@@ -19,7 +19,7 @@ const HistoryModule = {
 }
 
 function editHistory(host: IXQHost, move: IMove) {
-    move.SAN = toSAN(move, host.board, host.gameState);
+    move.SAN = toSAN(move, host.board);
     move.captured = host.board[move.to.x]?.[move.to.y] ?? null;
     let { currentStep, history } = host;
     const currentMove = move;

@@ -114,72 +114,6 @@ export function isValidMove(from: IPosition, to: IPosition, board: IBoard, gameS
 	}
 }
 
-// --- castling ---
-
-export function getCastlingMove(from: IPosition, to: IPosition, board: IBoard, castlingRights: ICastlingRights): IMove | null {
-	const piece = board[from.x][from.y];
-	if (!piece || piece.toUpperCase() !== "K") return null;
-	const isWhite = isWhitePiece(piece);
-
-	// kingside castling
-	if (isWhite && from.x === 4 && from.y === 7 && to.x === 6 && to.y === 7 && castlingRights.w.kingside) {
-		if (!board[5][7] && !board[6][7] && board[7][7] === "R") {
-			return { from, to, piece, flags: "castle", SAN: "O-O" };
-		}
-	}
-	if (!isWhite && from.x === 4 && from.y === 0 && to.x === 6 && to.y === 0 && castlingRights.b.kingside) {
-		if (!board[5][0] && !board[6][0] && board[7][0] === "r") {
-			return { from, to, piece, flags: "castle", SAN: "O-O" };
-		}
-	}
-
-	// queenside castling
-	if (isWhite && from.x === 4 && from.y === 7 && to.x === 2 && to.y === 7 && castlingRights.w.queenside) {
-		if (!board[3][7] && !board[2][7] && !board[1][7] && board[0][7] === "R") {
-			return { from, to, piece, flags: "castle", SAN: "O-O-O" };
-		}
-	}
-	if (!isWhite && from.x === 4 && from.y === 0 && to.x === 2 && to.y === 0 && castlingRights.b.queenside) {
-		if (!board[3][0] && !board[2][0] && !board[1][0] && board[0][0] === "r") {
-			return { from, to, piece, flags: "castle", SAN: "O-O-O" };
-		}
-	}
-
-	return null;
-}
-
-// --- check / checkmate ---
-
-export function findKing(board: IBoard, color: ITurn): IPosition | null {
-	const king = color === "white" ? "K" : "k";
-	for (let x = 0; x < COLS; x++) {
-		for (let y = 0; y < ROWS; y++) {
-			if (board[x][y] === king) return { x, y };
-		}
-	}
-	return null;
-}
-
-export function isSquareAttacked(board: IBoard, pos: IPosition, byColor: ITurn): boolean {
-	for (let x = 0; x < COLS; x++) {
-		for (let y = 0; y < ROWS; y++) {
-			const piece = board[x][y];
-			if (!piece) continue;
-			const pieceIsWhite = isWhitePiece(piece);
-			if ((byColor === "white" && !pieceIsWhite) || (byColor === "black" && pieceIsWhite)) continue;
-			if (isValidMove({ x, y }, pos, board)) return true;
-		}
-	}
-	return false;
-}
-
-export function isInCheck(board: IBoard, color: ITurn): boolean {
-	const king = findKing(board, color);
-	if (!king) return false;
-	const enemy: ITurn = color === "white" ? "black" : "white";
-	return isSquareAttacked(board, king, enemy);
-}
-
 // --- simulate a move ---
 
 function cloneBoard(board: IBoard): IBoard {
@@ -271,45 +205,9 @@ export function makeMove(board: IBoard, move: IMove, gameState: IGameState): { n
 	return { newBoard, newState };
 }
 
-export function isLegalMove(from: IPosition, to: IPosition, board: IBoard, gameState: IGameState): boolean {
-	const piece = board[from.x][from.y];
-	if (!piece) return false;
-
-	// check castling first
-	const castle = getCastlingMove(from, to, board, gameState.castlingRights);
-	if (castle) {
-		const isWhite = isWhitePiece(piece);
-		const color: ITurn = isWhite ? "white" : "black";
-		// king must not be in check, cannot move through or into check
-		const kingPath: IPosition[] = [];
-		if (to.x === 6) {
-			kingPath.push({ x: 4, y: from.y }, { x: 5, y: from.y }, { x: 6, y: from.y });
-		} else {
-			kingPath.push({ x: 4, y: from.y }, { x: 3, y: from.y }, { x: 2, y: from.y });
-		}
-		const enemy: ITurn = color === "white" ? "black" : "white";
-		for (const pos of kingPath) {
-			if (isSquareAttacked(board, pos, enemy)) return false;
-		}
-		return true;
-	}
-
-	if (!isValidMove(from, to, board, gameState)) return false;
-
-	// simulate and check if own king is in check
-	const move: IMove = { from, to, piece };
-	if (piece.toUpperCase() === "P" && gameState.enPassantTarget &&
-		to.x === gameState.enPassantTarget.x && to.y === gameState.enPassantTarget.y) {
-		move.flags = "enPassant";
-	}
-	const { newBoard } = makeMove(board, move, gameState);
-	const color: ITurn = isWhitePiece(piece) ? "white" : "black";
-	return !isInCheck(newBoard, color);
-}
-
 // --- SAN generation ---
 
-export function toSAN(move: IMove, board: IBoard, gameState: IGameState): string {
+export function toSAN(move: IMove, board: IBoard): string {
 	if (move.flags === "castle") return move.SAN!;
 	const piece = board[move.from.x][move.from.y]!;
 	const pieceType = piece.toUpperCase();
@@ -322,7 +220,7 @@ export function toSAN(move: IMove, board: IBoard, gameState: IGameState): string
 			if (x === move.from.x && y === move.from.y) continue;
 			const p = board[x][y];
 			if (!p || p.toUpperCase() !== pieceType) continue;
-			if (isSameSide(p, piece) && isLegalMove({ x, y }, move.to, board, gameState)) {
+			if (isSameSide(p, piece) && isValidMove({ x, y }, move.to, board)) {
 				candidates.push({ x, y });
 			}
 		}

@@ -1,8 +1,7 @@
 import { MarkdownView, Notice } from "obsidian";
 import { registerXQModule } from "../../core/module-system";
 import type { IMove, IXQHost, PieceType } from "../../types";
-import { genFENFromBoard, parseSource } from "../../utils/parse";
-import { toSAN, makeMove } from "../../utils/rules";
+import { genFENFromBoard } from "../../utils/parse";
 import { ConfirmModal } from "../../utils/confirmModal";
 
 const ActionsModule = {
@@ -124,44 +123,27 @@ registerXQModule('actions', ActionsModule);
 
 function runmove(host: IXQHost, move: IMove) {
 	const { from, to, promotion } = move;
-	const { newBoard, newState } = makeMove(host.board, move, host.gameState);
-	for (let x = 0; x < 8; x++) {
-		for (let y = 0; y < 8; y++) {
-			host.board[x][y] = newBoard[x][y];
-		}
-	}
-	host.gameState = newState;
+	host.board[to.x][to.y] = promotion ?? host.board[from.x][from.y];
+	host.board[from.x][from.y] = null;
 	host.currentStep++;
-	host.currentTurn = newState.turn;
+	host.currentTurn = host.currentTurn === 'white' ? 'black' : 'white';
 }
 
 function undo(host: IXQHost) {
     host.markedPos = null
-    if (host.history.length === 0 || host.currentStep <= 0) return;
-    host.currentStep--;
-    replayGameState(host);
-}
+    if (host.history.length === 0) return;
+    const move = host.history[host.currentStep - 1];
+    if (!move) return;
+    const { from, to, captured } = move;
+    const returnPiece = host.board[to.x][to.y];
+    host.board[from.x][from.y] = returnPiece;
+    host.board[to.x][to.y] = null;
 
-function replayGameState(host: IXQHost) {
-    const { board: initBoard, gameState: initGS } = parseSource(host.source);
-    for (let x = 0; x < 8; x++) {
-        for (let y = 0; y < 8; y++) {
-            host.board[x][y] = initBoard[x][y];
-        }
+    if (captured) {
+        host.board[to.x][to.y] = captured as PieceType;
     }
-    let gs = initGS;
-    for (let i = 0; i < host.currentStep; i++) {
-        const move = host.history[i];
-        const result = makeMove(host.board, move, gs);
-        for (let x = 0; x < 8; x++) {
-            for (let y = 0; y < 8; y++) {
-                host.board[x][y] = result.newBoard[x][y];
-            }
-        }
-        gs = result.newState;
-    }
-    host.gameState = gs;
-    host.currentTurn = gs.turn;
+    host.currentStep--;
+    host.currentTurn = host.currentTurn === "white" ? "black" : "white";
 }
 
 function redo(host: IXQHost) {

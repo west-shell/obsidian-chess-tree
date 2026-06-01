@@ -22,7 +22,7 @@ const ActionsModule = {
             }
             const piece = host.currentNode.board![move.from.x][move.from.y];
             move.piece = piece;
-            move.SAN = toSAN(move, host.currentNode.board!, host.currentNode.gameState!);
+            move.SAN = toSAN(move, host.currentNode.board!);
             host.nodeId = host.parser.nodeId
             const gs = host.currentNode.gameState!;
             const { newBoard, newState } = makeMove(host.currentNode.board!, move, gs);

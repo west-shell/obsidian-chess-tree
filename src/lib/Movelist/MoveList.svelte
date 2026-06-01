@@ -40,14 +40,13 @@
 >
   <ul class="move-list {settings.position}" bind:this={ulRef}>
     <li class="start" bind:this={itemRefs[0]}>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span class="roundnum">0</span>
       <span
         class="move start"
         class:active={currentStep === 0}
-        role="button"
-        tabindex="0"
         onclick={() => eventBus.emit("clickstep", 0)}
-        onkeydown={(e) => e.key === 'Enter' && eventBus.emit("clickstep", 0)}
       >
         {settings.showMovelistText ? "= Start =" : "Start"}
       </span>
@@ -56,24 +55,22 @@
       {#if i % 2 === 0}
         <li class="round" bind:this={itemRefs[i / 2 + 1]}>
           <span class="roundnum">{i / 2 + 1}</span>
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
             class="move white"
             class:active={currentStep === i + 1}
-            role="button"
-            tabindex="0"
             onclick={() => eventBus.emit("clickstep", i + 1)}
-            onkeydown={(e) => e.key === 'Enter' && eventBus.emit("clickstep", i + 1)}
           >
             {settings.showMovelistText ? (move.SAN ?? "...") : "W"}
           </span>
           {#if moves[i + 1]}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span
               class="move black"
               class:active={currentStep === i + 2}
-              role="button"
-              tabindex="0"
               onclick={() => eventBus.emit("clickstep", i + 2)}
-              onkeydown={(e) => e.key === 'Enter' && eventBus.emit("clickstep", i + 2)}
             >
               {settings.showMovelistText ? (moves[i + 1].SAN ?? "...") : "B"}
             </span>
