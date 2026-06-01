@@ -2,7 +2,7 @@ import { tokenize, type Token, type TokenType } from './Tokenizer';
 import type { ChessNode, IBoard, IMove, IPosition, ITurn, IGameState } from '../../types';
 import { loadBoardFromFEN, parseSANMove } from '../../utils/parse';
 import { DEFAULT_FEN } from '../../types';
-import { isValidMove, toSAN, makeMove, isInCheck, isSquareAttacked, findKing } from '../../utils/rules';
+import { makeMove, toSAN } from '../../utils/rules';
 
 const COLS = 8;
 const ROWS = 8;

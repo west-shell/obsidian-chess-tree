@@ -7,7 +7,7 @@
   import { pos2key, key2pos } from "chessground/util";
   import type * as cg from "chessground/types";
   import { genFENFromBoard } from "../utils/parse";
-  import { isValidMove, findKing, isSquareAttacked, isInCheck } from "../utils/rules";
+  import { isValidMove } from "../utils/rules";
   import type { ITurn } from "../types";
   import type { EventBus } from "../core/event-bus";
   import type { IBoard, IMove, IPosition, ISettings, IGameState } from "../types";
@@ -243,10 +243,10 @@
   });
 </script>
 
-<div bind:this={boardElement} class="xq-wrap {turnClass}" style="width: {boardWidth}px"></div>
+<div bind:this={boardElement} class="cg-wrap {turnClass}" style="width: {boardWidth}px"></div>
 
 <style>
-  .xq-wrap {
+  .cg-wrap {
     flex-shrink: 0;
     aspect-ratio: 1;
   }

@@ -307,19 +307,6 @@ export function isLegalMove(from: IPosition, to: IPosition, board: IBoard, gameS
 	return !isInCheck(newBoard, color);
 }
 
-export function getLegalMoves(from: IPosition, gameState: IGameState): IPosition[] {
-	const moves: IPosition[] = [];
-	for (let x = 0; x < COLS; x++) {
-		for (let y = 0; y < ROWS; y++) {
-			if (x === from.x && y === from.y) continue;
-			if (isLegalMove(from, { x, y }, gameState.board, gameState)) {
-				moves.push({ x, y });
-			}
-		}
-	}
-	return moves;
-}
-
 // --- SAN generation ---
 
 export function toSAN(move: IMove, board: IBoard, gameState: IGameState): string {

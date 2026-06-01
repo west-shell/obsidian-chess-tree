@@ -265,25 +265,6 @@ export function genFENFromBoard(board: IBoard, turn: ITurn): string {
 	return `${rows.join("/")} ${turn === "white" ? "w" : "b"}`;
 }
 
-export function genFullFEN(gameState: IGameState): string {
-	const pieceFen = genFENFromBoard(gameState.board, gameState.turn).split(" ")[0];
-	const turn = gameState.turn === "white" ? "w" : "b";
-
-	let castling = "";
-	if (gameState.castlingRights.w.kingside) castling += "K";
-	if (gameState.castlingRights.w.queenside) castling += "Q";
-	if (gameState.castlingRights.b.kingside) castling += "k";
-	if (gameState.castlingRights.b.queenside) castling += "q";
-	if (!castling) castling = "-";
-
-	let ep = "-";
-	if (gameState.enPassantTarget) {
-		ep = String.fromCharCode(97 + gameState.enPassantTarget.x) + String(8 - gameState.enPassantTarget.y);
-	}
-
-	return `${pieceFen} ${turn} ${castling} ${ep} ${gameState.halfMoveClock} ${gameState.fullMoveNumber}`;
-}
-
 // --- simple helper ---
 
 export function isSameSide(fromPiece: string, toPiece: string | null): boolean {

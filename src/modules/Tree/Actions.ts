@@ -1,7 +1,7 @@
 import { registerPGNViewModule } from "../../core/module-system";
 import type { ChessNode, IMove, IPGNViewHost } from "../../types";
 import { ConfirmModal } from "../../utils/confirmModal";
-import { toSAN, makeMove, isInCheck } from "../../utils/rules";
+import { toSAN, makeMove } from "../../utils/rules";
 
 const ActionsModule = {
     init(host: Record<string, any>) {
