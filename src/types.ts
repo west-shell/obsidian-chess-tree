@@ -2,7 +2,7 @@ export const DEFAULT_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
 
 export interface ISettings {
 	position: "bottom" | "right";
-	theme: "wood" | "parchment" | "green" | "marble" | "light" | "dark";
+	theme: "wood" | "green" | "blue" | "grey" | "dark" | "light";
 	cellSize: number;
 	fontSize: number;
 	showCoordinateLabels: boolean;
