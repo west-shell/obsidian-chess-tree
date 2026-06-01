@@ -180,12 +180,12 @@
         api.state.dom.redraw();
       }
     };
-    document.body.addEventListener("xq-layout-change", layoutChangeHandler);
+    document.body.addEventListener("layout-change", layoutChangeHandler);
   });
 
   onDestroy(() => {
     if (layoutChangeHandler) {
-      document.body.removeEventListener("xq-layout-change", layoutChangeHandler);
+      document.body.removeEventListener("layout-change", layoutChangeHandler);
     }
     if (api) {
       api.destroy();

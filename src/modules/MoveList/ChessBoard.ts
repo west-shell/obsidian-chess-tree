@@ -1,4 +1,4 @@
-import Chess from "../../lib/Movelist/Xiangqi.svelte";
+import Chess from "../../lib/Movelist/Chess.svelte";
 import { registerXQModule } from "../../core/module-system";
 import type { IXQHost } from "../../types";
 import { mount, unmount } from "svelte";
