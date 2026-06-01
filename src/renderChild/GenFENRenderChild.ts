@@ -1,4 +1,4 @@
-import XQPlugin from '../main';
+import ChessPlugin from '../main';
 import {
     type MarkdownPostProcessorContext,
     MarkdownRenderChild,
@@ -23,7 +23,7 @@ export class GenFENRenderChild extends MarkdownRenderChild {
         public containerEl: HTMLElement,
         public ctx: MarkdownPostProcessorContext,
         public source: string,
-        public plugin: XQPlugin,
+        public plugin: ChessPlugin,
     ) {
         super(containerEl);
         this.settings = this.plugin.settings;

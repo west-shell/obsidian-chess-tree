@@ -1,7 +1,8 @@
 import { MarkdownView, Notice } from "obsidian";
 import { registerXQModule } from "../../core/module-system";
 import type { IMove, IXQHost, PieceType } from "../../types";
-import { getICCS, genFENFromBoard, parseSource } from "../../utils/parse";
+import { genFENFromBoard, parseSource } from "../../utils/parse";
+import { toSAN, makeMove } from "../../utils/rules";
 import { ConfirmModal } from "../../utils/confirmModal";
 
 const ActionsModule = {
@@ -65,21 +66,21 @@ const ActionsModule = {
         eventBus.on('save', async () => {
             let message = "";
             if (host.history.length === 0 && host.PGN.length === 0) {
-                new Notice("历史记录和PGN记录为空，无需保存！");
+                new Notice("History and PGN are empty, nothing to save!");
                 return;
             }
             if (host.history.length === 0 && host.PGN.length > 0)
-                message = "当前PGN记录不为空，是否要清空？";
+                message = "PGN is not empty. Clear it?";
             if (host.history.length > 0 && host.PGN.length === 0)
-                message = "当前PGN记录为空，是否要保存历史为PGN？";
+                message = "PGN is empty. Save history as PGN?";
             if (host.history.length > 0 && host.PGN.length > 0)
-                message = "当前PGN记录不为空，是否要覆盖保存？";
+                message = "PGN is not empty. Overwrite?";
             const modal = new ConfirmModal(
                 host.plugin.app,
-                "确认保存",
+                "Confirm Save",
                 message,
-                "保存",
-                "取消",
+                "Save",
+                "Cancel",
             );
 
             modal.open();
@@ -87,7 +88,7 @@ const ActionsModule = {
 
             if (userConfirmed) {
                 await savePGN(host);
-                new Notice("保存成功！");
+                new Notice("Saved successfully!");
             }
             eventBus.emit('updateUI', 'save');
         })
@@ -108,24 +109,7 @@ const ActionsModule = {
             eventBus.emit('updateUI');
         })
 
-        eventBus.on('openPikafish', () => {
-            // 1. 获取初始局面
-            const { board, firstTurn } = parseSource(host.source);
-            const fen = genFENFromBoard(board, firstTurn);
-
-            // 2. 获取移动记录
-            const moves = host.modified ? host.history : host.PGN;
-
-            // 3. 转换为 UCI 格式字符串
-            const movesStr = moves.map(m => m.ICCS?.replace('-', '').toLowerCase()).join('');
-
-            // 4. 生成 URL
-            const url = `https://xiangqiai.com/#/${fen} moves ${movesStr}`;
-            window.open(url);
-        })
-
         eventBus.on('rotate', () => {
-            // 切换棋盘翻转状态
             if (!host.options) {
                 host.options = { rotated: true };
             } else {
@@ -139,48 +123,60 @@ const ActionsModule = {
 registerXQModule('actions', ActionsModule);
 
 function runmove(host: IXQHost, move: IMove) {
-    const { from, to } = move;
-    host.board[to.x][to.y] = host.board[from.x][from.y];
-    host.board[from.x][from.y] = null;
-    host.currentStep++;
-    host.currentTurn = host.currentTurn === 'red' ? 'black' : 'red';
+	const { from, to, promotion } = move;
+	const { newBoard, newState } = makeMove(host.board, move, host.gameState);
+	for (let x = 0; x < 8; x++) {
+		for (let y = 0; y < 8; y++) {
+			host.board[x][y] = newBoard[x][y];
+		}
+	}
+	host.gameState = newState;
+	host.currentStep++;
+	host.currentTurn = newState.turn;
 }
 
 function undo(host: IXQHost) {
     host.markedPos = null
-    if (host.history.length === 0) return;
-    const move = host.history[host.currentStep - 1];
-    if (!move) return;
-    const { from, to, captured } = move;
-    // 找到需要回退的棋子
-    const returnPiece = host.board[to.x][to.y];
-    host.board[from.x][from.y] = returnPiece;
-    host.board[to.x][to.y] = null;
-
-    // 恢复被吃掉的棋子
-    if (captured) {
-        host.board[to.x][to.y] = captured as PieceType;
-    }
+    if (host.history.length === 0 || host.currentStep <= 0) return;
     host.currentStep--;
-    host.currentTurn = host.currentTurn === "red" ? "black" : "red";
+    replayGameState(host);
+}
+
+function replayGameState(host: IXQHost) {
+    const { board: initBoard, gameState: initGS } = parseSource(host.source);
+    for (let x = 0; x < 8; x++) {
+        for (let y = 0; y < 8; y++) {
+            host.board[x][y] = initBoard[x][y];
+        }
+    }
+    let gs = initGS;
+    for (let i = 0; i < host.currentStep; i++) {
+        const move = host.history[i];
+        const result = makeMove(host.board, move, gs);
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 8; y++) {
+                host.board[x][y] = result.newBoard[x][y];
+            }
+        }
+        gs = result.newState;
+    }
+    host.gameState = gs;
+    host.currentTurn = gs.turn;
 }
 
 function redo(host: IXQHost) {
     host.markedPos = null;
     const eventBus = host.eventBus;
     if (!host.modified && host.PGN.length > 0) {
-        const nextMove = host.PGN[host.currentStep]; // 获取并移除 moves 中的第一步
+        const nextMove = host.PGN[host.currentStep];
         if (!nextMove) return;
         eventBus.emit('edithistory', nextMove);
         runmove(host, nextMove);
-
     } else {
         if (host.history.length < host.currentStep) return;
-        // 如果有悔棋记录，从 undoHistory 中执行下一步
         const moveToRedo = host.history[host.currentStep];
         if (!moveToRedo) return;
         runmove(host, moveToRedo);
-
     }
 }
 
@@ -190,9 +186,6 @@ async function savePGN(host: IXQHost) {
     const file = view.file;
     if (!file) return;
 
-    // 这里 this.containerEl 可能指当前实例的属性，确保 this 指向正确
-    // 如果 savePGN 是类方法，建议改写为箭头函数或 bind this
-
     host.plugin.app.vault.process(file, fileContent => {
         const section = host.ctx.getSectionInfo(host.containerEl);
         if (!section) return fileContent;
@@ -200,19 +193,17 @@ async function savePGN(host: IXQHost) {
         const { lineStart, lineEnd } = section;
         const lines = fileContent.split("\n");
 
-        // 明确标注类型，初始赋值时用slice保证是string[]
         let blockLines: string[] = lines.slice(lineStart, lineEnd + 1);
 
         if (blockLines.length < 2) return fileContent;
 
-        // 1. 删除所有符合 PGN 格式的行（无论 currentStep 是多少）
-        blockLines = blockLines.filter((line) => !/[A-Z]\d-[A-Z]\d/.test(line));
+        // Remove all SAN move lines
+        blockLines = blockLines.filter((line) => !/\b(O-O(?:-O)?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?)\b/.test(line));
 
-        // 2. 仅当 currentStep > 0 时生成并插入新的 PGN
         if (host.currentStep > 0) {
             const moves = host.history
                 .slice(0, host.currentStep)
-                .map((move: IMove) => getICCS(move));
+                .map((move: IMove) => move.SAN ?? "");
 
             const pgnLines: string[] = [];
             for (let i = 0; i < moves.length; i += 2) {
@@ -222,11 +213,9 @@ async function savePGN(host: IXQHost) {
             }
             const PGN = pgnLines.join("\n");
 
-            // 插入PGN字符串
             blockLines.splice(blockLines.length - 1, 0, PGN);
         }
 
-        // 3. 更新文件内容（无论是否插入 PGN，都会执行清理）
         const newContent = [
             ...lines.slice(0, lineStart),
             ...blockLines,

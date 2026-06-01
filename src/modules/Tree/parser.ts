@@ -1,7 +1,25 @@
 import { tokenize, type Token, type TokenType } from './Tokenizer';
-import type { ChessNode, IBoard, IMove, IPosition } from '../../types';
-import { loadBoardFromFEN } from '../../utils/parse';
+import type { ChessNode, IBoard, IMove, IPosition, ITurn, IGameState } from '../../types';
+import { loadBoardFromFEN, parseSANMove } from '../../utils/parse';
 import { DEFAULT_FEN } from '../../types';
+import { isValidMove, toSAN, makeMove, isInCheck, isSquareAttacked, findKing } from '../../utils/rules';
+
+const COLS = 8;
+const ROWS = 8;
+
+function defaultGameState(board: IBoard): IGameState {
+    return {
+        board: board.map(row => [...row]),
+        turn: "white",
+        castlingRights: {
+            w: { kingside: true, queenside: true },
+            b: { kingside: true, queenside: true },
+        },
+        enPassantTarget: null,
+        halfMoveClock: 0,
+        fullMoveNumber: 1,
+    };
+}
 
 export class PGNParser {
     haveFEN: boolean = false;
@@ -12,8 +30,9 @@ export class PGNParser {
     currentNode: ChessNode;
     nodeId: number;
     currentStep: number = 0;
-    currentSide: 'red' | 'black' = 'red';
+    currentSide: ITurn = 'white';
     tags: Map<string, string> = new Map();
+    gameState: IGameState;
 
     constructor(input: string | Token[]) {
         this.nodeMap = new Map<string, ChessNode>();
@@ -21,7 +40,9 @@ export class PGNParser {
         this.currentIndex = 0;
         this.nodeId = 1;
 
-        // 先创建rootNode
+        const initialBoard = loadBoardFromFEN(DEFAULT_FEN).board;
+        this.gameState = defaultGameState(initialBoard);
+
         this.rootNode = {
             id: `node-root`,
             data: null,
@@ -30,37 +51,34 @@ export class PGNParser {
             parentID: null,
             children: [],
             mainID: null,
-            board: loadBoardFromFEN(DEFAULT_FEN).board,
+            board: initialBoard.map(row => [...row]),
+            gameState: { ...this.gameState },
             comments: []
         };
         this.nodeMap.set(this.rootNode.id, this.rootNode);
         this.currentStep++;
 
-        // 然后设置currentNode
         this.currentNode = this.rootNode;
 
         while (!this.match('eof')) {
             if (this.match('tag')) {
-                this.parseTag(); // 跳过标签
-            } else if (this.match('iccs-move')) {
-                this.processMove(this.parseICCS(this.consume().value));
-            } else if (this.match('wxf-move')) {
-                this.processMove(this.parseWXF(this.consume().value));
+                this.parseTag();
+            } else if (this.match('san-move')) {
+                this.processSAN(this.consume().value);
             } else if (this.match('left-paren')) {
                 this.parseVariation();
             } else if (this.match('comment')) {
                 this.parseComment();
             } else if (this.match('result')) {
                 this.parseResult();
-            }
-            else {
-                this.consume(); // 跳过无法识别的token
+            } else {
+                this.consume();
             }
         }
     }
 
     parseTag() {
-        const token = this.consume(); // 取出 tag 类型的 token
+        const token = this.consume();
         const tagText = token.value;
 
         const match = tagText.match(/^\[(\w+)\s+"([^"]*)"\]$/);
@@ -68,17 +86,20 @@ export class PGNParser {
 
         const [, tagName, tagValue] = match;
 
-        this.tags.set(tagName, tagValue); // 全部收集
+        this.tags.set(tagName, tagValue);
 
         if (tagName.toUpperCase() === 'FEN') {
-            // 可选：你可以在这里初始化棋盘
             this.haveFEN = true;
             const { board, turn } = loadBoardFromFEN(tagValue);
-            this.currentNode.board = board; // 设置当前节点的棋盘状态
-            this.currentSide = turn === 'b' ? 'black' : 'red'; // 设置当前方
+            this.currentNode.board = board.map(row => [...row]);
+            this.currentSide = turn === 'b' ? 'black' : 'white';
+            this.gameState = defaultGameState(board);
+            this.gameState.turn = this.currentSide;
+            if (this.currentNode.gameState) {
+                this.currentNode.gameState = { ...this.gameState };
+            }
         }
     }
-
 
     createNode(move: IMove | null): ChessNode {
         const node: ChessNode = {
@@ -107,76 +128,51 @@ export class PGNParser {
         return this.peek().type === type;
     }
 
-    parseICCS(ICCS: string): IMove {
-        // 解析 PGN 字符串为 IMove 数组
-        // 解析走法，例如 "H2-D2" -> 起点和终点
-        const [fromSting, toSting] = ICCS.split("-");
-        const fromX = fromSting.charCodeAt(0) - "A".charCodeAt(0);
-        const fromY = 9 - parseInt(fromSting[1]); // 修正 Y 坐标，从下往上数
-        const toX = toSting.charCodeAt(0) - "A".charCodeAt(0);
-        const toY = 9 - parseInt(toSting[1]); // 修正 Y 坐标，从下往上数
-        const from = { x: fromX, y: fromY };
-        const to = { x: toX, y: toY };
-        return { from, to, ICCS };
+    parseSANMoveString(san: string, board: IBoard, gs: IGameState): IMove | null {
+        return parseSANMove(san, board, gs);
     }
 
-    parseWXF(wxf: string): IMove {
-        // 简化的中文着法解析，实际需要更复杂的处理
-        // 这里只是一个示例，实际实现需要完整的中文着法解析逻辑
-        return {
-            WXF: wxf,
-            from: { x: 0, y: 0 }, // 需要实际计算
-            to: { x: 0, y: 0 }    // 需要实际计算
-        };
-    }
-
-    processMove(move: IMove) {
+    processSAN(san: string) {
+        const board = this.currentNode.board || this.gameState.board;
+        const gs = this.currentNode.gameState || this.gameState;
+        const move = this.parseSANMoveString(san, board, gs);
+        if (!move) return;
         const newNode = this.createNode(move);
-        newNode.data!.type = this.currentNode.board![move.from.x][move.from.y] ?? undefined;
-        newNode.board = this.moveBoard(move);
+        newNode.data!.piece = board[move.from.x][move.from.y] ?? undefined;
+        newNode.data!.SAN = san;
+        newNode.data!.captured = board[move.to.x]?.[move.to.y] ?? null;
+
+        const { newBoard, newState } = makeMove(board, move, gs);
+        newNode.board = newBoard;
+        newNode.gameState = newState;
+
         this.nodeMap.set(newNode.id, newNode);
         this.currentNode.children.push(newNode);
         this.currentNode = newNode;
+        this.gameState = newState;
         this.switchSide();
         this.currentStep++;
     }
 
-    moveBoard(move: IMove): IBoard {
-        const newboard = this.currentNode.board!.map(row => row.slice());
-        const from = move.from;
-        const to = move.to;
-        const piece = newboard[from.x][from.y];
-        newboard[from.x][from.y] = null; // 清除原位置
-        if (newboard[to.x][to.y]) {
-            move.captured = newboard[to.x][to.y]; // 记录被吃掉的棋子
-        }
-        newboard[to.x][to.y] = piece; // 设置新位置
-        return newboard;
-    }
-
     parseVariation() {
-        this.consume(); // 消费 '('
+        this.consume(); // consume '('
 
-        // --- 判断变着应该挂在哪个节点上 ---
         const variationBase = this.nodeMap.get(this.currentNode.parentID!);
         const prevState = {
             node: this.currentNode,
             step: this.currentStep,
-            side: this.currentSide
+            side: this.currentSide,
+            gameState: this.gameState,
         };
 
-        // 从 variationBase 开始解析
         this.currentNode = variationBase!;
         this.currentStep = this.currentStep - 1;
-        this.currentSide = this.currentSide === 'red' ? 'black' : 'red';
+        this.currentSide = this.currentSide === 'white' ? 'black' : 'white';
+        this.gameState = this.currentNode.gameState || this.gameState;
 
         while (!this.match('right-paren') && !this.match('eof')) {
-            if (this.match('iccs-move')) {
-                const move = this.parseICCS(this.consume().value);
-                this.processMove(move);
-            } else if (this.match('wxf-move')) {
-                const move = this.parseWXF(this.consume().value);
-                this.processMove(move);
+            if (this.match('san-move')) {
+                this.processSAN(this.consume().value);
             } else if (this.match('comment')) {
                 this.parseComment();
             } else if (this.match('left-paren')) {
@@ -185,7 +181,7 @@ export class PGNParser {
                 this.consume();
                 break;
             } else {
-                this.consume(); // 跳过无法识别的 token
+                this.consume();
             }
         }
 
@@ -193,10 +189,10 @@ export class PGNParser {
             this.consume();
         }
 
-        // 恢复主线解析
         this.currentNode = prevState.node;
         this.currentStep = prevState.step;
         this.currentSide = prevState.side;
+        this.gameState = prevState.gameState;
     }
 
     parseComment() {
@@ -217,13 +213,13 @@ export class PGNParser {
         let result = '';
         switch (token.value) {
             case "1-0":
-                result = "R+";
+                result = "1-0";
                 break;
             case "0-1":
-                result = "B+";
+                result = "0-1";
                 break;
             case "1/2-1/2":
-                result = "=";
+                result = "1/2-1/2";
                 break;
             case "*":
                 result = "?";
@@ -236,7 +232,7 @@ export class PGNParser {
     }
 
     switchSide() {
-        this.currentSide = this.currentSide === 'red' ? 'black' : 'red';
+        this.currentSide = this.currentSide === 'white' ? 'black' : 'white';
     }
 
     public getTags(): string {
@@ -252,5 +248,4 @@ export class PGNParser {
     public getMap(): Map<string, ChessNode> {
         return this.nodeMap;
     }
-
 }

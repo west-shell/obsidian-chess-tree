@@ -1,4 +1,4 @@
-import Xiangqi from "../../lib/Movelist/Xiangqi.svelte";
+import Chess from "../../lib/Movelist/Xiangqi.svelte";
 import { registerXQModule } from "../../core/module-system";
 import type { IXQHost } from "../../types";
 import { mount, unmount } from "svelte";
@@ -10,7 +10,7 @@ const BoardModule = {
         eventBus.on("load", () => {
             host.modified = false
             const Container = host.containerEl.createEl('div');
-            host.Xiangqi = mount(Xiangqi, {
+            host.Chess = mount(Chess, {
                 target: Container,
                 props: {
                     settings: host.settings,
@@ -31,24 +31,18 @@ const BoardModule = {
         eventBus.on('ready', () => {
             if (!host.settings.autoJump) return
             switch (host.settings.autoJump) {
-                case "never":
-                    break;
-                case "always":
-                    eventBus.emit('toEnd');
-                    break;
+                case "never": break;
+                case "always": eventBus.emit('toEnd'); break;
                 case "auto":
-                    if (!host.haveFEN) {
-                        eventBus.emit('toEnd');
-                    }
+                    if (!host.haveFEN) eventBus.emit('toEnd');
                     break;
             }
         })
 
         eventBus.on('updateUI', () => {
-            // if (type === undefined) return;
-            host.Xiangqi?.$set({
+            host.Chess?.$set({
                 settings: { ...host.settings },
-                board: [...host.board.map(row => [...row])], // 创建新的 board 数组引用
+                board: [...host.board.map(row => [...row])],
                 markedPos: host.markedPos,
                 currentTurn: host.currentTurn,
                 currentStep: host.currentStep,
@@ -60,8 +54,7 @@ const BoardModule = {
         })
 
         eventBus.on("unload", () => {
-            unmount(host.Xiangqi)
-
+            unmount(host.Chess)
         })
     }
 }

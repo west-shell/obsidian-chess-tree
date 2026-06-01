@@ -1,4 +1,5 @@
-export const DEFAULT_FEN = 'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w'
+export const DEFAULT_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
 export interface ISettings {
 	position: "bottom" | "right";
 	theme: "wood" | "parchment" | "green" | "marble" | "light" | "dark";
@@ -17,41 +18,73 @@ export interface ISettings {
 	viewOnly?: boolean;
 	rotated?: boolean;
 }
+
 export type IOptions = {
 	protected?: boolean;
 	rotated?: boolean;
 };
-export type ITurn = "red" | "black";
 
-export const PIECE_CHARS = {
-	// 黑方 (小写)
-	k: "将",
-	a: "士",
-	b: "象",
-	r: "车",
-	n: "马",
-	c: "砲",
-	p: "卒",
-	// 红方 (大写)
-	K: "帅",
-	A: "仕",
-	B: "相",
-	R: "俥",
-	N: "傌",
-	C: "炮",
-	P: "兵",
-} as const;
+export type ITurn = "white" | "black";
+
+export const PIECE_CHARS: Record<string, string> = {
+	k: "♚",
+	q: "♛",
+	r: "♜",
+	b: "♝",
+	n: "♞",
+	p: "♟",
+	K: "♔",
+	Q: "♕",
+	R: "♖",
+	B: "♗",
+	N: "♘",
+	P: "♙",
+};
+
+export const PIECE_LABELS: Record<string, string> = {
+	k: "K",
+	q: "Q",
+	r: "R",
+	b: "B",
+	n: "N",
+	p: "",
+	K: "K",
+	Q: "Q",
+	R: "R",
+	B: "B",
+	N: "N",
+	P: "",
+};
+
 export type PieceType = keyof typeof PIECE_CHARS;
 export type IBoard = (PieceType | null)[][];
-export type IPosition = { x: number; y: number };
+
+export interface IPosition { x: number; y: number }
+
 export interface IMove {
-	type?: PieceType;
+	piece?: PieceType;
 	from: IPosition;
 	to: IPosition;
 	captured?: string | null;
-	ICCS?: string;
-	WXF?: string;
+	SAN?: string;
+	promotion?: PieceType;
+	flags?: string;
 }
+
+export interface ICastlingRights {
+	w: { kingside: boolean; queenside: boolean };
+	b: { kingside: boolean; queenside: boolean };
+}
+
+export interface IGameState {
+	board: IBoard;
+	turn: ITurn;
+	castlingRights: ICastlingRights;
+	enPassantTarget: IPosition | null;
+	halfMoveClock: number;
+	fullMoveNumber: number;
+}
+
 export type ChessNode = {
 	id: string;
 	data: IMove | null;
@@ -63,14 +96,16 @@ export type ChessNode = {
 	mainID?: string | null;
 	children: ChessNode[];
 	board?: IBoard;
+	gameState?: IGameState;
 	comments?: string[];
 };
+
 export type NodeMap = Map<string, ChessNode>;
+export type IHistory = IMove[];
+
 import type { MarkdownPostProcessorContext, MarkdownSectionInformation } from "obsidian";
 import type XQPlugin from "./main";
 import type { EventBus } from "./core/event-bus";
-
-export type IHistory = IMove[];
 
 export interface IHost {
 	plugin: XQPlugin;
@@ -94,7 +129,8 @@ export interface IXQHost extends IHost {
 	rotated: boolean;
 	options?: IOptions;
 	haveFEN?: boolean;
-	Xiangqi?: any;
+	gameState: IGameState;
+	Chess?: any;
 	source: string;
 }
 

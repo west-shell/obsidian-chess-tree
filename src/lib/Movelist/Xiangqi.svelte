@@ -2,7 +2,7 @@
   import Board from "../Board.svelte";
   import Toolbar from "./Toolbar.svelte";
   import MoveList from "./MoveList.svelte";
-  import type { IBoard, IMove, IOptions, IPosition, ISettings } from "../../types";
+  import type { IBoard, IMove, IOptions, IPosition, ISettings, ITurn } from "../../types";
   import type { EventBus } from "../../core/event-bus";
   import { onMount, tick } from "svelte";
 
@@ -10,7 +10,7 @@
     settings: ISettings;
     board: IBoard;
     markedPos: IPosition | null;
-    currentTurn: string;
+    currentTurn: ITurn;
     currentStep: number;
     eventBus: EventBus;
     modified: boolean;

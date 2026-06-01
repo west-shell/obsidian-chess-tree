@@ -32,12 +32,10 @@
   });
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   class="move-container {settings.position}"
-  style="--height: {10 * settings.cellSize}px;
-    --width: {9 * settings.cellSize}px;
+  style="--height: {8 * settings.cellSize}px;
+    --width: {8 * settings.cellSize}px;
     --fontsize: {settings.fontSize}px;"
 >
   <ul class="move-list {settings.position}" bind:this={ulRef}>
@@ -46,9 +44,12 @@
       <span
         class="move start"
         class:active={currentStep === 0}
+        role="button"
+        tabindex="0"
         onclick={() => eventBus.emit("clickstep", 0)}
+        onkeydown={(e) => e.key === 'Enter' && eventBus.emit("clickstep", 0)}
       >
-        {settings.showMovelistText ? "= 开 局 =" : "开 局"}
+        {settings.showMovelistText ? "= Start =" : "Start"}
       </span>
     </li>
     {#each moves as move, i}
@@ -56,19 +57,25 @@
         <li class="round" bind:this={itemRefs[i / 2 + 1]}>
           <span class="roundnum">{i / 2 + 1}</span>
           <span
-            class="move red"
+            class="move white"
             class:active={currentStep === i + 1}
+            role="button"
+            tabindex="0"
             onclick={() => eventBus.emit("clickstep", i + 1)}
+            onkeydown={(e) => e.key === 'Enter' && eventBus.emit("clickstep", i + 1)}
           >
-            {settings.showMovelistText ? move.WXF : "红"}
+            {settings.showMovelistText ? (move.SAN ?? "...") : "W"}
           </span>
           {#if moves[i + 1]}
             <span
               class="move black"
               class:active={currentStep === i + 2}
+              role="button"
+              tabindex="0"
               onclick={() => eventBus.emit("clickstep", i + 2)}
+              onkeydown={(e) => e.key === 'Enter' && eventBus.emit("clickstep", i + 2)}
             >
-              {settings.showMovelistText ? moves[i + 1].WXF : "黑"}
+              {settings.showMovelistText ? (moves[i + 1].SAN ?? "...") : "B"}
             </span>
           {/if}
         </li>
@@ -103,9 +110,8 @@
   .move-list.bottom {
     display: flex;
     flex-wrap: nowrap;
-    overflow-x: auto; /* 添加水平滚动条以处理溢出 */
+    overflow-x: auto;
     width: var(--width);
-    /* max-height: calc(var(--width) / 2); */
     align-content: flex-start;
     padding: 0;
     margin: 0;
@@ -114,31 +120,30 @@
   }
 
   .move-list.right li {
-    display: flex; /* 明确设置为 flex 容器 */
-    flex-wrap: nowrap; /* 确保 li 内部的元素不换行 */
-    flex-shrink: 0; /* 防止 li 元素收缩 */
-    flex-grow: 0; /* 防止 li 元素增长 */
+    display: flex;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    flex-grow: 0;
     align-items: center;
     gap: 0.5em;
     padding: 0px;
     margin: 0;
-    /* margin-bottom: -22px; */
     border-bottom: none;
-    width: 100%; /* 每个 li 元素占据一行 */
-    white-space: nowrap; /* 强制 li 元素本身不换行 */
+    width: 100%;
+    white-space: nowrap;
   }
 
   .move-list.bottom li {
-    display: flex; /* 明确设置为 flex 容器 */
-    flex-wrap: nowrap; /* 确保 li 内部的元素不换行 */
-    flex-shrink: 0; /* 防止 li 元素收缩 */
-    flex-grow: 0; /* 防止 li 元素增长 */
+    display: flex;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    flex-grow: 0;
     align-items: center;
     gap: 0.25em;
     padding: 1px;
     margin: 0;
     border-bottom: none;
-    white-space: nowrap; /* 强制 li 元素本身不换行 */
+    white-space: nowrap;
     writing-mode: vertical-rl;
     text-orientation: upright;
   }
@@ -150,16 +155,15 @@
     text-align: right;
     margin-right: 0.4em;
     white-space: nowrap;
-    flex-shrink: 0; /* 防止收缩 */
+    flex-shrink: 0;
     color: var(--text-muted);
   }
 
   .move-list.bottom .roundnum {
-    writing-mode: horizontal-tb; /* 强制水平方向 */
-    text-orientation: mixed; /* 确保数字横排 */
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
     display: inline-block;
-    /* width: 2ch; 固定宽度对齐 */
-    text-align: center; /* 右对齐，个位数前会空出 */
+    text-align: center;
   }
 
   span.move {
@@ -172,7 +176,7 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     white-space: nowrap;
-    flex-shrink: 0; /* 防止收缩 */
+    flex-shrink: 0;
   }
 
   span.start {
@@ -184,15 +188,10 @@
   }
 
   span.move {
-    /* color: #337ab7; */
     color: var(--text-normal);
-    /* padding: 0; */
   }
 
   span.move.active {
-    /* background-color: var(--interactive-accent); */
-    /* color: red; */
     color: var(--color-accent);
-    /* font-weight: bold; */
   }
 </style>

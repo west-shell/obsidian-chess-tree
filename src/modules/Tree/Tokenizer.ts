@@ -1,6 +1,5 @@
 export type TokenType =
-    | "iccs-move"
-    | "wxf-move"
+    | "san-move"
     | "left-paren"
     | "right-paren"
     | "comment"
@@ -47,33 +46,26 @@ export function tokenize(pgn: string): Token[] {
         const rest = pgn.slice(pos);
         const char = rest[0];
 
-        // 跳过空白
+        // Skip whitespace
         if (/^\s/.test(rest)) {
             advance(1);
             continue;
         }
 
-        // 跳过着法序号及 ...
+        // Skip move numbers
         const step = matchAndConsume(/^\d+\.(\s*\.\.\.)?/);
         if (step) {
             continue;
         }
 
-        // ICCS Move: A0-B9
-        const iccs = matchAndConsume(/^[A-Ia-i][0-9][\-x\*][A-Ia-i][0-9]/);
-        if (iccs) {
-            tokens.push({ type: "iccs-move", value: iccs.toUpperCase(), line: startLine, column: startCol });
+        // SAN move: O-O, O-O-O, exd5, Nf3, e8=Q, etc.
+        const san = matchAndConsume(/^(O-O(?:-O)?[+#]?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)\b/);
+        if (san) {
+            tokens.push({ type: "san-move", value: san, line: startLine, column: startCol });
             continue;
         }
 
-        // 中文 WXF 着法
-        const wxf = matchAndConsume(/^[兵卒车马炮相士帅将][一二三四五六七八九123456789进退平前后左右]*/);
-        if (wxf) {
-            tokens.push({ type: "wxf-move", value: wxf, line: startLine, column: startCol });
-            continue;
-        }
-
-        // 注释 { ... }，支持嵌套大括号（如 JSON 数据）
+        // Comment { ... }
         if (char === "{") {
             let depth = 1;
             let end = pos + 1;
@@ -88,43 +80,42 @@ export function tokenize(pgn: string): Token[] {
             continue;
         }
 
-        // 标签 [ ... ]
+        // Tag [ ... ]
         const tag = matchAndConsume(/^\[[^\]]*\]/);
         if (tag) {
             tokens.push({ type: "tag", value: tag, line: startLine, column: startCol });
             continue;
         }
 
-        // 结果
+        // Result
         const result = matchAndConsume(/^(1-0|0-1|1\/2-1\/2|\*)/);
         if (result) {
             tokens.push({ type: "result", value: result, line: startLine, column: startCol });
             continue;
         }
 
-        // 左括号
+        // Left paren
         if (char === "(") {
             advance(1);
             tokens.push({ type: "left-paren", value: "(", line: startLine, column: startCol });
             continue;
         }
 
-        // 右括号
+        // Right paren
         if (char === ")") {
             advance(1);
             tokens.push({ type: "right-paren", value: ")", line: startLine, column: startCol });
             continue;
         }
 
-        // 尝试识别FEN字符串
-        const fen = matchAndConsume(/^[rnbakcpRNBAKCP1-9]+(\/[rnbakcpRNBAKCP1-9]+){8}(\s+[wb])?/);
+        // FEN string (standard chess)
+        const fen = matchAndConsume(/^[rnbqkpRNBQKP1-8]+(\/[rnbqkpRNBQKP1-8]+){7}(\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)?/);
         if (fen) {
-            // 将FEN转换为标签格式
             tokens.push({ type: "tag", value: `[FEN "${fen}"]`, line: startLine, column: startCol });
             continue;
         }
 
-        // 其他无法识别的字符 → 跳过（不再抛出错误）
+        // Unrecognized character - skip
         advance(1);
     }
 

@@ -1,6 +1,6 @@
-import "../assets/base.css";
-import "../assets/board.css";
-import "../assets/pieces.css";
+import "chessground/assets/chessground.base.css";
+import "chessground/assets/chessground.brown.css";
+import "chessground/assets/chessground.cburnett.css";
 
 import { MarkdownView, Plugin, TFile, addIcon } from "obsidian";
 import type { ISettings } from "./types";
@@ -8,19 +8,19 @@ import { applyThemes } from "./themes";
 import { ChessRenderChild } from "./renderChild/MoveListRenderChild";
 import { GenFENRenderChild } from './renderChild/GenFENRenderChild';
 import { PGNView } from './view/pgn';
-import { XQSettingTab, DEFAULT_SETTINGS } from "./settings";
+import { ChessSettingTab, DEFAULT_SETTINGS } from "./settings";
 
-export default class XQPlugin extends Plugin {
+export default class ChessPlugin extends Plugin {
 	settings: ISettings = DEFAULT_SETTINGS;
 	instances: Set<{ refresh(): void }> = new Set();
 	async onload() {
 
 		await this.loadSettings();
 
-		this.addSettingTab(new XQSettingTab(this.app, this));
+		this.addSettingTab(new ChessSettingTab(this.app, this));
 
 		applyThemes(this.settings);
-		addIcon("xiangqi-icon", `
+		addIcon("chess-icon", `
 <svg viewBox="0 0 80 80">
   <circle cx="40" cy="40" r="38"
     fill="var(--background-primary-alt)"
@@ -31,15 +31,15 @@ export default class XQPlugin extends Plugin {
     text-anchor="middle"
     font-size="60"
     fill="var(--text-normal)"
-    font-weight="bold">象</text>
+    font-weight="bold">&#9822;</text>
 </svg>
 `);
-		this.registerMarkdownCodeBlockProcessor('xiangqi', (source, el, ctx) => {
+		this.registerMarkdownCodeBlockProcessor('chess', (source, el, ctx) => {
 			const renderChild = new ChessRenderChild(el, ctx, source, this);
 			ctx.addChild(renderChild);
 		});
 
-		this.registerMarkdownCodeBlockProcessor('xq', (source, el, ctx) => {
+		this.registerMarkdownCodeBlockProcessor('chessboard', (source, el, ctx) => {
 			const renderChild = new GenFENRenderChild(el, ctx, source, this);
 			ctx.addChild(renderChild);
 		});
@@ -51,13 +51,12 @@ export default class XQPlugin extends Plugin {
 
 		this.registerExtensions(["pgn"], PGNView.VIEW_TYPE);
 
-		this.addRibbonIcon("xiangqi-icon", "新建 PGN 文件", async () => {
-			let baseFileName = "未命名";
+		this.addRibbonIcon("chess-icon", "New PGN file", async () => {
+			let baseFileName = "Untitled";
 			let fileExtension = ".pgn";
 			let fileName = baseFileName + fileExtension;
 			let counter = 0;
 
-			// 检查文件是否存在，如果存在则递增文件名
 			while (await this.app.vault.adapter.exists(fileName)) {
 				counter++;
 				fileName = `${baseFileName} ${counter}${fileExtension}`;
@@ -69,7 +68,7 @@ export default class XQPlugin extends Plugin {
 				const newFile = await this.app.vault.create(fileName, fileContent);
 				this.app.workspace.getLeaf(true).openFile(newFile);
 			} catch (error) {
-				console.error("创建 PGN 文件失败:", error);
+				console.error("Failed to create PGN file:", error);
 			}
 		});
 
@@ -94,14 +93,14 @@ export default class XQPlugin extends Plugin {
 				if (!(currentView instanceof MarkdownView && currentView.file === file)) {
 					menu.addItem((item) =>
 						item
-							.setTitle("用 Markdown 视图打开")
+							.setTitle("Open in Markdown view")
 							.setIcon("file-text")
 							.onClick(() => this.changeView(file, 'markdown'))
 					);
 				} if (!(currentView instanceof PGNView && currentView.file === file)) {
 					menu.addItem((item) =>
-						item.setTitle("用 PGN 视图打开")
-							.setIcon("xiangqi-icon")
+						item.setTitle("Open in PGN view")
+							.setIcon("chess-icon")
 							.onClick(() => this.changeView(file, PGNView.VIEW_TYPE)));
 				}
 			}),

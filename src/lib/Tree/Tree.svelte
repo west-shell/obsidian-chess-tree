@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
   import type { EventBus } from "../../core/event-bus";
-  import { PIECE_CHARS, type ChessNode, type NodeMap } from "../../types";
+  import { PIECE_CHARS, PIECE_LABELS, type ChessNode, type NodeMap } from "../../types";
   import { calculateTreeLayout } from "./layout";
   import { setIcon } from "obsidian";
   import * as d3 from "d3";
@@ -37,14 +37,14 @@
   const lucide_star = `<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>`;
 
   const ANNOTATION_DEFINITIONS: Record<string, { symbol: string; color: string; icon?: string }> = {
-    "R+": { symbol: "红优", color: "var(--piece-red)", icon: lucide_thumbs_up },
-    "B+": { symbol: "黑优", color: "var(--piece-black)", icon: lucide_thumbs_down },
-    "=": { symbol: "均势", color: "green", icon: lucide_handshake },
-    "?": { symbol: "问题", color: "var(--text-warning)", icon: lucide_bookmark },
-    "!": { symbol: "妙手", color: "var(--color-yellow)", icon: lucide_star },
-    "R#": { symbol: "红胜", color: "red", icon: lucide_thumbs_up },
-    "B#": { symbol: "黑胜", color: "black", icon: lucide_thumbs_up },
-    "=#": { symbol: "和棋", color: "gray", icon: lucide_handshake },
+    "W+": { symbol: "White +", color: "var(--piece-red)", icon: lucide_thumbs_up },
+    "B+": { symbol: "Black +", color: "var(--piece-black)", icon: lucide_thumbs_down },
+    "=": { symbol: "Equal", color: "green", icon: lucide_handshake },
+    "?": { symbol: "Key", color: "var(--text-warning)", icon: lucide_bookmark },
+    "!": { symbol: "Brilliant", color: "var(--color-yellow)", icon: lucide_star },
+    "1-0": { symbol: "1-0", color: "white", icon: lucide_thumbs_up },
+    "0-1": { symbol: "0-1", color: "black", icon: lucide_thumbs_up },
+    "1/2-1/2": { symbol: "Draw", color: "gray", icon: lucide_handshake },
   };
 
   const ALL_ANNOTATION_KEYS = Object.keys(ANNOTATION_DEFINITIONS);
@@ -314,15 +314,15 @@
                 height={nodeHeight}
                 rx="2.5"
                 ry="2.5"
-                fill={node.side === "red"
-                  ? "var(--piece-red)"
+                fill={node.side === "white"
+                  ? "#fff"
                   : node.side === "black"
-                    ? "var(--piece-black)"
+                    ? "#333"
                     : "green"}
                 stroke="var(--board-line)"
               />
-              <text dy="3.5" text-anchor="middle" fill="white" font-size="9px">
-                {node.data?.type ? PIECE_CHARS[node.data.type] : "始"}
+              <text dy="3.5" text-anchor="middle" fill={node.side === "white" ? "#333" : "#fff"} font-size="9px">
+                {node.data?.piece ? PIECE_LABELS[node.data.piece] : "S"}
               </text>
             {/if}
 

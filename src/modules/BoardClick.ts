@@ -1,27 +1,23 @@
-import type { IMove, IPosition } from "../types";
+import type { IMove, IPosition, IXQHost } from "../types";
 import { isValidMove } from "../utils/rules";
 import { registerXQModule, registerPGNViewModule } from "../core/module-system";
 
 const BoardClickModule = {
-    init(host: Record<string, any>) {
+    init(host: IXQHost) {
         const eventBus = host.eventBus;
 
         eventBus.on('click', (clickedPos: IPosition) => {
             const clickedPiece = host.board[clickedPos.x][clickedPos.y];
-            // 你的后续逻辑
+
             if (!host.markedPos) {
-                // 没有标记棋子时，只能选中当前行棋方的棋子
                 if (clickedPiece) {
-                    const clickedIsRed =
-                        clickedPiece === clickedPiece.toUpperCase();
+                    const clickedIsWhite = clickedPiece === clickedPiece.toUpperCase();
                     if (
-                        (host.currentTurn === "red" && clickedIsRed) ||
-                        (host.currentTurn != "red" && !clickedIsRed)
+                        (host.currentTurn === "white" && clickedIsWhite) ||
+                        (host.currentTurn !== "white" && !clickedIsWhite)
                     ) {
                         host.markedPos = clickedPos;
-                        host.Xiangqi.$set({
-                            markedPos: { ...host.markedPos },
-                        });
+                        eventBus.emit('updateUI');
                     }
                 }
                 return;
@@ -31,6 +27,7 @@ const BoardClickModule = {
                 host.markedPos,
                 clickedPos,
                 host.board,
+                host.gameState,
             );
 
             if (moveValid) {
@@ -43,27 +40,20 @@ const BoardClickModule = {
                 host.markedPos = null;
                 eventBus.emit('runmove', move);
             } else {
-                // 不能走，取消标记
-                // restorePiece(host.markedPiece.pieceEl!);
-                // 如果点击的是当前方棋子，重新标记
                 if (clickedPiece) {
-                    const clickedIsRed =
-                        clickedPiece === clickedPiece.toUpperCase();
+                    const clickedIsWhite = clickedPiece === clickedPiece.toUpperCase();
                     if (
-                        (host.currentTurn === "red" && clickedIsRed) ||
-                        (host.currentTurn === "black" && !clickedIsRed)
+                        (host.currentTurn === "white" && clickedIsWhite) ||
+                        (host.currentTurn === "black" && !clickedIsWhite)
                     ) {
                         host.markedPos = clickedPos;
-                        host.Xiangqi.$set({ markedPos: host.markedPos });
+                        eventBus.emit('updateUI');
                         return;
                     }
                 }
                 host.markedPos = null;
-                host.Xiangqi.$set({
-                    markedPos: host.markedPos,
-                });
+                eventBus.emit('updateUI');
             }
-
         })
     }
 }

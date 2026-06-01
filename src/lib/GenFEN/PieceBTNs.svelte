@@ -13,28 +13,13 @@
 
   let { settings, board, eventBus, position = "", selectedPiece }: Props = $props();
 
-  // 判断是否为红方棋子（大写字母）
-  const isRed = (piece: string) => piece === piece.toUpperCase();
+  const isWhite = (piece: string) => piece === piece.toUpperCase();
 
-  // 每种棋子的标准上限（可按需调整）
   const MAX_COUNT: Record<string, number> = {
-    R: 2,
-    N: 2,
-    B: 2,
-    A: 2,
-    K: 1,
-    C: 2,
-    P: 5,
-    r: 2,
-    n: 2,
-    b: 2,
-    a: 2,
-    k: 1,
-    c: 2,
-    p: 5,
+    K: 1, Q: 1, R: 2, B: 2, N: 2, P: 8,
+    k: 1, q: 1, r: 2, b: 2, n: 2, p: 8,
   };
 
-  // 实时统计当前棋子数量
   let pieceCount = $derived(
     board.flat().reduce(
       (acc, piece) => {
@@ -54,13 +39,13 @@
 
 <div
   class={`piece-btn-container ${position}`}
-  style="--height: {10 * settings.cellSize}px;
-    --width: {9 * settings.cellSize}px;
+  style="--height: {8 * settings.cellSize}px;
+    --width: {8 * settings.cellSize}px;
     --font-size: {settings.cellSize * 0.3}px;"
 >
   {#each Object.entries(PIECE_CHARS) as [piece, name]}
     <button
-      class={`piece-btn ${position} ${isRed(piece) ? "red-piece" : "black-piece"}`}
+      class={`piece-btn ${position} ${isWhite(piece) ? "white-piece" : "black-piece"}`}
       class:empty={count[piece] === 0}
       class:active={selectedPiece === piece}
       onclick={() => eventBus.emit("clickPieceBTN", piece)}
@@ -72,24 +57,23 @@
 
 <style>
   .piece-btn-container {
-    --piece-red: var(--xq-piece-red, var(--color-red));
+    --piece-white: var(--xq-piece-red, var(--color-red));
     --piece-black: var(--xq-piece-black, var(--color-blue));
   }
   .piece-btn-container.right {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(14, 1fr);
     flex-direction: column;
     height: var(--height);
     width: fit-content;
     align-items: stretch;
     display: flex;
-    justify-content: space-between; /* 平均分布 */
+    justify-content: space-between;
   }
 
   .piece-btn-container.bottom {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
     width: var(--width);
     height: auto;
@@ -112,7 +96,7 @@
 
   .piece-btn.bottom {
     padding: 0;
-    width: calc(var(--width) / 7);
+    width: calc(var(--width) / 6);
     border-radius: 4px;
     cursor: pointer;
     font-size: var(--font-size);
@@ -120,8 +104,8 @@
     transition: box-shadow 0.15s, border-color 0.15s;
   }
 
-  .red-piece {
-    background-color: var(--piece-red);
+  .white-piece {
+    background-color: var(--piece-white);
     color: white;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }

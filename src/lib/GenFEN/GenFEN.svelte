@@ -1,7 +1,7 @@
 <script lang="ts">
   import Board from "../Board.svelte";
   import PieceBTNs from "./PieceBTNs.svelte";
-  import type { IBoard, IOptions, IPosition, ISettings } from "../../types";
+  import type { IBoard, IOptions, IPosition, ISettings, ITurn } from "../../types";
   import type { EventBus } from "../../core/event-bus";
   import Toolbar from "./Toolbar.svelte";
 
@@ -10,7 +10,7 @@
     board: IBoard;
     markedPos: IPosition;
     selectedPiece: string;
-    currentTurn: string;
+    currentTurn: ITurn;
     eventBus: EventBus;
   }
 

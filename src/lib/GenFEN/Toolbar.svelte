@@ -9,10 +9,10 @@
   let { eventBus, position, currentTurn }: Props = $props();
 
   const buttons = [
-    { title: "先手", text: "先", action: "turn", color: true },
-    { title: "清空", text: "空", action: "empty" },
-    { title: "填满", text: "满", action: "full" },
-    { title: "保存", text: "存", action: "save" },
+    { title: "Turn", text: "Turn", action: "turn", color: true },
+    { title: "Clear", text: "Clr", action: "empty" },
+    { title: "Fill", text: "Fill", action: "full" },
+    { title: "Save", text: "Sav", action: "save" },
   ];
 </script>
 
@@ -48,7 +48,7 @@
     cursor: pointer;
   }
 
-  .red {
+  .white {
     background-color: var(--xq-piece-red);
     color: white;
   }

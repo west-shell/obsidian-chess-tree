@@ -1,4 +1,4 @@
-import XQPlugin from '../main';
+import ChessPlugin from '../main';
 import type { ISettings } from '../types';
 import { TextFileView, type WorkspaceLeaf } from 'obsidian';
 import {
@@ -16,7 +16,7 @@ export class PGNView extends TextFileView {
     static readonly VIEW_TYPE = "PGN_VIEW";
     settings: ISettings;
     eventBus!: EventBus;
-    constructor(leaf: WorkspaceLeaf, public plugin: XQPlugin) {
+    constructor(leaf: WorkspaceLeaf, public plugin: ChessPlugin) {
         super(leaf);
         this.settings = this.plugin.settings;
         this.data = '';
@@ -64,7 +64,7 @@ export class PGNView extends TextFileView {
     }
 
     getIcon() {
-        return "xiangqi-icon";
+        return "chess-icon";
     }
 
     clear(): void {

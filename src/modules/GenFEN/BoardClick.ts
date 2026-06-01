@@ -11,9 +11,7 @@ const BoardClickModule = {
             if (!host.markedPos && !host.selectedPiece) {
                 if (clickedPiece) {
                     host.markedPos = clickedPos;
-                    host.Xiangqi.$set({
-                        markedPos: { ...host.markedPos },
-                    });
+                    eventBus.emit('updateUI');
                 }
             } else if (host.markedPos && !host.selectedPiece) {
                 const from = host.markedPos
@@ -21,32 +19,21 @@ const BoardClickModule = {
                 host.board[to.x][to.y] = host.board[from.x][from.y];
                 host.board[from.x][from.y] = null;
                 host.markedPos = null;
-                host.Xiangqi.$set({
-                    board: [...host.board.map((row: any) => [...row])],
-                    markedPos: host.markedPos,
-                });
+                eventBus.emit('updateUI');
             } else if (host.selectedPiece) {
                 host.board[clickedPos.x][clickedPos.y] = host.selectedPiece;
                 host.selectedPiece = null;
                 host.markedPos = null;
-                host.Xiangqi.$set({
-                    board: [...host.board.map((row: any) => [...row])],
-                    selectedPiece: host.selectedPiece,
-                    markedPos: host.markedPos,
-                });
+                eventBus.emit('updateUI');
             }
         })
 
-        // Sync board state from chessground after drags/click-click moves
         eventBus.on('fen-updated', (fen: string) => {
             if (!fen) return;
             const { board } = loadBoardFromFEN(fen);
             host.board = board;
             host.markedPos = null;
-            host.Xiangqi.$set({
-                board: [...host.board.map((row: any) => [...row])],
-                markedPos: null,
-            });
+            eventBus.emit('updateUI');
         })
     }
 }

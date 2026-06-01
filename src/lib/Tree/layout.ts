@@ -32,12 +32,12 @@ function insertBySide(arr: ChessNode[], nodes: ChessNode | ChessNode[], target: 
 
     const insertNodes = Array.isArray(nodes) ? nodes : [nodes];
 
-    // 如果是黑方节点，先反转子节点顺序
+    // For black side nodes, reverse child order
     const orderedNodes = insertNodes[0].side === 'black'
         ? [...insertNodes].reverse()
         : insertNodes;
 
-    const insertPos = insertNodes[0].side === 'red' ? index + 1 : index;
+    const insertPos = insertNodes[0].side === 'white' ? index + 1 : index;
 
     // 过滤掉已存在的节点
     const nodesToInsert = orderedNodes.filter(n => !arr.includes(n));

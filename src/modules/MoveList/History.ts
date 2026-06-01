@@ -1,10 +1,10 @@
 import { registerXQModule } from "../../core/module-system";
-import { getWXF, getICCS } from "../../utils/parse"; // 导入 getICCS
-import type { IMove } from "../../types";
+import { toSAN } from "../../utils/rules";
+import type { IMove, IXQHost } from "../../types";
 
 const HistoryModule = {
 
-    init(host: Record<string, any>) {
+    init(host: IXQHost) {
         const eventBus = host.eventBus;
 
         eventBus.on("load", () => {
@@ -18,14 +18,12 @@ const HistoryModule = {
     }
 }
 
-function editHistory(host: Record<string, any>, move: IMove) {
-    move.WXF = getWXF(move, host.board);
-    move.captured = host.board[move.to.x][move.to.y];
-    move.ICCS = getICCS(move); // 添加：计算并设置 ICCS
+function editHistory(host: IXQHost, move: IMove) {
+    move.SAN = toSAN(move, host.board, host.gameState);
+    move.captured = host.board[move.to.x]?.[move.to.y] ?? null;
     let { currentStep, history } = host;
     const currentMove = move;
 
-    // 检查当前步骤是否已存在相同的 move
     const existingMove = history[currentStep];
     if (
         existingMove &&
@@ -34,13 +32,10 @@ function editHistory(host: Record<string, any>, move: IMove) {
         existingMove.to.x === currentMove.to.x &&
         existingMove.to.y === currentMove.to.y
     ) {
+        return;
     }
 
-    // 不同则：
-    // 1. 删除 currentStep 之后的所有历史
     host.history.splice(currentStep);
-
-    // 2. 添加新 move（直接 push 到原数组）
     host.history.push(currentMove);
 }
 

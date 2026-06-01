@@ -20,13 +20,12 @@
   });
 
   const buttons = [
-    { title: "重置", icon: "refresh-cw", event: "reset" },
-    { title: "开局", icon: "arrow-left-to-line", event: "toStart" },
-    { title: "回退", icon: "arrow-left", event: "undo" },
-    { title: "前进", icon: "arrow-right", event: "redo" },
-    { title: "终局", icon: "arrow-right-to-line", event: "toEnd" },
-    { title: "翻转", icon: "flip-vertical", event: "rotate" },
-    { title: "皮卡鱼Web", icon: "external-link", event: "openPikafish" },
+    { title: "Reset", icon: "refresh-cw", event: "reset" },
+    { title: "Start", icon: "arrow-left-to-line", event: "toStart" },
+    { title: "Back", icon: "arrow-left", event: "undo" },
+    { title: "Forward", icon: "arrow-right", event: "redo" },
+    { title: "End", icon: "arrow-right-to-line", event: "toEnd" },
+    { title: "Flip", icon: "flip-vertical", event: "rotate" },
   ];
 
   let saveBtnEl: HTMLButtonElement;
@@ -62,7 +61,7 @@
   <button
     class="toolbar-btn {buttonClass}"
     class:disabled={isprotected}
-    aria-label="保存"
+    aria-label="Save"
     bind:this={saveBtnEl}
     use:useSetSaveIcon
     onclick={() => emitEvent("save")}
@@ -92,7 +91,6 @@
       transform 0.1s ease;
   }
 
-  /* === 状态颜色 === */
   .toolbar-btn.empty {
     background-color: hsl(33, 5%, 57%);
   }

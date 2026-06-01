@@ -5,7 +5,7 @@ import { PluginOption, defineConfig } from "vite";
 const setOutDir = (mode: string) => {
 	switch (mode) {
 		case "development":
-			return "./test-vault/.obsidian/plugins/xiangqi";
+			return "./test-vault/.obsidian/plugins/chess";
 		case "production":
 		case "production-min":
 			return "build";
@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
 					entryFileNames: "main.js",
 					assetFileNames: "styles.css",
 					sourcemapBaseUrl: pathToFileURL(
-						`${__dirname}/test-vault/.obsidian/plugins/xiangqi/`,
+						`${__dirname}/test-vault/.obsidian/plugins/chess/`,
 					).toString(),
 				},
 				external: [

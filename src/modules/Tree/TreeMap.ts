@@ -44,7 +44,7 @@ const TreeMap = {
             host.nodeMap = parser.getMap();
             host.tags = parser.getTags();
             host.currentNode = host.nodeMap.get('node-root');
-            host.currentTurn = host.currentNode.side === 'black' ? 'black' : 'red';
+            host.currentTurn = host.currentNode.side === 'black' ? 'black' : 'white';
             host.board = host.currentNode.board;
             host.updateMainPath();
         });

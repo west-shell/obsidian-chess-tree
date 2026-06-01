@@ -1,16 +1,19 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { Chessground } from "@west-shell/chessground-xq";
-  import type { Api } from "@west-shell/chessground-xq/api";
-  import type { Config } from "@west-shell/chessground-xq/config";
-  import type { DrawShape } from "@west-shell/chessground-xq/draw";
-  import { pos2key, key2pos } from "@west-shell/chessground-xq/util";
-  import type * as cg from "@west-shell/chessground-xq/types";
+  import { Chessground } from "chessground";
+  import type { Api } from "chessground/api";
+  import type { Config } from "chessground/config";
+  import type { DrawShape } from "chessground/draw";
+  import { pos2key, key2pos } from "chessground/util";
+  import type * as cg from "chessground/types";
   import { genFENFromBoard } from "../utils/parse";
-  import { isValidMove } from "../utils/rules";
+  import { isValidMove, findKing, isSquareAttacked, isInCheck } from "../utils/rules";
   import type { ITurn } from "../types";
   import type { EventBus } from "../core/event-bus";
-  import type { IBoard, IMove, IPosition, ISettings } from "../types";
+  import type { IBoard, IMove, IPosition, ISettings, IGameState } from "../types";
+
+  const COLS = 8;
+  const ROWS = 8;
 
   interface Props {
     settings: ISettings;
@@ -24,6 +27,7 @@
     freeMode?: boolean;
     boardWidth?: number;
     userShapes?: DrawShape[];
+    gameState?: IGameState | null;
   }
 
   let {
@@ -38,9 +42,10 @@
     freeMode = false,
     boardWidth: boardWidthOverride,
     userShapes = [],
+    gameState = null,
   }: Props = $props();
 
-  let boardWidth = $derived(boardWidthOverride ?? settings.cellSize * 9);
+  let boardWidth = $derived(boardWidthOverride ?? settings.cellSize * 8);
 
   let boardElement: HTMLDivElement;
   let api: Api | null = null;
@@ -49,32 +54,32 @@
   let turnColor: cg.Color = $derived(currentTurn === "black" ? "black" : "white");
   let turnClass = $derived(settings.showTurnBorder ? `turn-${currentTurn}` : "");
 
-  // Our internal coords: y=0 top, y=9 bottom
-  // Chessground: y=0 bottom, y=9 top
+  // Our internal coords: y=0 top, y=7 bottom
+  // Chessground coords: y=0 bottom (rank1), y=7 top (rank8)
   function toKey(pos: IPosition): cg.Key {
-    return pos2key([pos.x, 9 - pos.y])!;
+    return pos2key([pos.x, ROWS - 1 - pos.y])!;
   }
 
   function toPos(key: cg.Key): IPosition {
     const [x, y] = key2pos(key);
-    return { x, y: 9 - y };
+    return { x, y: ROWS - 1 - y };
   }
 
-  function computeDests(board: IBoard, turn: ITurn): Map<cg.Key, cg.Key[]> {
+  function computeDests(board: IBoard, turn: ITurn, gs: IGameState | null): Map<cg.Key, cg.Key[]> {
     const dests = new Map<cg.Key, cg.Key[]>();
-    for (let x = 0; x < 9; x++) {
-      for (let y = 0; y < 10; y++) {
+    for (let x = 0; x < COLS; x++) {
+      for (let y = 0; y < ROWS; y++) {
         const piece = board[x][y];
         if (!piece) continue;
-        const isRed = piece === piece.toUpperCase();
-        if ((turn === "red" && !isRed) || (turn === "black" && isRed)) continue;
+        const isWhite = piece === piece.toUpperCase();
+        if ((turn === "white" && !isWhite) || (turn === "black" && isWhite)) continue;
 
         const from: IPosition = { x, y };
         const keys: cg.Key[] = [];
-        for (let tx = 0; tx < 9; tx++) {
-          for (let ty = 0; ty < 10; ty++) {
+        for (let tx = 0; tx < COLS; tx++) {
+          for (let ty = 0; ty < ROWS; ty++) {
             if (tx === x && ty === y) continue;
-            if (isValidMove(from, { x: tx, y: ty }, board)) {
+            if (isValidMove(from, { x: tx, y: ty }, board, gs ?? undefined)) {
               keys.push(toKey({ x: tx, y: ty }));
             }
           }
@@ -96,7 +101,7 @@
   }
 
   let shapes = $derived(settings.showNextMove ? computeVariationShapes(variations) : []);
-  let dests = $derived(computeDests(board, currentTurn));
+  let dests = $derived(computeDests(board, currentTurn, gameState));
 
   onMount(async () => {
     const events: Config["events"] = freeMode
@@ -113,7 +118,7 @@
             const from = toPos(orig);
             const to = toPos(dest);
 
-            if (isValidMove(from, to, board)) {
+            if (isValidMove(from, to, board, gameState ?? undefined)) {
               eventBus.emit("runmove", {
                 from,
                 to,
@@ -148,7 +153,6 @@
         visible: true,
         shapes: userShapes,
         autoShapes: shapes,
-        eraseOnMovablePieceClick: false,
         onChange: (s) => {
           eventBus.emit("user-shapes-changed", s);
         },
@@ -243,10 +247,7 @@
 
 <style>
   .xq-wrap {
-    height: 100%;
     flex-shrink: 0;
-    aspect-ratio: 450 / 500;
-    --piece-red: var(--xq-piece-red, var(--color-red));
-    --piece-black: var(--xq-piece-black, var(--color-blue));
+    aspect-ratio: 1;
   }
 </style>

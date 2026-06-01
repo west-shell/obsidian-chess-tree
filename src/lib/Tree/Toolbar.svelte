@@ -8,24 +8,22 @@
   let { eventBus }: Props = $props();
 
   const buttons = [
-    { title: "删除", icon: "circle-x", event: "remove" },
-    { title: "提升", icon: "arrow-up-wide-narrow", event: "promote" },
-    { title: "开局", icon: "arrow-left-to-line", event: "toStart" },
-    { title: "回退", icon: "arrow-left", event: "back" },
-    { title: "前进", icon: "arrow-right", event: "next" },
-    { title: "终局", icon: "arrow-right-to-line", event: "toEnd" },
-    { title: "翻转", icon: "flip-vertical", event: "rotate" },
-    { title: "皮卡鱼Web", icon: "external-link", event: "openPikafish" },
-    { title: "标注", icon: "tag", event: "toggle-annotation-menu" },
+    { title: "Delete", icon: "circle-x", event: "remove" },
+    { title: "Promote", icon: "arrow-up-wide-narrow", event: "promote" },
+    { title: "Start", icon: "arrow-left-to-line", event: "toStart" },
+    { title: "Back", icon: "arrow-left", event: "back" },
+    { title: "Forward", icon: "arrow-right", event: "next" },
+    { title: "End", icon: "arrow-right-to-line", event: "toEnd" },
+    { title: "Flip", icon: "flip-vertical", event: "rotate" },
+    { title: "Annotate", icon: "tag", event: "toggle-annotation-menu" },
   ];
 
-  // 你的 annotation 项目 —— 会放进菜单
   const annotations = [
-    { title: "优势", icon: "thumbs-up", symbol: "R+", event: "annotation" },
-    { title: "劣势", icon: "thumbs-down", symbol: "B+", event: "annotation" },
-    { title: "均势", icon: "handshake", symbol: "=", event: "annotation" },
-    { title: "关键", icon: "bookmark", symbol: "?", event: "annotation" },
-    { title: "妙手", icon: "star", symbol: "!", event: "annotation" },
+    { title: "White advantage", icon: "thumbs-up", symbol: "W+", event: "annotation" },
+    { title: "Black advantage", icon: "thumbs-down", symbol: "B+", event: "annotation" },
+    { title: "Equal", icon: "handshake", symbol: "=", event: "annotation" },
+    { title: "Key move", icon: "bookmark", symbol: "?", event: "annotation" },
+    { title: "Brilliant", icon: "star", symbol: "!", event: "annotation" },
   ];
 
   function emitEvent(name: string, payload: any = null) {
@@ -36,14 +34,13 @@
     setIcon(el, icon);
   }
 
-  // 👇 在这里实现菜单
   function handleAnnotationMenu(evt: MouseEvent) {
     const menu = new Menu();
 
     annotations.forEach((item) => {
       menu.addItem((mi) => {
         mi.setTitle(item.title)
-          .setIcon(item.icon) // 你可以换别的 icon，也可以省略
+          .setIcon(item.icon)
           .onClick(() => emitEvent(item.event, item.symbol));
       });
     });
@@ -54,14 +51,13 @@
 
 <div class="toolbar-container">
   {#each buttons as { title, icon, event }}
-    <!-- svelte-ignore event_directive_deprecated -->
     <button
       class="toolbar-btn"
       aria-label={title}
       use:useSetIcon={icon}
       onclick={(e) => {
         if (event === "toggle-annotation-menu") {
-          handleAnnotationMenu(e); // ← 打开标注菜单
+          handleAnnotationMenu(e);
         } else if (event === "rotate") {
           eventBus.emit("rotate");
         } else {
@@ -82,20 +78,18 @@
   :global(.tree-view.bottom) .toolbar-container {
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap; /* 不换行 */
-    justify-content: space-between; /* 平均分布 */
+    flex-wrap: nowrap;
+    justify-content: space-between;
     align-items: center;
-    width: 100%; /* 占满容器宽度 */
-    /* padding: 0 4px; 留点边距 */
+    width: 100%;
     box-sizing: border-box;
-    /* gap: 4px; 按钮间距 */
   }
 
   :global(.tree-view.bottom) .toolbar-container .toolbar-btn {
-    flex: 1 1 0; /* 平均分宽，可缩小 */
-    min-width: 24px; /* 最小宽度，保证可点击 */
-    max-width: 100%; /* 不超过容器 */
-    font-size: clamp(12px, 3vw, 16px); /* 字体随屏幕宽度缩放 */
+    flex: 1 1 0;
+    min-width: 24px;
+    max-width: 100%;
+    font-size: clamp(12px, 3vw, 16px);
     padding: 0;
     margin: 0;
   }
