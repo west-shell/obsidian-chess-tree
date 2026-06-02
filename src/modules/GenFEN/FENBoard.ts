@@ -14,9 +14,7 @@ const BoardModule = {
                 props: {
                     selectedPiece: host.selectedPiece,
                     settings: host.settings,
-                    board: host.board,
-                    markedPos: host.markedPos,
-                    currentTurn: host.currentTurn,
+                    fen: host.fen,
                     eventBus: host.eventBus,
                 },
             });
@@ -26,9 +24,7 @@ const BoardModule = {
             host.Chess?.$set({
                 selectedPiece: host.selectedPiece,
                 settings: { ...host.settings },
-                board: [...host.board.map(row => [...row])],
-                markedPos: host.markedPos,
-                currentTurn: host.currentTurn,
+                fen: host.fen,
             });
         })
 

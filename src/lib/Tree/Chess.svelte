@@ -2,10 +2,11 @@
   import Tree from "./Tree.svelte";
   import Board from "../Board.svelte";
   import Toolbar from "./Toolbar.svelte";
-  import type { ChessNode, IBoard, IGameState, IMove, IPosition, ISettings, NodeMap, ITurn } from "../../types";
+  import type { ChessNode, ISettings, NodeMap } from "../../types";
   import type { EventBus } from "../../core/event-bus";
   import type { DrawShape } from "chessground/draw";
   import type * as cg from "chessground/types";
+  import type { Move, Square } from "chess.js";
   import { onMount, tick } from "svelte";
 
   const SHAPES_PREFIX = "__SHAPES__";
@@ -41,9 +42,7 @@
 
   interface Props {
     settings: ISettings;
-    board: IBoard;
-    markedPos: IPosition;
-    currentTurn: ITurn;
+    fen: string;
     eventBus: EventBus;
     nodeMap: NodeMap;
     currentNode: ChessNode;
@@ -52,24 +51,24 @@
 
   let {
     settings,
-    board,
-    markedPos,
-    currentTurn,
+    fen,
     eventBus,
     nodeMap,
     currentNode,
     currentPath,
   }: Props = $props();
 
-  let lastMove = $derived(currentNode.data);
+  let lastMove: [Square, Square] | null = $derived(
+    currentNode.move ? [currentNode.move.from, currentNode.move.to] : null
+  );
   let { position } = $derived(settings);
   let rotated = $state(false);
   let variations = $derived(
-    currentNode.children.map((child) => child.data).filter((data): data is IMove => data != null) ??
-      [],
+    currentNode.children
+      .map((child) => child.move)
+      .filter((m): m is Move => m != null) ?? [],
   );
   let userShapes = $derived(loadShapes(currentNode));
-  let gameState = $derived(currentNode.gameState ?? null);
 
   let treeViewEl: HTMLDivElement;
   let adaptiveBoardWidth = $state(300);
@@ -117,9 +116,8 @@
 <div class="tree-view {position}" bind:this={treeViewEl}>
   <div class="board-area">
     <Board
-      {settings} {board} {lastMove} {markedPos} {currentTurn}
-      {eventBus} {rotated} {variations} {userShapes}
-      boardWidth={adaptiveBoardWidth} {gameState}
+      {settings} {fen} {lastMove} {eventBus} {rotated} {variations} {userShapes}
+      boardWidth={adaptiveBoardWidth}
     />
   </div>
   <Toolbar {eventBus} />

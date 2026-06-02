@@ -1,27 +1,57 @@
-import type { IPosition } from "../../types";
+import { Chess } from "chess.js";
+import type { Square } from "chess.js";
 import { registerGenFENModule } from "../../core/module-system";
-import { loadBoardFromFEN } from "../../utils/parse";
+
+const BOARD_CLICK_EMPTY = "__EMPTY__";
 
 const BoardClickModule = {
     init(host: Record<string, any>) {
         const eventBus = host.eventBus;
 
-        eventBus.on('click', (clickedPos: IPosition) => {
-            const clickedPiece = host.board[clickedPos.x][clickedPos.y];
+        eventBus.on('click', (clickedKey: string) => {
             if (!host.markedPos && !host.selectedPiece) {
-                if (clickedPiece) {
-                    host.markedPos = clickedPos;
+                // First click: select a piece on the board
+                const chess = new Chess(host.fen);
+                const piece = chess.get(clickedKey as Square);
+                if (piece) {
+                    host.markedPos = clickedKey;
                     eventBus.emit('updateUI');
                 }
             } else if (host.markedPos && !host.selectedPiece) {
-                const from = host.markedPos
-                const to = clickedPos
-                host.board[to.x][to.y] = host.board[from.x][from.y];
-                host.board[from.x][from.y] = null;
-                host.markedPos = null;
-                eventBus.emit('updateUI');
+                // Move piece from markedPos to clickedKey
+                const from = host.markedPos as Square;
+                const to = clickedKey as Square;
+                const chess = new Chess(host.fen);
+                const piece = chess.get(from);
+                if (piece) {
+                    // Only allow moving within the board; remove the target piece first
+                    chess.remove(to);
+                    const squarePiece = chess.get(from);
+                    chess.remove(from);
+                    if (squarePiece) {
+                        chess.put(squarePiece, to);
+                    }
+                    host.fen = chess.fen();
+                    host.markedPos = null;
+                    eventBus.emit('updateUI');
+                } else {
+                    host.markedPos = null;
+                    eventBus.emit('updateUI');
+                }
             } else if (host.selectedPiece) {
-                host.board[clickedPos.x][clickedPos.y] = host.selectedPiece;
+                if (host.selectedPiece === BOARD_CLICK_EMPTY) {
+                    // Clear square
+                    const chess = new Chess(host.fen);
+                    chess.remove(clickedKey as Square);
+                    host.fen = chess.fen();
+                } else {
+                    const chess = new Chess(host.fen);
+                    chess.remove(clickedKey as Square);
+                    const color = host.selectedPiece === host.selectedPiece.toUpperCase() ? 'w' : 'b';
+                    const type = host.selectedPiece.toLowerCase();
+                    chess.put({ type, color }, clickedKey as Square);
+                    host.fen = chess.fen();
+                }
                 host.selectedPiece = null;
                 host.markedPos = null;
                 eventBus.emit('updateUI');
@@ -30,8 +60,7 @@ const BoardClickModule = {
 
         eventBus.on('fen-updated', (fen: string) => {
             if (!fen) return;
-            const { board } = loadBoardFromFEN(fen);
-            host.board = board;
+            host.fen = fen;
             host.markedPos = null;
             eventBus.emit('updateUI');
         })

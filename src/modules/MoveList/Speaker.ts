@@ -1,5 +1,6 @@
 import { registerXQModule } from "../../core/module-system";
-import type { IMove, IXQHost } from "../../types";
+import type { Move } from "chess.js";
+import type { IXQHost } from "../../types";
 
 const SpeakerModule = {
     init(host: IXQHost) {
@@ -20,10 +21,10 @@ const SpeakerModule = {
 
 registerXQModule('speech', SpeakerModule);
 
-function speak(move: IMove) {
-    const { SAN } = move;
-    if (!SAN) return;
-    const finalSpeech = SAN
+function speak(move: Move) {
+    const { san } = move;
+    if (!san) return;
+    const finalSpeech = san
         .replace(/O-O-O/g, "queenside castle")
         .replace(/O-O/g, "kingside castle")
         .replace(/\+/g, " check")

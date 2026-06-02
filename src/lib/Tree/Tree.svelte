@@ -1,12 +1,16 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
   import type { EventBus } from "../../core/event-bus";
-  import { PIECE_CHARS, type ChessNode, type NodeMap } from "../../types";
+  import { type ChessNode, type NodeMap } from "../../types";
   import { t } from "../../i18n";
   import { calculateTreeLayout } from "./layout";
   import { setIcon } from "obsidian";
   import * as d3 from "d3";
 
+  const PIECE_CHARS: Record<string, string> = {
+    k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
+    K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
+  };
   interface Props {
     nodeMap: NodeMap;
     eventBus: EventBus;
@@ -30,7 +34,6 @@
   const nodeWidth = 16;
   const nodeHeight = 13;
   const lucide_message_square_text = `<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>`;
-  // const lucide_smile = `<path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/>`;
   const lucide_thumbs_up = `<path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/><path d="M7 10v12"/>`;
   const lucide_thumbs_down = `<path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/><path d="M17 14V2"/>`;
   const lucide_handshake = `<path d="M19.414 14.414C21 12.828 22 11.5 22 9.5a5.5 5.5 0 0 0-9.591-3.676.6.6 0 0 1-.818.001A5.5 5.5 0 0 0 2 9.5c0 2.3 1.5 4 3 5.5l5.535 5.362a2 2 0 0 0 2.879.052 2.12 2.12 0 0 0-.004-3 2.124 2.124 0 1 0 3-3 2.124 2.124 0 0 0 3.004 0 2 2 0 0 0 0-2.828l-1.881-1.882a2.41 2.41 0 0 0-3.409 0l-1.71 1.71a2 2 0 0 1-2.828 0 2 2 0 0 1 0-2.828l2.823-2.762"/>`;
@@ -76,14 +79,12 @@
   function handleCommentsInput() {
     adjustTextareaHeight();
 
-    // 防抖：输入暂停 700ms 自动保存
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = window.setTimeout(() => {
       saveComments();
       saveTimeout = undefined;
     }, 700);
   }
-  // 组件卸载时清理定时器
   onDestroy(() => {
     if (saveTimeout) {
       clearTimeout(saveTimeout);
@@ -91,7 +92,6 @@
     }
   });
 
-  // 离开时立即保存
   function handleCommentsBlur() {
     if (saveTimeout) {
       clearTimeout(saveTimeout);
@@ -111,7 +111,6 @@
     eventBus.emit("updatePGN", null);
   }
 
-  // ---- 自动调整文本框高度 ----
   function adjustTextareaHeight() {
     if (!textareaEl) return;
     textareaEl.classList.add("auto-height");
@@ -119,7 +118,6 @@
     textareaEl.classList.remove("auto-height");
   }
 
-  // ---- 布局计算 ----
   function updateTreeLayout() {
     renderedNodes = calculateTreeLayout(nodeMap);
   }
@@ -128,10 +126,7 @@
     updateTreeLayout();
     if (!svgEl || !zoomBehavior) return;
     const padding = 40;
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     for (const n of renderedNodes) {
       minX = Math.min(minX, n.x!);
       maxX = Math.max(maxX, n.x!);
@@ -158,36 +153,26 @@
     const nodeScreenX = node.x * spacingX * scale + translateX;
     const nodeScreenY = node.y * spacingY * scale + translateY;
 
-    let dx = 0,
-      dy = 0;
+    let dx = 0, dy = 0;
     if (nodeScreenX < padding) dx = padding - nodeScreenX;
     else if (nodeScreenX > clientWidth - padding) dx = clientWidth - padding - nodeScreenX;
-
     if (nodeScreenY < padding) dy = padding - nodeScreenY;
     else if (nodeScreenY > clientHeight - padding) dy = clientHeight - padding - nodeScreenY;
 
-    if (dx || dy) {
-      translateX += dx;
-      translateY += dy;
-    }
+    if (dx || dy) { translateX += dx; translateY += dy; }
     const t = d3.zoomIdentity.translate(translateX, translateY).scale(scale);
     d3.select(svgEl).transition().duration(300).call(zoomBehavior.transform, t);
   }
 
   function zoomAtCenter(factor: number) {
     if (!svgEl) return;
-
-    const w = svgEl.clientWidth;
-    const h = svgEl.clientHeight;
-    const cx = w / 2;
-    const cy = h / 2;
+    const w = svgEl.clientWidth, h = svgEl.clientHeight;
+    const cx = w / 2, cy = h / 2;
     let { x: translateX, y: translateY, k: scale } = zoomTransform;
     const prev = scale;
     const next = prev * factor;
-    // 计算当前屏幕中心对应的世界坐标（未缩放坐标系）
     const worldX = (cx - translateX) / prev;
     const worldY = (cy - translateY) / prev;
-    // 应用新缩放并调整 translate 保持屏幕中心不变
     scale = next;
     translateX = cx - worldX * scale;
     translateY = cy - worldY * scale;
@@ -196,27 +181,22 @@
   }
 
   const ZOOM_STEP = 1.15;
-
-  function zoomIn() {
-    zoomAtCenter(ZOOM_STEP);
-  }
-  function zoomOut() {
-    zoomAtCenter(1 / ZOOM_STEP);
-  }
+  function zoomIn() { zoomAtCenter(ZOOM_STEP); }
+  function zoomOut() { zoomAtCenter(1 / ZOOM_STEP); }
 
   let nodeMode = $state(0);
   const MODE_ICONS = ["club", "case-sensitive", "align-justify"];
-  function cycleNodeMode() {
-    nodeMode = (nodeMode + 1) % 3;
-  }
+  function cycleNodeMode() { nodeMode = (nodeMode + 1) % 3; }
+
   function nodeLabel(node: ChessNode): string {
-    const p = node.data?.piece;
-    if (nodeMode === 2) return node.data?.SAN ?? "S";
+    if (!node.move) return "S";
+    const p = node.move.piece;
+    if (nodeMode === 2) return node.move.san ?? "S";
     if (nodeMode === 0) {
-      const k = p ? (p.toUpperCase() as keyof typeof PIECE_CHARS) : "";
-      return k && PIECE_CHARS[k] ? PIECE_CHARS[k] : "★";
+      const char = node.move.color === 'w' ? p.toUpperCase() : p;
+      return PIECE_CHARS[char] ?? "★";
     }
-    return p ? p : "S";
+    return node.move.color === 'w' ? p.toUpperCase() : p;
   }
   function nodeFontSize(): string {
     if (nodeMode === 2) return "7px";
@@ -230,40 +210,27 @@
     { title: "重置", icon: "rotate-ccw", event: resetView },
   ];
   let modeIcon = $derived(MODE_ICONS[nodeMode]);
-  function useSetIcon(el: HTMLElement, icon: string) {
-    setIcon(el, icon);
-  }
+  function useSetIcon(el: HTMLElement, icon: string) { setIcon(el, icon); }
 
   onMount(async () => {
     if (!svgEl) return;
-
     updateTreeLayout();
-
     zoomBehavior = d3
       .zoom<SVGSVGElement, unknown>()
-      // .scaleExtent([0.5, 6])
-      .on("zoom", (event) => {
-        zoomTransform = event.transform;
-      });
-
+      .on("zoom", (event) => { zoomTransform = event.transform; });
     d3.select(svgEl).call(zoomBehavior);
-
     await tick();
     await new Promise(requestAnimationFrame);
-
     resetView();
   });
 
-  // ---- 响应式更新 ----
   $effect(() => {
     if (!currentNode) {
       commentsText = "";
       return;
     }
-
     const node = currentNode;
     commentsText = getRegularComments(node).join("\n");
-
     tick().then(() => {
       if (textareaEl) adjustTextareaHeight();
       panToNodeIfNeeded(node);
@@ -280,7 +247,6 @@
   <div class="svg-wrapper">
     <svg bind:this={svgEl} width="100%" height="100%" class="tree-svg">
       <g transform={zoomTransform.toString()}>
-        <!-- 连线 -->
         {#each renderedNodes as node}
           {#each node.children as child}
             <path
@@ -292,8 +258,7 @@
               stroke="var(--board-line)"
               stroke-linejoin="round"
               stroke-width={currentPath.includes(node.id) && currentPath.includes(child.id)
-                ? 1.5
-                : 1}
+                ? 1.5 : 1}
               opacity={currentPath.includes(node.id) && currentPath.includes(child.id) ? 1.5 : 0.7}
               filter={currentPath.includes(node.id) && currentPath.includes(child.id)
                 ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
@@ -303,7 +268,6 @@
           {/each}
         {/each}
 
-        <!-- 节点 -->
         {#each renderedNodes as node (node.id)}
           {@const primaryAnnotation = getPrimaryAnnotation(node)}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -338,8 +302,7 @@
                 y={-nodeHeight / 2}
                 width={nodeWidth}
                 height={nodeHeight}
-                rx="2.5"
-                ry="2.5"
+                rx="2.5" ry="2.5"
                 fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
                 stroke="var(--board-line)"
               />
@@ -348,11 +311,9 @@
                 dominant-baseline="central"
                 text-anchor="middle"
                 fill={node.side === "white" ? "#333" : "#fff"}
-                font-size={nodeFontSize()}>{nodeLabel(node)}</text
-              >
+                font-size={nodeFontSize()}>{nodeLabel(node)}</text>
             {/if}
 
-            <!-- 评论标记 -->
             {#if getRegularComments(node).length > 0}
               <g
                 transform="translate({0.35 * nodeWidth} {-0.7 * nodeHeight}) scale(0.35)"
@@ -372,8 +333,7 @@
 
     <div class="toolbar">
       {#each zoomBTN as { title, icon, event }}
-        <button class="toolbar-btn" aria-label={title} use:useSetIcon={icon} onclick={event}
-        ></button>
+        <button class="toolbar-btn" aria-label={title} use:useSetIcon={icon} onclick={event}></button>
       {/each}
       <button
         class="toolbar-btn"
@@ -428,8 +388,6 @@
   }
 
   .toolbar .toolbar-btn {
-    /* font-size: large; */
-    /* all: unset; */
     width: 30px;
     height: 30px;
     padding: 0;

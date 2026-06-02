@@ -1,28 +1,27 @@
 <script lang="ts">
   import Board from "../Board.svelte";
   import PieceBTNs from "./PieceBTNs.svelte";
-  import type { IBoard, IOptions, IPosition, ISettings, ITurn } from "../../types";
+  import type { ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
+  import type { Square } from "chess.js";
   import Toolbar from "./Toolbar.svelte";
 
   interface Props {
     settings: ISettings;
-    board: IBoard;
-    markedPos: IPosition;
-    selectedPiece: string;
-    currentTurn: ITurn;
+    fen: string;
+    selectedPiece: string | null;
     eventBus: EventBus;
   }
 
-  let { settings, board, markedPos, selectedPiece, currentTurn, eventBus }: Props = $props();
+  let { settings, fen, selectedPiece, eventBus }: Props = $props();
 
   let position = $derived(settings.position);
 </script>
 
 <div class="XQ-container {settings.position}">
-  <Board {settings} {board} {markedPos} {currentTurn} {eventBus} rotated={false} freeMode={true} />
-  <PieceBTNs {settings} {board} {eventBus} {position} {selectedPiece} />
-  <Toolbar {eventBus} {position} {currentTurn} />
+  <Board {settings} {fen} {eventBus} rotated={false} freeMode={true} />
+  <PieceBTNs {settings} {fen} {eventBus} {position} {selectedPiece} />
+  <Toolbar {eventBus} {position} currentTurn={fen.split(' ')[1] === 'b' ? 'black' : 'white'} />
 </div>
 
 <style>

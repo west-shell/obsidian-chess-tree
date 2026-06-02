@@ -2,29 +2,28 @@
   import Board from "../Board.svelte";
   import Toolbar from "./Toolbar.svelte";
   import MoveList from "./MoveList.svelte";
-  import type { IBoard, IGameState, IMove, IOptions, IPosition, ISettings, ITurn } from "../../types";
+  import type { ISettings, IOptions } from "../../types";
   import type { EventBus } from "../../core/event-bus";
+  import type { Move, Square } from "chess.js";
   import { onMount, tick } from "svelte";
 
   interface Props {
     settings: ISettings;
-    board: IBoard;
-    markedPos: IPosition | null;
-    currentTurn: ITurn;
+    fen: string;
+    selectedSquare: Square | null;
     currentStep: number;
     eventBus: EventBus;
     modified: boolean;
-    PGN: IMove[];
-    history: IMove[];
-    lastMove: IMove | null;
+    PGN: Move[];
+    history: Move[];
+    lastMove: [Square, Square] | null;
     options: IOptions;
-    gameState: IGameState | null;
   }
 
   let {
-    settings, board, markedPos, currentTurn, currentStep,
+    settings, fen, selectedSquare, currentStep,
     eventBus, modified, PGN, history, lastMove,
-    options, gameState = null,
+    options,
   }: Props = $props();
 
   let moves = $derived(modified ? history : PGN);
@@ -38,7 +37,7 @@
 </script>
 
 <div class="XQ-container {settings.position}">
-  <Board {settings} {board} {lastMove} {markedPos} {currentTurn} {eventBus} {rotated} {gameState} />
+  <Board {settings} {fen} {lastMove} {selectedSquare} {eventBus} {rotated} />
   <Toolbar {settings} {eventBus} {modified} {PGN} {isprotected} />
   {#if settings.showMovelist}
     <MoveList {settings} {currentStep} {moves} {eventBus} />

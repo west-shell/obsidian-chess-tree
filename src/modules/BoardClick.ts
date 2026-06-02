@@ -1,56 +1,34 @@
-import type { IMove, IPosition, IXQHost } from "../types";
-import { isValidMove } from "../utils/rules";
+import { Chess } from "chess.js";
+import type { IXQHost } from "../types";
 import { registerXQModule, registerPGNViewModule } from "../core/module-system";
 
 const BoardClickModule = {
     init(host: IXQHost) {
         const eventBus = host.eventBus;
 
-        eventBus.on('click', (clickedPos: IPosition) => {
-            const clickedPiece = host.board[clickedPos.x][clickedPos.y];
-
+        eventBus.on('click', (clickedKey: string) => {
+            // In non-free mode, Board.svelte handles moves via "runmove" directly
+            // This is kept for PGN view compatibility
             if (!host.markedPos) {
-                if (clickedPiece) {
-                    const clickedIsWhite = clickedPiece === clickedPiece.toUpperCase();
-                    if (
-                        (host.currentTurn === "white" && clickedIsWhite) ||
-                        (host.currentTurn !== "white" && !clickedIsWhite)
-                    ) {
-                        host.markedPos = clickedPos;
-                        eventBus.emit('updateUI');
-                    }
-                }
+                // Try to read the piece at the clicked square
+                host.markedPos = clickedKey;
+                eventBus.emit('updateUI');
                 return;
             }
 
-            const moveValid = isValidMove(
-                host.markedPos,
-                clickedPos,
-                host.board,
-                host.gameState,
-            );
-
-            if (moveValid) {
-                const move: IMove = {
-                    from: { ...host.markedPos },
-                    to: { ...clickedPos },
-                };
-                if (!host.modified) host.modifiedStep = host.currentStep;
-                host.modified = true;
-                host.markedPos = null;
-                eventBus.emit('runmove', move);
-            } else {
-                if (clickedPiece) {
-                    const clickedIsWhite = clickedPiece === clickedPiece.toUpperCase();
-                    if (
-                        (host.currentTurn === "white" && clickedIsWhite) ||
-                        (host.currentTurn === "black" && !clickedIsWhite)
-                    ) {
-                        host.markedPos = clickedPos;
-                        eventBus.emit('updateUI');
-                        return;
-                    }
+            // Second click - try to make a move
+            try {
+                const chess = new Chess(host.fen);
+                const move = chess.move({ from: host.markedPos as string, to: clickedKey });
+                if (move) {
+                    host.markedPos = null;
+                    eventBus.emit('runmove', move);
+                } else {
+                    // Perhaps selecting a different piece
+                    host.markedPos = clickedKey;
+                    eventBus.emit('updateUI');
                 }
+            } catch {
                 host.markedPos = null;
                 eventBus.emit('updateUI');
             }

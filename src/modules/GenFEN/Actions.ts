@@ -1,16 +1,15 @@
 import { MarkdownView, Notice } from "obsidian";
 import { registerGenFENModule } from "../../core/module-system";
-import type { IBoard, IGenFENHost, ITurn, PieceType } from "../../types";
-import { genFENFromBoard } from "../../utils/parse";
+import type { IGenFENHost } from "../../types";
 import { t } from "../../i18n";
+import { DEFAULT_FEN } from "../../types";
 
 const ActionsModule = {
     init(host: IGenFENHost) {
         const eventBus = host.eventBus;
 
-        eventBus.on("clickPieceBTN", (piece: PieceType) => {
+        eventBus.on("clickPieceBTN", (piece: string) => {
             if (!piece) return;
-            host.markedPos = null;
             host.selectedPiece = piece;
             host.eventBus.emit('updateUI');
         })
@@ -19,19 +18,18 @@ const ActionsModule = {
             if (!action) return;
             switch (action) {
                 case 'turn':
-                    host.currentTurn = host.currentTurn === 'white' ? 'black' : 'white';
+                    // Toggle turn in FEN
+                    const parts = host.fen.split(' ');
+                    parts[1] = parts[1] === 'w' ? 'b' : 'w';
+                    host.fen = parts.join(' ');
                     break
                 case 'empty':
-                    host.board = Array.from({ length: 8 }, () => Array(8).fill(null));
-                    host.board[4][0] = 'k';
-                    host.board[4][7] = 'K';
-                    host.selectedPiece = null
-                    host.markedPos = null;
+                    host.fen = 'k7/8/8/8/8/8/8/6K1 w - - 0 1';
+                    host.selectedPiece = null;
                     break
                 case 'full':
-                    host.eventBus.emit('full');
-                    host.selectedPiece = null
-                    host.markedPos = null;
+                    host.fen = DEFAULT_FEN;
+                    host.selectedPiece = null;
                     break
                 case 'save':
                     onSaveBTNClick(host);
@@ -45,7 +43,7 @@ const ActionsModule = {
 registerGenFENModule('actions', ActionsModule)
 
 async function onSaveBTNClick(host: IGenFENHost) {
-    const fen = genFENFromBoard(host.board, host.currentTurn);
+    const fen = host.fen;
     const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) return;
     const file = view.file;
@@ -61,7 +59,7 @@ async function onSaveBTNClick(host: IGenFENHost) {
         let blockLines: string[] = lines.slice(lineStart, lineEnd + 1);
         if (blockLines.length < 2) return fileContent;
 
-        // Replace code block type from chessboard to chess and insert FEN
+        // Replace code block type from fen to chess and insert FEN
         blockLines[0] = blockLines[0].replace(/^```fen\b.*$/, "```chess");
         blockLines = [blockLines[0], `[FEN "${fen}"]`, "```"];
 

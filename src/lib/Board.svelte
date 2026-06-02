@@ -4,104 +4,77 @@
   import type { Api } from "chessground/api";
   import type { Config } from "chessground/config";
   import type { DrawShape } from "chessground/draw";
-  import { pos2key, key2pos } from "chessground/util";
   import type * as cg from "chessground/types";
-  import { genFENFromBoard } from "../utils/parse";
-  import { isValidMove } from "../utils/rules";
-  import type { ITurn } from "../types";
+  import { Chess, type Move, type Square } from "chess.js";
   import type { EventBus } from "../core/event-bus";
-  import type { IBoard, IMove, IPosition, ISettings, IGameState } from "../types";
-
-  const COLS = 8;
-  const ROWS = 8;
+  import type { ISettings } from "../types";
 
   interface Props {
     settings: ISettings;
-    board: IBoard;
-    lastMove?: IMove | null;
-    markedPos?: IPosition | null;
-    currentTurn: ITurn;
+    fen: string;
+    lastMove?: [Square, Square] | null;
+    selectedSquare?: Square | null;
     eventBus: EventBus;
     rotated: boolean;
-    variations?: IMove[];
+    variations?: Move[];
     freeMode?: boolean;
     boardWidth?: number;
     userShapes?: DrawShape[];
-    gameState?: IGameState | null;
   }
 
   let {
     settings,
-    board,
+    fen,
     lastMove = null,
-    markedPos = null,
-    currentTurn,
+    selectedSquare = null,
     eventBus,
     rotated,
     variations = [],
     freeMode = false,
     boardWidth: boardWidthOverride,
     userShapes = [],
-    gameState = null,
   }: Props = $props();
 
   let boardWidth = $derived(boardWidthOverride ?? settings.cellSize * 8);
-
   let boardElement: HTMLDivElement;
   let api: Api | null = null;
   let layoutChangeHandler: (() => void) | null = null;
-  let fen = $derived(genFENFromBoard(board, currentTurn));
-  let turnColor: cg.Color = $derived(currentTurn === "black" ? "black" : "white");
-  let turnClass = $derived(settings.showTurnBorder ? `turn-${currentTurn}` : "");
+  let turnColor: cg.Color = $derived(
+    fen.split(' ')[1] === 'b' ? 'black' : 'white'
+  );
+  let turnClass = $derived(
+    settings.showTurnBorder ? `turn-${fen.split(' ')[1] === 'b' ? 'black' : 'white'}` : ""
+  );
 
-  // Our internal coords: y=0 top, y=7 bottom
-  // Chessground coords: y=0 bottom (rank1), y=7 top (rank8)
-  function toKey(pos: IPosition): cg.Key {
-    return pos2key([pos.x, ROWS - 1 - pos.y])!;
-  }
-
-  function toPos(key: cg.Key): IPosition {
-    const [x, y] = key2pos(key);
-    return { x, y: ROWS - 1 - y };
-  }
-
-  function computeDests(board: IBoard, turn: ITurn, gs: IGameState | null): Map<cg.Key, cg.Key[]> {
-    const dests = new Map<cg.Key, cg.Key[]>();
-    for (let x = 0; x < COLS; x++) {
-      for (let y = 0; y < ROWS; y++) {
-        const piece = board[x][y];
-        if (!piece) continue;
-        const isWhite = piece === piece.toUpperCase();
-        if ((turn === "white" && !isWhite) || (turn === "black" && isWhite)) continue;
-
-        const from: IPosition = { x, y };
-        const keys: cg.Key[] = [];
-        for (let tx = 0; tx < COLS; tx++) {
-          for (let ty = 0; ty < ROWS; ty++) {
-            if (tx === x && ty === y) continue;
-            if (isValidMove(from, { x: tx, y: ty }, board, gs ?? undefined)) {
-              keys.push(toKey({ x: tx, y: ty }));
-            }
-          }
+  function computeDests(fen: string): Map<cg.Key, cg.Key[]> {
+    try {
+      const chess = new Chess(fen);
+      const dests = new Map<cg.Key, cg.Key[]>();
+      const moves = chess.moves({ verbose: true }) as Move[];
+      for (const move of moves) {
+        const orig = move.from;
+        const dest = move.to;
+        if (!dests.has(orig)) {
+          dests.set(orig, []);
         }
-        if (keys.length > 0) {
-          dests.set(toKey(from), keys);
-        }
+        dests.get(orig)!.push(dest);
       }
+      return dests;
+    } catch {
+      return new Map();
     }
-    return dests;
   }
 
-  function computeVariationShapes(variations: IMove[]): DrawShape[] {
+  function computeVariationShapes(variations: Move[]): DrawShape[] {
     return variations.map((move) => ({
-      orig: toKey(move.from),
-      dest: toKey(move.to),
+      orig: move.from,
+      dest: move.to,
       brush: "blue",
     }));
   }
 
   let shapes = $derived(settings.showNextMove ? computeVariationShapes(variations) : []);
-  let dests = $derived(computeDests(board, currentTurn, gameState));
+  let dests = $derived(computeDests(fen));
 
   onMount(async () => {
     const events: Config["events"] = freeMode
@@ -110,20 +83,21 @@
             if (api) eventBus.emit("fen-updated", api.getFen());
           },
           select: (key) => {
-            eventBus.emit("click", toPos(key));
+            eventBus.emit("click", key);
           },
         }
       : {
           move: (orig, dest) => {
-            const from = toPos(orig);
-            const to = toPos(dest);
-
-            if (isValidMove(from, to, board, gameState ?? undefined)) {
-              eventBus.emit("runmove", {
-                from,
-                to,
-              } as IMove);
-            } else {
+            try {
+              const chess = new Chess(fen);
+              const move = chess.move({ from: orig, to: dest });
+              if (move) {
+                eventBus.emit("runmove", move);
+              } else {
+                api?.cancelMove();
+                eventBus.emit("invalid-move", { from: orig, to: dest });
+              }
+            } catch {
               api?.cancelMove();
               eventBus.emit("invalid-move", { from: orig, to: dest });
             }
@@ -165,11 +139,11 @@
     }
 
     if (lastMove) {
-      config.lastMove = [toKey(lastMove.from), toKey(lastMove.to)];
+      config.lastMove = lastMove;
     }
 
-    if (markedPos) {
-      config.selected = toKey(markedPos);
+    if (selectedSquare) {
+      config.selected = selectedSquare;
     }
 
     api = Chessground(boardElement, config);
@@ -209,7 +183,7 @@
   $effect(() => {
     if (!api) return;
     api.set({
-      lastMove: lastMove ? [toKey(lastMove.from), toKey(lastMove.to)] : undefined,
+      lastMove: lastMove ? lastMove : undefined,
     });
   });
 
@@ -225,9 +199,8 @@
 
   $effect(() => {
     if (!api || freeMode) return;
-    void board;
-    if (markedPos) {
-      api.selectSquare(toKey(markedPos), true);
+    if (selectedSquare) {
+      api.selectSquare(selectedSquare, true);
     } else {
       api.selectSquare(null);
     }

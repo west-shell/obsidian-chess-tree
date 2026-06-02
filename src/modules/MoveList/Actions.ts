@@ -1,7 +1,7 @@
+import { Chess, type Move } from "chess.js";
 import { MarkdownView, Notice } from "obsidian";
 import { registerXQModule } from "../../core/module-system";
-import type { IMove, IXQHost, PieceType } from "../../types";
-import { genFENFromBoard } from "../../utils/parse";
+import type { IXQHost, ITurn } from "../../types";
 import { ConfirmModal } from "../../utils/confirmModal";
 import { t } from "../../i18n";
 
@@ -9,12 +9,14 @@ const ActionsModule = {
     init(host: IXQHost) {
         const eventBus = host.eventBus;
 
-        eventBus.on('runmove', (move) => {
+        eventBus.on('runmove', (move: Move) => {
             if (!move) return;
             if (!host.modified) host.modifiedStep = host.currentStep;
             host.modified = true;
             eventBus.emit('edithistory', move);
-            runmove(host, move);
+            host.fen = move.after;
+            host.currentStep++;
+            host.currentTurn = getTurnFromFen(host.fen);
             eventBus.emit('updateUI', 'runmove');
         })
 
@@ -122,45 +124,49 @@ const ActionsModule = {
 
 registerXQModule('actions', ActionsModule);
 
-function runmove(host: IXQHost, move: IMove) {
-	const { from, to, promotion } = move;
-	host.board[to.x][to.y] = promotion ?? host.board[from.x][from.y];
-	host.board[from.x][from.y] = null;
-	host.currentStep++;
-	host.currentTurn = host.currentTurn === 'white' ? 'black' : 'white';
-}
-
 function undo(host: IXQHost) {
-    host.markedPos = null
     if (host.history.length === 0) return;
-    const move = host.history[host.currentStep - 1];
-    if (!move) return;
-    const { from, to, captured } = move;
-    const returnPiece = host.board[to.x][to.y];
-    host.board[from.x][from.y] = returnPiece;
-    host.board[to.x][to.y] = null;
-
-    if (captured) {
-        host.board[to.x][to.y] = captured as PieceType;
+    if (host.currentStep > 0) {
+        host.currentStep--;
+        host.fen = replayFen(host);
+        host.currentTurn = getTurnFromFen(host.fen);
     }
-    host.currentStep--;
-    host.currentTurn = host.currentTurn === "white" ? "black" : "white";
 }
 
 function redo(host: IXQHost) {
-    host.markedPos = null;
-    const eventBus = host.eventBus;
     if (!host.modified && host.PGN.length > 0) {
         const nextMove = host.PGN[host.currentStep];
         if (!nextMove) return;
-        eventBus.emit('edithistory', nextMove);
-        runmove(host, nextMove);
+        host.eventBus.emit('edithistory', nextMove);
+        host.currentStep++;
+        host.fen = nextMove.after;
+        host.currentTurn = getTurnFromFen(host.fen);
     } else {
         if (host.history.length < host.currentStep) return;
         const moveToRedo = host.history[host.currentStep];
         if (!moveToRedo) return;
-        runmove(host, moveToRedo);
+        host.currentStep++;
+        host.fen = moveToRedo.after;
+        host.currentTurn = getTurnFromFen(host.fen);
     }
+}
+
+function replayFen(host: IXQHost): string {
+    try {
+        const chess = new Chess(host.fenRoot);
+        const currentMoves = host.modified ? host.history : host.PGN;
+        for (let i = 0; i < host.currentStep; i++) {
+            chess.move(currentMoves[i].san);
+        }
+        return chess.fen();
+    } catch {
+        return host.fenRoot;
+    }
+}
+
+/** Read turn from fen string */
+function getTurnFromFen(fen: string): ITurn {
+    return fen.split(' ')[1] === 'b' ? 'black' : 'white';
 }
 
 async function savePGN(host: IXQHost) {
@@ -186,7 +192,7 @@ async function savePGN(host: IXQHost) {
         if (host.currentStep > 0) {
             const moves = host.history
                 .slice(0, host.currentStep)
-                .map((move: IMove) => move.SAN ?? "");
+                .map((move: Move) => move.san ?? "");
 
             const pgnLines: string[] = [];
             for (let i = 0; i < moves.length; i += 2) {

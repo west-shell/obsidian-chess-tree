@@ -1,32 +1,20 @@
 <script lang="ts">
   import { setIcon } from "obsidian";
-  import type { IBoard, ISettings } from "../../types";
+  import type { ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
 
   interface Props {
     settings: ISettings;
-    board: IBoard;
+    fen: string;
     eventBus: EventBus;
     position?: string;
-    selectedPiece: string;
+    selectedPiece: string | null;
   }
-  let { settings, board, eventBus, position = "", selectedPiece }: Props = $props();
-
-  const isWhite = (p: string) => p === p.toUpperCase();
+  let { settings, fen, eventBus, position = "", selectedPiece }: Props = $props();
 
   const MAX_COUNT: Record<string, number> = {
-    K: 1,
-    Q: 1,
-    R: 2,
-    B: 2,
-    N: 2,
-    P: 8,
-    k: 1,
-    q: 1,
-    r: 2,
-    b: 2,
-    n: 2,
-    p: 8,
+    K: 1, Q: 1, R: 2, B: 2, N: 2, P: 8,
+    k: 1, q: 1, r: 2, b: 2, n: 2, p: 8,
   };
 
   const PIECES: { key: string; color: "white" | "black"; icon: string }[] = [
@@ -45,8 +33,11 @@
   ];
 
   let pieceCount = $derived(
-    board.flat().reduce((acc: Record<string, number>, p) => {
-      if (p) acc[p] = (acc[p] || 0) + 1;
+    fen.split(' ')[0].split('').reduce((acc: Record<string, number>, c) => {
+      if (/[1-8]/.test(c)) return acc;
+      if (/[a-zA-Z]/.test(c)) {
+        acc[c] = (acc[c] || 0) + 1;
+      }
       return acc;
     }, {}),
   );

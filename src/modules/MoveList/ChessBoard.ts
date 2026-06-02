@@ -2,6 +2,7 @@ import Chess from "../../lib/Movelist/Chess.svelte";
 import { registerXQModule } from "../../core/module-system";
 import type { IXQHost } from "../../types";
 import { mount, unmount } from "svelte";
+import type { Square } from "chess.js";
 
 const BoardModule = {
     init(host: IXQHost) {
@@ -14,17 +15,15 @@ const BoardModule = {
                 target: Container,
                 props: {
                     settings: host.settings,
-                    board: host.board,
-                    markedPos: host.markedPos,
-                    currentTurn: host.currentTurn,
+                    fen: host.fen,
+                    selectedSquare: null,
                     currentStep: host.currentStep,
                     eventBus: host.eventBus,
                     modified: host.modified,
                     PGN: host.PGN,
                     history: host.history,
-                    lastMove: host.modified ? host.history[host.currentStep - 1] || null : host.PGN[host.currentStep - 1] || null,
+                    lastMove: null,
                     options: host.options || {},
-                    gameState: host.gameState,
                 },
             });
         })
@@ -41,17 +40,17 @@ const BoardModule = {
         })
 
         eventBus.on('updateUI', () => {
+            const currentMoves = host.modified ? host.history : host.PGN;
+            const lastMove = currentMoves[host.currentStep - 1] ?? null;
             host.Chess?.$set({
                 settings: { ...host.settings },
-                board: [...host.board.map(row => [...row])],
-                markedPos: host.markedPos,
-                currentTurn: host.currentTurn,
+                fen: host.fen,
+                selectedSquare: null,
                 currentStep: host.currentStep,
                 modified: host.modified,
                 history: [...host.history],
-                lastMove: host.modified ? host.history[host.currentStep - 1] || null : host.PGN[host.currentStep - 1] || null,
+                lastMove: lastMove ? [lastMove.from, lastMove.to] as [Square, Square] : null,
                 options: { ...(host.options || {}) },
-                gameState: host.gameState,
             });
         })
 

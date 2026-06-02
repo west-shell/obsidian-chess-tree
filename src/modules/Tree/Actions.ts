@@ -1,50 +1,38 @@
+import { Chess, type Move } from "chess.js";
 import { registerPGNViewModule } from "../../core/module-system";
-import type { ChessNode, IMove, IPGNViewHost } from "../../types";
+import type { ChessNode } from "../../types";
 import { ConfirmModal } from "../../utils/confirmModal";
-import { toSAN, makeMove } from "../../utils/rules";
 import { t } from "../../i18n";
 
 const ActionsModule = {
     init(host: Record<string, any>) {
         const eventBus = host.eventBus;
 
-        eventBus.on('runmove', (move: IMove) => {
+        eventBus.on('runmove', (move: Move) => {
             const { from, to } = move
             const currentNode = host.currentNode;
             for (let node of currentNode.children) {
-                if (node.data && node.data.from.x === from.x && node.data.from.y === from.y && node.data.to.x === to.x && node.data.to.y === to.y) {
+                if (node.move && node.move.from === from && node.move.to === to) {
                     host.currentNode = node;
-                    host.board = host.currentNode.board;
-                    host.currentTurn = host.currentTurn === 'white' ? 'black' : 'white';
                     host.updateMainPath();
                     eventBus.emit('updateUI')
                     return;
                 }
             }
-            const piece = host.currentNode.board![move.from.x][move.from.y];
-            move.piece = piece;
-            move.SAN = toSAN(move, host.currentNode.board!);
-            host.nodeId = host.parser.nodeId
-            const gs = host.currentNode.gameState!;
-            const { newBoard, newState } = makeMove(host.currentNode.board!, move, gs);
             const newNode: ChessNode = {
                 id: `node-${host.parser.nodeId++}`,
-                data: move,
+                fen: move.after,
+                move,
                 step: host.currentStep,
-                side: host.currentTurn,
+                side: move.color === 'w' ? 'white' : 'black',
                 parentID: host.currentNode.id,
                 children: [],
                 mainID: null,
                 comments: [],
-                board: newBoard,
-                gameState: newState,
             };
-            newNode.data!.captured = gs.board[move.to.x]?.[move.to.y] ?? null;
             host.nodeMap.set(newNode.id, newNode);
-            host.board = newBoard;
             host.currentNode.children.push(newNode);
             host.currentNode = newNode;
-            host.currentTurn = host.currentTurn === 'white' ? 'black' : 'white';
             host.currentStep++;
             host.updateMainPath();
             eventBus.emit('updateUI')
@@ -54,8 +42,6 @@ const ActionsModule = {
         eventBus.on('node-click', (id: string) => {
             host.markedPos = null;
             host.currentNode = host.nodeMap.get(id);
-            host.board = host.currentNode.board;
-            host.currentTurn = host.currentNode.side === 'white' ? 'black' : 'white';
             host.updateMainPath();
             host.eventBus.emit('updateUI')
         })
@@ -156,15 +142,11 @@ const ActionsModule = {
                 }
                 case 'toStart': {
                     host.currentNode = host.nodeMap.get(host.currentPath[0]);
-                    host.board = host.currentNode.board;
-                    host.currentTurn = host.currentNode.side === 'white' ? 'black' : 'white';
                     break;
                 }
                 case 'back': {
                     if (host.currentNode.parentID) {
                         host.currentNode = host.nodeMap.get(host.currentNode.parentID);
-                        host.board = host.currentNode.board;
-                        host.currentTurn = host.currentNode.side === 'white' ? 'black' : 'white';
                     }
                     break;
                 }
@@ -173,15 +155,11 @@ const ActionsModule = {
                     if (currentIndex < host.currentPath.length - 1) {
                         const nextNodeId = host.currentPath[currentIndex + 1];
                         host.currentNode = host.nodeMap.get(nextNodeId);
-                        host.board = host.currentNode.board;
-                        host.currentTurn = host.currentNode.side === 'white' ? 'black' : 'white';
                     }
                     break;
                 }
                 case 'toEnd': {
                     host.currentNode = host.nodeMap.get(host.currentPath[host.currentPath.length - 1]);
-                    host.board = host.currentNode.board;
-                    host.currentTurn = host.currentNode.side === 'white' ? 'black' : 'white';
                     break;
                 }
             }
@@ -215,9 +193,9 @@ function stringifyPGN(root: ChessNode): string {
     function walk(node: ChessNode, stepNum: number): string {
         let result = '';
         if (node.side === 'white') {
-            result += `${stepNum}. ${node.data!.SAN}`;
+            result += `${stepNum}. ${node.move!.san}`;
         } else if (node.side === 'black') {
-            result += `${node.data!.SAN}`;
+            result += `${node.move!.san}`;
         }
         if (node.comments?.length) {
             for (const c of node.comments) {

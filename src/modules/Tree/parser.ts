@@ -1,25 +1,7 @@
+import { Chess, type Move } from 'chess.js';
 import { tokenize, type Token, type TokenType } from './Tokenizer';
-import type { ChessNode, IBoard, IMove, IPosition, ITurn, IGameState } from '../../types';
-import { loadBoardFromFEN, parseSANMove } from '../../utils/parse';
+import type { ChessNode } from '../../types';
 import { DEFAULT_FEN } from '../../types';
-import { makeMove, toSAN } from '../../utils/rules';
-
-const COLS = 8;
-const ROWS = 8;
-
-function defaultGameState(board: IBoard): IGameState {
-    return {
-        board: board.map(row => [...row]),
-        turn: "white",
-        castlingRights: {
-            w: { kingside: true, queenside: true },
-            b: { kingside: true, queenside: true },
-        },
-        enPassantTarget: null,
-        halfMoveClock: 0,
-        fullMoveNumber: 1,
-    };
-}
 
 export class PGNParser {
     haveFEN: boolean = false;
@@ -30,9 +12,9 @@ export class PGNParser {
     currentNode: ChessNode;
     nodeId: number;
     currentStep: number = 0;
-    currentSide: ITurn = 'white';
+    currentSide: string | null = null;
     tags: Map<string, string> = new Map();
-    gameState: IGameState;
+    chess: Chess;
 
     constructor(input: string | Token[]) {
         this.nodeMap = new Map<string, ChessNode>();
@@ -40,25 +22,24 @@ export class PGNParser {
         this.currentIndex = 0;
         this.nodeId = 1;
 
-        const initialBoard = loadBoardFromFEN(DEFAULT_FEN).board;
-        this.gameState = defaultGameState(initialBoard);
+        this.chess = new Chess(DEFAULT_FEN);
 
         this.rootNode = {
             id: `node-root`,
-            data: null,
+            fen: DEFAULT_FEN,
+            move: null,
             step: 0,
             side: null,
             parentID: null,
             children: [],
             mainID: null,
-            board: initialBoard.map(row => [...row]),
-            gameState: { ...this.gameState },
             comments: []
         };
         this.nodeMap.set(this.rootNode.id, this.rootNode);
         this.currentStep++;
 
         this.currentNode = this.rootNode;
+        this.currentSide = null;
 
         while (!this.match('eof')) {
             if (this.match('tag')) {
@@ -85,28 +66,27 @@ export class PGNParser {
         if (!match) return;
 
         const [, tagName, tagValue] = match;
-
         this.tags.set(tagName, tagValue);
 
         if (tagName.toUpperCase() === 'FEN') {
             this.haveFEN = true;
-            const { board, turn } = loadBoardFromFEN(tagValue);
-            this.currentNode.board = board.map(row => [...row]);
-            this.currentSide = turn === 'b' ? 'black' : 'white';
-            this.gameState = defaultGameState(board);
-            this.gameState.turn = this.currentSide;
-            if (this.currentNode.gameState) {
-                this.currentNode.gameState = { ...this.gameState };
+            try {
+                this.chess.load(tagValue);
+                this.rootNode.fen = tagValue;
+            } catch {
+                // invalid FEN, ignore
             }
         }
     }
 
-    createNode(move: IMove | null): ChessNode {
+    createNode(move: Move, fen: string): ChessNode {
+        const side = move.color === 'w' ? 'white' : 'black';
         const node: ChessNode = {
             id: `node-${this.nodeId++}`,
-            data: move,
+            fen,
+            move,
             step: this.currentStep,
-            side: this.currentSide,
+            side,
             parentID: this.currentNode.id,
             children: [],
             mainID: null,
@@ -128,51 +108,49 @@ export class PGNParser {
         return this.peek().type === type;
     }
 
-    parseSANMoveString(san: string, board: IBoard, gs: IGameState): IMove | null {
-        return parseSANMove(san, board, gs);
-    }
-
     processSAN(san: string) {
-        const board = this.currentNode.board || this.gameState.board;
-        const gs = this.currentNode.gameState || this.gameState;
-        const move = this.parseSANMoveString(san, board, gs);
-        if (!move) return;
-        const newNode = this.createNode(move);
-        newNode.data!.piece = board[move.from.x][move.from.y] ?? undefined;
-        newNode.data!.SAN = san;
-        newNode.data!.captured = board[move.to.x]?.[move.to.y] ?? null;
+        const fen = this.currentNode.fen;
+        this.chess.load(fen);
+        try {
+            const move = this.chess.move(san);
+            if (!move) return;
 
-        const { newBoard, newState } = makeMove(board, move, gs);
-        newNode.board = newBoard;
-        newNode.gameState = newState;
-
-        this.nodeMap.set(newNode.id, newNode);
-        this.currentNode.children.push(newNode);
-        this.currentNode = newNode;
-        this.gameState = newState;
-        this.switchSide();
-        this.currentStep++;
+            const newNode = this.createNode(move, this.chess.fen());
+            this.currentNode.children.push(newNode);
+            this.currentNode = newNode;
+            this.currentStep++;
+            this.currentSide = move.color === 'w' ? 'white' : 'black';
+        } catch {
+            return;
+        }
     }
 
     parseVariation() {
         this.consume(); // consume '('
 
-        const variationBase = this.nodeMap.get(this.currentNode.parentID!);
+        const variationParentID = this.currentNode.parentID;
+        if (!variationParentID) {
+            // skip
+            while (!this.match('right-paren') && !this.match('eof')) {
+                this.consume();
+            }
+            if (this.match('right-paren')) this.consume();
+            return;
+        }
+        const variationBase = this.nodeMap.get(variationParentID)!;
         const prevState = {
             node: this.currentNode,
             step: this.currentStep,
             side: this.currentSide,
-            gameState: this.gameState,
         };
 
-        this.currentNode = variationBase!;
-        this.currentStep = this.currentStep - 1;
-        this.currentSide = this.currentSide === 'white' ? 'black' : 'white';
-        this.gameState = this.currentNode.gameState || this.gameState;
+        this.currentNode = variationBase;
+        this.currentStep = variationBase.step!;
+        this.currentSide = variationBase.side;
 
         while (!this.match('right-paren') && !this.match('eof')) {
             if (this.match('san-move')) {
-                this.processSAN(this.consume().value);
+                this.processSANVariation(this.consume().value);
             } else if (this.match('comment')) {
                 this.parseComment();
             } else if (this.match('left-paren')) {
@@ -192,7 +170,22 @@ export class PGNParser {
         this.currentNode = prevState.node;
         this.currentStep = prevState.step;
         this.currentSide = prevState.side;
-        this.gameState = prevState.gameState;
+    }
+
+    processSANVariation(san: string) {
+        const fen = this.currentNode.fen;
+        this.chess.load(fen);
+        try {
+            const move = this.chess.move(san);
+            if (!move) return;
+
+            const newNode = this.createNode(move, this.chess.fen());
+            this.currentNode.children.push(newNode);
+            this.currentNode = newNode;
+            this.currentStep++;
+        } catch {
+            return;
+        }
     }
 
     parseComment() {
@@ -229,10 +222,6 @@ export class PGNParser {
             this.currentNode.comments = [];
         }
         this.currentNode.comments.push(result);
-    }
-
-    switchSide() {
-        this.currentSide = this.currentSide === 'white' ? 'black' : 'white';
     }
 
     public getTags(): string {

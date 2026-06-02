@@ -14,9 +14,7 @@ const TreeViewModule = {
                 props: {
                     nodeMap: host.nodeMap,
                     settings: host.settings,
-                    board: host.currentNode.board,
-                    markedPos: host.markedPos,
-                    currentTurn: host.currentTurn,
+                    fen: host.currentNode.fen,
                     eventBus: host.eventBus,
                     currentNode: host.currentNode,
                     currentPath: host.currentPath,
@@ -28,9 +26,7 @@ const TreeViewModule = {
             host.Chess?.$set({
                 settings: { ...host.settings },
                 nodeMap: new Map(host.nodeMap),
-                board: host.currentNode.board,
-                markedPos: host.markedPos,
-                currentTurn: host.currentTurn,
+                fen: host.currentNode?.fen ?? '',
                 currentNode: host.currentNode,
                 currentPath: host.currentPath,
             });
