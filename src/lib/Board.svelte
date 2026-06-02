@@ -222,5 +222,14 @@
   .cg-wrap {
     flex-shrink: 0;
     aspect-ratio: 1;
+    border-radius: 2px;
+  }
+
+  .cg-wrap.turn-white {
+    box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.7);
+  }
+
+  .cg-wrap.turn-black {
+    box-shadow: 0 0 12px 3px rgba(0, 0, 0, 0.7);
   }
 </style>

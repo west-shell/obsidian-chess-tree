@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-chess",
+  "name": "obsidian-chess-tree",
   "private": true,
-  "version": "4.0.0",
+  "version": "1.0.0",
   "description": "Render chess positions and diagrams in a note.",
   "main": "main.js",
   "type": "module",
