@@ -2,7 +2,7 @@
   import Tree from "./Tree.svelte";
   import Board from "../Board.svelte";
   import Toolbar from "./Toolbar.svelte";
-  import type { ChessNode, IBoard, IMove, IPosition, ISettings, NodeMap, ITurn } from "../../types";
+  import type { ChessNode, IBoard, IGameState, IMove, IPosition, ISettings, NodeMap, ITurn } from "../../types";
   import type { EventBus } from "../../core/event-bus";
   import type { DrawShape } from "chessground/draw";
   import type * as cg from "chessground/types";
@@ -69,6 +69,7 @@
       [],
   );
   let userShapes = $derived(loadShapes(currentNode));
+  let gameState = $derived(currentNode.gameState ?? null);
 
   let treeViewEl: HTMLDivElement;
   let adaptiveBoardWidth = $state(300);
@@ -116,16 +117,9 @@
 <div class="tree-view {position}" bind:this={treeViewEl}>
   <div class="board-area">
     <Board
-      {settings}
-      {board}
-      {lastMove}
-      {markedPos}
-      {currentTurn}
-      {eventBus}
-      {rotated}
-      {variations}
-      {userShapes}
-      boardWidth={adaptiveBoardWidth}
+      {settings} {board} {lastMove} {markedPos} {currentTurn}
+      {eventBus} {rotated} {variations} {userShapes}
+      boardWidth={adaptiveBoardWidth} {gameState}
     />
   </div>
   <Toolbar {eventBus} />

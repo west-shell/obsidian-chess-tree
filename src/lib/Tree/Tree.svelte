@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
   import type { EventBus } from "../../core/event-bus";
-  import { PIECE_CHARS, PIECE_LABELS, type ChessNode, type NodeMap } from "../../types";
+  import { PIECE_CHARS, type ChessNode, type NodeMap } from "../../types";
   import { t } from "../../i18n";
   import { calculateTreeLayout } from "./layout";
   import { setIcon } from "obsidian";
@@ -213,10 +213,10 @@
     const p = node.data?.piece;
     if (nodeMode === 2) return node.data?.SAN ?? "S";
     if (nodeMode === 0) {
-      const k = p ? p.toUpperCase() as keyof typeof PIECE_CHARS : "";
+      const k = p ? (p.toUpperCase() as keyof typeof PIECE_CHARS) : "";
       return k && PIECE_CHARS[k] ? PIECE_CHARS[k] : "★";
     }
-    return p && PIECE_LABELS[p] ? PIECE_LABELS[p] : "S";
+    return p ? p : "S";
   }
   function nodeFontSize(): string {
     if (nodeMode === 2) return "7px";
@@ -343,7 +343,8 @@
                 fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
                 stroke="var(--board-line)"
               />
-              <text x="0"
+              <text
+                x="0"
                 dominant-baseline="central"
                 text-anchor="middle"
                 fill={node.side === "white" ? "#333" : "#fff"}

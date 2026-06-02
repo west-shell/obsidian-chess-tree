@@ -39,6 +39,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "chess.js": "^1.4.0",
     "chessground": "^9.2.1"
   }
 }

@@ -2,7 +2,7 @@
   import Board from "../Board.svelte";
   import Toolbar from "./Toolbar.svelte";
   import MoveList from "./MoveList.svelte";
-  import type { IBoard, IMove, IOptions, IPosition, ISettings, ITurn } from "../../types";
+  import type { IBoard, IGameState, IMove, IOptions, IPosition, ISettings, ITurn } from "../../types";
   import type { EventBus } from "../../core/event-bus";
   import { onMount, tick } from "svelte";
 
@@ -18,20 +18,13 @@
     history: IMove[];
     lastMove: IMove | null;
     options: IOptions;
+    gameState: IGameState | null;
   }
 
   let {
-    settings,
-    board,
-    markedPos,
-    currentTurn,
-    currentStep,
-    eventBus,
-    modified,
-    PGN,
-    history,
-    lastMove,
-    options,
+    settings, board, markedPos, currentTurn, currentStep,
+    eventBus, modified, PGN, history, lastMove,
+    options, gameState = null,
   }: Props = $props();
 
   let moves = $derived(modified ? history : PGN);
@@ -45,7 +38,7 @@
 </script>
 
 <div class="XQ-container {settings.position}">
-  <Board {settings} {board} {lastMove} {markedPos} {currentTurn} {eventBus} {rotated} />
+  <Board {settings} {board} {lastMove} {markedPos} {currentTurn} {eventBus} {rotated} {gameState} />
   <Toolbar {settings} {eventBus} {modified} {PGN} {isprotected} />
   {#if settings.showMovelist}
     <MoveList {settings} {currentStep} {moves} {eventBus} />

@@ -23,7 +23,8 @@ const BoardModule = {
                     PGN: host.PGN,
                     history: host.history,
                     lastMove: host.modified ? host.history[host.currentStep - 1] || null : host.PGN[host.currentStep - 1] || null,
-                    options: host.options || {}
+                    options: host.options || {},
+                    gameState: host.gameState,
                 },
             });
         })
@@ -49,7 +50,8 @@ const BoardModule = {
                 modified: host.modified,
                 history: [...host.history],
                 lastMove: host.modified ? host.history[host.currentStep - 1] || null : host.PGN[host.currentStep - 1] || null,
-                options: { ...(host.options || {}) }
+                options: { ...(host.options || {}) },
+                gameState: host.gameState,
             });
         })
 

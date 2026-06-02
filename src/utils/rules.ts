@@ -103,6 +103,19 @@ export function isValidMove(from: IPosition, to: IPosition, board: IBoard, gameS
 
 	const enPassant = gameState?.enPassantTarget ?? null;
 
+	// castling: king moves 2 squares horizontally
+	if (piece.toUpperCase() === "K" && Math.abs(to.x - from.x) === 2 && from.y === to.y && gameState) {
+		const isW = isWhitePiece(piece);
+		if (to.x === 6) {
+			const rights = isW ? gameState.castlingRights.w : gameState.castlingRights.b;
+			if (rights.kingside && !board[5][from.y] && !board[6][from.y] && board[7][from.y]?.toUpperCase() === "R") return true;
+		} else if (to.x === 2) {
+			const rights = isW ? gameState.castlingRights.w : gameState.castlingRights.b;
+			if (rights.queenside && !board[3][from.y] && !board[2][from.y] && !board[1][from.y] && board[0][from.y]?.toUpperCase() === "R") return true;
+		}
+		return false;
+	}
+
 	switch (piece.toUpperCase()) {
 		case "K": return kingMoves(from, to, board);
 		case "Q": return queenMoves(from, to, board);

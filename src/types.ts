@@ -42,11 +42,6 @@ export const PIECE_CHARS: Record<string, string> = {
 	P: "♙",
 };
 
-export const PIECE_LABELS: Record<string, string> = {
-	k: "K", q: "Q", r: "R", b: "B", n: "N", p: "P",
-	K: "K", Q: "Q", R: "R", B: "B", N: "N", P: "P",
-};
-
 export type PieceType = keyof typeof PIECE_CHARS;
 export type IBoard = (PieceType | null)[][];
 
