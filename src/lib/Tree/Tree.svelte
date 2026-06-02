@@ -7,10 +7,23 @@
   import { setIcon } from "obsidian";
   import * as d3 from "d3";
 
-  const PIECE_CHARS: Record<string, string> = {
-    k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
-    K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
-  };
+  // Lucide chess piece components
+  import ChessKing from "@lucide/svelte/icons/chess-king";
+  import ChessQueen from "@lucide/svelte/icons/chess-queen";
+  import ChessRook from "@lucide/svelte/icons/chess-rook";
+  import ChessBishop from "@lucide/svelte/icons/chess-bishop";
+  import ChessKnight from "@lucide/svelte/icons/chess-knight";
+  import ChessPawn from "@lucide/svelte/icons/chess-pawn";
+  import Castle from "@lucide/svelte/icons/castle";
+
+  // Lucide annotation components
+  import ThumbsUp from "@lucide/svelte/icons/thumbs-up";
+  import ThumbsDown from "@lucide/svelte/icons/thumbs-down";
+  import Handshake from "@lucide/svelte/icons/handshake";
+  import Bookmark from "@lucide/svelte/icons/bookmark";
+  import Star from "@lucide/svelte/icons/star";
+  import MessageSquareText from "@lucide/svelte/icons/message-square-text";
+
   interface Props {
     nodeMap: NodeMap;
     eventBus: EventBus;
@@ -31,27 +44,38 @@
 
   const spacingX = 22;
   const spacingY = 15;
-  const nodeWidth = 16;
+  const nodeWidth = 20;
   const nodeHeight = 13;
-  const lucide_message_square_text = `<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>`;
-  const lucide_thumbs_up = `<path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/><path d="M7 10v12"/>`;
-  const lucide_thumbs_down = `<path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/><path d="M17 14V2"/>`;
-  const lucide_handshake = `<path d="M19.414 14.414C21 12.828 22 11.5 22 9.5a5.5 5.5 0 0 0-9.591-3.676.6.6 0 0 1-.818.001A5.5 5.5 0 0 0 2 9.5c0 2.3 1.5 4 3 5.5l5.535 5.362a2 2 0 0 0 2.879.052 2.12 2.12 0 0 0-.004-3 2.124 2.124 0 1 0 3-3 2.124 2.124 0 0 0 3.004 0 2 2 0 0 0 0-2.828l-1.881-1.882a2.41 2.41 0 0 0-3.409 0l-1.71 1.71a2 2 0 0 1-2.828 0 2 2 0 0 1 0-2.828l2.823-2.762"/>`;
-  const lucide_bookmark = `<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>`;
-  const lucide_star = `<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>`;
 
-  const ANNOTATION_DEFINITIONS: Record<string, { symbol: string; color: string; icon?: string }> = {
-    "W+": { symbol: "White +", color: "var(--piece-red)", icon: lucide_thumbs_up },
-    "B+": { symbol: "Black +", color: "var(--piece-black)", icon: lucide_thumbs_down },
-    "=": { symbol: "Equal", color: "green", icon: lucide_handshake },
-    "?": { symbol: "Key", color: "var(--text-warning)", icon: lucide_bookmark },
-    "!": { symbol: "Brilliant", color: "var(--color-yellow)", icon: lucide_star },
-    "1-0": { symbol: "1-0", color: "white", icon: lucide_thumbs_up },
-    "0-1": { symbol: "0-1", color: "black", icon: lucide_thumbs_up },
-    "1/2-1/2": { symbol: "Draw", color: "gray", icon: lucide_handshake },
-  };
+  const ANNOTATION_DEFINITIONS: Record<string, { symbol: string; color: string; component: any }> =
+    {
+      "W+": { symbol: "White +", color: "var(--piece-red)", component: ThumbsUp },
+      "B+": { symbol: "Black +", color: "var(--piece-black)", component: ThumbsDown },
+      "=": { symbol: "Equal", color: "green", component: Handshake },
+      "?": { symbol: "Key", color: "var(--text-warning)", component: Bookmark },
+      "!": { symbol: "Brilliant", color: "var(--color-yellow)", component: Star },
+      "1-0": { symbol: "1-0", color: "white", component: ThumbsUp },
+      "0-1": { symbol: "0-1", color: "black", component: ThumbsUp },
+      "1/2-1/2": { symbol: "Draw", color: "gray", component: Handshake },
+    };
 
   const ALL_ANNOTATION_KEYS = Object.keys(ANNOTATION_DEFINITIONS);
+
+  // Chess piece component lookup
+  const PIECE_COMPONENTS: Record<string, any> = {
+    k: ChessKing,
+    q: ChessQueen,
+    r: ChessRook,
+    b: ChessBishop,
+    n: ChessKnight,
+    p: ChessPawn,
+  };
+
+  function getPieceComponent(node: ChessNode) {
+    if (!node.move) return null;
+    if (node.move.isKingsideCastle() || node.move.isQueensideCastle()) return Castle;
+    return PIECE_COMPONENTS[node.move.piece] ?? null;
+  }
 
   // ---- 工具函数 ----
   function getPrimaryAnnotation(node: ChessNode): string | undefined {
@@ -126,7 +150,10 @@
     updateTreeLayout();
     if (!svgEl || !zoomBehavior) return;
     const padding = 40;
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
     for (const n of renderedNodes) {
       minX = Math.min(minX, n.x!);
       maxX = Math.max(maxX, n.x!);
@@ -153,21 +180,27 @@
     const nodeScreenX = node.x * spacingX * scale + translateX;
     const nodeScreenY = node.y * spacingY * scale + translateY;
 
-    let dx = 0, dy = 0;
+    let dx = 0,
+      dy = 0;
     if (nodeScreenX < padding) dx = padding - nodeScreenX;
     else if (nodeScreenX > clientWidth - padding) dx = clientWidth - padding - nodeScreenX;
     if (nodeScreenY < padding) dy = padding - nodeScreenY;
     else if (nodeScreenY > clientHeight - padding) dy = clientHeight - padding - nodeScreenY;
 
-    if (dx || dy) { translateX += dx; translateY += dy; }
+    if (dx || dy) {
+      translateX += dx;
+      translateY += dy;
+    }
     const t = d3.zoomIdentity.translate(translateX, translateY).scale(scale);
     d3.select(svgEl).transition().duration(300).call(zoomBehavior.transform, t);
   }
 
   function zoomAtCenter(factor: number) {
     if (!svgEl) return;
-    const w = svgEl.clientWidth, h = svgEl.clientHeight;
-    const cx = w / 2, cy = h / 2;
+    const w = svgEl.clientWidth,
+      h = svgEl.clientHeight;
+    const cx = w / 2,
+      cy = h / 2;
     let { x: translateX, y: translateY, k: scale } = zoomTransform;
     const prev = scale;
     const next = prev * factor;
@@ -181,22 +214,25 @@
   }
 
   const ZOOM_STEP = 1.15;
-  function zoomIn() { zoomAtCenter(ZOOM_STEP); }
-  function zoomOut() { zoomAtCenter(1 / ZOOM_STEP); }
+  function zoomIn() {
+    zoomAtCenter(ZOOM_STEP);
+  }
+  function zoomOut() {
+    zoomAtCenter(1 / ZOOM_STEP);
+  }
 
   let nodeMode = $state(0);
   const MODE_ICONS = ["club", "case-sensitive", "align-justify"];
-  function cycleNodeMode() { nodeMode = (nodeMode + 1) % 3; }
+  function cycleNodeMode() {
+    nodeMode = (nodeMode + 1) % 3;
+  }
 
   function nodeLabel(node: ChessNode): string {
     if (!node.move) return "S";
     const p = node.move.piece;
     if (nodeMode === 2) return node.move.san ?? "S";
-    if (nodeMode === 0) {
-      const char = node.move.color === 'w' ? p.toUpperCase() : p;
-      return PIECE_CHARS[char] ?? "★";
-    }
-    return node.move.color === 'w' ? p.toUpperCase() : p;
+    if (nodeMode === 0) return ""; // icon mode handled in template
+    return node.move.color === "w" ? p.toUpperCase() : p;
   }
   function nodeFontSize(): string {
     if (nodeMode === 2) return "7px";
@@ -210,14 +246,16 @@
     { title: "重置", icon: "rotate-ccw", event: resetView },
   ];
   let modeIcon = $derived(MODE_ICONS[nodeMode]);
-  function useSetIcon(el: HTMLElement, icon: string) { setIcon(el, icon); }
+  function useSetIcon(el: HTMLElement, icon: string) {
+    setIcon(el, icon);
+  }
 
   onMount(async () => {
     if (!svgEl) return;
     updateTreeLayout();
-    zoomBehavior = d3
-      .zoom<SVGSVGElement, unknown>()
-      .on("zoom", (event) => { zoomTransform = event.transform; });
+    zoomBehavior = d3.zoom<SVGSVGElement, unknown>().on("zoom", (event) => {
+      zoomTransform = event.transform;
+    });
     d3.select(svgEl).call(zoomBehavior);
     await tick();
     await new Promise(requestAnimationFrame);
@@ -258,7 +296,8 @@
               stroke="var(--board-line)"
               stroke-linejoin="round"
               stroke-width={currentPath.includes(node.id) && currentPath.includes(child.id)
-                ? 1.5 : 1}
+                ? 1.5
+                : 1}
               opacity={currentPath.includes(node.id) && currentPath.includes(child.id) ? 1.5 : 0.7}
               filter={currentPath.includes(node.id) && currentPath.includes(child.id)
                 ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
@@ -270,6 +309,7 @@
 
         {#each renderedNodes as node (node.id)}
           {@const primaryAnnotation = getPrimaryAnnotation(node)}
+          {@const hasComments = getRegularComments(node).length > 0}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <g
@@ -286,45 +326,69 @@
           >
             {#if primaryAnnotation}
               {@const def = ANNOTATION_DEFINITIONS[primaryAnnotation]}
-              <g
-                transform="translate(-7.2 -7.2) scale(0.6)"
-                fill={def.color}
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                {@html def.icon}
-              </g>
+              {@const AnnotationIcon = def.component}
+              <rect
+                x={-nodeWidth / 2}
+                y={-nodeHeight / 2}
+                width={nodeWidth}
+                height={nodeHeight}
+                rx="2.5"
+                ry="2.5"
+                fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
+                stroke="var(--board-line)"
+              />
+              <foreignObject x={-8} y={-6.5} width={16} height={13}>
+                <div
+                  xmlns="http://www.w3.org/1999/xhtml"
+                  style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+                  color:{def.color};pointer-events:none;"
+                >
+                  <AnnotationIcon size={12} strokeWidth={1.5} />
+                </div>
+              </foreignObject>
             {:else}
               <rect
                 x={-nodeWidth / 2}
                 y={-nodeHeight / 2}
                 width={nodeWidth}
                 height={nodeHeight}
-                rx="2.5" ry="2.5"
+                rx="2.5"
+                ry="2.5"
                 fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
                 stroke="var(--board-line)"
               />
-              <text
-                x="0"
-                dominant-baseline="central"
-                text-anchor="middle"
-                fill={node.side === "white" ? "#333" : "#fff"}
-                font-size={nodeFontSize()}>{nodeLabel(node)}</text>
+              {#if nodeMode === 0 && getPieceComponent(node)}
+                {@const PieceIcon = getPieceComponent(node)!}
+                <foreignObject x={-8} y={-6.5} width={16} height={13}>
+                  <div
+                    xmlns="http://www.w3.org/1999/xhtml"
+                    style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+                    color:{node.side === 'white' ? '#333' : '#fff'};pointer-events:none;"
+                  >
+                    <PieceIcon size={12} strokeWidth={1.5} />
+                  </div>
+                </foreignObject>
+              {:else}
+                <text
+                  x="0"
+                  dominant-baseline="central"
+                  text-anchor="middle"
+                  fill={node.side === "white" ? "#333" : "#fff"}
+                  font-size={nodeFontSize()}>{nodeLabel(node)}</text
+                >
+              {/if}
             {/if}
 
-            {#if getRegularComments(node).length > 0}
-              <g
-                transform="translate({0.35 * nodeWidth} {-0.7 * nodeHeight}) scale(0.35)"
-                fill="royalblue"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                {@html lucide_message_square_text}
-              </g>
+            {#if hasComments}
+              <foreignObject x={0.35 * nodeWidth} y={-0.7 * nodeHeight - 8} width={10} height={10}>
+                <div
+                  xmlns="http://www.w3.org/1999/xhtml"
+                  style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+                  color:royalblue;pointer-events:none;"
+                >
+                  <MessageSquareText size={8} strokeWidth={1.5} fill="royalblue" />
+                </div>
+              </foreignObject>
             {/if}
           </g>
         {/each}
@@ -333,7 +397,8 @@
 
     <div class="toolbar">
       {#each zoomBTN as { title, icon, event }}
-        <button class="toolbar-btn" aria-label={title} use:useSetIcon={icon} onclick={event}></button>
+        <button class="toolbar-btn" aria-label={title} use:useSetIcon={icon} onclick={event}
+        ></button>
       {/each}
       <button
         class="toolbar-btn"

@@ -39,6 +39,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@lucide/svelte": "^1.17.0",
     "chess.js": "^1.4.0",
     "chessground": "^9.2.1"
   }
