@@ -72,6 +72,7 @@ const messages: Record<string, Record<string, string>> = {
 		"confirm.deleteMsg": "Are you sure you want to delete the entire game? This cannot be undone.",
 		"confirm.yes": "Yes",
 
+		"tree.placeholder": "Add a comment",
 		"pgn.newFile": "New PGN file",
 		"pgn.error": "Failed to create PGN file:",
 		"menu.markdown": "Open in Markdown view",
@@ -151,6 +152,7 @@ const messages: Record<string, Record<string, string>> = {
 		"confirm.deleteMsg": "确定要删除整盘棋局吗？此操作不可撤销。",
 		"confirm.yes": "确定",
 
+		"tree.placeholder": "添加注释",
 		"pgn.newFile": "新建 PGN 文件",
 		"pgn.error": "创建 PGN 文件失败:",
 		"menu.markdown": "用 Markdown 视图打开",
