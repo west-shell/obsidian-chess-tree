@@ -2,7 +2,7 @@
   import { onDestroy, onMount, tick } from "svelte";
   import type { EventBus } from "../../core/event-bus";
   import { type ChessNode, type NodeMap } from "../../types";
-  import { t } from "../../i18n";
+  import { onLangChange, t } from "../../i18n";
   import { calculateTreeLayout } from "./layout";
   import { setIcon } from "obsidian";
   import * as d3 from "d3";
@@ -227,6 +227,16 @@
     nodeMode = (nodeMode + 1) % 3;
   }
 
+  let _lv = $state(0);
+  onLangChange(() => _lv++);
+
+  let zoomBTN = $derived([
+    { title: t("tree.zoomIn", _lv), icon: "plus", event: zoomIn },
+    { title: t("tree.zoomOut", _lv), icon: "minus", event: zoomOut },
+    { title: t("tree.resetView", _lv), icon: "rotate-ccw", event: resetView },
+  ]);
+  let nodeModeTitle = $derived(t("tree.nodeMode", _lv));
+
   function nodeLabel(node: ChessNode): string {
     if (!node.move) return "S";
     const p = node.move.piece;
@@ -239,12 +249,6 @@
     if (nodeMode === 0) return "12px";
     return "9px";
   }
-
-  const zoomBTN = [
-    { title: "放大", icon: "plus", event: zoomIn },
-    { title: "缩小", icon: "minus", event: zoomOut },
-    { title: "重置", icon: "rotate-ccw", event: resetView },
-  ];
   let modeIcon = $derived(MODE_ICONS[nodeMode]);
   function useSetIcon(el: HTMLElement, icon: string) {
     setIcon(el, icon);
@@ -397,12 +401,13 @@
 
     <div class="toolbar">
       {#each zoomBTN as { title, icon, event }}
-        <button class="toolbar-btn" aria-label={title} use:useSetIcon={icon} onclick={event}
+        <button class="toolbar-btn" title={title} aria-label={title} use:useSetIcon={icon} onclick={event}
         ></button>
       {/each}
       <button
         class="toolbar-btn"
-        aria-label="Node"
+        title={nodeModeTitle}
+        aria-label={nodeModeTitle}
         use:useSetIcon={modeIcon}
         onclick={cycleNodeMode}
       ></button>

@@ -73,6 +73,10 @@ const messages: Record<string, Record<string, string>> = {
 		"confirm.yes": "Yes",
 
 		"tree.placeholder": "Add a comment",
+		"tree.zoomIn": "Zoom in",
+		"tree.zoomOut": "Zoom out",
+		"tree.resetView": "Reset view",
+		"tree.nodeMode": "Node mode",
 		"pgn.newFile": "New PGN file",
 		"pgn.error": "Failed to create PGN file:",
 		"menu.markdown": "Open in Markdown view",
@@ -153,6 +157,10 @@ const messages: Record<string, Record<string, string>> = {
 		"confirm.yes": "确定",
 
 		"tree.placeholder": "添加注释",
+		"tree.zoomIn": "放大",
+		"tree.zoomOut": "缩小",
+		"tree.resetView": "重置视图",
+		"tree.nodeMode": "节点模式",
 		"pgn.newFile": "新建 PGN 文件",
 		"pgn.error": "创建 PGN 文件失败:",
 		"menu.markdown": "用 Markdown 视图打开",
