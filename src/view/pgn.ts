@@ -64,7 +64,7 @@ export class PGNView extends TextFileView {
     }
 
     getIcon() {
-        return "chess-icon";
+        return "chess-knight";
     }
 
     clear(): void {

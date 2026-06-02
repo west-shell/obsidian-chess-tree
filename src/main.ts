@@ -23,20 +23,7 @@ export default class ChessPlugin extends Plugin {
 		this.addSettingTab(new ChessSettingTab(this.app, this));
 
 		applyThemes(this.settings);
-		addIcon("chess-icon", `
-<svg viewBox="0 0 80 80">
-  <circle cx="40" cy="40" r="38"
-    fill="var(--background-primary-alt)"
-    stroke="var(--text-normal)"
-    stroke-width="4" />
-  <text x="50%" y="58%"
-    dominant-baseline="middle"
-    text-anchor="middle"
-    font-size="60"
-    fill="var(--text-normal)"
-    font-weight="bold">&#9822;</text>
-</svg>
-`);
+
 		this.registerMarkdownCodeBlockProcessor('chess', (source, el, ctx) => {
 			const renderChild = new ChessRenderChild(el, ctx, source, this);
 			ctx.addChild(renderChild);
@@ -54,7 +41,7 @@ export default class ChessPlugin extends Plugin {
 
 		this.registerExtensions(["pgn"], PGNView.VIEW_TYPE);
 
-		this.addRibbonIcon("chess-icon", t("pgn.newFile"), async () => {
+		this.addRibbonIcon("chess-knight", t("pgn.newFile"), async () => {
 			let baseFileName = "Untitled";
 			let fileExtension = ".pgn";
 			let fileName = baseFileName + fileExtension;
@@ -103,7 +90,7 @@ export default class ChessPlugin extends Plugin {
 				} if (!(currentView instanceof PGNView && currentView.file === file)) {
 					menu.addItem((item) =>
 						item.setTitle(t("menu.pgn"))
-							.setIcon("chess-icon")
+							.setIcon("chess-knight")
 							.onClick(() => this.changeView(file, PGNView.VIEW_TYPE)));
 				}
 			}),
