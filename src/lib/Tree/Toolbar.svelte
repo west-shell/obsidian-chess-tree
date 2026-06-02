@@ -1,33 +1,36 @@
 <script lang="ts">
   import { setIcon, Menu } from "obsidian";
   import type { EventBus } from "../../core/event-bus";
-  import { t } from "../../i18n";
+  import { onLangChange, t } from "../../i18n";
 
   interface Props {
     eventBus: EventBus;
   }
   let { eventBus }: Props = $props();
 
-  const buildButtons = () => [
-    { title: t("toolbar.delete"), icon: "circle-x", event: "remove" },
-    { title: t("toolbar.promote"), icon: "arrow-up-wide-narrow", event: "promote" },
-    { title: t("toolbar.start"), icon: "arrow-left-to-line", event: "toStart" },
-    { title: t("toolbar.back"), icon: "arrow-left", event: "back" },
-    { title: t("toolbar.forward"), icon: "arrow-right", event: "next" },
-    { title: t("toolbar.end"), icon: "arrow-right-to-line", event: "toEnd" },
-    { title: t("toolbar.flip"), icon: "flip-vertical", event: "rotate" },
-    { title: t("toolbar.annotate"), icon: "tag", event: "toggle-annotation-menu" },
-  ];
-  let buttons = $derived(buildButtons());
+  let _lv = $state(0);
+  onLangChange(() => _lv++);
 
-  const buildAnnotations = () => [
-    { title: t("annotation.w+"), icon: "thumbs-up", symbol: "W+", event: "annotation" },
-    { title: t("annotation.b+"), icon: "thumbs-down", symbol: "B+", event: "annotation" },
-    { title: t("annotation.eq"), icon: "handshake", symbol: "=", event: "annotation" },
-    { title: t("annotation.key"), icon: "bookmark", symbol: "?", event: "annotation" },
-    { title: t("annotation.br"), icon: "star", symbol: "!", event: "annotation" },
+  const buildButtons = (v: number) => [
+    { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
+    { title: t("toolbar.promote", v), icon: "arrow-up-wide-narrow", event: "promote" },
+    { title: t("toolbar.start", v), icon: "arrow-left-to-line", event: "toStart" },
+    { title: t("toolbar.back", v), icon: "arrow-left", event: "back" },
+    { title: t("toolbar.forward", v), icon: "arrow-right", event: "next" },
+    { title: t("toolbar.end", v), icon: "arrow-right-to-line", event: "toEnd" },
+    { title: t("toolbar.flip", v), icon: "flip-vertical", event: "rotate" },
+    { title: t("toolbar.annotate", v), icon: "tag", event: "toggle-annotation-menu" },
   ];
-  let annotations = $derived(buildAnnotations());
+  let buttons = $derived(buildButtons(_lv));
+
+  const buildAnnotations = (v: number) => [
+    { title: t("annotation.w+", v), icon: "thumbs-up", symbol: "W+", event: "annotation" },
+    { title: t("annotation.b+", v), icon: "thumbs-down", symbol: "B+", event: "annotation" },
+    { title: t("annotation.eq", v), icon: "handshake", symbol: "=", event: "annotation" },
+    { title: t("annotation.key", v), icon: "bookmark", symbol: "?", event: "annotation" },
+    { title: t("annotation.br", v), icon: "star", symbol: "!", event: "annotation" },
+  ];
+  let annotations = $derived(buildAnnotations(_lv));
 
   function emitEvent(name: string, payload: any = null) {
     eventBus.emit("btn-click", { name, payload });

@@ -160,6 +160,8 @@ const messages: Record<string, Record<string, string>> = {
 
 let lang = "en";
 let _sysLang: string | null = null;
+let _ver = 0;
+const listeners = new Set<() => void>();
 
 function detect(): string {
 	const raw = navigator.language;
@@ -168,9 +170,13 @@ function detect(): string {
 	return "en";
 }
 
-export function t(key: string): string {
+export function t(key: string, _ver?: number): string {
+	void _ver;
 	return messages[lang]?.[key] ?? messages.en?.[key] ?? key;
 }
+
+export function i18nVer() { return _ver; }
+export function onLangChange(fn: () => void) { listeners.add(fn); }
 
 export function initI18n(locale: string) {
 	if (locale === "auto") {
@@ -179,6 +185,8 @@ export function initI18n(locale: string) {
 	} else {
 		lang = resolve(locale);
 	}
+	_ver++;
+	listeners.forEach(fn => fn());
 }
 
 function resolve(raw: string): string {

@@ -2,7 +2,7 @@
   import { setIcon } from "obsidian";
   import type { EventBus } from "../../core/event-bus";
   import type { ISettings, IMove } from "../../types";
-  import { t } from "../../i18n";
+  import { onLangChange, t } from "../../i18n";
 
   interface Props {
     settings: ISettings;
@@ -15,19 +15,21 @@
   let { settings, eventBus, modified, PGN, isprotected }: Props = $props();
 
   let buttonClass: string = $state("");
+  let _lv = $state(0);
+  onLangChange(() => _lv++);
 
   $effect(() => {
     buttonClass = modified ? "unsaved" : PGN.length > 0 ? "saved" : "empty";
   });
 
-  const buttons = [
-    { title: t("toolbar.reset"), icon: "refresh-cw", event: "reset" },
-    { title: t("toolbar.start"), icon: "arrow-left-to-line", event: "toStart" },
-    { title: t("toolbar.back"), icon: "arrow-left", event: "undo" },
-    { title: t("toolbar.forward"), icon: "arrow-right", event: "redo" },
-    { title: t("toolbar.end"), icon: "arrow-right-to-line", event: "toEnd" },
-    { title: t("toolbar.flip"), icon: "flip-vertical", event: "rotate" },
-  ];
+  let buttons = $derived([
+    { title: t("toolbar.reset", _lv), icon: "refresh-cw", event: "reset" },
+    { title: t("toolbar.start", _lv), icon: "arrow-left-to-line", event: "toStart" },
+    { title: t("toolbar.back", _lv), icon: "arrow-left", event: "undo" },
+    { title: t("toolbar.forward", _lv), icon: "arrow-right", event: "redo" },
+    { title: t("toolbar.end", _lv), icon: "arrow-right-to-line", event: "toEnd" },
+    { title: t("toolbar.flip", _lv), icon: "flip-vertical", event: "rotate" },
+  ]);
 
   let saveBtnEl: HTMLButtonElement;
 
@@ -62,7 +64,7 @@
   <button
     class="toolbar-btn {buttonClass}"
     class:disabled={isprotected}
-    aria-label={t("toolbar.save")}
+    aria-label={t("toolbar.save", _lv)}
     bind:this={saveBtnEl}
     use:useSetSaveIcon
     onclick={() => emitEvent("save")}
