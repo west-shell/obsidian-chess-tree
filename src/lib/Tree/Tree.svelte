@@ -222,9 +222,9 @@
   }
 
   let nodeMode = $state(0);
-  const MODE_ICONS = ["club", "case-sensitive", "align-justify"];
+  const MODE_ICONS = ["club", "align-justify"];
   function cycleNodeMode() {
-    nodeMode = (nodeMode + 1) % 3;
+    nodeMode = (nodeMode + 1) % 2;
   }
 
   let _lv = $state(0);
@@ -239,15 +239,12 @@
 
   function nodeLabel(node: ChessNode): string {
     if (!node.move) return "S";
-    const p = node.move.piece;
-    if (nodeMode === 2) return node.move.san ?? "S";
-    if (nodeMode === 0) return ""; // icon mode handled in template
-    return node.move.color === "w" ? p.toUpperCase() : p;
+    if (nodeMode === 1) return node.move.san ?? "S";
+    return ""; // icon mode handled in template
   }
   function nodeFontSize(): string {
-    if (nodeMode === 2) return "7px";
-    if (nodeMode === 0) return "12px";
-    return "9px";
+    if (nodeMode === 1) return "7px";
+    return "12px";
   }
   let modeIcon = $derived(MODE_ICONS[nodeMode]);
   function useSetIcon(el: HTMLElement, icon: string) {
