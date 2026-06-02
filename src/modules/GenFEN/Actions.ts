@@ -62,7 +62,7 @@ async function onSaveBTNClick(host: IGenFENHost) {
         if (blockLines.length < 2) return fileContent;
 
         // Replace code block type from chessboard to chess and insert FEN
-        blockLines[0] = blockLines[0].replace(/^```chessboard\b.*$/, "```chess");
+        blockLines[0] = blockLines[0].replace(/^```fen\b.*$/, "```chess");
         blockLines = [blockLines[0], `[FEN "${fen}"]`, "```"];
 
         const newContent = [
