@@ -34,13 +34,30 @@
 </div>
 
 <style>
-  .fen-toolbar.right { display: flex; flex-direction: column; gap: 0.5em; }
-  .fen-toolbar.bottom { display: flex; flex-direction: row; gap: 0.5em; }
+  .fen-toolbar.right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+  .fen-toolbar.bottom {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+  }
   .fen-btn {
-    padding: 0.4em 0.8em; border: none; border-radius: 4px; cursor: pointer;
+    padding: 0.4em 0.8em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     background: var(--background-secondary);
     color: var(--text-normal);
   }
-  .turn-white { background: #f0d9b5; color: #5a4a3a; }
-  .turn-black { background: #3a3a3a; color: #d0d0d0; }
+  .turn-white {
+    background: #f0d9b5;
+    color: #5a4a3a;
+  }
+  .turn-black {
+    background: #3a3a3a;
+    color: #d0d0d0;
+  }
 </style>

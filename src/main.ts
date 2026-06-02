@@ -2,7 +2,7 @@ import "chessground/assets/chessground.base.css";
 import "chessground/assets/chessground.brown.css";
 import "chessground/assets/chessground.cburnett.css";
 
-import { MarkdownView, Plugin, TFile, addIcon } from "obsidian";
+import { MarkdownView, Plugin, TFile } from "obsidian";
 import type { ISettings } from "./types";
 import { applyThemes } from "./themes";
 import { ChessRenderChild } from "./renderChild/MoveListRenderChild";
