@@ -27,8 +27,8 @@
 
   const spacingX = 22;
   const spacingY = 15;
-  const nodeWidth = 13;
-  const nodeHeight = 11;
+  const nodeWidth = 16;
+  const nodeHeight = 13;
   const lucide_message_square_text = `<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>`;
   // const lucide_smile = `<path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/>`;
   const lucide_thumbs_up = `<path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/><path d="M7 10v12"/>`;
@@ -63,7 +63,11 @@
   const SHAPES_PREFIX = "__SHAPES__";
 
   function getRegularComments(node: ChessNode): string[] {
-    return node.comments?.filter((c) => !ALL_ANNOTATION_KEYS.includes(c) && !c.startsWith(SHAPES_PREFIX)) ?? [];
+    return (
+      node.comments?.filter(
+        (c) => !ALL_ANNOTATION_KEYS.includes(c) && !c.startsWith(SHAPES_PREFIX),
+      ) ?? []
+    );
   }
 
   // ---- 自动保存逻辑 ----
@@ -200,11 +204,32 @@
     zoomAtCenter(1 / ZOOM_STEP);
   }
 
+  let nodeMode = $state(0);
+  const MODE_ICONS = ["club", "case-sensitive", "align-justify"];
+  function cycleNodeMode() {
+    nodeMode = (nodeMode + 1) % 3;
+  }
+  function nodeLabel(node: ChessNode): string {
+    const p = node.data?.piece;
+    if (nodeMode === 2) return node.data?.SAN ?? "S";
+    if (nodeMode === 0) {
+      const k = p ? p.toUpperCase() as keyof typeof PIECE_CHARS : "";
+      return k && PIECE_CHARS[k] ? PIECE_CHARS[k] : "★";
+    }
+    return p && PIECE_LABELS[p] ? PIECE_LABELS[p] : "S";
+  }
+  function nodeFontSize(): string {
+    if (nodeMode === 2) return "7px";
+    if (nodeMode === 0) return "12px";
+    return "9px";
+  }
+
   const zoomBTN = [
     { title: "放大", icon: "plus", event: zoomIn },
     { title: "缩小", icon: "minus", event: zoomOut },
     { title: "重置", icon: "rotate-ccw", event: resetView },
   ];
+  let modeIcon = $derived(MODE_ICONS[nodeMode]);
   function useSetIcon(el: HTMLElement, icon: string) {
     setIcon(el, icon);
   }
@@ -315,16 +340,15 @@
                 height={nodeHeight}
                 rx="2.5"
                 ry="2.5"
-                fill={node.side === "white"
-                  ? "#fff"
-                  : node.side === "black"
-                    ? "#333"
-                    : "green"}
+                fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
                 stroke="var(--board-line)"
               />
-              <text dy="3.5" text-anchor="middle" fill={node.side === "white" ? "#333" : "#fff"} font-size="9px">
-                {node.data?.piece ? PIECE_LABELS[node.data.piece] : "S"}
-              </text>
+              <text x="0"
+                dominant-baseline="central"
+                text-anchor="middle"
+                fill={node.side === "white" ? "#333" : "#fff"}
+                font-size={nodeFontSize()}>{nodeLabel(node)}</text
+              >
             {/if}
 
             <!-- 评论标记 -->
@@ -350,6 +374,12 @@
         <button class="toolbar-btn" aria-label={title} use:useSetIcon={icon} onclick={event}
         ></button>
       {/each}
+      <button
+        class="toolbar-btn"
+        aria-label="Node"
+        use:useSetIcon={modeIcon}
+        onclick={cycleNodeMode}
+      ></button>
     </div>
   </div>
 
