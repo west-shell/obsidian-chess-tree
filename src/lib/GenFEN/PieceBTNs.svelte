@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { PIECE_CHARS, type IBoard } from "../../types";
+  import { setIcon } from "obsidian";
+  import type { IBoard, ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
-  import type { ISettings } from "../../types";
 
   interface Props {
     settings: ISettings;
@@ -10,120 +10,114 @@
     position?: string;
     selectedPiece: string;
   }
-
   let { settings, board, eventBus, position = "", selectedPiece }: Props = $props();
 
-  const isWhite = (piece: string) => piece === piece.toUpperCase();
+  const isWhite = (p: string) => p === p.toUpperCase();
 
   const MAX_COUNT: Record<string, number> = {
-    K: 1, Q: 1, R: 2, B: 2, N: 2, P: 8,
-    k: 1, q: 1, r: 2, b: 2, n: 2, p: 8,
+    K: 1,
+    Q: 1,
+    R: 2,
+    B: 2,
+    N: 2,
+    P: 8,
+    k: 1,
+    q: 1,
+    r: 2,
+    b: 2,
+    n: 2,
+    p: 8,
   };
 
+  const PIECES: { key: string; color: "white" | "black"; icon: string }[] = [
+    { key: "K", color: "white", icon: "chess-king" },
+    { key: "Q", color: "white", icon: "chess-queen" },
+    { key: "R", color: "white", icon: "chess-rook" },
+    { key: "B", color: "white", icon: "chess-bishop" },
+    { key: "N", color: "white", icon: "chess-knight" },
+    { key: "P", color: "white", icon: "chess-pawn" },
+    { key: "k", color: "black", icon: "chess-king" },
+    { key: "q", color: "black", icon: "chess-queen" },
+    { key: "r", color: "black", icon: "chess-rook" },
+    { key: "b", color: "black", icon: "chess-bishop" },
+    { key: "n", color: "black", icon: "chess-knight" },
+    { key: "p", color: "black", icon: "chess-pawn" },
+  ];
+
   let pieceCount = $derived(
-    board.flat().reduce(
-      (acc, piece) => {
-        if (piece) acc[piece] = (acc[piece] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    ),
+    board.flat().reduce((acc: Record<string, number>, p) => {
+      if (p) acc[p] = (acc[p] || 0) + 1;
+      return acc;
+    }, {}),
   );
 
   let count = $derived(
-    Object.fromEntries(
-      Object.keys(MAX_COUNT).map((piece) => [piece, MAX_COUNT[piece] - (pieceCount[piece] || 0)]),
-    ),
+    Object.fromEntries(Object.keys(MAX_COUNT).map((p) => [p, MAX_COUNT[p] - (pieceCount[p] || 0)])),
   );
+
+  function useIcon(el: HTMLElement, icon: string) {
+    setIcon(el, icon);
+  }
 </script>
 
-<div
-  class={`piece-btn-container ${position}`}
-  style="--height: {8 * settings.cellSize}px;
-    --width: {8 * settings.cellSize}px;
-    --font-size: {settings.cellSize * 0.3}px;"
->
-  {#each Object.entries(PIECE_CHARS) as [piece, name]}
+<div class="pieces {position}" style="--h:{8 * settings.cellSize}px;--w:{8 * settings.cellSize}px;">
+  {#each PIECES as { key, color, icon }}
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-      class={`piece-btn ${position} ${isWhite(piece) ? "white-piece" : "black-piece"}`}
-      class:empty={count[piece] === 0}
-      class:active={selectedPiece === piece}
-      onclick={() => eventBus.emit("clickPieceBTN", piece)}
-    >
-      {name}
-    </button>
+      class="btn {position} {color}"
+      class:empty={count[key] === 0}
+      class:active={selectedPiece === key}
+      use:useIcon={icon}
+      onclick={() => eventBus.emit("clickPieceBTN", key)}
+    ></button>
   {/each}
 </div>
 
 <style>
-  .piece-btn-container {
-    --piece-white: var(--xq-piece-red, var(--color-red));
-    --piece-black: var(--xq-piece-black, var(--color-blue));
-  }
-  .piece-btn-container.right {
-    display: grid;
-    grid-template-columns: 1fr;
-    flex-direction: column;
-    height: var(--height);
-    width: fit-content;
-    align-items: stretch;
+  .pieces.right {
     display: flex;
+    flex-direction: column;
+    height: var(--h);
     justify-content: space-between;
   }
-
-  .piece-btn-container.bottom {
+  .pieces.bottom {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    width: var(--width);
-    height: auto;
-    justify-content: center;
+    width: var(--w);
   }
-
-  .piece-btn.right {
-    flex: 1;
-    width: 100%;
+  .btn {
+    border: 2px solid transparent;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--font-size);
-    border: 1.5px solid rgba(0, 0, 0, 0.35);
+    padding: 4px;
+  }
+  .btn.right {
+    flex: 1;
     margin: 1px 0;
-    transition: box-shadow 0.15s, border-color 0.15s;
   }
-
-  .piece-btn.bottom {
-    padding: 0;
-    width: calc(var(--width) / 6);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: var(--font-size);
-    border: 1.5px solid rgba(0, 0, 0, 0.35);
-    transition: box-shadow 0.15s, border-color 0.15s;
+  .btn.bottom {
+    margin: 1px;
   }
-
-  .white-piece {
-    background-color: var(--piece-white);
-    color: white;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  .btn.white {
+    background: #f0d9b5;
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #3a3a3a;
   }
-
-  .black-piece {
-    background-color: var(--piece-black);
-    color: white;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  .btn.black {
+    background: #3a3a3a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e8e8e8;
   }
-
-  .active {
+  .btn.active {
     border-color: #ffd700;
     box-shadow: 0 0 0 2px #ffd700;
-    filter: brightness(1.5) saturate(1.4) drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
   }
-
-  .empty {
+  .btn.empty {
     pointer-events: none;
-    opacity: 0.35;
+    opacity: 0.2;
   }
 </style>

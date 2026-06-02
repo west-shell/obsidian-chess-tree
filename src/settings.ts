@@ -2,8 +2,10 @@ import ChessPlugin from "./main";
 import type { ISettings } from "./types";
 import { type App, PluginSettingTab, Setting } from "obsidian";
 import { THEME_OPTIONS } from "./themes";
+import { t, initI18n } from "./i18n";
 
 export const DEFAULT_SETTINGS: ISettings = {
+	lang: "auto",
 	position: "right",
 	theme: "wood",
 	cellSize: 50,
@@ -68,12 +70,23 @@ export class ChessSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		// ==================== Board appearance ====================
-		containerEl.createEl("h2", { text: "Board" });
+		new Setting(containerEl)
+			.setName("Language / 语言")
+			.addDropdown((d) => d
+				.addOptions({ auto: "Auto / 跟随软件", en: "English", "zh-cn": "中文" })
+				.setValue(settings.lang)
+				.onChange((v) => {
+					settings.lang = v as ISettings["lang"];
+					this.plugin.saveSettings();
+					initI18n(v);
+					this.display();
+				}));
+
+		containerEl.createEl("h2", { text: t("board.title") });
 
 		new Setting(containerEl)
-			.setName("Theme")
-			.setDesc("Board color and texture")
+			.setName(t("board.theme"))
+			.setDesc(t("board.theme.desc"))
 			.addDropdown((dropdown) => {
 				dropdown.addOptions(THEME_OPTIONS);
 				dropdown.setValue(settings.theme).onChange((theme) => {
@@ -84,25 +97,17 @@ export class ChessSettingTab extends PluginSettingTab {
 			});
 
 		addSliderWithValue(
-			containerEl,
-			"Cell size",
-			"Adjust board and piece display size",
-			settings.cellSize,
-			{ min: 15, max: 100, step: 1 },
-			"px",
-			(v) => {
-				settings.cellSize = v;
-				this.plugin.saveSettings();
-				this.plugin.refresh();
-			},
+			containerEl, t("board.cellSize"), t("board.cellSize.desc"),
+			settings.cellSize, { min: 15, max: 100, step: 1 }, "px",
+			(v) => { settings.cellSize = v; this.plugin.saveSettings(); this.plugin.refresh(); },
 		);
 
 		new Setting(containerEl)
-			.setName("Layout")
-			.setDesc("Toolbar position relative to board")
+			.setName(t("board.layout"))
+			.setDesc(t("board.layout.desc"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOptions({ right: "Side", bottom: "Bottom" })
+					.addOptions({ right: t("board.layout.side"), bottom: t("board.layout.bottom") })
 					.setValue(settings.position)
 					.onChange((position) => {
 						settings.position = position as "bottom" | "right";
@@ -112,8 +117,8 @@ export class ChessSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Show coordinates")
-			.setDesc("Show file letters and rank numbers on board edges")
+			.setName(t("board.coordinates"))
+			.setDesc(t("board.coordinates.desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(settings.showCoordinateLabels).onChange((value) => {
 					settings.showCoordinateLabels = value;
@@ -121,46 +126,38 @@ export class ChessSettingTab extends PluginSettingTab {
 				}),
 			);
 
-		// ==================== Game hints ====================
-		containerEl.createEl("h2", { text: "Game Hints" });
+		containerEl.createEl("h2", { text: t("game.title") });
 
 		new Setting(containerEl)
-			.setName("Show last move")
-			.setDesc("Highlight the origin and destination of the previous move")
+			.setName(t("game.lastMove")).setDesc(t("game.lastMove.desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(settings.showLastMove).onChange((value) => {
 					settings.showLastMove = value;
-					this.plugin.saveSettings();
-					this.plugin.refresh();
+					this.plugin.saveSettings(); this.plugin.refresh();
 				}),
 			);
 
 		new Setting(containerEl)
-			.setName("Show legal moves")
-			.setDesc("Highlight legal destination squares for the selected piece")
+			.setName(t("game.legalMoves")).setDesc(t("game.legalMoves.desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(settings.showNextMove).onChange((value) => {
 					settings.showNextMove = value;
-					this.plugin.saveSettings();
-					this.plugin.refresh();
+					this.plugin.saveSettings(); this.plugin.refresh();
 				}),
 			);
 
 		new Setting(containerEl)
-			.setName("Show turn border")
-			.setDesc("Show a highlighted border indicating whose turn it is")
+			.setName(t("game.turnBorder")).setDesc(t("game.turnBorder.desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(settings.showTurnBorder).onChange((value) => {
 					settings.showTurnBorder = value;
-					this.plugin.saveSettings();
-					this.plugin.refresh();
+					this.plugin.saveSettings(); this.plugin.refresh();
 				}),
 			);
 
 		if (window.speechSynthesis) {
 			new Setting(containerEl)
-				.setName("Speech")
-				.setDesc("Read moves aloud (unavailable on mobile)")
+				.setName(t("game.speech")).setDesc(t("game.speech.desc"))
 				.addToggle((toggle) =>
 					toggle.setValue(settings.enableSpeech).onChange((value) => {
 						settings.enableSpeech = value;
@@ -169,113 +166,71 @@ export class ChessSettingTab extends PluginSettingTab {
 				);
 		}
 
-		// ==================== Movelist ====================
-		containerEl.createEl("h2", { text: "Move List" });
+		containerEl.createEl("h2", { text: t("movelist.title") });
 
 		new Setting(containerEl)
-			.setName("Show move list")
-			.setDesc("Display the full move record and variations beside the board")
+			.setName(t("movelist.show")).setDesc(t("movelist.show.desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(settings.showMovelist).onChange((value) => {
 					settings.showMovelist = value;
-					this.plugin.saveSettings();
-					this.plugin.refresh();
+					this.plugin.saveSettings(); this.plugin.refresh();
 				}),
 			);
 
 		new Setting(containerEl)
-			.setName("Show move text")
-			.setDesc("Display SAN notation for each move alongside move numbers")
+			.setName(t("movelist.text")).setDesc(t("movelist.text.desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(settings.showMovelistText).onChange((value) => {
 					settings.showMovelistText = value;
-					this.plugin.saveSettings();
-					this.plugin.refresh();
+					this.plugin.saveSettings(); this.plugin.refresh();
 					this.display();
 				}),
 			);
 
 		addSliderWithValue(
-			containerEl,
-			"Move text size",
-			"Font size for the move list",
-			settings.fontSize,
-			{ min: 10, max: 25, step: 1 },
-			"px",
-			(v) => {
-				settings.fontSize = v;
-				this.plugin.saveSettings();
-				this.plugin.refresh();
-			},
+			containerEl, t("movelist.fontSize"), t("movelist.fontSize.desc"),
+			settings.fontSize, { min: 10, max: 25, step: 1 }, "px",
+			(v) => { settings.fontSize = v; this.plugin.saveSettings(); this.plugin.refresh(); },
 		);
 
 		new Setting(containerEl)
-			.setName("Auto jump")
-			.setDesc("Where to position the board when opening a game")
+			.setName(t("movelist.autoJump")).setDesc(t("movelist.autoJump.desc"))
 			.addDropdown((dropdown) => {
-				dropdown
-					.addOptions({
-						never: "Never jump",
-						always: "Always jump to end",
-						auto: "Only for default position",
-					})
-					.setValue(settings.autoJump)
+				dropdown.addOptions({
+					never: t("movelist.autoJump.never"),
+					always: t("movelist.autoJump.always"),
+					auto: t("movelist.autoJump.auto"),
+				}).setValue(settings.autoJump)
 					.onChange(async (value) => {
 						settings.autoJump = value as "never" | "always" | "auto";
 						this.plugin.saveSettings();
 					});
 			});
 
-		// ---- margins ----
-		containerEl.createEl("h3", { text: "Board Margins" });
+		containerEl.createEl("h3", { text: t("margin.title") });
 
 		addSliderWithValue(
-			containerEl,
-			"Top margin",
-			"Space above the board",
-			settings.boardMarginTop,
-			{ min: 0, max: 100, step: 1 },
-			"px",
-			(v) => {
-				settings.boardMarginTop = v;
-				this.plugin.saveSettings();
-				this.plugin.refresh();
-			},
+			containerEl, t("margin.top"), t("margin.top.desc"),
+			settings.boardMarginTop, { min: 0, max: 100, step: 1 }, "px",
+			(v) => { settings.boardMarginTop = v; this.plugin.saveSettings(); this.plugin.refresh(); },
 		);
 
 		addSliderWithValue(
-			containerEl,
-			"Bottom margin",
-			"Space below the board",
-			settings.boardMarginBottom,
-			{ min: 0, max: 100, step: 1 },
-			"px",
-			(v) => {
-				settings.boardMarginBottom = v;
-				this.plugin.saveSettings();
-				this.plugin.refresh();
-			},
+			containerEl, t("margin.bottom"), t("margin.bottom.desc"),
+			settings.boardMarginBottom, { min: 0, max: 100, step: 1 }, "px",
+			(v) => { settings.boardMarginBottom = v; this.plugin.saveSettings(); this.plugin.refresh(); },
 		);
 
 		const style = containerEl.createEl("style");
 		style.textContent = `
 			.xq-slider-value {
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				min-width: 42px;
-				height: 24px;
-				margin-right: 8px;
-				font-size: 13px;
-				font-weight: 600;
-				color: var(--text-accent);
-				background: var(--background-modifier-border);
-				border-radius: 4px;
-				padding: 0 6px;
+				display: inline-flex; align-items: center; justify-content: center;
+				min-width: 42px; height: 24px; margin-right: 8px;
+				font-size: 13px; font-weight: 600;
+				color: var(--text-accent); background: var(--background-modifier-border);
+				border-radius: 4px; padding: 0 6px;
 			}
-			.chess-setting-tab .setting-item {
-				border-top: none;
-			}
+			.chess-setting-tab .setting-item { border-top: none; }
 		`;
 		containerEl.parentElement?.classList.add("chess-setting-tab");
 	}

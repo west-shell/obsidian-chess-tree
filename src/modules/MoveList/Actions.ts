@@ -3,6 +3,7 @@ import { registerXQModule } from "../../core/module-system";
 import type { IMove, IXQHost, PieceType } from "../../types";
 import { genFENFromBoard } from "../../utils/parse";
 import { ConfirmModal } from "../../utils/confirmModal";
+import { t } from "../../i18n";
 
 const ActionsModule = {
     init(host: IXQHost) {
@@ -65,21 +66,21 @@ const ActionsModule = {
         eventBus.on('save', async () => {
             let message = "";
             if (host.history.length === 0 && host.PGN.length === 0) {
-                new Notice("History and PGN are empty, nothing to save!");
+                new Notice(t("notice.saveEmpty"));
                 return;
             }
             if (host.history.length === 0 && host.PGN.length > 0)
-                message = "PGN is not empty. Clear it?";
+                message = t("confirm.saveClear");
             if (host.history.length > 0 && host.PGN.length === 0)
-                message = "PGN is empty. Save history as PGN?";
+                message = t("confirm.saveNew");
             if (host.history.length > 0 && host.PGN.length > 0)
-                message = "PGN is not empty. Overwrite?";
+                message = t("confirm.saveOverwrite");
             const modal = new ConfirmModal(
                 host.plugin.app,
-                "Confirm Save",
+                t("confirm.saveTitle"),
                 message,
-                "Save",
-                "Cancel",
+                t("confirm.saveBtn"),
+                t("confirm.cancel"),
             );
 
             modal.open();
@@ -87,7 +88,7 @@ const ActionsModule = {
 
             if (userConfirmed) {
                 await savePGN(host);
-                new Notice("Saved successfully!");
+                new Notice(t("notice.saveSuccess"));
             }
             eventBus.emit('updateUI', 'save');
         })

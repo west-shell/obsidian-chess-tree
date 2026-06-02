@@ -9,6 +9,7 @@ import { ChessRenderChild } from "./renderChild/MoveListRenderChild";
 import { GenFENRenderChild } from './renderChild/GenFENRenderChild';
 import { PGNView } from './view/pgn';
 import { ChessSettingTab, DEFAULT_SETTINGS } from "./settings";
+import { initI18n, t } from "./i18n";
 
 export default class ChessPlugin extends Plugin {
 	settings: ISettings = DEFAULT_SETTINGS;
@@ -16,6 +17,8 @@ export default class ChessPlugin extends Plugin {
 	async onload() {
 
 		await this.loadSettings();
+
+		initI18n(this.settings.lang);
 
 		this.addSettingTab(new ChessSettingTab(this.app, this));
 
@@ -39,7 +42,7 @@ export default class ChessPlugin extends Plugin {
 			ctx.addChild(renderChild);
 		});
 
-		this.registerMarkdownCodeBlockProcessor('chessboard', (source, el, ctx) => {
+		this.registerMarkdownCodeBlockProcessor('fen', (source, el, ctx) => {
 			const renderChild = new GenFENRenderChild(el, ctx, source, this);
 			ctx.addChild(renderChild);
 		});
@@ -51,7 +54,7 @@ export default class ChessPlugin extends Plugin {
 
 		this.registerExtensions(["pgn"], PGNView.VIEW_TYPE);
 
-		this.addRibbonIcon("chess-icon", "New PGN file", async () => {
+		this.addRibbonIcon("chess-icon", t("pgn.newFile"), async () => {
 			let baseFileName = "Untitled";
 			let fileExtension = ".pgn";
 			let fileName = baseFileName + fileExtension;
@@ -68,7 +71,7 @@ export default class ChessPlugin extends Plugin {
 				const newFile = await this.app.vault.create(fileName, fileContent);
 				this.app.workspace.getLeaf(true).openFile(newFile);
 			} catch (error) {
-				console.error("Failed to create PGN file:", error);
+				console.error(t("pgn.error"), error);
 			}
 		});
 
@@ -93,13 +96,13 @@ export default class ChessPlugin extends Plugin {
 				if (!(currentView instanceof MarkdownView && currentView.file === file)) {
 					menu.addItem((item) =>
 						item
-							.setTitle("Open in Markdown view")
+							.setTitle(t("menu.markdown"))
 							.setIcon("file-text")
 							.onClick(() => this.changeView(file, 'markdown'))
 					);
 				} if (!(currentView instanceof PGNView && currentView.file === file)) {
 					menu.addItem((item) =>
-						item.setTitle("Open in PGN view")
+						item.setTitle(t("menu.pgn"))
 							.setIcon("chess-icon")
 							.onClick(() => this.changeView(file, PGNView.VIEW_TYPE)));
 				}

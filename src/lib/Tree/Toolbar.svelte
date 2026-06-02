@@ -1,30 +1,33 @@
 <script lang="ts">
   import { setIcon, Menu } from "obsidian";
   import type { EventBus } from "../../core/event-bus";
+  import { t } from "../../i18n";
 
   interface Props {
     eventBus: EventBus;
   }
   let { eventBus }: Props = $props();
 
-  const buttons = [
-    { title: "Delete", icon: "circle-x", event: "remove" },
-    { title: "Promote", icon: "arrow-up-wide-narrow", event: "promote" },
-    { title: "Start", icon: "arrow-left-to-line", event: "toStart" },
-    { title: "Back", icon: "arrow-left", event: "back" },
-    { title: "Forward", icon: "arrow-right", event: "next" },
-    { title: "End", icon: "arrow-right-to-line", event: "toEnd" },
-    { title: "Flip", icon: "flip-vertical", event: "rotate" },
-    { title: "Annotate", icon: "tag", event: "toggle-annotation-menu" },
+  const buildButtons = () => [
+    { title: t("toolbar.delete"), icon: "circle-x", event: "remove" },
+    { title: t("toolbar.promote"), icon: "arrow-up-wide-narrow", event: "promote" },
+    { title: t("toolbar.start"), icon: "arrow-left-to-line", event: "toStart" },
+    { title: t("toolbar.back"), icon: "arrow-left", event: "back" },
+    { title: t("toolbar.forward"), icon: "arrow-right", event: "next" },
+    { title: t("toolbar.end"), icon: "arrow-right-to-line", event: "toEnd" },
+    { title: t("toolbar.flip"), icon: "flip-vertical", event: "rotate" },
+    { title: t("toolbar.annotate"), icon: "tag", event: "toggle-annotation-menu" },
   ];
+  let buttons = $derived(buildButtons());
 
-  const annotations = [
-    { title: "White advantage", icon: "thumbs-up", symbol: "W+", event: "annotation" },
-    { title: "Black advantage", icon: "thumbs-down", symbol: "B+", event: "annotation" },
-    { title: "Equal", icon: "handshake", symbol: "=", event: "annotation" },
-    { title: "Key move", icon: "bookmark", symbol: "?", event: "annotation" },
-    { title: "Brilliant", icon: "star", symbol: "!", event: "annotation" },
+  const buildAnnotations = () => [
+    { title: t("annotation.w+"), icon: "thumbs-up", symbol: "W+", event: "annotation" },
+    { title: t("annotation.b+"), icon: "thumbs-down", symbol: "B+", event: "annotation" },
+    { title: t("annotation.eq"), icon: "handshake", symbol: "=", event: "annotation" },
+    { title: t("annotation.key"), icon: "bookmark", symbol: "?", event: "annotation" },
+    { title: t("annotation.br"), icon: "star", symbol: "!", event: "annotation" },
   ];
+  let annotations = $derived(buildAnnotations());
 
   function emitEvent(name: string, payload: any = null) {
     eventBus.emit("btn-click", { name, payload });

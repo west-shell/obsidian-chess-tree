@@ -2,6 +2,7 @@ import { registerPGNViewModule } from "../../core/module-system";
 import type { ChessNode, IMove, IPGNViewHost } from "../../types";
 import { ConfirmModal } from "../../utils/confirmModal";
 import { toSAN, makeMove } from "../../utils/rules";
+import { t } from "../../i18n";
 
 const ActionsModule = {
     init(host: Record<string, any>) {
@@ -95,10 +96,10 @@ const ActionsModule = {
                     if (host.currentNode.id === 'node-root') {
                         const modal = new ConfirmModal(
                             host.plugin.app,
-                            "Confirm Delete",
-                            "Are you sure you want to delete the entire game? This cannot be undone.",
-                            "Yes",
-                            "Cancel",
+                            t("confirm.deleteTitle"),
+                            t("confirm.deleteMsg"),
+                            t("confirm.yes"),
+                            t("confirm.cancel"),
                         );
                         modal.open();
                         const userConfirmed = await modal.promise;

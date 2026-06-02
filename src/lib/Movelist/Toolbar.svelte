@@ -2,6 +2,7 @@
   import { setIcon } from "obsidian";
   import type { EventBus } from "../../core/event-bus";
   import type { ISettings, IMove } from "../../types";
+  import { t } from "../../i18n";
 
   interface Props {
     settings: ISettings;
@@ -20,12 +21,12 @@
   });
 
   const buttons = [
-    { title: "Reset", icon: "refresh-cw", event: "reset" },
-    { title: "Start", icon: "arrow-left-to-line", event: "toStart" },
-    { title: "Back", icon: "arrow-left", event: "undo" },
-    { title: "Forward", icon: "arrow-right", event: "redo" },
-    { title: "End", icon: "arrow-right-to-line", event: "toEnd" },
-    { title: "Flip", icon: "flip-vertical", event: "rotate" },
+    { title: t("toolbar.reset"), icon: "refresh-cw", event: "reset" },
+    { title: t("toolbar.start"), icon: "arrow-left-to-line", event: "toStart" },
+    { title: t("toolbar.back"), icon: "arrow-left", event: "undo" },
+    { title: t("toolbar.forward"), icon: "arrow-right", event: "redo" },
+    { title: t("toolbar.end"), icon: "arrow-right-to-line", event: "toEnd" },
+    { title: t("toolbar.flip"), icon: "flip-vertical", event: "rotate" },
   ];
 
   let saveBtnEl: HTMLButtonElement;
@@ -61,7 +62,7 @@
   <button
     class="toolbar-btn {buttonClass}"
     class:disabled={isprotected}
-    aria-label="Save"
+    aria-label={t("toolbar.save")}
     bind:this={saveBtnEl}
     use:useSetSaveIcon
     onclick={() => emitEvent("save")}
