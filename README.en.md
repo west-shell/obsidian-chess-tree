@@ -116,7 +116,7 @@ r:true
 
 ## Installation
 
-This plugin is available on the Obsidian Community Plugin marketplace. Search for "Chess" to install.
+> ~~This plugin is available on the Obsidian Community Plugin marketplace. Search for "Chess" to install.~~ (Not yet published)
 
 1. Open Obsidian
 2. Go to **Settings**

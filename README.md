@@ -118,7 +118,7 @@ p:true
 
 ## 安装说明
 
-本插件已在 Obsidian 官方插件市场上线，搜索 "Chess" 即可安装。
+> ~~本插件已在 Obsidian 官方插件市场上线，搜索 "Chess" 即可安装。~~（尚未上架，待发布）
 
 1. 打开 Obsidian
 2. 进入 **设置** (Settings)
