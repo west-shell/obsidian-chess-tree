@@ -24,7 +24,7 @@ const ActionsModule = {
                     host.fen = parts.join(' ');
                     break
                 case 'empty':
-                    host.fen = 'k7/8/8/8/8/8/8/6K1 w - - 0 1';
+                    host.fen = '8/8/8/8/8/8/8/8 w - - 0 1';
                     host.selectedPiece = null;
                     break
                 case 'full':
