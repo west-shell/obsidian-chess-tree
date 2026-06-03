@@ -2,7 +2,7 @@
   "name": "obsidian-chess-tree",
   "private": true,
   "version": "1.0.3",
-  "description": "Render chess positions and diagrams in a note.",
+  "description": "Chess variation tree.",
   "main": "main.js",
   "type": "module",
   "scripts": {
