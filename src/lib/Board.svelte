@@ -35,10 +35,42 @@
     userShapes = [],
   }: Props = $props();
 
+  import ChessQueen from "@lucide/svelte/icons/chess-queen";
+  import ChessRook from "@lucide/svelte/icons/chess-rook";
+  import ChessBishop from "@lucide/svelte/icons/chess-bishop";
+  import ChessKnight from "@lucide/svelte/icons/chess-knight";
+
   let boardWidth = $derived(boardWidthOverride ?? settings.cellSize * 8);
   let boardElement: HTMLDivElement;
   let api: Api | null = null;
   let layoutChangeHandler: (() => void) | null = null;
+
+  // Promotion state
+  let promotingMove: { from: Square; to: Square } | null = $state(null);
+  let promotingColor: "w" | "b" = $state("w");
+
+  const PROMOTION_PIECES: { type: "q" | "r" | "b" | "n"; component: any }[] = [
+    { type: "q", component: ChessQueen },
+    { type: "r", component: ChessRook },
+    { type: "b", component: ChessBishop },
+    { type: "n", component: ChessKnight },
+  ];
+
+  function isPromotionRank(to: string, color: "w" | "b"): boolean {
+    return (color === "w" && to[1] === "8") || (color === "b" && to[1] === "1");
+  }
+
+  function completePromotion(pieceType: "q" | "r" | "b" | "n") {
+    if (!promotingMove) return;
+    try {
+      const chess = new Chess(fen);
+      const move = chess.move({ from: promotingMove.from, to: promotingMove.to, promotion: pieceType });
+      if (move) {
+        eventBus.emit("runmove", move);
+      }
+    } catch { /* ignore */ }
+    promotingMove = null;
+  }
   let turnColor: cg.Color = $derived(
     fen.split(' ')[1] === 'b' ? 'black' : 'white'
   );
@@ -88,8 +120,24 @@
         }
       : {
           move: (orig, dest) => {
+            const chess = new Chess(fen);
+            const piece = chess.get(orig as Square);
+            const color = piece?.color;
+            if (piece?.type === "p" && color && isPromotionRank(dest, color)) {
+              // Check if any legal promotion exists
+              try {
+                const testChess = new Chess(fen);
+                const moves = testChess.moves({ square: orig as Square, verbose: true }) as Move[];
+                const promoMoves = moves.filter((m) => m.to === dest && m.promotion);
+                if (promoMoves.length > 0) {
+                  api?.cancelMove();
+                  promotingMove = { from: orig as Square, to: dest as Square };
+                  promotingColor = color;
+                  return;
+                }
+              } catch { /* fall through */ }
+            }
             try {
-              const chess = new Chess(fen);
               const move = chess.move({ from: orig, to: dest });
               if (move) {
                 eventBus.emit("runmove", move);
@@ -216,7 +264,24 @@
   });
 </script>
 
-<div bind:this={boardElement} class="cg-wrap {turnClass}" style="width: {boardWidth}px"></div>
+<div class="board-wrapper" style="width: {boardWidth}px">
+  <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
+  {#if promotingMove}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="promotion-overlay" onclick={() => (promotingMove = null)}>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div class="promotion-choices {promotingColor}" onclick={(e) => e.stopPropagation()}>
+        {#each PROMOTION_PIECES as { type, component: Icon }}
+          <button class="promotion-btn" onclick={() => completePromotion(type)}>
+            <Icon size={boardWidth * 0.11} strokeWidth={1.2} />
+          </button>
+        {/each}
+      </div>
+    </div>
+  {/if}
+</div>
 
 <style>
   .cg-wrap {
@@ -231,5 +296,44 @@
 
   .cg-wrap.turn-black {
     box-shadow: 0 0 12px 3px rgba(0, 0, 0, 0.7);
+  }
+
+  .board-wrapper {
+    position: relative;
+  }
+
+  .promotion-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .promotion-choices {
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 6px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .promotion-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    color: var(--text-normal);
+    transition: background 0.15s;
+  }
+
+  .promotion-btn:hover {
+    background: var(--background-modifier-hover);
+    border-color: var(--color-accent);
   }
 </style>
