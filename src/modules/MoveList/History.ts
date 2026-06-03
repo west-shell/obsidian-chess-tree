@@ -9,7 +9,6 @@ const HistoryModule = {
 
         eventBus.on("load", () => {
             host.modified = false;
-            host.history = [];
         })
 
         eventBus.on("edithistory", (move: Move) => {

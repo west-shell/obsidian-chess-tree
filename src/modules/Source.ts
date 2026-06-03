@@ -14,6 +14,7 @@ const SourceModule = {
                     host.fen = fenRoot;
                     host.fenRoot = fenRoot;
                     host.PGN = PGN;
+                    host.history = [...PGN];
                     host.currentTurn = firstTurn;
                     host.currentStep = 0;
                     host.options = options;
