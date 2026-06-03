@@ -2,9 +2,9 @@
     "id": "chess-tree",
     "version": "1.0.0",
     "name": "Chess tree",
-    "description": "A chess plugin designed for Obsidian",
+    "description": "Chess variation tree。",
     "author": "weshell",
-    "authorUrl": "https://space.bilibili.com/156446344",
+    "authorUrl": "https://github.com/west-shell",
     "minAppVersion": "1.5.0",
     "isDesktopOnly": false
 }
