@@ -15,6 +15,7 @@
   import ChessKnight from "@lucide/svelte/icons/chess-knight";
   import ChessPawn from "@lucide/svelte/icons/chess-pawn";
   import Castle from "@lucide/svelte/icons/castle";
+  import ChevronsUp from "@lucide/svelte/icons/chevrons-up";
 
   // Lucide annotation components
   import ThumbsUp from "@lucide/svelte/icons/thumbs-up";
@@ -74,6 +75,7 @@
   function getPieceComponent(node: ChessNode) {
     if (!node.move) return null;
     if (node.move.isKingsideCastle() || node.move.isQueensideCastle()) return Castle;
+    if (node.move.promotion) return ChevronsUp;
     return PIECE_COMPONENTS[node.move.piece] ?? null;
   }
 
@@ -398,7 +400,7 @@
 
     <div class="toolbar">
       {#each zoomBTN as { title, icon, event }}
-        <button class="toolbar-btn" title={title} aria-label={title} use:useSetIcon={icon} onclick={event}
+        <button class="toolbar-btn" {title} aria-label={title} use:useSetIcon={icon} onclick={event}
         ></button>
       {/each}
       <button
