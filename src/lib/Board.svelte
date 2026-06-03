@@ -16,6 +16,7 @@
     selectedSquare?: Square | null;
     eventBus: EventBus;
     rotated: boolean;
+    inCheck?: boolean;
     variations?: Move[];
     freeMode?: boolean;
     boardWidth?: number;
@@ -29,6 +30,7 @@
     selectedSquare = null,
     eventBus,
     rotated,
+    inCheck = false,
     variations = [],
     freeMode = false,
     boardWidth: boardWidthOverride,
@@ -107,6 +109,7 @@
 
   let shapes = $derived(settings.showNextMove ? computeVariationShapes(variations) : []);
   let dests = $derived(computeDests(fen));
+  let _check: cg.Color | false = $derived(inCheck && turnColor);
 
   onMount(async () => {
     const events: Config["events"] = freeMode
@@ -168,7 +171,6 @@
           },
       highlight: {
         lastMove: settings.showLastMove,
-        check: true,
       },
       drawable: {
         enabled: true,
@@ -185,6 +187,8 @@
     if (freeMode) {
       config.draggable = { deleteOnDropOff: true };
     }
+
+    config.check = _check;
 
     if (lastMove) {
       config.lastMove = lastMove;
@@ -217,9 +221,9 @@
   $effect(() => {
     if (!api) return;
     if (freeMode) {
-      api.set({ fen, turnColor });
+      api.set({ fen, turnColor, check: _check });
     } else {
-      api.set({ fen, turnColor, movable: { color: turnColor, dests } });
+      api.set({ fen, turnColor, movable: { color: turnColor, dests }, check: _check });
     }
   });
 

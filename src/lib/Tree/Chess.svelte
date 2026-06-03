@@ -69,6 +69,7 @@
       .filter((m): m is Move => m != null) ?? [],
   );
   let userShapes = $derived(loadShapes(currentNode));
+  let inCheck = $derived(currentNode.move ? /\+|#/.test(currentNode.move.san) : false);
 
   let treeViewEl: HTMLDivElement;
   let adaptiveBoardWidth = $state(300);
@@ -116,7 +117,7 @@
 <div class="tree-view {position}" bind:this={treeViewEl}>
   <div class="board-area">
     <Board
-      {settings} {fen} {lastMove} {eventBus} {rotated} {variations} {userShapes}
+      {settings} {fen} {lastMove} {inCheck} {eventBus} {rotated} {variations} {userShapes}
       boardWidth={adaptiveBoardWidth}
     />
   </div>
