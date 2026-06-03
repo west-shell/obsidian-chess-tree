@@ -1,7 +1,7 @@
 {
-    "id": "chess tree",
+    "id": "chess-tree",
     "version": "1.0.0",
-    "name": "Chess",
+    "name": "Chess tree",
     "description": "A chess plugin designed for Obsidian",
     "author": "weshell",
     "authorUrl": "https://space.bilibili.com/156446344",
