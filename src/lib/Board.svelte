@@ -16,7 +16,7 @@
     selectedSquare?: Square | null;
     eventBus: EventBus;
     rotated: boolean;
-    inCheck?: boolean;
+    checkColor?: cg.Color | null;
     variations?: Move[];
     freeMode?: boolean;
     boardWidth?: number;
@@ -30,7 +30,7 @@
     selectedSquare = null,
     eventBus,
     rotated,
-    inCheck = false,
+    checkColor = null,
     variations = [],
     freeMode = false,
     boardWidth: boardWidthOverride,
@@ -109,7 +109,7 @@
 
   let shapes = $derived(settings.showNextMove ? computeVariationShapes(variations) : []);
   let dests = $derived(computeDests(fen));
-  let _check: cg.Color | false = $derived(inCheck && turnColor);
+  let _check: cg.Color | false = $derived(checkColor || false);
 
   onMount(async () => {
     const events: Config["events"] = freeMode

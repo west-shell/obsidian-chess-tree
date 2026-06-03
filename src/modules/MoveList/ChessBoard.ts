@@ -16,7 +16,7 @@ const BoardModule = {
                 props: {
                     settings: host.settings,
                     fen: host.fen,
-                    inCheck: false,
+                    checkColor: null,
                     selectedSquare: null,
                     currentStep: host.currentStep,
                     eventBus: host.eventBus,
@@ -43,11 +43,12 @@ const BoardModule = {
         eventBus.on('updateUI', () => {
             const currentMoves = host.modified ? host.history : host.PGN;
             const lastMove = currentMoves[host.currentStep - 1] ?? null;
-            const inCheck = lastMove ? /\+|#/.test(lastMove.san) : false;
+            const checkColor = lastMove && /\+|#/.test(lastMove.san)
+                ? (lastMove.color === 'w' ? 'black' : 'white') : null;
             host.Chess?.$set({
                 settings: { ...host.settings },
                 fen: host.fen,
-                inCheck,
+                checkColor,
                 selectedSquare: null,
                 currentStep: host.currentStep,
                 modified: host.modified,

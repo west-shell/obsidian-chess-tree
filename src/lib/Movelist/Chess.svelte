@@ -10,7 +10,7 @@
   interface Props {
     settings: ISettings;
     fen: string;
-    inCheck: boolean;
+    checkColor?: string | null;
     selectedSquare: Square | null;
     currentStep: number;
     eventBus: EventBus;
@@ -22,7 +22,7 @@
   }
 
   let {
-    settings, fen, inCheck, selectedSquare, currentStep,
+    settings, fen, checkColor, selectedSquare, currentStep,
     eventBus, modified, PGN, history, lastMove,
     options,
   }: Props = $props();
@@ -38,7 +38,7 @@
 </script>
 
 <div class="XQ-container {settings.position}">
-  <Board {settings} {fen} {lastMove} {inCheck} {selectedSquare} {eventBus} {rotated} />
+  <Board {settings} {fen} {lastMove} {checkColor} {selectedSquare} {eventBus} {rotated} />
   <Toolbar {settings} {eventBus} {modified} {PGN} {isprotected} />
   {#if settings.showMovelist}
     <MoveList {settings} {currentStep} {moves} {eventBus} />
