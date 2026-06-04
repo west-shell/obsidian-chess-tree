@@ -126,7 +126,7 @@
     flex-grow: 0;
     align-items: center;
     gap: 0.5em;
-    padding: 0px;
+    padding: 0;
     margin: 0;
     border-bottom: none;
     width: 100%;
@@ -139,8 +139,9 @@
     flex-shrink: 0;
     flex-grow: 0;
     align-items: center;
+    justify-content: center;
     gap: 0.25em;
-    padding: 1px;
+    padding: 0.25em 0.125em; /* 4px -> 0.25em, 2px -> 0.125em (假设 font-size=16px) */
     margin: 0;
     border-bottom: none;
     white-space: nowrap;
@@ -164,19 +165,27 @@
     text-orientation: mixed;
     display: inline-block;
     text-align: center;
+    margin-bottom: 0.25em; /* 4px -> 0.25em */
   }
 
+  /* 美化后的 move 样式 */
   span.move {
     display: inline-block;
-    line-height: 1;
+    line-height: 1.2;
     justify-content: center;
     align-items: center;
     text-align: center;
-    border-radius: 4px;
+    border-radius: 0.375em; /* 6px -> 0.375em (6/16) */
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
     flex-shrink: 0;
+    padding: 0.25em 0.5em; /* 4px -> 0.25em, 8px -> 0.5em */
+  }
+
+  span.move.white,
+  span.move.black {
+    min-width: 4em; /* 稍微加宽 */
   }
 
   span.start {
@@ -185,13 +194,30 @@
 
   span.move:hover {
     background-color: var(--background-modifier-hover);
+    transform: scale(1.02); /* 悬停时轻微放大 */
   }
 
   span.move {
     color: var(--text-normal);
   }
 
+  /* 美化后的选中样式 - 增加内边距和圆角 */
   span.move.active {
-    color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: var(--text-on-accent);
+    box-shadow: 0 0.125em 0.375em rgba(0, 0, 0, 0.15); /* 0 2px 6px -> 0 0.125em 0.375em */
+    font-weight: 500;
+    transform: scale(1.02);
+  }
+
+  /* 可选：为右侧列表的 li 添加间隙，让选中效果更舒展 */
+  .move-list.right li span.move {
+    margin: 0.125em 0; /* 2px -> 0.125em */
+  }
+
+  /* 可选：底部列表的 move 间距优化 */
+  .move-list.bottom li span.move {
+    margin: 0.125em 0; /* 2px -> 0.125em */
+    padding: 0.375em 0.25em; /* 6px -> 0.375em, 4px -> 0.25em */
   }
 </style>
