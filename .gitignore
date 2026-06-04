@@ -14,9 +14,9 @@ build/
 *.local
 
 # Editor directories and files
-.vscode/*
-.claude/*
-!.vscode/extensions.json
+.vscode/
+.claude/
+.codegraph/
 .idea
 .DS_Store
 *.suo
