@@ -1,7 +1,7 @@
 {
     "id": "chess-tree",
     "version": "1.0.4",
-    "name": "Chess tree",
+    "name": "chess tree",
     "description": "Chess variation tree.",
     "author": "weshell",
     "authorUrl": "https://github.com/west-shell",
