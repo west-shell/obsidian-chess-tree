@@ -31,12 +31,16 @@ jobs:
         run: npm run build
 
       - name: Generate build provenance
+        id: attest
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
             build/main.js
             build/manifest.json
             build/styles.css
+
+      - name: Copy attestation bundle
+        run: cp "${{ steps.attest.outputs.bundle-path }}" build/attestation.json
 
       - name: Create pre-release
         uses: softprops/action-gh-release@v2
@@ -47,3 +51,4 @@ jobs:
             build/main.js
             build/manifest.json
             build/styles.css
+            build/attestation.json
