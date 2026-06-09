@@ -17,14 +17,7 @@ export function applyThemes(settings: ISettings) {
 	const { theme, boardMarginTop, boardMarginBottom, showCoordinateLabels } = settings;
 	const t = themes[theme] ?? themes.wood;
 
-	let styleEl = document.getElementById("chess-theme-style");
-	if (!styleEl) {
-		styleEl = document.createElement("style");
-		styleEl.id = "chess-theme-style";
-		document.head.appendChild(styleEl);
-	}
-	styleEl.textContent = `cg-board { background-color: ${t.bg}; }`;
-
+	document.body.style.setProperty("--board-bg", t.bg);
 	document.body.style.setProperty("--xq-piece-red", t.white);
 	document.body.style.setProperty("--xq-piece-black", t.black);
 	document.body.style.setProperty("--board-margin-top", `${boardMarginTop}px`);

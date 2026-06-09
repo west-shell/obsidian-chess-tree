@@ -221,17 +221,6 @@ export class ChessSettingTab extends PluginSettingTab {
 			(v) => { settings.boardMarginBottom = v; this.plugin.saveSettings(); this.plugin.refresh(); },
 		);
 
-		const style = containerEl.createEl("style");
-		style.textContent = `
-			.xq-slider-value {
-				display: inline-flex; align-items: center; justify-content: center;
-				min-width: 42px; height: 24px; margin-right: 8px;
-				font-size: 13px; font-weight: 600;
-				color: var(--text-accent); background: var(--background-modifier-border);
-				border-radius: 4px; padding: 0 6px;
-			}
-			.chess-setting-tab .setting-item { border-top: none; }
-		`;
 		containerEl.parentElement?.classList.add("chess-setting-tab");
 	}
 
