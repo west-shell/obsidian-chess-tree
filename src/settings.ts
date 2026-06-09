@@ -82,7 +82,7 @@ export class ChessSettingTab extends PluginSettingTab {
 					this.display();
 				}));
 
-		containerEl.createEl("h2", { text: t("board.title") });
+		new Setting(containerEl).setName(t("board.title")).setHeading();
 
 		new Setting(containerEl)
 			.setName(t("board.theme"))
@@ -126,7 +126,7 @@ export class ChessSettingTab extends PluginSettingTab {
 				}),
 			);
 
-		containerEl.createEl("h2", { text: t("game.title") });
+		new Setting(containerEl).setName(t("game.title")).setHeading();
 
 		new Setting(containerEl)
 			.setName(t("game.lastMove")).setDesc(t("game.lastMove.desc"))
@@ -166,7 +166,7 @@ export class ChessSettingTab extends PluginSettingTab {
 				);
 		}
 
-		containerEl.createEl("h2", { text: t("movelist.title") });
+		new Setting(containerEl).setName(t("movelist.title")).setHeading();
 
 		new Setting(containerEl)
 			.setName(t("movelist.show")).setDesc(t("movelist.show.desc"))
@@ -207,7 +207,7 @@ export class ChessSettingTab extends PluginSettingTab {
 					});
 			});
 
-		containerEl.createEl("h3", { text: t("margin.title") });
+		new Setting(containerEl).setName(t("margin.title")).setHeading();
 
 		addSliderWithValue(
 			containerEl, t("margin.top"), t("margin.top.desc"),
