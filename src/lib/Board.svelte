@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { Chessground } from "chessground";
   import type { Api } from "chessground/api";
   import type { Config } from "chessground/config";

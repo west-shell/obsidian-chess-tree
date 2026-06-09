@@ -1,240 +1,239 @@
 import { Chess, type Move } from 'chess.js';
-import { tokenize, type Token, type TokenType } from './Tokenizer';
+
 import type { ChessNode } from '../../types';
 import { DEFAULT_FEN } from '../../types';
 
+import { type Token, tokenize, type TokenType } from './Tokenizer';
+
 export class PGNParser {
-    haveFEN: boolean = false;
-    tokens: Token[];
-    nodeMap: Map<string, ChessNode>;
-    currentIndex: number;
-    rootNode: ChessNode;
-    currentNode: ChessNode;
-    nodeId: number;
-    currentStep: number = 0;
-    currentSide: string | null = null;
-    tags: Map<string, string> = new Map();
-    chess: Chess;
+  haveFEN: boolean = false;
+  tokens: Token[];
+  nodeMap: Map<string, ChessNode>;
+  currentIndex: number;
+  rootNode: ChessNode;
+  currentNode: ChessNode;
+  nodeId: number;
+  currentStep: number = 0;
+  currentSide: string | null = null;
+  tags: Map<string, string> = new Map();
+  chess: Chess;
 
-    constructor(input: string | Token[]) {
-        this.nodeMap = new Map<string, ChessNode>();
-        this.tokens = typeof input === 'string' ? tokenize(input) : input;
-        this.currentIndex = 0;
-        this.nodeId = 1;
+  constructor(input: string | Token[]) {
+    this.nodeMap = new Map<string, ChessNode>();
+    this.tokens = typeof input === 'string' ? tokenize(input) : input;
+    this.currentIndex = 0;
+    this.nodeId = 1;
 
-        this.chess = new Chess(DEFAULT_FEN);
+    this.chess = new Chess(DEFAULT_FEN);
 
-        this.rootNode = {
-            id: `node-root`,
-            fen: DEFAULT_FEN,
-            move: null,
-            step: 0,
-            side: null,
-            parentID: null,
-            children: [],
-            mainID: null,
-            comments: []
-        };
-        this.nodeMap.set(this.rootNode.id, this.rootNode);
-        this.currentStep++;
+    this.rootNode = {
+      id: `node-root`,
+      fen: DEFAULT_FEN,
+      move: null,
+      step: 0,
+      side: null,
+      parentID: null,
+      children: [],
+      mainID: null,
+      comments: [],
+    };
+    this.nodeMap.set(this.rootNode.id, this.rootNode);
+    this.currentStep++;
 
-        this.currentNode = this.rootNode;
-        this.currentSide = null;
+    this.currentNode = this.rootNode;
+    this.currentSide = null;
 
-        while (!this.match('eof')) {
-            if (this.match('tag')) {
-                this.parseTag();
-            } else if (this.match('san-move')) {
-                this.processSAN(this.consume().value);
-            } else if (this.match('left-paren')) {
-                this.parseVariation();
-            } else if (this.match('comment')) {
-                this.parseComment();
-            } else if (this.match('result')) {
-                this.parseResult();
-            } else {
-                this.consume();
-            }
-        }
+    while (!this.match('eof')) {
+      if (this.match('tag')) {
+        this.parseTag();
+      } else if (this.match('san-move')) {
+        this.processSAN(this.consume().value);
+      } else if (this.match('left-paren')) {
+        this.parseVariation();
+      } else if (this.match('comment')) {
+        this.parseComment();
+      } else if (this.match('result')) {
+        this.parseResult();
+      } else {
+        this.consume();
+      }
+    }
+  }
+
+  parseTag() {
+    const token = this.consume();
+    const tagText = token.value;
+
+    const match = tagText.match(/^\[(\w+)\s+"([^"]*)"\]$/);
+    if (!match) return;
+
+    const [, tagName, tagValue] = match;
+    this.tags.set(tagName, tagValue);
+
+    if (tagName.toUpperCase() === 'FEN') {
+      this.haveFEN = true;
+      try {
+        this.chess.load(tagValue);
+        this.rootNode.fen = tagValue;
+      } catch {
+        // invalid FEN, ignore
+      }
+    }
+  }
+
+  createNode(move: Move, fen: string): ChessNode {
+    const side = move.color === 'w' ? 'white' : 'black';
+    const node: ChessNode = {
+      id: `node-${this.nodeId++}`,
+      fen,
+      move,
+      step: this.currentStep,
+      side,
+      parentID: this.currentNode.id,
+      children: [],
+      mainID: null,
+      comments: [],
+    };
+    this.nodeMap.set(node.id, node);
+    return node;
+  }
+
+  peek(): Token {
+    return this.tokens[this.currentIndex];
+  }
+
+  consume(): Token {
+    return this.tokens[this.currentIndex++];
+  }
+
+  match(type: TokenType): boolean {
+    return this.peek().type === type;
+  }
+
+  processSAN(san: string) {
+    const fen = this.currentNode.fen;
+    this.chess.load(fen);
+    try {
+      const move = this.chess.move(san);
+      if (!move) return;
+
+      const newNode = this.createNode(move, this.chess.fen());
+      this.currentNode.children.push(newNode);
+      this.currentNode = newNode;
+      this.currentStep++;
+      this.currentSide = move.color === 'w' ? 'white' : 'black';
+    } catch {
+      return;
+    }
+  }
+
+  parseVariation() {
+    this.consume(); // consume '('
+
+    const variationParentID = this.currentNode.parentID;
+    if (!variationParentID) {
+      // skip
+      while (!this.match('right-paren') && !this.match('eof')) {
+        this.consume();
+      }
+      if (this.match('right-paren')) this.consume();
+      return;
+    }
+    const variationBase = this.nodeMap.get(variationParentID)!;
+    const prevState = {
+      node: this.currentNode,
+      step: this.currentStep,
+      side: this.currentSide,
+    };
+
+    this.currentNode = variationBase;
+    this.currentStep = variationBase.step!;
+    this.currentSide = variationBase.side;
+
+    while (!this.match('right-paren') && !this.match('eof')) {
+      if (this.match('san-move')) {
+        this.processSANVariation(this.consume().value);
+      } else if (this.match('comment')) {
+        this.parseComment();
+      } else if (this.match('left-paren')) {
+        this.parseVariation();
+      } else if (this.match('result')) {
+        this.consume();
+        break;
+      } else {
+        this.consume();
+      }
     }
 
-    parseTag() {
-        const token = this.consume();
-        const tagText = token.value;
-
-        const match = tagText.match(/^\[(\w+)\s+"([^"]*)"\]$/);
-        if (!match) return;
-
-        const [, tagName, tagValue] = match;
-        this.tags.set(tagName, tagValue);
-
-        if (tagName.toUpperCase() === 'FEN') {
-            this.haveFEN = true;
-            try {
-                this.chess.load(tagValue);
-                this.rootNode.fen = tagValue;
-            } catch {
-                // invalid FEN, ignore
-            }
-        }
+    if (this.match('right-paren')) {
+      this.consume();
     }
 
-    createNode(move: Move, fen: string): ChessNode {
-        const side = move.color === 'w' ? 'white' : 'black';
-        const node: ChessNode = {
-            id: `node-${this.nodeId++}`,
-            fen,
-            move,
-            step: this.currentStep,
-            side,
-            parentID: this.currentNode.id,
-            children: [],
-            mainID: null,
-            comments: []
-        };
-        this.nodeMap.set(node.id, node);
-        return node;
+    this.currentNode = prevState.node;
+    this.currentStep = prevState.step;
+    this.currentSide = prevState.side;
+  }
+
+  processSANVariation(san: string) {
+    const fen = this.currentNode.fen;
+    this.chess.load(fen);
+    try {
+      const move = this.chess.move(san);
+      if (!move) return;
+
+      const newNode = this.createNode(move, this.chess.fen());
+      this.currentNode.children.push(newNode);
+      this.currentNode = newNode;
+      this.currentStep++;
+    } catch {
+      return;
     }
+  }
 
-    peek(): Token {
-        return this.tokens[this.currentIndex];
+  parseComment() {
+    const token = this.consume();
+    const comment = token.value.replace(/^{|}$/g, '').replace(/^;/, '').trim();
+
+    if (!this.currentNode.comments) {
+      this.currentNode.comments = [];
     }
+    this.currentNode.comments.push(comment);
+  }
 
-    consume(): Token {
-        return this.tokens[this.currentIndex++];
+  parseResult() {
+    const token = this.consume();
+    let result = '';
+    switch (token.value) {
+      case '1-0':
+        result = '1-0';
+        break;
+      case '0-1':
+        result = '0-1';
+        break;
+      case '1/2-1/2':
+        result = '1/2-1/2';
+        break;
+      case '*':
+        result = '?';
+        break;
     }
-
-    match(type: TokenType): boolean {
-        return this.peek().type === type;
+    if (!this.currentNode.comments) {
+      this.currentNode.comments = [];
     }
+    this.currentNode.comments.push(result);
+  }
 
-    processSAN(san: string) {
-        const fen = this.currentNode.fen;
-        this.chess.load(fen);
-        try {
-            const move = this.chess.move(san);
-            if (!move) return;
-
-            const newNode = this.createNode(move, this.chess.fen());
-            this.currentNode.children.push(newNode);
-            this.currentNode = newNode;
-            this.currentStep++;
-            this.currentSide = move.color === 'w' ? 'white' : 'black';
-        } catch {
-            return;
-        }
+  public getTags(): string {
+    const lines: string[] = [];
+    for (const [key, value] of this.tags.entries()) {
+      lines.push(`[${key} "${value}"]`);
     }
-
-    parseVariation() {
-        this.consume(); // consume '('
-
-        const variationParentID = this.currentNode.parentID;
-        if (!variationParentID) {
-            // skip
-            while (!this.match('right-paren') && !this.match('eof')) {
-                this.consume();
-            }
-            if (this.match('right-paren')) this.consume();
-            return;
-        }
-        const variationBase = this.nodeMap.get(variationParentID)!;
-        const prevState = {
-            node: this.currentNode,
-            step: this.currentStep,
-            side: this.currentSide,
-        };
-
-        this.currentNode = variationBase;
-        this.currentStep = variationBase.step!;
-        this.currentSide = variationBase.side;
-
-        while (!this.match('right-paren') && !this.match('eof')) {
-            if (this.match('san-move')) {
-                this.processSANVariation(this.consume().value);
-            } else if (this.match('comment')) {
-                this.parseComment();
-            } else if (this.match('left-paren')) {
-                this.parseVariation();
-            } else if (this.match('result')) {
-                this.consume();
-                break;
-            } else {
-                this.consume();
-            }
-        }
-
-        if (this.match('right-paren')) {
-            this.consume();
-        }
-
-        this.currentNode = prevState.node;
-        this.currentStep = prevState.step;
-        this.currentSide = prevState.side;
-    }
-
-    processSANVariation(san: string) {
-        const fen = this.currentNode.fen;
-        this.chess.load(fen);
-        try {
-            const move = this.chess.move(san);
-            if (!move) return;
-
-            const newNode = this.createNode(move, this.chess.fen());
-            this.currentNode.children.push(newNode);
-            this.currentNode = newNode;
-            this.currentStep++;
-        } catch {
-            return;
-        }
-    }
-
-    parseComment() {
-        const token = this.consume();
-        const comment = token.value
-            .replace(/^{|}$/g, '')
-            .replace(/^;/, '')
-            .trim();
-
-        if (!this.currentNode.comments) {
-            this.currentNode.comments = [];
-        }
-        this.currentNode.comments.push(comment);
-    }
-
-    parseResult() {
-        const token = this.consume();
-        let result = '';
-        switch (token.value) {
-            case "1-0":
-                result = "1-0";
-                break;
-            case "0-1":
-                result = "0-1";
-                break;
-            case "1/2-1/2":
-                result = "1/2-1/2";
-                break;
-            case "*":
-                result = "?";
-                break;
-        }
-        if (!this.currentNode.comments) {
-            this.currentNode.comments = [];
-        }
-        this.currentNode.comments.push(result);
-    }
-
-    public getTags(): string {
-        const lines: string[] = [];
-        for (const [key, value] of this.tags.entries()) {
-            lines.push(`[${key} "${value}"]`);
-        }
-        return lines.join('\n');
-    }
-    public getRoot(): ChessNode {
-        return this.rootNode;
-    }
-    public getMap(): Map<string, ChessNode> {
-        return this.nodeMap;
-    }
+    return lines.join('\n');
+  }
+  public getRoot(): ChessNode {
+    return this.rootNode;
+  }
+  public getMap(): Map<string, ChessNode> {
+    return this.nodeMap;
+  }
 }

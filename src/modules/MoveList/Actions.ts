@@ -1,209 +1,202 @@
-import { Chess, type Move } from "chess.js";
-import { MarkdownView, Notice } from "obsidian";
-import { registerXQModule } from "../../core/module-system";
-import type { IXQHost, ITurn } from "../../types";
-import { ConfirmModal } from "../../utils/confirmModal";
-import { t } from "../../i18n";
+import { Chess, type Move } from 'chess.js';
+import { MarkdownView, Notice } from 'obsidian';
+
+import { registerXQModule } from '../../core/module-system';
+import { t } from '../../i18n';
+import type { ITurn, IXQHost } from '../../types';
+import { ConfirmModal } from '../../utils/confirmModal';
 
 const ActionsModule = {
-    init(host: IXQHost) {
-        const eventBus = host.eventBus;
+  init(host: IXQHost) {
+    const eventBus = host.eventBus;
 
-        eventBus.on('runmove', (move: Move) => {
-            if (!move) return;
-            if (!host.modified) host.modifiedStep = host.currentStep;
-            host.modified = true;
-            eventBus.emit('edithistory', move);
-            host.fen = move.after;
-            host.currentStep++;
-            host.currentTurn = getTurnFromFen(host.fen);
-            eventBus.emit('updateUI', 'runmove');
-        })
+    eventBus.on('runmove', (move: Move) => {
+      if (!move) return;
+      if (!host.modified) host.modifiedStep = host.currentStep;
+      host.modified = true;
+      eventBus.emit('edithistory', move);
+      host.fen = move.after;
+      host.currentStep++;
+      host.currentTurn = getTurnFromFen(host.fen);
+      eventBus.emit('updateUI', 'runmove');
+    });
 
-        eventBus.on('undo', () => {
-            undo(host);
-            eventBus.emit('updateUI', 'undo');
-        })
+    eventBus.on('undo', () => {
+      undo(host);
+      eventBus.emit('updateUI', 'undo');
+    });
 
-        eventBus.on('redo', () => {
+    eventBus.on('redo', () => {
+      redo(host);
+      eventBus.emit('updateUI', 'redo');
+    });
+
+    eventBus.on('toStart', () => {
+      while (host.currentStep != 0) {
+        undo(host);
+      }
+      eventBus.emit('updateUI', 'toStart');
+    });
+
+    eventBus.on('toEnd', () => {
+      const step = host.modified ? host.history.length : host.PGN.length;
+      const dif = step - host.currentStep;
+      for (let i = 0; i < dif; i++) {
+        redo(host);
+      }
+      eventBus.emit('updateUI', 'toEnd');
+    });
+
+    eventBus.on('reset', () => {
+      if (host.modified) {
+        while (host.currentStep != 0) {
+          undo(host);
+        }
+        host.modified = false;
+        host.history = [];
+        if (host.modifiedStep) {
+          for (let i = 0; i < host.modifiedStep; i++) {
             redo(host);
-            eventBus.emit('updateUI', 'redo');
-        })
+          }
+        }
+        host.modifiedStep = null;
+        eventBus.emit('updateUI', 'reset');
+      } else {
+        eventBus.emit('toStart');
+      }
+    });
 
-        eventBus.on('toStart', () => {
-            while (host.currentStep != 0) {
-                undo(host);
-            }
-            eventBus.emit('updateUI', 'toStart');
-        })
+    eventBus.on('save', async () => {
+      let message = '';
+      if (host.history.length === 0 && host.PGN.length === 0) {
+        new Notice(t('notice.saveEmpty'));
+        return;
+      }
+      if (host.history.length === 0 && host.PGN.length > 0) message = t('confirm.saveClear');
+      if (host.history.length > 0 && host.PGN.length === 0) message = t('confirm.saveNew');
+      if (host.history.length > 0 && host.PGN.length > 0) message = t('confirm.saveOverwrite');
+      const modal = new ConfirmModal(
+        host.plugin.app,
+        t('confirm.saveTitle'),
+        message,
+        t('confirm.saveBtn'),
+        t('confirm.cancel'),
+      );
 
-        eventBus.on('toEnd', () => {
-            const step = host.modified ? host.history.length : host.PGN.length;
-            const dif = step - host.currentStep;
-            for (let i = 0; i < dif; i++) {
-                redo(host);
-            }
-            eventBus.emit('updateUI', 'toEnd');
-        })
+      modal.open();
+      const userConfirmed = await modal.promise;
 
-        eventBus.on('reset', () => {
-            if (host.modified) {
-                while (host.currentStep != 0) {
-                    undo(host);
-                }
-                host.modified = false;
-                host.history = [];
-                if (host.modifiedStep) {
-                    for (let i = 0; i < host.modifiedStep; i++) {
-                        redo(host);
-                    }
-                }
-                host.modifiedStep = null;
-                eventBus.emit('updateUI', 'reset');
-            } else {
-                eventBus.emit('toStart');
-            }
-        })
+      if (userConfirmed) {
+        await savePGN(host);
+        new Notice(t('notice.saveSuccess'));
+      }
+      eventBus.emit('updateUI', 'save');
+    });
 
-        eventBus.on('save', async () => {
-            let message = "";
-            if (host.history.length === 0 && host.PGN.length === 0) {
-                new Notice(t("notice.saveEmpty"));
-                return;
-            }
-            if (host.history.length === 0 && host.PGN.length > 0)
-                message = t("confirm.saveClear");
-            if (host.history.length > 0 && host.PGN.length === 0)
-                message = t("confirm.saveNew");
-            if (host.history.length > 0 && host.PGN.length > 0)
-                message = t("confirm.saveOverwrite");
-            const modal = new ConfirmModal(
-                host.plugin.app,
-                t("confirm.saveTitle"),
-                message,
-                t("confirm.saveBtn"),
-                t("confirm.cancel"),
-            );
+    eventBus.on('clickstep', step => {
+      if (step === undefined || step === host.currentStep) return;
+      host.currentStep = step;
+      host.fen = replayFen(host);
+      host.currentTurn = getTurnFromFen(host.fen);
+      eventBus.emit('updateUI');
+    });
 
-            modal.open();
-            const userConfirmed = await modal.promise;
-
-            if (userConfirmed) {
-                await savePGN(host);
-                new Notice(t("notice.saveSuccess"));
-            }
-            eventBus.emit('updateUI', 'save');
-        })
-
-        eventBus.on('clickstep', (step) => {
-            if (step === undefined || step === host.currentStep) return;
-            host.currentStep = step;
-            host.fen = replayFen(host);
-            host.currentTurn = getTurnFromFen(host.fen);
-            eventBus.emit('updateUI');
-        })
-
-        eventBus.on('rotate', () => {
-            if (!host.options) {
-                host.options = { rotated: true };
-            } else {
-                host.options.rotated = !host.options.rotated;
-            }
-            eventBus.emit('updateUI', 'rotate');
-        })
-    }
-}
+    eventBus.on('rotate', () => {
+      if (!host.options) {
+        host.options = { rotated: true };
+      } else {
+        host.options.rotated = !host.options.rotated;
+      }
+      eventBus.emit('updateUI', 'rotate');
+    });
+  },
+};
 
 registerXQModule('actions', ActionsModule);
 
 function undo(host: IXQHost) {
-    if (host.currentStep > 0) {
-        host.currentStep--;
-        host.fen = replayFen(host);
-        host.currentTurn = getTurnFromFen(host.fen);
-    }
+  if (host.currentStep > 0) {
+    host.currentStep--;
+    host.fen = replayFen(host);
+    host.currentTurn = getTurnFromFen(host.fen);
+  }
 }
 
 function redo(host: IXQHost) {
-    if (!host.modified && host.PGN.length > 0) {
-        const nextMove = host.PGN[host.currentStep];
-        if (!nextMove) return;
-        host.eventBus.emit('edithistory', nextMove);
-        host.currentStep++;
-        host.fen = nextMove.after;
-        host.currentTurn = getTurnFromFen(host.fen);
-    } else {
-        if (host.history.length < host.currentStep) return;
-        const moveToRedo = host.history[host.currentStep];
-        if (!moveToRedo) return;
-        host.currentStep++;
-        host.fen = moveToRedo.after;
-        host.currentTurn = getTurnFromFen(host.fen);
-    }
+  if (!host.modified && host.PGN.length > 0) {
+    const nextMove = host.PGN[host.currentStep];
+    if (!nextMove) return;
+    host.eventBus.emit('edithistory', nextMove);
+    host.currentStep++;
+    host.fen = nextMove.after;
+    host.currentTurn = getTurnFromFen(host.fen);
+  } else {
+    if (host.history.length < host.currentStep) return;
+    const moveToRedo = host.history[host.currentStep];
+    if (!moveToRedo) return;
+    host.currentStep++;
+    host.fen = moveToRedo.after;
+    host.currentTurn = getTurnFromFen(host.fen);
+  }
 }
 
 function replayFen(host: IXQHost): string {
-    const chess = new Chess(host.fenRoot);
-    const currentMoves = host.modified ? host.history : host.PGN;
-    for (let i = 0; i < host.currentStep; i++) {
-        const move = currentMoves[i];
-        if (!move) break;
-        try {
-            chess.move(move.san);
-        } catch {
-            // fallback: try lan (ICCS format, e.g. "h2e2")
-            chess.move(move.lan);
-        }
+  const chess = new Chess(host.fenRoot);
+  const currentMoves = host.modified ? host.history : host.PGN;
+  for (let i = 0; i < host.currentStep; i++) {
+    const move = currentMoves[i];
+    if (!move) break;
+    try {
+      chess.move(move.san);
+    } catch {
+      // fallback: try lan (ICCS format, e.g. "h2e2")
+      chess.move(move.lan);
     }
-    return chess.fen();
+  }
+  return chess.fen();
 }
 
 /** Read turn from fen string */
 function getTurnFromFen(fen: string): ITurn {
-    return fen.split(' ')[1] === 'b' ? 'black' : 'white';
+  return fen.split(' ')[1] === 'b' ? 'black' : 'white';
 }
 
 async function savePGN(host: IXQHost) {
-    const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view) return;
-    const file = view.file;
-    if (!file) return;
+  const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+  if (!view) return;
+  const file = view.file;
+  if (!file) return;
 
-    host.plugin.app.vault.process(file, fileContent => {
-        const section = host.ctx.getSectionInfo(host.containerEl);
-        if (!section) return fileContent;
+  host.plugin.app.vault.process(file, fileContent => {
+    const section = host.ctx.getSectionInfo(host.containerEl);
+    if (!section) return fileContent;
 
-        const { lineStart, lineEnd } = section;
-        const lines = fileContent.split("\n");
+    const { lineStart, lineEnd } = section;
+    const lines = fileContent.split('\n');
 
-        let blockLines: string[] = lines.slice(lineStart, lineEnd + 1);
+    let blockLines: string[] = lines.slice(lineStart, lineEnd + 1);
 
-        if (blockLines.length < 2) return fileContent;
+    if (blockLines.length < 2) return fileContent;
 
-        // Remove all SAN move lines
-        blockLines = blockLines.filter((line) => !/\b(O-O(?:-O)?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?)\b/.test(line));
+    // Remove all SAN move lines
+    blockLines = blockLines.filter(
+      line => !/\b(O-O(?:-O)?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?)\b/.test(line),
+    );
 
-        if (host.currentStep > 0) {
-            const moves = host.history
-                .slice(0, host.currentStep)
-                .map((move: Move) => move.san ?? "");
+    if (host.currentStep > 0) {
+      const moves = host.history.slice(0, host.currentStep).map((move: Move) => move.san ?? '');
 
-            const pgnLines: string[] = [];
-            for (let i = 0; i < moves.length; i += 2) {
-                const line =
-                    `${Math.ceil((i + 1) / 2)}. ${moves[i]} ${moves[i + 1] || ""}`.trim();
-                pgnLines.push(line);
-            }
-            const PGN = pgnLines.join("\n");
+      const pgnLines: string[] = [];
+      for (let i = 0; i < moves.length; i += 2) {
+        const line = `${Math.ceil((i + 1) / 2)}. ${moves[i]} ${moves[i + 1] || ''}`.trim();
+        pgnLines.push(line);
+      }
+      const PGN = pgnLines.join('\n');
 
-            blockLines.splice(blockLines.length - 1, 0, PGN);
-        }
+      blockLines.splice(blockLines.length - 1, 0, PGN);
+    }
 
-        const newContent = [
-            ...lines.slice(0, lineStart),
-            ...blockLines,
-            ...lines.slice(lineEnd + 1),
-        ].join("\n");
-        return newContent;
-    });
+    const newContent = [...lines.slice(0, lineStart), ...blockLines, ...lines.slice(lineEnd + 1)].join('\n');
+    return newContent;
+  });
 }

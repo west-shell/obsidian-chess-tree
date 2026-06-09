@@ -7,7 +7,7 @@
 
 如果你喜欢这个项目，欢迎到我的主页  
 [![Bilibili](https://img.shields.io/badge/Bilibili-哔哩哔哩-ff69b4?logo=bilibili&logoColor=white)](https://space.bilibili.com/156446344)  
-点赞、投币、交流 
+点赞、投币、交流
 
 ## 插件简介
 
@@ -24,11 +24,13 @@
 - **快速新建**：工具栏按钮一键新建 PGN 文件
 
 > **注意**：`.pgn` 文件仅支持单局棋谱。多局 PGN 文件建议借助 AI 添加代码块标记转换成 Markdown 格式：
+>
 > ````markdown
 > ```chess
 > [Event "第一局"]
 > 1. e4 e5 2. Nf3 Nc6 1-0
 > ```
+>
 > ```chess
 > [Event "第二局"]
 > 1. d4 d5 2. c4 e6 1/2-1/2
@@ -127,7 +129,8 @@ p:true
 
 - 冒号中英文皆可，`r` `p` 大小写皆可
 - FEN 两边带不带引号都行
-·
+  ·
+
 ## 安装说明
 
 > ~~本插件已在 Obsidian 官方插件市场上线，搜索 "Chess" 即可安装。~~（尚未上架，待发布）

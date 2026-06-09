@@ -2,7 +2,7 @@
   import Board from "../Board.svelte";
   import Toolbar from "./Toolbar.svelte";
   import MoveList from "./MoveList.svelte";
-  import type { ISettings, IOptions } from "../../types";
+  import type { IOptions, ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
   import type { Move, Square } from "chess.js";
   import { onMount, tick } from "svelte";

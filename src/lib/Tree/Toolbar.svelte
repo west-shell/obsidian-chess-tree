@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { setIcon, Menu } from "obsidian";
+  import { Menu, setIcon } from "obsidian";
   import type { EventBus } from "../../core/event-bus";
   import { onLangChange, t } from "../../i18n";
 

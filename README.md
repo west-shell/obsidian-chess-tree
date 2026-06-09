@@ -24,11 +24,13 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 - **Quick Create**: New PGN files from the ribbon button
 
 > **Note**: `.pgn` files only support single games. For multi-game PGN files, use AI to add code block markers and convert to Markdown format:
+>
 > ````markdown
 > ```chess
 > [Event "Game 1"]
 > 1. e4 e5 2. Nf3 Nc6 1-0
 > ```
+>
 > ```chess
 > [Event "Game 2"]
 > 1. d4 d5 2. c4 e6 1/2-1/2

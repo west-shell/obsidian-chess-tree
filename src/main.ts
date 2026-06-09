@@ -1,131 +1,129 @@
-import "chessground/assets/chessground.base.css";
-import "chessground/assets/chessground.brown.css";
-import "chessground/assets/chessground.cburnett.css";
+import 'chessground/assets/chessground.base.css';
+import 'chessground/assets/chessground.brown.css';
+import 'chessground/assets/chessground.cburnett.css';
 
-import { MarkdownView, Plugin, TFile } from "obsidian";
-import type { ISettings } from "./types";
-import { applyThemes } from "./themes";
-import { ChessRenderChild } from "./renderChild/MoveListRenderChild";
+import { MarkdownView, Plugin, TFile } from 'obsidian';
+
+import { initI18n, t } from './i18n';
 import { GenFENRenderChild } from './renderChild/GenFENRenderChild';
+import { ChessRenderChild } from './renderChild/MoveListRenderChild';
+import { ChessSettingTab, DEFAULT_SETTINGS } from './settings';
+import { applyThemes } from './themes';
+import type { ISettings } from './types';
 import { PGNView } from './view/pgn';
-import { ChessSettingTab, DEFAULT_SETTINGS } from "./settings";
-import { initI18n, t } from "./i18n";
 
 export default class ChessPlugin extends Plugin {
-	settings: ISettings = DEFAULT_SETTINGS;
-	instances: Set<{ refresh(): void }> = new Set();
-	async onload() {
+  settings: ISettings = DEFAULT_SETTINGS;
+  instances: Set<{ refresh(): void }> = new Set();
+  async onload() {
+    await this.loadSettings();
 
-		await this.loadSettings();
+    initI18n(this.settings.lang);
 
-		initI18n(this.settings.lang);
+    this.addSettingTab(new ChessSettingTab(this.app, this));
 
-		this.addSettingTab(new ChessSettingTab(this.app, this));
+    applyThemes(this.settings);
 
-		applyThemes(this.settings);
+    this.registerMarkdownCodeBlockProcessor('chess', (source, el, ctx) => {
+      const renderChild = new ChessRenderChild(el, ctx, source, this);
+      ctx.addChild(renderChild);
+    });
 
-		this.registerMarkdownCodeBlockProcessor('chess', (source, el, ctx) => {
-			const renderChild = new ChessRenderChild(el, ctx, source, this);
-			ctx.addChild(renderChild);
-		});
+    this.registerMarkdownCodeBlockProcessor('fen', (source, el, ctx) => {
+      const renderChild = new GenFENRenderChild(el, ctx, source, this);
+      ctx.addChild(renderChild);
+    });
 
-		this.registerMarkdownCodeBlockProcessor('fen', (source, el, ctx) => {
-			const renderChild = new GenFENRenderChild(el, ctx, source, this);
-			ctx.addChild(renderChild);
-		});
+    this.registerView(PGNView.VIEW_TYPE, leaf => new PGNView(leaf, this));
 
-		this.registerView(
-			PGNView.VIEW_TYPE,
-			(leaf) => new PGNView(leaf, this)
-		);
+    this.registerExtensions(['pgn'], PGNView.VIEW_TYPE);
 
-		this.registerExtensions(["pgn"], PGNView.VIEW_TYPE);
+    this.addRibbonIcon('chess-knight', t('pgn.newFile'), async () => {
+      let baseFileName = 'Untitled';
+      let fileExtension = '.pgn';
+      let fileName = baseFileName + fileExtension;
+      let counter = 0;
 
-		this.addRibbonIcon("chess-knight", t("pgn.newFile"), async () => {
-			let baseFileName = "Untitled";
-			let fileExtension = ".pgn";
-			let fileName = baseFileName + fileExtension;
-			let counter = 0;
+      while (await this.app.vault.adapter.exists(fileName)) {
+        counter++;
+        fileName = `${baseFileName} ${counter}${fileExtension}`;
+      }
 
-			while (await this.app.vault.adapter.exists(fileName)) {
-				counter++;
-				fileName = `${baseFileName} ${counter}${fileExtension}`;
-			}
+      const fileContent = '';
 
-			const fileContent = "";
+      try {
+        const newFile = await this.app.vault.create(fileName, fileContent);
+        this.app.workspace.getLeaf(true).openFile(newFile);
+      } catch (error) {
+        console.error(t('pgn.error'), error);
+      }
+    });
 
-			try {
-				const newFile = await this.app.vault.create(fileName, fileContent);
-				this.app.workspace.getLeaf(true).openFile(newFile);
-			} catch (error) {
-				console.error(t("pgn.error"), error);
-			}
-		});
+    this.registerEvent(
+      this.app.workspace.on('resize', () => {
+        document.body.dispatchEvent(new CustomEvent('layout-change'));
+      }),
+    );
 
-		this.registerEvent(
-			this.app.workspace.on("resize", () => {
-				document.body.dispatchEvent(new CustomEvent("layout-change"));
-			}),
-		);
+    this.registerEvent(
+      this.app.workspace.on('css-change', () => {
+        applyThemes(this.settings);
+      }),
+    );
 
-		this.registerEvent(
-			this.app.workspace.on("css-change", () => {
-				applyThemes(this.settings)
-			}),
-		);
+    this.registerEvent(
+      this.app.workspace.on('file-menu', (menu, file) => {
+        if (!(file instanceof TFile) || file.extension !== 'pgn') {
+          return;
+        }
+        const currentView = this.app.workspace.getLeaf().view;
+        if (!(currentView instanceof MarkdownView && currentView.file === file)) {
+          menu.addItem(item =>
+            item
+              .setTitle(t('menu.markdown'))
+              .setIcon('file-text')
+              .onClick(() => this.changeView(file, 'markdown')),
+          );
+        }
+        if (!(currentView instanceof PGNView && currentView.file === file)) {
+          menu.addItem(item =>
+            item
+              .setTitle(t('menu.pgn'))
+              .setIcon('chess-knight')
+              .onClick(() => this.changeView(file, PGNView.VIEW_TYPE)),
+          );
+        }
+      }),
+    );
+  }
 
-		this.registerEvent(
-			this.app.workspace.on("file-menu", (menu, file) => {
-				if (!(file instanceof TFile) || file.extension !== "pgn") {
-					return;
-				}
-				const currentView = this.app.workspace.getLeaf().view;
-				if (!(currentView instanceof MarkdownView && currentView.file === file)) {
-					menu.addItem((item) =>
-						item
-							.setTitle(t("menu.markdown"))
-							.setIcon("file-text")
-							.onClick(() => this.changeView(file, 'markdown'))
-					);
-				} if (!(currentView instanceof PGNView && currentView.file === file)) {
-					menu.addItem((item) =>
-						item.setTitle(t("menu.pgn"))
-							.setIcon("chess-knight")
-							.onClick(() => this.changeView(file, PGNView.VIEW_TYPE)));
-				}
-			}),
-		);
-	}
+  refresh() {
+    this.instances.forEach(instance => {
+      instance.refresh();
+    });
+  }
 
-	refresh() {
-		this.instances.forEach((instance) => {
-			instance.refresh();
-		});
-	}
+  async changeView(file: TFile, targetViewType: string) {
+    const leaf = this.app.workspace.getLeaf(false);
+    if (!leaf) return;
 
-	async changeView(file: TFile, targetViewType: string) {
-		const leaf = this.app.workspace.getLeaf(false);
-		if (!leaf) return;
+    await leaf.setViewState({
+      type: targetViewType,
+      state: { file: file.path },
+      active: true,
+    });
+  }
 
-		await leaf.setViewState({
-			type: targetViewType,
-			state: { file: file.path },
-			active: true,
-		});
-	}
+  async loadSettings() {
+    const savedData = await this.loadData();
+    this.settings = {
+      ...DEFAULT_SETTINGS,
+      ...savedData,
+    };
+  }
 
-
-	async loadSettings() {
-		const savedData = await this.loadData();
-		this.settings = {
-			...DEFAULT_SETTINGS,
-			...savedData,
-		};
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-		applyThemes(this.settings);
-	}
-
+  async saveSettings() {
+    await this.saveData(this.settings);
+    applyThemes(this.settings);
+  }
 }
