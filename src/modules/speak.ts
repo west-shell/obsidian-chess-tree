@@ -7,7 +7,7 @@ export function speak(move: Move) {
     const finalSpeech = san
         .replace(/O-O-O/g, t("speech.queensideCastle"))
         .replace(/O-O/g, t("speech.kingsideCastle"))
-        .replace(/=([QRBN])/g, (_, piece) => ` ${t("speech.promotesTo")} ${t("speech.piece" + piece)}`)
+        .replace(/=([QRBN])/g, (_, piece) => `：${t("speech.promotesTo")}${t("speech.piece" + piece)}`)
         .replace(/\+/g, ` ${t("speech.check")}`)
         .replace(/\#/g, ` ${t("speech.checkmate")}`);
 
