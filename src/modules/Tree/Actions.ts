@@ -9,10 +9,10 @@ const ActionsModule = {
         const eventBus = host.eventBus;
 
         eventBus.on('runmove', (move: Move) => {
-            const { from, to } = move
+            const { from, to, promotion } = move
             const currentNode = host.currentNode;
             for (let node of currentNode.children) {
-                if (node.move && node.move.from === from && node.move.to === to) {
+                if (node.move && node.move.from === from && node.move.to === to && node.move.promotion === promotion) {
                     host.currentNode = node;
                     host.updateMainPath();
                     eventBus.emit('updateUI')

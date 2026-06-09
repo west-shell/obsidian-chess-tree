@@ -24,7 +24,8 @@ function editHistory(host: IXQHost, move: Move) {
     if (
         existingMove &&
         existingMove.from === move.from &&
-        existingMove.to === move.to
+        existingMove.to === move.to &&
+        existingMove.promotion === move.promotion
     ) {
         return;
     }
