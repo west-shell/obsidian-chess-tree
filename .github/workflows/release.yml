@@ -39,9 +39,6 @@ jobs:
             build/manifest.json
             build/styles.css
 
-      - name: Copy attestation bundle
-        run: cp "${{ steps.attest.outputs.bundle-path }}" build/attestation.json
-
       - name: Create pre-release
         uses: softprops/action-gh-release@v2
         with:
