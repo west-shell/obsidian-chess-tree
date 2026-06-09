@@ -207,6 +207,7 @@ export function t(key: string, _ver?: number): string {
 
 export function i18nVer() { return _ver; }
 export function onLangChange(fn: () => void) { listeners.add(fn); }
+export function getLang(): string { return lang; }
 
 export function initI18n(locale: string) {
 	if (locale === "auto") {

@@ -1,5 +1,5 @@
 import type { Move } from "chess.js";
-import { t } from "../i18n";
+import { t, getLang } from "../i18n";
 
 export function speak(move: Move) {
     const { san } = move;
@@ -13,7 +13,7 @@ export function speak(move: Move) {
 
     if (!window.speechSynthesis) return;
     const utter = new SpeechSynthesisUtterance(finalSpeech);
-    utter.lang = "en-US";
+    utter.lang = getLang() === "zh-cn" ? "zh-CN" : "en-US";
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
 }
