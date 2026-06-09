@@ -234,6 +234,7 @@
     } else {
       api.set({ fen, turnColor, movable: { color: turnColor, dests }, check: _check });
     }
+    api.selectSquare(null);
   });
 
   $effect(() => {
