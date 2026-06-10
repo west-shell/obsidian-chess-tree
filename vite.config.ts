@@ -5,7 +5,7 @@ import { type PluginOption, defineConfig } from 'vite';
 const setOutDir = (mode: string) => {
   switch (mode) {
     case 'development':
-      return './test-vault/.obsidian/plugins/chess';
+      return './test-vault/.obsidian/plugins/chess-tree';
     case 'production':
     case 'production-min':
       return 'build';

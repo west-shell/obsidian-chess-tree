@@ -16,6 +16,7 @@
   import ChessPawn from "@lucide/svelte/icons/chess-pawn";
   import Castle from "@lucide/svelte/icons/castle";
   import ChevronsUp from "@lucide/svelte/icons/chevrons-up";
+  import House from "@lucide/svelte/icons/house";
 
   // Lucide annotation components
   import ThumbsUp from "@lucide/svelte/icons/thumbs-up";
@@ -240,8 +241,7 @@
   let nodeModeTitle = $derived(t("tree.nodeMode", _lv));
 
   function nodeLabel(node: ChessNode): string {
-    if (!node.move) return "S";
-    if (nodeMode === 1) return node.move.san ?? "S";
+    if (nodeMode === 1) return node.move?.san ?? "start";
     return ""; // icon mode handled in template
   }
   function nodeFontSize(): string {
@@ -360,7 +360,17 @@
                 fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
                 stroke="var(--board-line)"
               />
-              {#if nodeMode === 0 && getPieceComponent(node)}
+              {#if nodeMode === 0 && !node.move}
+                <foreignObject x={-8} y={-6.5} width={16} height={13}>
+                  <div
+                    xmlns="http://www.w3.org/1999/xhtml"
+                    style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+                    color:#fff;pointer-events:none;"
+                  >
+                    <House size={12} strokeWidth={1.5} />
+                  </div>
+                </foreignObject>
+              {:else if nodeMode === 0 && getPieceComponent(node)}
                 {@const PieceIcon = getPieceComponent(node)!}
                 <foreignObject x={-8} y={-6.5} width={16} height={13}>
                   <div
