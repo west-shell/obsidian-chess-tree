@@ -133,7 +133,7 @@
   <div class="tool-section">
     <span class="section-label">{t("genfen.castling", _lv)}</span>
     <div class="castling-grid">
-      <span class="castling-color">白</span>
+      <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.K}>
         <input type="checkbox" checked={hasCastling.K} onchange={() => toggleCastling('K')} />
         <span>{t("genfen.castling_short", _lv)}</span>
@@ -142,7 +142,7 @@
         <input type="checkbox" checked={hasCastling.Q} onchange={() => toggleCastling('Q')} />
         <span>{t("genfen.castling_long", _lv)}</span>
       </label>
-      <span class="castling-color">黑</span>
+      <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.k}>
         <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling('k')} />
         <span>{t("genfen.castling_short", _lv)}</span>
