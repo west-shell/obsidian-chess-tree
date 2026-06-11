@@ -169,9 +169,11 @@
             showDests: true,
             dests,
           },
-      highlight: {
-        lastMove: settings.showLastMove,
-      },
+      highlight: freeMode
+        ? { lastMove: false }
+        : {
+            lastMove: settings.showLastMove,
+          },
       drawable: {
         enabled: true,
         visible: true,
@@ -270,11 +272,14 @@
 
   $effect(() => {
     if (!api) return;
-    api.set({
+    const cfg: any = {
       coordinates: true,
       viewOnly: settings.viewOnly ?? false,
-      highlight: { lastMove: settings.showLastMove },
-    });
+    };
+    if (!freeMode) {
+      cfg.highlight = { lastMove: settings.showLastMove };
+    }
+    api.set(cfg);
   });
 </script>
 
