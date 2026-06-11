@@ -30,10 +30,6 @@
     eventBus.emit('btn-click', { action: 'toggleCastling', right });
   }
 
-  function toggleTurn() {
-    eventBus.emit('toggle-turn');
-  }
-
   function setEnPassant(file: string) {
     eventBus.emit('btn-click', { action: 'setEnPassant', file });
   }
