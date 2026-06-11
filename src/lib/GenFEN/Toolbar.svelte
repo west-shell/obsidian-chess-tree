@@ -38,10 +38,8 @@
     eventBus.emit('btn-click', { action: 'setEnPassant', file });
   }
 
-  function setPreset(fenStr: string) {
-    if (fenStr) {
-      eventBus.emit('btn-click', { action: 'setPreset', fen: fenStr });
-    }
+  function toggleTurn() {
+    eventBus.emit('toggle-turn');
   }
 
   function buttonClick(action: string) {
@@ -105,24 +103,11 @@
     });
   });
 
-  // Preset positions
-  const PRESETS = [
-    { label: 'Standard', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' },
-    { label: 'Empty', fen: '8/8/8/8/8/8/8/8 w - - 0 1' },
-    { label: 'Italian Game', fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1' },
-    { label: 'Sicilian Defense', fen: 'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 1' },
-    { label: 'French Defense', fen: 'rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1' },
-    { label: 'Caro-Kann', fen: 'rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1' },
-    { label: 'King\'s Gambit', fen: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 1' },
-    { label: 'Queen\'s Gambit', fen: 'rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 1' },
-    { label: 'Ruy Lopez', fen: 'r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 1' },
-  ];
 </script>
 
 <div class="fen-editor-tools {position}">
   <!-- Side to move -->
   <div class="tool-section turn-row">
-    <span class="section-label">{t("genfen.side_to_move", _lv)}：</span>
     <button
       class="turn-toggle"
       onclick={toggleTurn}
@@ -167,17 +152,6 @@
       <option value="-">{t("genfen.enpassant_off", _lv)}</option>
       {#each enPassantFiles as f}
         <option value={f}>{f}{currentTurn === 'white' ? '6' : '3'}</option>
-      {/each}
-    </select>
-  </div>
-
-  <!-- Preset positions -->
-  <div class="tool-section">
-    <label class="section-label" for="genfen-preset">{t("genfen.preset", _lv)}</label>
-    <select id="genfen-preset" class="fen-select" onchange={(e) => setPreset((e.target as HTMLSelectElement).value)}>
-      <option value="">— {t("genfen.preset", _lv)} —</option>
-      {#each PRESETS as p}
-        <option value={p.fen}>{p.label}</option>
       {/each}
     </select>
   </div>
