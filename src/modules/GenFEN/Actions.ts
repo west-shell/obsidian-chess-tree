@@ -5,6 +5,18 @@ import { t } from '../../i18n';
 import type { IGenFENHost } from '../../types';
 import { DEFAULT_FEN } from '../../types';
 
+function parseFen(fen: string): string[] {
+  const parts = fen.split(' ');
+  while (parts.length < 6) parts.push('-');
+  return parts;
+}
+
+function setFenField(fen: string, idx: number, val: string): string {
+  const parts = parseFen(fen);
+  parts[idx] = val;
+  return parts.join(' ');
+}
+
 const ActionsModule = {
   init(host: IGenFENHost) {
     const eventBus = host.eventBus;
@@ -15,26 +27,79 @@ const ActionsModule = {
       host.eventBus.emit('updateUI');
     });
 
-    eventBus.on('btn-click', action => {
+    eventBus.on('btn-click', (action: any) => {
       if (!action) return;
-      switch (action) {
-        case 'turn':
-          // Toggle turn in FEN
-          const parts = host.fen.split(' ');
-          parts[1] = parts[1] === 'w' ? 'b' : 'w';
-          host.fen = parts.join(' ');
+
+      // Simple string actions
+      if (typeof action === 'string') {
+        switch (action) {
+          case 'turn':
+            host.fen = setFenField(host.fen, 1, parseFen(host.fen)[1] === 'w' ? 'b' : 'w');
+            break;
+          case 'empty':
+            host.fen = '8/8/8/8/8/8/8/8 w - - 0 1';
+            host.selectedPiece = null;
+            break;
+          case 'full':
+            host.fen = DEFAULT_FEN;
+            host.selectedPiece = null;
+            break;
+          case 'save':
+            onSaveBTNClick(host);
+            break;
+          case 'start':
+            host.fen = DEFAULT_FEN;
+            host.selectedPiece = null;
+            break;
+        }
+        eventBus.emit('updateUI');
+        return;
+      }
+
+      // Object actions
+      switch (action.action) {
+        case 'toggleCastling': {
+          const right = action.right as string; // K, Q, k, q
+          let castling = parseFen(host.fen)[2];
+          if (castling === '-') castling = '';
+          if (castling.includes(right)) {
+            castling = castling.replace(right, '');
+          } else {
+            castling = (castling + right).split('').sort((a, b) => {
+              const order = ['K', 'Q', 'k', 'q'];
+              return order.indexOf(a) - order.indexOf(b);
+            }).join('');
+          }
+          if (!castling) castling = '-';
+          host.fen = setFenField(host.fen, 2, castling);
           break;
-        case 'empty':
-          host.fen = '8/8/8/8/8/8/8/8 w - - 0 1';
-          host.selectedPiece = null;
+        }
+        case 'setEnPassant': {
+          const file = action.file as string;
+          if (file === '-') {
+            host.fen = setFenField(host.fen, 3, '-');
+          } else if (file) {
+            const turn = parseFen(host.fen)[1];
+            const rank = turn === 'w' ? '6' : '3';
+            host.fen = setFenField(host.fen, 3, `${file}${rank}`);
+          }
           break;
-        case 'full':
-          host.fen = DEFAULT_FEN;
-          host.selectedPiece = null;
+        }
+        case 'setPreset': {
+          const fenStr = action.fen as string;
+          if (fenStr) {
+            host.fen = fenStr;
+            host.selectedPiece = null;
+          }
           break;
-        case 'save':
-          onSaveBTNClick(host);
+        }
+        case 'setFen': {
+          const newFen = action.fen as string;
+          if (newFen) {
+            host.fen = newFen;
+          }
           break;
+        }
       }
       eventBus.emit('updateUI');
     });

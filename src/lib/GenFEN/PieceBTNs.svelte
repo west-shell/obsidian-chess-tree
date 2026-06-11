@@ -7,10 +7,10 @@
     settings: ISettings;
     fen: string;
     eventBus: EventBus;
-    position?: string;
+    position: string;
     selectedPiece: string | null;
   }
-  let { settings, fen, eventBus, position = "", selectedPiece }: Props = $props();
+  let { settings, fen, eventBus, position, selectedPiece }: Props = $props();
 
   const MAX_COUNT: Record<string, number> = {
     K: 1, Q: 1, R: 2, B: 2, N: 2, P: 8,
@@ -65,11 +65,14 @@
 </div>
 
 <style>
-  .pieces.right {
+  .pieces {
     display: flex;
+  }
+  .pieces.right {
     flex-direction: column;
     height: var(--h);
     justify-content: space-between;
+    flex-shrink: 0;
   }
   .pieces.bottom {
     display: grid;
@@ -85,9 +88,11 @@
     align-items: center;
     justify-content: center;
     padding: 4px;
+    transition: all 0.15s;
   }
   .btn.right {
     flex: 1;
+    aspect-ratio: 1;
     margin: 1px 0;
   }
   .btn.bottom {
@@ -110,5 +115,8 @@
   .btn.empty {
     pointer-events: none;
     opacity: 0.2;
+  }
+  .btn:hover:not(.empty) {
+    filter: brightness(1.15);
   }
 </style>

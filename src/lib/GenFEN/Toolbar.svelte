@@ -1,63 +1,312 @@
 <script lang="ts">
   import type { EventBus } from "../../core/event-bus";
   import { onLangChange, t } from "../../i18n";
+  import { onMount } from "svelte";
 
   interface Props {
     eventBus: EventBus;
     position: string;
-    currentTurn: string;
+    getFen: () => string;
   }
-  let { eventBus, position, currentTurn }: Props = $props();
+  let { eventBus, position, getFen }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
-  let buttons = $derived([
-    { text: t("genfen.turn", _lv), action: "turn", color: true },
-    { text: t("genfen.empty", _lv), action: "empty" },
-    { text: t("genfen.full", _lv), action: "full" },
-    { text: t("genfen.save", _lv), action: "save" },
-  ]);
+  // Read latest FEN from getter (always uptodate)
+  let latestFen = $derived(getFen());
+  let parts = $derived(latestFen.split(' '));
+  let currentTurn = $derived(parts[1] === 'b' ? 'black' : 'white');
+  let castlingStr = $derived(parts[2] || '');
+  let enPassantStr = $derived(parts[3] || '-');
+
+  let hasCastling = $derived({
+    K: castlingStr.includes('K'),
+    Q: castlingStr.includes('Q'),
+    k: castlingStr.includes('k'),
+    q: castlingStr.includes('q'),
+  });
+
+  function toggleCastling(right: 'K' | 'Q' | 'k' | 'q') {
+    eventBus.emit('btn-click', { action: 'toggleCastling', right });
+  }
+
+  function toggleTurn() {
+    eventBus.emit('toggle-turn');
+  }
+
+  function setEnPassant(file: string) {
+    eventBus.emit('btn-click', { action: 'setEnPassant', file });
+  }
+
+  function setPreset(fenStr: string) {
+    if (fenStr) {
+      eventBus.emit('btn-click', { action: 'setPreset', fen: fenStr });
+    }
+  }
+
+  function buttonClick(action: string) {
+    eventBus.emit('btn-click', action);
+  }
+
+  const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+  // Compute en passant files on demand (when dropdown is opened)
+  function expandRow(row: string): string[] {
+    const result: string[] = [];
+    for (const ch of row) {
+      if (/[1-8]/.test(ch)) {
+        for (let i = 0; i < parseInt(ch); i++) result.push('');
+      } else {
+        result.push(ch);
+      }
+    }
+    return result;
+  }
+
+  function computeEnPassantFilesFor(fenStr: string): string[] {
+    const p = fenStr.split(' ');
+    const board = p[0].split('/'); // rank 8 to rank 1
+    const turn = p[1]; // 'w' or 'b'
+    const valid: string[] = [];
+
+    if (turn === 'w') {
+      const row = expandRow(board[3]); // rank 5
+      for (let f = 0; f < 8; f++) {
+        if (row[f] === 'p') {
+          if ((f > 0 && row[f - 1] === 'P') || (f < 7 && row[f + 1] === 'P')) {
+            valid.push(FILES[f]);
+          }
+        }
+      }
+    } else {
+      const row = expandRow(board[4]); // rank 4
+      for (let f = 0; f < 8; f++) {
+        if (row[f] === 'P') {
+          if ((f > 0 && row[f - 1] === 'p') || (f < 7 && row[f + 1] === 'p')) {
+            valid.push(FILES[f]);
+          }
+        }
+      }
+    }
+    return [...new Set(valid)].sort();
+  }
+
+  let enPassantFiles = $state([]);
+
+  onMount(() => {
+    enPassantFiles = computeEnPassantFilesFor(getFen());
+  });
+
+  // Sync en passant files whenever FEN changes (from any source)
+  $effect(() => {
+    const current = getFen();
+    enPassantFiles = computeEnPassantFilesFor(current);
+  });
+
+  // Preset positions
+  const PRESETS = [
+    { label: 'Standard', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' },
+    { label: 'Empty', fen: '8/8/8/8/8/8/8/8 w - - 0 1' },
+    { label: 'Italian Game', fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1' },
+    { label: 'Sicilian Defense', fen: 'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 1' },
+    { label: 'French Defense', fen: 'rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1' },
+    { label: 'Caro-Kann', fen: 'rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1' },
+    { label: 'King\'s Gambit', fen: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 1' },
+    { label: 'Queen\'s Gambit', fen: 'rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 1' },
+    { label: 'Ruy Lopez', fen: 'r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 1' },
+  ];
 </script>
 
-<div class={`fen-toolbar ${position}`}>
-  {#each buttons as { text, action, color }}
+<div class="fen-editor-tools {position}">
+  <!-- Side to move -->
+  <div class="tool-section turn-row">
+    <span class="section-label">{t("genfen.side_to_move", _lv)}：</span>
     <button
-      class="fen-btn"
-      class:turn-white={color && currentTurn === "white"}
-      class:turn-black={color && currentTurn === "black"}
-      onclick={() => eventBus.emit("btn-click", action)}
+      class="turn-toggle"
+      onclick={toggleTurn}
+    >{currentTurn === 'white' ? t("genfen.white_turn", _lv) : t("genfen.black_turn", _lv)}</button>
+  </div>
+
+  <!-- Castling -->
+  <div class="tool-section">
+    <span class="section-label">{t("genfen.castling", _lv)}</span>
+    <div class="castling-grid">
+      <span class="castling-color">白</span>
+      <label class="castling-checkbox" class:active={hasCastling.K}>
+        <input type="checkbox" checked={hasCastling.K} onchange={() => toggleCastling('K')} />
+        <span>{t("genfen.castling_short", _lv)}</span>
+      </label>
+      <label class="castling-checkbox" class:active={hasCastling.Q}>
+        <input type="checkbox" checked={hasCastling.Q} onchange={() => toggleCastling('Q')} />
+        <span>{t("genfen.castling_long", _lv)}</span>
+      </label>
+      <span class="castling-color">黑</span>
+      <label class="castling-checkbox" class:active={hasCastling.k}>
+        <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling('k')} />
+        <span>{t("genfen.castling_short", _lv)}</span>
+      </label>
+      <label class="castling-checkbox" class:active={hasCastling.q}>
+        <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling('q')} />
+        <span>{t("genfen.castling_long", _lv)}</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- En passant -->
+  <div class="tool-section">
+    <label class="section-label" for="genfen-ep">{t("genfen.enpassant", _lv)}</label>
+    <select
+      id="genfen-ep"
+      class="fen-select"
+      value={enPassantStr === '-' ? '-' : enPassantStr[0]}
+      onfocus={() => { enPassantFiles = computeEnPassantFilesFor(getFen()); }}
+      onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
     >
-      {text}
+      <option value="-">{t("genfen.enpassant_off", _lv)}</option>
+      {#each enPassantFiles as f}
+        <option value={f}>{f}{currentTurn === 'white' ? '6' : '3'}</option>
+      {/each}
+    </select>
+  </div>
+
+  <!-- Preset positions -->
+  <div class="tool-section">
+    <label class="section-label" for="genfen-preset">{t("genfen.preset", _lv)}</label>
+    <select id="genfen-preset" class="fen-select" onchange={(e) => setPreset((e.target as HTMLSelectElement).value)}>
+      <option value="">— {t("genfen.preset", _lv)} —</option>
+      {#each PRESETS as p}
+        <option value={p.fen}>{p.label}</option>
+      {/each}
+    </select>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="tool-section tool-buttons">
+    <button class="fen-btn" onclick={() => buttonClick('start')}>
+      {t("genfen.start", _lv)}
     </button>
-  {/each}
+    <button class="fen-btn" onclick={() => buttonClick('empty')}>
+      {t("genfen.empty", _lv)}
+    </button>
+    <button class="fen-btn" onclick={() => buttonClick('flip')}>
+      {t("genfen.flip", _lv)}
+    </button>
+    <button class="fen-btn fen-btn-save" onclick={() => buttonClick('save')}>
+      {t("genfen.save", _lv)}
+    </button>
+  </div>
 </div>
 
 <style>
-  .fen-toolbar.right {
+  .fen-editor-tools {
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 10px;
+    padding: 8px;
   }
-  .fen-toolbar.bottom {
-    display: flex;
+  .fen-editor-tools.bottom {
     flex-direction: row;
-    gap: 0.5em;
+    flex-wrap: wrap;
+    align-items: flex-start;
   }
-  .fen-btn {
-    padding: 0.4em 0.8em;
-    border: none;
+  .tool-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .section-label {
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+  .turn-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+  .turn-toggle {
+    padding: 2px 12px;
+    border: 1px solid var(--background-modifier-border, #ccc);
     border-radius: 4px;
     cursor: pointer;
-    background: var(--background-secondary);
-    color: var(--text-normal);
+    background: var(--background-secondary, #f0f0f0);
+    color: var(--text-normal, #000);
+    font-size: 0.85em;
+    transition: background 0.15s;
+    white-space: nowrap;
   }
-  .turn-white {
-    background: #f0d9b5;
-    color: #5a4a3a;
+  .turn-toggle:hover {
+    background: var(--background-modifier-hover, #e0e0e0);
   }
-  .turn-black {
-    background: #3a3a3a;
-    color: #d0d0d0;
+  .fen-select {
+    padding: 4px 8px;
+    border: 1px solid var(--background-modifier-border, #ccc);
+    border-radius: 4px;
+    background: var(--background-primary, #fff);
+    color: var(--text-normal, #000);
+    font-size: 0.9em;
+    max-width: 100%;
+  }
+  .castling-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 4px 8px;
+    align-items: center;
+  }
+  .castling-color {
+    font-weight: 600;
+    font-size: 0.85em;
+    text-align: right;
+  }
+  .castling-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .castling-checkbox.active {
+    border-color: var(--interactive-accent, #6a9fb5);
+    background: color-mix(in srgb, var(--interactive-accent, #6a9fb5) 15%, transparent);
+  }
+  .castling-checkbox input {
+    margin: 0;
+  }
+  .tool-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .tool-buttons.bottom {
+    flex-direction: row;
+  }
+  .fen-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--background-modifier-border, #ccc);
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--background-secondary, #f0f0f0);
+    color: var(--text-normal, #000);
+    font-size: 0.85em;
+    transition: background 0.15s;
+  }
+  .fen-btn:hover {
+    background: var(--background-modifier-hover, #e0e0e0);
+  }
+  .fen-btn-save {
+    background: var(--interactive-accent, #6a9fb5);
+    color: var(--text-on-accent, #fff);
+    border-color: var(--interactive-accent, #6a9fb5);
+    font-weight: 600;
+  }
+  .fen-btn-save:hover {
+    opacity: 0.9;
   }
 </style>
