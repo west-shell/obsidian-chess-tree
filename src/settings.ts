@@ -125,16 +125,6 @@ export class ChessSettingTab extends PluginSettingTab {
           });
       });
 
-    new Setting(containerEl)
-      .setName(t('board.coordinates'))
-      .setDesc(t('board.coordinates.desc'))
-      .addToggle(toggle =>
-        toggle.setValue(settings.showCoordinateLabels).onChange(value => {
-          settings.showCoordinateLabels = value;
-          this.plugin.saveSettings();
-        }),
-      );
-
     new Setting(containerEl).setName(t('game.title')).setHeading();
 
     new Setting(containerEl)
