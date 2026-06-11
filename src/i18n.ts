@@ -216,6 +216,13 @@ let _ver = 0;
 const listeners = new Set<() => void>();
 
 function detect(): string {
+  // Try Obsidian UI language first (true "跟随软件")
+  const docLang = document.documentElement.lang;
+  if (docLang) {
+    if (docLang.toLowerCase().startsWith('zh')) return 'zh-cn';
+    if (messages[docLang]) return docLang;
+  }
+  // Fallback to browser language
   const raw = navigator.language;
   if (messages[raw]) return raw;
   if (raw.toLowerCase().startsWith('zh')) return 'zh-cn';
