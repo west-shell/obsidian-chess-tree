@@ -18,18 +18,18 @@
   };
 
   const PIECES: { key: string; color: "white" | "black"; icon: string }[] = [
-    { key: "K", color: "white", icon: "chess-king" },
-    { key: "Q", color: "white", icon: "chess-queen" },
-    { key: "R", color: "white", icon: "chess-rook" },
-    { key: "B", color: "white", icon: "chess-bishop" },
-    { key: "N", color: "white", icon: "chess-knight" },
-    { key: "P", color: "white", icon: "chess-pawn" },
     { key: "k", color: "black", icon: "chess-king" },
     { key: "q", color: "black", icon: "chess-queen" },
     { key: "r", color: "black", icon: "chess-rook" },
     { key: "b", color: "black", icon: "chess-bishop" },
     { key: "n", color: "black", icon: "chess-knight" },
     { key: "p", color: "black", icon: "chess-pawn" },
+    { key: "K", color: "white", icon: "chess-king" },
+    { key: "Q", color: "white", icon: "chess-queen" },
+    { key: "R", color: "white", icon: "chess-rook" },
+    { key: "B", color: "white", icon: "chess-bishop" },
+    { key: "N", color: "white", icon: "chess-knight" },
+    { key: "P", color: "white", icon: "chess-pawn" },
   ];
 
   let pieceCount = $derived(
