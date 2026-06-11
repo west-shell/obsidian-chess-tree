@@ -24,7 +24,7 @@ const ActionsModule = {
     eventBus.on('clickPieceBTN', (piece: string) => {
       if (!piece) return;
       host.selectedPiece = piece;
-      host.eventBus.emit('updateUI');
+      host.eventBus.emit('updateUI', host.fen);
     });
 
     eventBus.on('btn-click', (action: any) => {
@@ -52,7 +52,7 @@ const ActionsModule = {
             host.selectedPiece = null;
             break;
         }
-        eventBus.emit('updateUI');
+        eventBus.emit('updateUI', host.fen);
         return;
       }
 
@@ -101,7 +101,7 @@ const ActionsModule = {
           break;
         }
       }
-      eventBus.emit('updateUI');
+      eventBus.emit('updateUI', host.fen);
     });
   },
 };

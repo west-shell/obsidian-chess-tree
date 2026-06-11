@@ -47,7 +47,7 @@
   </div>
   <div class="editor-sidebar {position}">
     <PieceBTNs {settings} {fen} {eventBus} {position} {selectedPiece} />
-    <Toolbar {eventBus} {position} getFen={() => fen} />
+    <Toolbar {eventBus} {position} {fen} />
   </div>
 </div>
 

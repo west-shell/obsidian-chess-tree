@@ -16,7 +16,7 @@ const BoardClickModule = {
         const piece = chess.get(clickedKey as Square);
         if (piece) {
           host.markedPos = clickedKey;
-          eventBus.emit('updateUI');
+          eventBus.emit('updateUI', host.fen);
         }
       } else if (host.markedPos && !host.selectedPiece) {
         // Move piece from markedPos to clickedKey
@@ -34,10 +34,10 @@ const BoardClickModule = {
           }
           host.fen = chess.fen();
           host.markedPos = null;
-          eventBus.emit('updateUI');
+          eventBus.emit('updateUI', host.fen);
         } else {
           host.markedPos = null;
-          eventBus.emit('updateUI');
+          eventBus.emit('updateUI', host.fen);
         }
       } else if (host.selectedPiece) {
         if (host.selectedPiece === BOARD_CLICK_EMPTY) {
@@ -55,15 +55,8 @@ const BoardClickModule = {
         }
         host.selectedPiece = null;
         host.markedPos = null;
-        eventBus.emit('updateUI');
+        eventBus.emit('updateUI', host.fen);
       }
-    });
-
-    eventBus.on('fen-updated', (fen: string) => {
-      if (!fen) return;
-      host.fen = fen;
-      host.markedPos = null;
-      eventBus.emit('updateUI');
     });
   },
 };

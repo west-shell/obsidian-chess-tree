@@ -6,16 +6,15 @@
   interface Props {
     eventBus: EventBus;
     position: string;
-    getFen: () => string;
+    fen: string;
   }
-  let { eventBus, position, getFen }: Props = $props();
+  let { eventBus, position, fen }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
-  // Read latest FEN from getter (always uptodate)
-  let latestFen = $derived(getFen());
-  let parts = $derived(latestFen.split(' '));
+  // Parse FEN
+  let parts = $derived(fen.split(' '));
   let currentTurn = $derived(parts[1] === 'b' ? 'black' : 'white');
   let castlingStr = $derived(parts[2] || '');
   let enPassantStr = $derived(parts[3] || '-');
@@ -95,13 +94,15 @@
   let enPassantFiles = $state([]);
 
   onMount(() => {
-    enPassantFiles = computeEnPassantFilesFor(getFen());
-  });
-
-  // Sync en passant files whenever FEN changes (from any source)
-  $effect(() => {
-    const current = getFen();
-    enPassantFiles = computeEnPassantFilesFor(current);
+    enPassantFiles = computeEnPassantFilesFor(fen);
+    // Recalc on every FEN update (from any source)
+    eventBus.on('updateUI', (fenStr: string) => {
+      if (fenStr) {
+        enPassantFiles = computeEnPassantFilesFor(fenStr);
+      } else {
+        enPassantFiles = computeEnPassantFilesFor(fen);
+      }
+    });
   });
 
   // Preset positions
@@ -160,7 +161,7 @@
       id="genfen-ep"
       class="fen-select"
       value={enPassantStr === '-' ? '-' : enPassantStr[0]}
-      onfocus={() => { enPassantFiles = computeEnPassantFilesFor(getFen()); }}
+      onfocus={() => { enPassantFiles = computeEnPassantFilesFor(fen); }}
       onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
     >
       <option value="-">{t("genfen.enpassant_off", _lv)}</option>
