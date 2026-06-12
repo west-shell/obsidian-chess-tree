@@ -9,12 +9,15 @@
 
   interface Props {
     settings: ISettings;
-    fen: string;
+    fen: string;           // 棋子布局部分
+    currentTurn: string;   // "w" 或 "b"
+    castling: string;      // 易位权力
+    enPassant: string;     // 过路兵
     selectedPiece: string | null;
     eventBus: EventBus;
   }
 
-  let { settings, fen, selectedPiece, eventBus }: Props = $props();
+  let { settings, fen, currentTurn, castling, enPassant, selectedPiece, eventBus }: Props = $props();
 
   let position = $derived(settings.position);
   let flipped = $state(false);
@@ -26,9 +29,8 @@
   }
 
   function onToggleTurn() {
-    const parts = fen.split(' ');
-    parts[1] = parts[1] === 'w' ? 'b' : 'w';
-    eventBus.emit('btn-click', { action: 'setFen', fen: parts.join(' ') });
+    currentTurn = currentTurn === 'w' ? 'b' : 'w';
+    eventBus.emit('btn-click', { action: 'setFen', fen: `${fen} ${currentTurn} ${castling} ${enPassant}` });
   }
 
   onMount(() => {
@@ -47,7 +49,7 @@
   </div>
   <div class="editor-sidebar {position}">
     <PieceBTNs {settings} {fen} {eventBus} {position} {selectedPiece} />
-    <Toolbar {eventBus} {position} {fen} />
+    <Toolbar {eventBus} {position} {fen} {currentTurn} {castling} {enPassant} />
   </div>
 </div>
 

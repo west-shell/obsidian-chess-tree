@@ -20,9 +20,14 @@ const SourceModule = {
           host.currentStep = 0;
           host.options = options;
           break;
-        case 'fen':
-          host.fen = fen;
+        case 'fen': {
+          const parts = fen.split(' ');
+          host.fen = parts[0]; // 棋子布局
+          host.currentTurn = parts[1] || 'w';
+          host.castling = parts[2] || '-';
+          host.enPassant = parts[3] || '-';
           break;
+        }
       }
     });
 

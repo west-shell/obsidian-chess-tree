@@ -82,7 +82,10 @@ export interface IGenFENHost extends IHost {
   ctx: MarkdownPostProcessorContext & {
     getSectionInfo(el: HTMLElement): MarkdownSectionInformation;
   };
-  fen: string;
+  fen: string; // 棋子布局部分，如 "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+  currentTurn: string; // "w" 或 "b"
+  castling: string; // 易位权力，如 "KQkq" 或 "-"
+  enPassant: string; // 过路兵，如 "-" 或 "e3"
   selectedPiece: string | null;
   settings: ISettings;
   file: { path: string };

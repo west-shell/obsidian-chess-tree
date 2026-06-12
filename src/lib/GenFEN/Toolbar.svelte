@@ -6,24 +6,23 @@
   interface Props {
     eventBus: EventBus;
     position: string;
-    fen: string;
+    fen: string;           // 棋子布局部分
+    currentTurn: string;   // "w" 或 "b"
+    castling: string;      // 易位权力
+    enPassant: string;     // 过路兵
   }
-  let { eventBus, position, fen }: Props = $props();
+  let { eventBus, position, fen, currentTurn, castling, enPassant }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
-  // Parse FEN
-  let parts = $derived(fen.split(" "));
-  let currentTurn = $derived(parts[1] === "b" ? "black" : "white");
-  let castlingStr = $derived(parts[2] || "");
-  let enPassantStr = $derived(parts[3] || "-");
+  let turnLabel = $derived(currentTurn === "b" ? "black" : "white");
 
   let hasCastling = $derived({
-    K: castlingStr.includes("K"),
-    Q: castlingStr.includes("Q"),
-    k: castlingStr.includes("k"),
-    q: castlingStr.includes("q"),
+    K: castling.includes("K"),
+    Q: castling.includes("Q"),
+    k: castling.includes("k"),
+    q: castling.includes("q"),
   });
 
   function toggleCastling(right: "K" | "Q" | "k" | "q") {
@@ -57,10 +56,8 @@
     return result;
   }
 
-  function computeEnPassantFilesFor(fenStr: string): string[] {
-    const p = fenStr.split(" ");
-    const board = p[0].split("/"); // rank 8 to rank 1
-    const turn = p[1]; // 'w' or 'b'
+  function computeEnPassantFilesFor(boardFen: string, turn: string): string[] {
+    const board = boardFen.split("/"); // rank 8 to rank 1
     const valid: string[] = [];
 
     if (turn === "w") {
@@ -85,16 +82,17 @@
     return [...new Set(valid)].sort();
   }
 
-  let enPassantFiles = $state([]);
+  let enPassantFiles = $state<string[]>([]);
 
   onMount(() => {
-    enPassantFiles = computeEnPassantFilesFor(fen);
+    enPassantFiles = computeEnPassantFilesFor(fen, currentTurn);
     // Recalc on every FEN update (from any source)
     eventBus.on("updateUI", (fenStr: string) => {
+      const turn = currentTurn;
       if (fenStr) {
-        enPassantFiles = computeEnPassantFilesFor(fenStr);
+        enPassantFiles = computeEnPassantFilesFor(fenStr, turn);
       } else {
-        enPassantFiles = computeEnPassantFilesFor(fen);
+        enPassantFiles = computeEnPassantFilesFor(fen, turn);
       }
     });
   });
@@ -104,7 +102,7 @@
   <!-- Side to move -->
   <div class="tool-section turn-row">
     <button class="turn-toggle" onclick={toggleTurn}
-      >{currentTurn === "white" ? t("genfen.white_turn", _lv) : t("genfen.black_turn", _lv)}</button
+      >{turnLabel === "black" ? t("genfen.black_turn", _lv) : t("genfen.white_turn", _lv)}</button
     >
   </div>
 
@@ -124,7 +122,7 @@
       <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.k}>
         <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling("k")} />
-        <span>{t("genfen.castling_short", _lv)}</span>
+        <span>{t("genfen.castling_long", _lv)}</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.q}>
         <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling("q")} />
@@ -139,15 +137,15 @@
     <select
       id="genfen-ep"
       class="fen-select"
-      value={enPassantStr === "-" ? "-" : enPassantStr[0]}
+      value={enPassant === "-" ? "-" : enPassant[0]}
       onfocus={() => {
-        enPassantFiles = computeEnPassantFilesFor(fen);
+        enPassantFiles = computeEnPassantFilesFor(fen, currentTurn);
       }}
       onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
     >
       <option value="-">{t("genfen.enpassant_off", _lv)}</option>
       {#each enPassantFiles as f}
-        <option value={f}>{f}{currentTurn === "white" ? "6" : "3"}</option>
+        <option value={f}>{f}{currentTurn === "w" ? "6" : "3"}</option>
       {/each}
     </select>
   </div>

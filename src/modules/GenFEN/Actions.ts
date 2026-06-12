@@ -5,16 +5,23 @@ import { t } from '../../i18n';
 import type { IGenFENHost } from '../../types';
 import { DEFAULT_FEN } from '../../types';
 
-function parseFen(fen: string): string[] {
-  const parts = fen.split(' ');
-  while (parts.length < 6) parts.push('-');
-  return parts;
+function buildFullFen(host: IGenFENHost): string {
+  return `${host.fen} ${host.currentTurn} ${host.castling} ${host.enPassant} 0 1`;
 }
 
-function setFenField(fen: string, idx: number, val: string): string {
-  const parts = parseFen(fen);
-  parts[idx] = val;
-  return parts.join(' ');
+function setBoardOnly(host: IGenFENHost, boardPart: string): void {
+  host.fen = boardPart;
+  host.currentTurn = 'w';
+  host.castling = '-';
+  host.enPassant = '-';
+}
+
+function setFullStartPosition(host: IGenFENHost): void {
+  const parts = DEFAULT_FEN.split(' ');
+  host.fen = parts[0];
+  host.currentTurn = parts[1];
+  host.castling = parts[2];
+  host.enPassant = parts[3];
 }
 
 const ActionsModule = {
@@ -34,21 +41,21 @@ const ActionsModule = {
       if (typeof action === 'string') {
         switch (action) {
           case 'turn':
-            host.fen = setFenField(host.fen, 1, parseFen(host.fen)[1] === 'w' ? 'b' : 'w');
+            host.currentTurn = host.currentTurn === 'w' ? 'b' : 'w';
             break;
           case 'empty':
-            host.fen = '8/8/8/8/8/8/8/8 w - - 0 1';
+            setBoardOnly(host, '8/8/8/8/8/8/8/8');
             host.selectedPiece = null;
             break;
           case 'full':
-            host.fen = DEFAULT_FEN;
+            setFullStartPosition(host);
             host.selectedPiece = null;
             break;
           case 'save':
             onSaveBTNClick(host);
             break;
           case 'start':
-            host.fen = DEFAULT_FEN;
+            setFullStartPosition(host);
             host.selectedPiece = null;
             break;
         }
@@ -60,8 +67,7 @@ const ActionsModule = {
       switch (action.action) {
         case 'toggleCastling': {
           const right = action.right as string; // K, Q, k, q
-          let castling = parseFen(host.fen)[2];
-          if (castling === '-') castling = '';
+          let castling = host.castling === '-' ? '' : host.castling;
           if (castling.includes(right)) {
             castling = castling.replace(right, '');
           } else {
@@ -73,25 +79,27 @@ const ActionsModule = {
               })
               .join('');
           }
-          if (!castling) castling = '-';
-          host.fen = setFenField(host.fen, 2, castling);
+          host.castling = castling || '-';
           break;
         }
         case 'setEnPassant': {
           const file = action.file as string;
           if (file === '-') {
-            host.fen = setFenField(host.fen, 3, '-');
+            host.enPassant = '-';
           } else if (file) {
-            const turn = parseFen(host.fen)[1];
-            const rank = turn === 'w' ? '6' : '3';
-            host.fen = setFenField(host.fen, 3, `${file}${rank}`);
+            const rank = host.currentTurn === 'w' ? '6' : '3';
+            host.enPassant = `${file}${rank}`;
           }
           break;
         }
         case 'setPreset': {
           const fenStr = action.fen as string;
           if (fenStr) {
-            host.fen = fenStr;
+            const parts = fenStr.split(' ');
+            host.fen = parts[0];
+            host.currentTurn = parts[1] || 'w';
+            host.castling = parts[2] || '-';
+            host.enPassant = parts[3] || '-';
             host.selectedPiece = null;
           }
           break;
@@ -99,7 +107,11 @@ const ActionsModule = {
         case 'setFen': {
           const newFen = action.fen as string;
           if (newFen) {
-            host.fen = newFen;
+            const parts = newFen.split(' ');
+            host.fen = parts[0];
+            host.currentTurn = parts[1] || host.currentTurn;
+            host.castling = parts[2] || host.castling;
+            host.enPassant = parts[3] || host.enPassant;
           }
           break;
         }
@@ -112,7 +124,7 @@ const ActionsModule = {
 registerGenFENModule('actions', ActionsModule);
 
 async function onSaveBTNClick(host: IGenFENHost) {
-  const fen = host.fen;
+  const fullFen = buildFullFen(host);
   const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
   if (!view) return;
   const file = view.file;
@@ -130,7 +142,7 @@ async function onSaveBTNClick(host: IGenFENHost) {
 
     // Replace code block type from fen to chess and insert FEN
     blockLines[0] = blockLines[0].replace(/^```fen\b.*$/, '```chess');
-    blockLines = [blockLines[0], `[FEN "${fen}"]`, '```'];
+    blockLines = [blockLines[0], `[FEN "${fullFen}"]`, '```'];
 
     const newContent = [...lines.slice(0, lineStart), ...blockLines, ...lines.slice(lineEnd + 1)].join('\n');
 
