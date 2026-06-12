@@ -14,42 +14,42 @@
   onLangChange(() => _lv++);
 
   // Parse FEN
-  let parts = $derived(fen.split(' '));
-  let currentTurn = $derived(parts[1] === 'b' ? 'black' : 'white');
-  let castlingStr = $derived(parts[2] || '');
-  let enPassantStr = $derived(parts[3] || '-');
+  let parts = $derived(fen.split(" "));
+  let currentTurn = $derived(parts[1] === "b" ? "black" : "white");
+  let castlingStr = $derived(parts[2] || "");
+  let enPassantStr = $derived(parts[3] || "-");
 
   let hasCastling = $derived({
-    K: castlingStr.includes('K'),
-    Q: castlingStr.includes('Q'),
-    k: castlingStr.includes('k'),
-    q: castlingStr.includes('q'),
+    K: castlingStr.includes("K"),
+    Q: castlingStr.includes("Q"),
+    k: castlingStr.includes("k"),
+    q: castlingStr.includes("q"),
   });
 
-  function toggleCastling(right: 'K' | 'Q' | 'k' | 'q') {
-    eventBus.emit('btn-click', { action: 'toggleCastling', right });
+  function toggleCastling(right: "K" | "Q" | "k" | "q") {
+    eventBus.emit("btn-click", { action: "toggleCastling", right });
   }
 
   function setEnPassant(file: string) {
-    eventBus.emit('btn-click', { action: 'setEnPassant', file });
+    eventBus.emit("btn-click", { action: "setEnPassant", file });
   }
 
   function toggleTurn() {
-    eventBus.emit('toggle-turn');
+    eventBus.emit("toggle-turn");
   }
 
   function buttonClick(action: string) {
-    eventBus.emit('btn-click', action);
+    eventBus.emit("btn-click", action);
   }
 
-  const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
   // Compute en passant files on demand (when dropdown is opened)
   function expandRow(row: string): string[] {
     const result: string[] = [];
     for (const ch of row) {
       if (/[1-8]/.test(ch)) {
-        for (let i = 0; i < parseInt(ch); i++) result.push('');
+        for (let i = 0; i < parseInt(ch); i++) result.push("");
       } else {
         result.push(ch);
       }
@@ -58,16 +58,16 @@
   }
 
   function computeEnPassantFilesFor(fenStr: string): string[] {
-    const p = fenStr.split(' ');
-    const board = p[0].split('/'); // rank 8 to rank 1
+    const p = fenStr.split(" ");
+    const board = p[0].split("/"); // rank 8 to rank 1
     const turn = p[1]; // 'w' or 'b'
     const valid: string[] = [];
 
-    if (turn === 'w') {
+    if (turn === "w") {
       const row = expandRow(board[3]); // rank 5
       for (let f = 0; f < 8; f++) {
-        if (row[f] === 'p') {
-          if ((f > 0 && row[f - 1] === 'P') || (f < 7 && row[f + 1] === 'P')) {
+        if (row[f] === "p") {
+          if ((f > 0 && row[f - 1] === "P") || (f < 7 && row[f + 1] === "P")) {
             valid.push(FILES[f]);
           }
         }
@@ -75,8 +75,8 @@
     } else {
       const row = expandRow(board[4]); // rank 4
       for (let f = 0; f < 8; f++) {
-        if (row[f] === 'P') {
-          if ((f > 0 && row[f - 1] === 'p') || (f < 7 && row[f + 1] === 'p')) {
+        if (row[f] === "P") {
+          if ((f > 0 && row[f - 1] === "p") || (f < 7 && row[f + 1] === "p")) {
             valid.push(FILES[f]);
           }
         }
@@ -90,7 +90,7 @@
   onMount(() => {
     enPassantFiles = computeEnPassantFilesFor(fen);
     // Recalc on every FEN update (from any source)
-    eventBus.on('updateUI', (fenStr: string) => {
+    eventBus.on("updateUI", (fenStr: string) => {
       if (fenStr) {
         enPassantFiles = computeEnPassantFilesFor(fenStr);
       } else {
@@ -98,16 +98,14 @@
       }
     });
   });
-
 </script>
 
 <div class="fen-editor-tools {position}">
   <!-- Side to move -->
   <div class="tool-section turn-row">
-    <button
-      class="turn-toggle"
-      onclick={toggleTurn}
-    >{currentTurn === 'white' ? t("genfen.white_turn", _lv) : t("genfen.black_turn", _lv)}</button>
+    <button class="turn-toggle" onclick={toggleTurn}
+      >{currentTurn === "white" ? t("genfen.white_turn", _lv) : t("genfen.black_turn", _lv)}</button
+    >
   </div>
 
   <!-- Castling -->
@@ -116,20 +114,20 @@
     <div class="castling-grid">
       <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.K}>
-        <input type="checkbox" checked={hasCastling.K} onchange={() => toggleCastling('K')} />
+        <input type="checkbox" checked={hasCastling.K} onchange={() => toggleCastling("K")} />
         <span>{t("genfen.castling_short", _lv)}</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.Q}>
-        <input type="checkbox" checked={hasCastling.Q} onchange={() => toggleCastling('Q')} />
+        <input type="checkbox" checked={hasCastling.Q} onchange={() => toggleCastling("Q")} />
         <span>{t("genfen.castling_long", _lv)}</span>
       </label>
       <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.k}>
-        <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling('k')} />
+        <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling("k")} />
         <span>{t("genfen.castling_short", _lv)}</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.q}>
-        <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling('q')} />
+        <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling("q")} />
         <span>{t("genfen.castling_long", _lv)}</span>
       </label>
     </div>
@@ -141,29 +139,31 @@
     <select
       id="genfen-ep"
       class="fen-select"
-      value={enPassantStr === '-' ? '-' : enPassantStr[0]}
-      onfocus={() => { enPassantFiles = computeEnPassantFilesFor(fen); }}
+      value={enPassantStr === "-" ? "-" : enPassantStr[0]}
+      onfocus={() => {
+        enPassantFiles = computeEnPassantFilesFor(fen);
+      }}
       onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
     >
       <option value="-">{t("genfen.enpassant_off", _lv)}</option>
       {#each enPassantFiles as f}
-        <option value={f}>{f}{currentTurn === 'white' ? '6' : '3'}</option>
+        <option value={f}>{f}{currentTurn === "white" ? "6" : "3"}</option>
       {/each}
     </select>
   </div>
 
   <!-- Action buttons -->
   <div class="tool-section tool-buttons">
-    <button class="fen-btn" onclick={() => buttonClick('start')}>
+    <button class="fen-btn" onclick={() => buttonClick("start")}>
       {t("genfen.start", _lv)}
     </button>
-    <button class="fen-btn" onclick={() => buttonClick('empty')}>
+    <button class="fen-btn" onclick={() => buttonClick("empty")}>
       {t("genfen.empty", _lv)}
     </button>
-    <button class="fen-btn" onclick={() => buttonClick('flip')}>
+    <button class="fen-btn" onclick={() => buttonClick("flip")}>
       {t("genfen.flip", _lv)}
     </button>
-    <button class="fen-btn fen-btn-save" onclick={() => buttonClick('save')}>
+    <button class="fen-btn fen-btn-save" onclick={() => buttonClick("save")}>
       {t("genfen.save", _lv)}
     </button>
   </div>

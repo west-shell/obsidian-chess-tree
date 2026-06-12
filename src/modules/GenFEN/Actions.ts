@@ -65,10 +65,13 @@ const ActionsModule = {
           if (castling.includes(right)) {
             castling = castling.replace(right, '');
           } else {
-            castling = (castling + right).split('').sort((a, b) => {
-              const order = ['K', 'Q', 'k', 'q'];
-              return order.indexOf(a) - order.indexOf(b);
-            }).join('');
+            castling = (castling + right)
+              .split('')
+              .sort((a, b) => {
+                const order = ['K', 'Q', 'k', 'q'];
+                return order.indexOf(a) - order.indexOf(b);
+              })
+              .join('');
           }
           if (!castling) castling = '-';
           host.fen = setFenField(host.fen, 2, castling);
