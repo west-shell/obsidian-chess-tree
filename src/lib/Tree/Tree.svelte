@@ -91,14 +91,16 @@
     return node.comments?.filter((c) => ALL_ANNOTATION_KEYS.includes(c)) ?? [];
   }
 
-  const SHAPES_PREFIX = "__SHAPES__";
+  const SHAPES_RE = /^{([a-h][1-8])([a-h][1-8])?:([gryb])}$/;
 
   function getRegularComments(node: ChessNode): string[] {
     return (
-      node.comments?.filter(
-        (c) => !ALL_ANNOTATION_KEYS.includes(c) && !c.startsWith(SHAPES_PREFIX),
-      ) ?? []
+      node.comments?.filter((c) => !ALL_ANNOTATION_KEYS.includes(c) && !SHAPES_RE.test(c)) ?? []
     );
+  }
+
+  function getAllShapes(node: ChessNode): string[] {
+    return node.comments?.filter((c) => SHAPES_RE.test(c)) ?? [];
   }
 
   // ---- 自动保存逻辑 ----
@@ -139,9 +141,8 @@
     if (!currentNode) return;
     const regularComments = commentsText.split("\n").filter((c) => c.trim() !== "");
     const existingAnnotations = getAllAnnotations(currentNode);
-    const shapesComment = currentNode.comments?.find((c) => c.startsWith(SHAPES_PREFIX));
-    currentNode.comments = [...existingAnnotations, ...regularComments];
-    if (shapesComment) currentNode.comments.push(shapesComment);
+    const existingShapes = getAllShapes(currentNode);
+    currentNode.comments = [...existingAnnotations, ...existingShapes, ...regularComments];
     eventBus.emit("updateUI", null);
     eventBus.emit("updatePGN", null);
   }
