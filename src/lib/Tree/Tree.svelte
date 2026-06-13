@@ -104,7 +104,7 @@
       saveTimeout = undefined;
     }
     if (layoutChangeHandler) {
-      document.body.removeEventListener('layout-change', layoutChangeHandler);
+      document.body.removeEventListener("layout-change", layoutChangeHandler);
       layoutChangeHandler = null;
     }
   });
@@ -254,7 +254,7 @@
     resetView();
 
     layoutChangeHandler = () => resetView();
-    document.body.addEventListener('layout-change', layoutChangeHandler);
+    document.body.addEventListener("layout-change", layoutChangeHandler);
   });
 
   $effect(() => {
@@ -264,6 +264,7 @@
     }
     const node = currentNode;
     commentsText = getRegularComments(node).join("\n");
+    // oxlint-disable-next-line promise/always-return
     tick().then(() => {
       if (textareaEl) adjustTextareaHeight();
       panToNodeIfNeeded(node);
@@ -271,6 +272,7 @@
   });
 
   $effect(() => {
+    // oxlint-disable-next-line no-unused-expressions
     nodeMap.size;
     updateTreeLayout();
   });
@@ -331,15 +333,9 @@
                 fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
                 stroke="var(--board-line)"
               />
-              <foreignObject x={-8} y={-6.5} width={16} height={13}>
-                <div
-                  xmlns="http://www.w3.org/1999/xhtml"
-                  style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-                  color:{def.color};pointer-events:none;"
-                >
-                  {@html iconSvg(def.icon, 12, 1.5)}
-                </div>
-              </foreignObject>
+              <g transform="translate(-6, -6)" color={def.color}>
+                {@html iconSvg(def.icon, 12, 1.5)}
+              </g>
             {:else}
               <rect
                 x={-nodeWidth / 2}
@@ -352,25 +348,13 @@
                 stroke="var(--board-line)"
               />
               {#if nodeMode === 0 && !node.move}
-                <foreignObject x={-8} y={-6.5} width={16} height={13}>
-                  <div
-                    xmlns="http://www.w3.org/1999/xhtml"
-                    style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-                    color:#fff;pointer-events:none;"
-                  >
-                    {@html iconSvg("house", 12, 1.5)}
-                  </div>
-                </foreignObject>
+                <g transform="translate(-6, -6)" color="#fff">
+                  {@html iconSvg("house", 12, 1.5)}
+                </g>
               {:else if nodeMode === 0 && getPieceIcon(node)}
-                <foreignObject x={-8} y={-6.5} width={16} height={13}>
-                  <div
-                    xmlns="http://www.w3.org/1999/xhtml"
-                    style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-                    color:{node.side === 'white' ? '#333' : '#fff'};pointer-events:none;"
-                  >
-                    {@html iconSvg(getPieceIcon(node)!, 12, 1.5)}
-                  </div>
-                </foreignObject>
+                <g transform="translate(-6, -6)" color={node.side === 'white' ? '#333' : '#fff'}>
+                  {@html iconSvg(getPieceIcon(node)!, 12, 1.5)}
+                </g>
               {:else}
                 <text
                   x="0"
@@ -383,15 +367,9 @@
             {/if}
 
             {#if hasComments}
-              <foreignObject x={0.35 * nodeWidth} y={-0.7 * nodeHeight - 8} width={10} height={10}>
-                <div
-                  xmlns="http://www.w3.org/1999/xhtml"
-                  style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-                  color:royalblue;pointer-events:none;"
-                >
-                  {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
-                </div>
-              </foreignObject>
+              <g transform="translate(7, -17.1)">
+                {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
+              </g>
             {/if}
           </g>
         {/each}
