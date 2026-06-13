@@ -1,3 +1,5 @@
+import './settings.css';
+
 import { type App, PluginSettingTab, Setting } from 'obsidian';
 
 import { initI18n, t } from './i18n';
@@ -258,7 +260,7 @@ export class ChessSettingTab extends PluginSettingTab {
       },
     );
 
-    containerEl.parentElement?.classList.add('chess-setting-tab');
+    containerEl.parentElement?.classList.add('xq-setting-tab');
   }
 
   async hide() {
