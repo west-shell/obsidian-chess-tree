@@ -1,31 +1,12 @@
 <script lang="ts">
-  // oxlint-disable promise/always-return no-unused-expressions
   import { onDestroy, onMount, tick } from "svelte";
   import type { EventBus } from "../../core/event-bus";
   import { type ChessNode, type NodeMap } from "../../types";
   import { onLangChange, t } from "../../i18n";
   import { calculateTreeLayout } from "./layout";
+  import { iconSvg } from "../../utils/icon";
   import { setIcon } from "obsidian";
   import * as d3 from "d3";
-
-  // Lucide chess piece components
-  import ChessKing from "@lucide/svelte/icons/chess-king";
-  import ChessQueen from "@lucide/svelte/icons/chess-queen";
-  import ChessRook from "@lucide/svelte/icons/chess-rook";
-  import ChessBishop from "@lucide/svelte/icons/chess-bishop";
-  import ChessKnight from "@lucide/svelte/icons/chess-knight";
-  import ChessPawn from "@lucide/svelte/icons/chess-pawn";
-  import Castle from "@lucide/svelte/icons/castle";
-  import ChevronsUp from "@lucide/svelte/icons/chevrons-up";
-  import House from "@lucide/svelte/icons/house";
-
-  // Lucide annotation components
-  import ThumbsUp from "@lucide/svelte/icons/thumbs-up";
-  import ThumbsDown from "@lucide/svelte/icons/thumbs-down";
-  import Handshake from "@lucide/svelte/icons/handshake";
-  import Bookmark from "@lucide/svelte/icons/bookmark";
-  import Star from "@lucide/svelte/icons/star";
-  import MessageSquareText from "@lucide/svelte/icons/message-square-text";
 
   interface Props {
     nodeMap: NodeMap;
@@ -50,35 +31,34 @@
   const nodeWidth = 20;
   const nodeHeight = 13;
 
-  const ANNOTATION_DEFINITIONS: Record<string, { symbol: string; color: string; component: any }> =
-    {
-      "W+": { symbol: "White +", color: "var(--piece-red)", component: ThumbsUp },
-      "B+": { symbol: "Black +", color: "var(--piece-black)", component: ThumbsDown },
-      "=": { symbol: "Equal", color: "green", component: Handshake },
-      "?": { symbol: "Key", color: "var(--text-warning)", component: Bookmark },
-      "!": { symbol: "Brilliant", color: "var(--color-yellow)", component: Star },
-      "1-0": { symbol: "1-0", color: "white", component: ThumbsUp },
-      "0-1": { symbol: "0-1", color: "black", component: ThumbsUp },
-      "1/2-1/2": { symbol: "Draw", color: "gray", component: Handshake },
-    };
+  const ANNOTATION_DEFINITIONS: Record<string, { symbol: string; color: string; icon: string }> = {
+    "W+": { symbol: "White +", color: "var(--piece-red)", icon: "thumbs-up" },
+    "B+": { symbol: "Black +", color: "var(--piece-black)", icon: "thumbs-down" },
+    "=": { symbol: "Equal", color: "green", icon: "handshake" },
+    "?": { symbol: "Key", color: "var(--text-warning)", icon: "bookmark" },
+    "!": { symbol: "Brilliant", color: "var(--color-yellow)", icon: "star" },
+    "1-0": { symbol: "1-0", color: "white", icon: "thumbs-up" },
+    "0-1": { symbol: "0-1", color: "black", icon: "thumbs-up" },
+    "1/2-1/2": { symbol: "Draw", color: "gray", icon: "handshake" },
+  };
 
   const ALL_ANNOTATION_KEYS = Object.keys(ANNOTATION_DEFINITIONS);
 
-  // Chess piece component lookup
-  const PIECE_COMPONENTS: Record<string, any> = {
-    k: ChessKing,
-    q: ChessQueen,
-    r: ChessRook,
-    b: ChessBishop,
-    n: ChessKnight,
-    p: ChessPawn,
+  // Chess piece icon name lookup
+  const PIECE_ICONS: Record<string, string> = {
+    k: "chess-king",
+    q: "chess-queen",
+    r: "chess-rook",
+    b: "chess-bishop",
+    n: "chess-knight",
+    p: "chess-pawn",
   };
 
-  function getPieceComponent(node: ChessNode) {
+  function getPieceIcon(node: ChessNode): string | null {
     if (!node.move) return null;
-    if (node.move.isKingsideCastle() || node.move.isQueensideCastle()) return Castle;
-    if (node.move.promotion) return ChevronsUp;
-    return PIECE_COMPONENTS[node.move.piece] ?? null;
+    if (node.move.isKingsideCastle() || node.move.isQueensideCastle()) return "castle";
+    if (node.move.promotion) return "chevrons-up";
+    return PIECE_ICONS[node.move.piece] ?? null;
   }
 
   // ---- 工具函数 ----
@@ -341,7 +321,6 @@
           >
             {#if primaryAnnotation}
               {@const def = ANNOTATION_DEFINITIONS[primaryAnnotation]}
-              {@const AnnotationIcon = def.component}
               <rect
                 x={-nodeWidth / 2}
                 y={-nodeHeight / 2}
@@ -358,7 +337,7 @@
                   style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
                   color:{def.color};pointer-events:none;"
                 >
-                  <AnnotationIcon size={12} strokeWidth={1.5} />
+                  {@html iconSvg(def.icon, 12, 1.5)}
                 </div>
               </foreignObject>
             {:else}
@@ -379,18 +358,17 @@
                     style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
                     color:#fff;pointer-events:none;"
                   >
-                    <House size={12} strokeWidth={1.5} />
+                    {@html iconSvg("house", 12, 1.5)}
                   </div>
                 </foreignObject>
-              {:else if nodeMode === 0 && getPieceComponent(node)}
-                {@const PieceIcon = getPieceComponent(node)!}
+              {:else if nodeMode === 0 && getPieceIcon(node)}
                 <foreignObject x={-8} y={-6.5} width={16} height={13}>
                   <div
                     xmlns="http://www.w3.org/1999/xhtml"
                     style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
                     color:{node.side === 'white' ? '#333' : '#fff'};pointer-events:none;"
                   >
-                    <PieceIcon size={12} strokeWidth={1.5} />
+                    {@html iconSvg(getPieceIcon(node)!, 12, 1.5)}
                   </div>
                 </foreignObject>
               {:else}
@@ -411,7 +389,7 @@
                   style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
                   color:royalblue;pointer-events:none;"
                 >
-                  <MessageSquareText size={8} strokeWidth={1.5} fill="royalblue" />
+                  {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
                 </div>
               </foreignObject>
             {/if}

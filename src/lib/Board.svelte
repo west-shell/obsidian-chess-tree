@@ -32,10 +32,7 @@
     userShapes = [],
   }: Props = $props();
 
-  import ChessQueen from "@lucide/svelte/icons/chess-queen";
-  import ChessRook from "@lucide/svelte/icons/chess-rook";
-  import ChessBishop from "@lucide/svelte/icons/chess-bishop";
-  import ChessKnight from "@lucide/svelte/icons/chess-knight";
+  import { iconSvg } from "../utils/icon";
 
   let boardWidth = $derived(boardWidthOverride ?? settings.cellSize * 8);
   // oxlint-disable-next-line no-unassigned-vars
@@ -47,11 +44,11 @@
   let promotingMove: { from: Square; to: Square } | null = $state(null);
   let promotingColor: "w" | "b" = $state("w");
 
-  const PROMOTION_PIECES: { type: "q" | "r" | "b" | "n"; component: any }[] = [
-    { type: "q", component: ChessQueen },
-    { type: "r", component: ChessRook },
-    { type: "b", component: ChessBishop },
-    { type: "n", component: ChessKnight },
+  const PROMOTION_PIECES: { type: "q" | "r" | "b" | "n"; icon: string }[] = [
+    { type: "q", icon: "chess-queen" },
+    { type: "r", icon: "chess-rook" },
+    { type: "b", icon: "chess-bishop" },
+    { type: "n", icon: "chess-knight" },
   ];
 
   function isPromotionRank(to: string, color: "w" | "b"): boolean {
@@ -297,9 +294,9 @@
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div class="promotion-choices {promotingColor}" onclick={(e) => e.stopPropagation()}>
-        {#each PROMOTION_PIECES as { type, component: Icon }}
+        {#each PROMOTION_PIECES as { type, icon }}
           <button class="promotion-btn" onclick={() => completePromotion(type)}>
-            <Icon size={boardWidth * 0.11} strokeWidth={1.2} />
+            {@html iconSvg(icon, boardWidth * 0.11, 1.2)}
           </button>
         {/each}
       </div>
