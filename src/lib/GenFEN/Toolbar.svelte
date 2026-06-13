@@ -48,7 +48,7 @@
     const result: string[] = [];
     for (const ch of row) {
       if (/[1-8]/.test(ch)) {
-        for (let i = 0; i < parseInt(ch); i++) result.push("");
+        for (let i = 0; i < Number.parseInt(ch); i++) result.push("");
       } else {
         result.push(ch);
       }

@@ -1,3 +1,4 @@
+// oxlint-disable no-useless-return
 import { Chess, type Move } from 'chess.js';
 
 import type { ChessNode } from '../../types';

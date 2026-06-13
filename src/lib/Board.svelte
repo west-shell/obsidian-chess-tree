@@ -43,6 +43,7 @@
   import ChessKnight from "@lucide/svelte/icons/chess-knight";
 
   let boardWidth = $derived(boardWidthOverride ?? settings.cellSize * 8);
+  // oxlint-disable-next-line no-unassigned-vars
   let boardElement: HTMLDivElement;
   let api: Api | null = null;
   let layoutChangeHandler: (() => void) | null = null;
@@ -66,18 +67,22 @@
     if (!promotingMove) return;
     try {
       const chess = new Chess(fen);
-      const move = chess.move({ from: promotingMove.from, to: promotingMove.to, promotion: pieceType });
+      const move = chess.move({
+        from: promotingMove.from,
+        to: promotingMove.to,
+        promotion: pieceType,
+      });
       if (move) {
         eventBus.emit("runmove", move);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     promotingMove = null;
   }
-  let turnColor: cg.Color = $derived(
-    fen.split(' ')[1] === 'b' ? 'black' : 'white'
-  );
+  let turnColor: cg.Color = $derived(fen.split(" ")[1] === "b" ? "black" : "white");
   let turnClass = $derived(
-    settings.showTurnBorder ? `turn-${fen.split(' ')[1] === 'b' ? 'black' : 'white'}` : ""
+    settings.showTurnBorder ? `turn-${fen.split(" ")[1] === "b" ? "black" : "white"}` : "",
   );
 
   function computeDests(fen: string): Map<cg.Key, cg.Key[]> {
@@ -138,7 +143,9 @@
                   promotingColor = color;
                   return;
                 }
-              } catch { /* fall through */ }
+              } catch {
+                /* fall through */
+              }
             }
             try {
               const move = chess.move({ from: orig, to: dest });
@@ -202,9 +209,12 @@
 
     // 等待容器布局完成，避免 bounds 为 0 时 renderCircle 产生 NaN
     if (!boardElement.offsetWidth) {
-      await new Promise<void>(resolve => {
+      await new Promise<void>((resolve) => {
         const ro = new ResizeObserver(() => {
-          if (boardElement.offsetWidth) { ro.disconnect(); resolve(); }
+          if (boardElement.offsetWidth) {
+            ro.disconnect();
+            resolve();
+          }
         });
         ro.observe(boardElement);
       });
@@ -357,11 +367,18 @@
   }
 
   :global(.xq-slider-value) {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 42px; height: 24px; margin-right: 8px;
-    font-size: 13px; font-weight: 600;
-    color: var(--text-accent); background: var(--background-modifier-border);
-    border-radius: 4px; padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    height: 24px;
+    margin-right: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-accent);
+    background: var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 0 6px;
   }
   :global(.chess-setting-tab .setting-item) {
     border-top: none;

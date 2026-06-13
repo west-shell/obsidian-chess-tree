@@ -1,4 +1,5 @@
 <script lang="ts">
+  // oxlint-disable promise/always-return no-unused-expressions
   import { onDestroy, onMount, tick } from "svelte";
   import type { EventBus } from "../../core/event-bus";
   import { type ChessNode, type NodeMap } from "../../types";

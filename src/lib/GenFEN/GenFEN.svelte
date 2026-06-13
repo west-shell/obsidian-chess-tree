@@ -5,7 +5,7 @@
   import type { EventBus } from "../../core/event-bus";
   import type { Square } from "chess.js";
   import Toolbar from "./Toolbar.svelte";
-  import { onMount, onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   interface Props {
     settings: ISettings;

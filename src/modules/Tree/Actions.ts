@@ -1,4 +1,4 @@
-import { Chess, type Move } from 'chess.js';
+import { type Move } from 'chess.js';
 
 import { registerPGNViewModule } from '../../core/module-system';
 import { t } from '../../i18n';
