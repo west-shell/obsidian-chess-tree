@@ -15,6 +15,13 @@ const BoardClickModule = {
           eventBus.emit('updateUI');
         }
       } else if (host.markedPos && !host.selectedPiece) {
+        if (host.markedPos === clickedKey) {
+          chess.remove(clickedKey as Square);
+          host.fen = chess.fen();
+          host.markedPos = null;
+          eventBus.emit('updateUI');
+          return;
+        }
         const from = host.markedPos as Square;
         const to = clickedKey as Square;
         const piece = chess.get(from);
