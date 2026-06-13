@@ -1,6 +1,7 @@
 import { registerGenFENModule, registerXQModule } from '../core/module-system';
 import { DEFAULT_FEN } from '../types';
 import { parseSource } from '../utils/parse';
+import { validateFen } from '../chess';
 
 const SourceModule = {
   init(host: any) {
@@ -19,7 +20,7 @@ const SourceModule = {
           host.options = options;
           break;
         case 'fen': {
-          host.fen = fen; // 完整 FEN
+          host.fen = validateFen(fen).ok ? fen : DEFAULT_FEN; // 完整 FEN
           break;
         }
       }
