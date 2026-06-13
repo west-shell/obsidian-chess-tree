@@ -1,6 +1,7 @@
 import { registerGenFENModule, registerPGNViewModule, registerXQModule } from './module-system';
 
 type EventType = string | symbol;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- pub/sub event system must accept any payload
 type Handler = (payload?: any) => void;
 
 export class EventBus {
@@ -25,7 +26,7 @@ export class EventBus {
     set.add(handler);
   }
 
-  emit(event: EventType, payload?: any) {
+  emit(event: EventType, payload?: unknown) {
     const set = this.handlers.get(event);
     if (!set) return;
     const hasPayload = arguments.length === 2;
