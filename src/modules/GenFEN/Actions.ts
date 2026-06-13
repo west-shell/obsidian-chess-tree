@@ -77,7 +77,10 @@ const ActionsModule = {
 
 registerGenFENModule('actions', ActionsModule);
 
-async function onSaveBTNClick(host: IGenFENHost, meta: { turn: string; castling: string; enPassant: string }) {
+async function onSaveBTNClick(
+  host: IGenFENHost,
+  meta: { turn: string; castling: string; enPassant: string },
+) {
   const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
   if (!view) return;
   const file = view.file;

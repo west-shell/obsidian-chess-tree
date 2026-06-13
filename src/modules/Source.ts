@@ -1,7 +1,7 @@
+import { validateFen } from '../chess';
 import { registerGenFENModule, registerXQModule } from '../core/module-system';
 import { DEFAULT_FEN } from '../types';
 import { parseSource } from '../utils/parse';
-import { validateFen } from '../chess';
 
 const SourceModule = {
   init(host: any) {
