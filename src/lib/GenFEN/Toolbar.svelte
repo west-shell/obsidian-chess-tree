@@ -109,24 +109,26 @@
   <!-- Castling -->
   <div class="tool-section">
     <span class="section-label">{t("genfen.castling", _lv)}</span>
-    <div class="castling-grid">
+    <div class="castling-row">
       <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.K}>
         <input type="checkbox" checked={hasCastling.K} onchange={() => toggleCastling("K")} />
-        <span>{t("genfen.castling_short", _lv)}</span>
+        <span>O-O</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.Q}>
         <input type="checkbox" checked={hasCastling.Q} onchange={() => toggleCastling("Q")} />
-        <span>{t("genfen.castling_long", _lv)}</span>
+        <span>O-O-O</span>
       </label>
+    </div>
+    <div class="castling-row">
       <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.k}>
         <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling("k")} />
-        <span>{t("genfen.castling_short", _lv)}</span>
+        <span>O-O</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.q}>
         <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling("q")} />
-        <span>{t("genfen.castling_long", _lv)}</span>
+        <span>O-O-O</span>
       </label>
     </div>
   </div>
@@ -219,11 +221,14 @@
     font-size: 0.9em;
     max-width: 100%;
   }
-  .castling-grid {
+  .castling-row {
     display: flex;
     flex-wrap: nowrap;
-    gap: 2px 6px;
+    gap: 4px;
     align-items: center;
+  }
+  .castling-row + .castling-row {
+    margin-top: 2px;
   }
   .castling-color {
     font-weight: 600;
