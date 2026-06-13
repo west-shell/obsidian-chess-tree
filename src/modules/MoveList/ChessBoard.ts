@@ -1,6 +1,6 @@
-import type { Square } from 'chess.js';
 import { mount, unmount } from 'svelte';
 
+import type { Square } from '../../chess';
 import { registerXQModule } from '../../core/module-system';
 import Chess from '../../lib/Movelist/Chess.svelte';
 import type { IXQHost } from '../../types';

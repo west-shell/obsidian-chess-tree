@@ -1,5 +1,4 @@
-import type { Move } from 'chess.js';
-
+import type { Move } from '../chess';
 import { getLang, t } from '../i18n';
 
 export function speak(move: Move) {

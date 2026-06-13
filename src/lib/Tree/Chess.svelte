@@ -4,9 +4,7 @@
   import Toolbar from "./Toolbar.svelte";
   import type { ChessNode, ISettings, NodeMap } from "../../types";
   import type { EventBus } from "../../core/event-bus";
-  import type { DrawShape } from "chessground/draw";
-  import type * as cg from "chessground/types";
-  import type { Move, Square } from "chess.js";
+  import type { cg, DrawShape, Move, Square } from "../../chess";
   import { onMount, tick } from "svelte";
 
   const SHAPES_PREFIX = "__SHAPES__";
@@ -49,32 +47,26 @@
     currentPath: string[];
   }
 
-  let {
-    settings,
-    fen,
-    eventBus,
-    nodeMap,
-    currentNode,
-    currentPath,
-  }: Props = $props();
+  let { settings, fen, eventBus, nodeMap, currentNode, currentPath }: Props = $props();
 
   let lastMove: [Square, Square] | null = $derived(
-    currentNode.move ? [currentNode.move.from, currentNode.move.to] : null
+    currentNode.move ? [currentNode.move.from, currentNode.move.to] : null,
   );
   let { position } = $derived(settings);
   let rotated = $state(false);
   let variations = $derived(
-    currentNode.children
-      .map((child) => child.move)
-      .filter((m): m is Move => m != null) ?? [],
+    currentNode.children.map((child) => child.move).filter((m): m is Move => m != null) ?? [],
   );
   let userShapes = $derived(loadShapes(currentNode));
   let checkColor = $derived(
     currentNode.move && /\+|#/.test(currentNode.move.san)
-      ? (currentNode.move.color === 'w' ? 'black' : 'white')
-      : null
-  );
+      ? currentNode.move.color === "w"
+        ? "black"
+        : "white"
+      : null,
+  ) as "white" | "black" | null;
 
+  // oxlint-disable-next-line no-unassigned-vars
   let treeViewEl: HTMLDivElement;
   let adaptiveBoardWidth = $state(300);
 
@@ -121,7 +113,14 @@
 <div class="tree-view {position}" bind:this={treeViewEl}>
   <div class="board-area">
     <Board
-      {settings} {fen} {lastMove} {checkColor} {eventBus} {rotated} {variations} {userShapes}
+      {settings}
+      {fen}
+      {lastMove}
+      {checkColor}
+      {eventBus}
+      {rotated}
+      {variations}
+      {userShapes}
       boardWidth={adaptiveBoardWidth}
     />
   </div>

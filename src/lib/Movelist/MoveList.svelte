@@ -3,7 +3,7 @@
   import { scrollToBTN } from "../../utils/utils";
   import type { EventBus } from "../../core/event-bus";
   import type { ISettings } from "../../types";
-  import type { Move } from "chess.js";
+  import type { Move } from "../../chess";
 
   interface Props {
     settings: ISettings;

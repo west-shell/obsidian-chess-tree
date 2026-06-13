@@ -1,6 +1,6 @@
-import type { Move } from 'chess.js';
 import type { MarkdownPostProcessorContext, MarkdownSectionInformation } from 'obsidian';
 
+import type { Move } from './chess';
 import type { EventBus } from './core/event-bus';
 import type XQPlugin from './main';
 

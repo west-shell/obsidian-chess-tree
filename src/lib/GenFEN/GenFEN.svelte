@@ -3,7 +3,7 @@
   import PieceBTNs from "./PieceBTNs.svelte";
   import type { ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
-  import type { Square } from "chess.js";
+  import type { Square } from "../../chess";
   import Toolbar from "./Toolbar.svelte";
   import { onDestroy, onMount } from "svelte";
 

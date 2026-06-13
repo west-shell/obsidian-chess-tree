@@ -1,6 +1,4 @@
-import { Chess } from 'chess.js';
-import type { PieceSymbol, Square } from 'chess.js';
-
+import { Chess, type PieceSymbol, type Square } from '../../chess';
 import { registerGenFENModule } from '../../core/module-system';
 
 function getFullFen(host: Record<string, any>): string {

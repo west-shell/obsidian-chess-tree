@@ -1,5 +1,4 @@
-import { Chess } from 'chess.js';
-
+import { Chess } from '../chess';
 import { registerPGNViewModule, registerXQModule } from '../core/module-system';
 import type { IXQHost } from '../types';
 

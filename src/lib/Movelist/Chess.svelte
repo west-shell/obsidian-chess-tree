@@ -4,7 +4,7 @@
   import MoveList from "./MoveList.svelte";
   import type { IOptions, ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
-  import type { Move, Square } from "chess.js";
+  import type { Move, Square } from "../../chess";
   import { onMount, tick } from "svelte";
 
   interface Props {

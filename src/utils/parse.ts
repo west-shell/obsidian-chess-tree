@@ -1,5 +1,4 @@
-import { Chess, type Move, type Square } from 'chess.js';
-
+import { Chess, type Move } from '../chess';
 import type { IOptions, ITurn } from '../types';
 import { DEFAULT_FEN } from '../types';
 

@@ -1,6 +1,5 @@
 // oxlint-disable no-useless-return
-import { Chess, type Move } from 'chess.js';
-
+import { Chess, type Move } from '../../chess';
 import type { ChessNode } from '../../types';
 import { DEFAULT_FEN } from '../../types';
 

@@ -1,5 +1,3 @@
-import { Chess } from 'chess.js';
-
 import { registerGenFENModule, registerXQModule } from '../core/module-system';
 import { DEFAULT_FEN } from '../types';
 import { parseSource } from '../utils/parse';

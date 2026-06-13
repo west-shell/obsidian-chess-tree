@@ -5,8 +5,7 @@ import {
   type Move,
   type PieceSymbol,
   type Square,
-} from 'chess.js';
-
+} from '../chess';
 import { DEFAULT_FEN } from '../types';
 
 export type { Move, Square, PieceSymbol, Color };
