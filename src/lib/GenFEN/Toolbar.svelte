@@ -122,7 +122,7 @@
       <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.k}>
         <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling("k")} />
-        <span>{t("genfen.castling_long", _lv)}</span>
+        <span>{t("genfen.castling_short", _lv)}</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.q}>
         <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling("q")} />
@@ -222,7 +222,7 @@
   .castling-grid {
     display: grid;
     grid-template-columns: auto 1fr 1fr;
-    gap: 4px 8px;
+    gap: 2px 4px;
     align-items: center;
   }
   .castling-color {
