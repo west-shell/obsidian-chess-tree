@@ -16,13 +16,22 @@
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
+  // svelte-ignore state_referenced_locally
   let _turn = $state(currentTurn);
+  // svelte-ignore state_referenced_locally
   let _castling = $state(castling);
+  // svelte-ignore state_referenced_locally
   let _enPassant = $state(enPassant);
 
-  $effect(() => { _turn = currentTurn; });
-  $effect(() => { _castling = castling; });
-  $effect(() => { _enPassant = enPassant; });
+  $effect(() => {
+    _turn = currentTurn;
+  });
+  $effect(() => {
+    _castling = castling;
+  });
+  $effect(() => {
+    _enPassant = enPassant;
+  });
 
   let turnLabel = $derived(_turn === "b" ? "black" : "white");
 
@@ -38,10 +47,13 @@
     if (c.includes(right)) {
       c = c.replace(right, "");
     } else {
-      c = (c + right).split("").sort((a, b) => {
-        const order = ["K", "Q", "k", "q"];
-        return order.indexOf(a) - order.indexOf(b);
-      }).join("");
+      c = (c + right)
+        .split("")
+        .sort((a, b) => {
+          const order = ["K", "Q", "k", "q"];
+          return order.indexOf(a) - order.indexOf(b);
+        })
+        .join("");
     }
     _castling = c || "-";
   }
