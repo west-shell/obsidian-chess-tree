@@ -3,16 +3,15 @@
   import PieceBTNs from "./PieceBTNs.svelte";
   import type { ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
-  import type { Square } from "../../chess";
   import Toolbar from "./Toolbar.svelte";
   import { onDestroy, onMount } from "svelte";
 
   interface Props {
     settings: ISettings;
-    fen: string;           // 棋子布局部分
-    currentTurn: string;   // "w" 或 "b"
-    castling: string;      // 易位权力
-    enPassant: string;     // 过路兵
+    fen: string;
+    currentTurn: string;
+    castling: string;
+    enPassant: string;
     selectedPiece: string | null;
     eventBus: EventBus;
   }
@@ -28,18 +27,11 @@
     }
   }
 
-  function onToggleTurn() {
-    currentTurn = currentTurn === 'w' ? 'b' : 'w';
-    eventBus.emit('btn-click', { action: 'setFen', fen: `${fen} ${currentTurn} ${castling} ${enPassant}` });
-  }
-
   onMount(() => {
     eventBus.on('btn-click', onBtnClick);
-    eventBus.on('toggle-turn', onToggleTurn);
   });
   onDestroy(() => {
     eventBus.off('btn-click', onBtnClick);
-    eventBus.off('toggle-turn', onToggleTurn);
   });
 </script>
 

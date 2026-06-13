@@ -1,24 +1,12 @@
 import { Chess, type PieceSymbol, type Square } from '../../chess';
 import { registerGenFENModule } from '../../core/module-system';
 
-function getFullFen(host: Record<string, any>): string {
-  return `${host.fen} ${host.currentTurn || 'w'} ${host.castling || '-'} ${host.enPassant || '-'} 0 1`;
-}
-
-function setHostFenParts(host: Record<string, any>, fullFen: string): void {
-  const parts = fullFen.split(' ');
-  host.fen = parts[0];
-  host.currentTurn = parts[1] || 'w';
-  host.castling = parts[2] || '-';
-  host.enPassant = parts[3] || '-';
-}
-
 const BoardClickModule = {
   init(host: Record<string, any>) {
     const eventBus = host.eventBus;
 
     eventBus.on('click', (clickedKey: string) => {
-      const chess = new Chess(getFullFen(host), { skipValidation: true });
+      const chess = new Chess(host.fen, { skipValidation: true });
 
       if (!host.markedPos && !host.selectedPiece) {
         const piece = chess.get(clickedKey as Square);
@@ -35,7 +23,7 @@ const BoardClickModule = {
           const sqPiece = chess.get(from);
           chess.remove(from);
           if (sqPiece) chess.put(sqPiece, to);
-          setHostFenParts(host, chess.fen());
+          host.fen = chess.fen();
           host.markedPos = null;
           eventBus.emit('updateUI');
         } else {
@@ -49,7 +37,7 @@ const BoardClickModule = {
           const type = host.selectedPiece.toLowerCase();
           chess.put({ type: type as PieceSymbol, color }, clickedKey as Square);
         }
-        setHostFenParts(host, chess.fen());
+        host.fen = chess.fen();
         host.selectedPiece = null;
         host.markedPos = null;
         eventBus.emit('updateUI');
@@ -58,7 +46,7 @@ const BoardClickModule = {
 
     eventBus.on('fen-updated', (fen: string) => {
       if (!fen) return;
-      setHostFenParts(host, fen);
+      host.fen = fen;
       host.markedPos = null;
       eventBus.emit('updateUI');
     });

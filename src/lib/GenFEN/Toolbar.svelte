@@ -6,44 +6,69 @@
   interface Props {
     eventBus: EventBus;
     position: string;
-    fen: string;           // 棋子布局部分
-    currentTurn: string;   // "w" 或 "b"
-    castling: string;      // 易位权力
-    enPassant: string;     // 过路兵
+    fen: string;
+    currentTurn: string;
+    castling: string;
+    enPassant: string;
   }
   let { eventBus, position, fen, currentTurn, castling, enPassant }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
-  let turnLabel = $derived(currentTurn === "b" ? "black" : "white");
+  let _turn = $state(currentTurn);
+  let _castling = $state(castling);
+  let _enPassant = $state(enPassant);
+
+  $effect(() => { _turn = currentTurn; });
+  $effect(() => { _castling = castling; });
+  $effect(() => { _enPassant = enPassant; });
+
+  let turnLabel = $derived(_turn === "b" ? "black" : "white");
 
   let hasCastling = $derived({
-    K: castling.includes("K"),
-    Q: castling.includes("Q"),
-    k: castling.includes("k"),
-    q: castling.includes("q"),
+    K: _castling.includes("K"),
+    Q: _castling.includes("Q"),
+    k: _castling.includes("k"),
+    q: _castling.includes("q"),
   });
 
   function toggleCastling(right: "K" | "Q" | "k" | "q") {
-    eventBus.emit("btn-click", { action: "toggleCastling", right });
+    let c = _castling === "-" ? "" : _castling;
+    if (c.includes(right)) {
+      c = c.replace(right, "");
+    } else {
+      c = (c + right).split("").sort((a, b) => {
+        const order = ["K", "Q", "k", "q"];
+        return order.indexOf(a) - order.indexOf(b);
+      }).join("");
+    }
+    _castling = c || "-";
   }
 
   function setEnPassant(file: string) {
-    eventBus.emit("btn-click", { action: "setEnPassant", file });
+    if (file === "-") {
+      _enPassant = "-";
+    } else if (file) {
+      const rank = _turn === "w" ? "6" : "3";
+      _enPassant = `${file}${rank}`;
+    }
   }
 
   function toggleTurn() {
-    eventBus.emit("toggle-turn");
+    _turn = _turn === "w" ? "b" : "w";
   }
 
   function buttonClick(action: string) {
+    if (action === "save") {
+      eventBus.emit("saveFen", `${fen} ${_turn} ${_castling} ${_enPassant} 0 1`);
+      return;
+    }
     eventBus.emit("btn-click", action);
   }
 
   const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-  // Compute en passant files on demand (when dropdown is opened)
   function expandRow(row: string): string[] {
     const result: string[] = [];
     for (const ch of row) {
@@ -57,11 +82,11 @@
   }
 
   function computeEnPassantFilesFor(boardFen: string, turn: string): string[] {
-    const board = boardFen.split("/"); // rank 8 to rank 1
+    const board = boardFen.split("/");
     const valid: string[] = [];
 
     if (turn === "w") {
-      const row = expandRow(board[3]); // rank 5
+      const row = expandRow(board[3]);
       for (let f = 0; f < 8; f++) {
         if (row[f] === "p") {
           if ((f > 0 && row[f - 1] === "P") || (f < 7 && row[f + 1] === "P")) {
@@ -70,7 +95,7 @@
         }
       }
     } else {
-      const row = expandRow(board[4]); // rank 4
+      const row = expandRow(board[4]);
       for (let f = 0; f < 8; f++) {
         if (row[f] === "P") {
           if ((f > 0 && row[f - 1] === "p") || (f < 7 && row[f + 1] === "p")) {
@@ -85,28 +110,24 @@
   let enPassantFiles = $state<string[]>([]);
 
   onMount(() => {
-    enPassantFiles = computeEnPassantFilesFor(fen, currentTurn);
-    // Recalc on every FEN update (from any source)
+    enPassantFiles = computeEnPassantFilesFor(fen, _turn);
     eventBus.on("updateUI", (fenStr: string) => {
-      const turn = currentTurn;
       if (fenStr) {
-        enPassantFiles = computeEnPassantFilesFor(fenStr, turn);
+        enPassantFiles = computeEnPassantFilesFor(fenStr, _turn);
       } else {
-        enPassantFiles = computeEnPassantFilesFor(fen, turn);
+        enPassantFiles = computeEnPassantFilesFor(fen, _turn);
       }
     });
   });
 </script>
 
 <div class="fen-editor-tools {position}">
-  <!-- Side to move -->
   <div class="tool-section turn-row">
     <button class="turn-toggle" onclick={toggleTurn}
       >{turnLabel === "black" ? t("genfen.black_turn", _lv) : t("genfen.white_turn", _lv)}</button
     >
   </div>
 
-  <!-- Castling -->
   <div class="tool-section">
     <span class="section-label">{t("genfen.castling", _lv)}</span>
     <div class="castling-row">
@@ -133,26 +154,24 @@
     </div>
   </div>
 
-  <!-- En passant -->
   <div class="tool-section">
     <label class="section-label" for="genfen-ep">{t("genfen.enpassant", _lv)}</label>
     <select
       id="genfen-ep"
       class="fen-select"
-      value={enPassant === "-" ? "-" : enPassant[0]}
+      value={_enPassant === "-" ? "-" : _enPassant[0]}
       onfocus={() => {
-        enPassantFiles = computeEnPassantFilesFor(fen, currentTurn);
+        enPassantFiles = computeEnPassantFilesFor(fen, _turn);
       }}
       onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
     >
       <option value="-">{t("genfen.enpassant_off", _lv)}</option>
       {#each enPassantFiles as f}
-        <option value={f}>{f}{currentTurn === "w" ? "6" : "3"}</option>
+        <option value={f}>{f}{_turn === "w" ? "6" : "3"}</option>
       {/each}
     </select>
   </div>
 
-  <!-- Action buttons -->
   <div class="tool-section tool-buttons">
     <button class="fen-btn" onclick={() => buttonClick("start")}>
       {t("genfen.start", _lv)}
