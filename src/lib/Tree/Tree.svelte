@@ -113,10 +113,17 @@
       saveTimeout = undefined;
     }, 700);
   }
+
+  let layoutChangeHandler: (() => void) | null = null;
+
   onDestroy(() => {
     if (saveTimeout) {
       clearTimeout(saveTimeout);
       saveTimeout = undefined;
+    }
+    if (layoutChangeHandler) {
+      document.body.removeEventListener('layout-change', layoutChangeHandler);
+      layoutChangeHandler = null;
     }
   });
 
@@ -264,6 +271,9 @@
     await tick();
     await new Promise(requestAnimationFrame);
     resetView();
+
+    layoutChangeHandler = () => resetView();
+    document.body.addEventListener('layout-change', layoutChangeHandler);
   });
 
   $effect(() => {
