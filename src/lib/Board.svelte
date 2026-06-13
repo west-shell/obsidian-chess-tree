@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { Chessground, type Api, type Config, type DrawShape, type cg, Chess, type Move, type Square } from "../chess";
+  import { type Api, type cg, Chess, Chessground, type Config, type DrawShape, type Move, type Square } from "../chess";
   import type { EventBus } from "../core/event-bus";
   import type { ISettings } from "../types";
 
