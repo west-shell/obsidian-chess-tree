@@ -220,25 +220,26 @@
     max-width: 100%;
   }
   .castling-grid {
-    display: grid;
-    grid-template-columns: auto 1fr 1fr;
-    gap: 2px 4px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2px 6px;
     align-items: center;
   }
   .castling-color {
     font-weight: 600;
     font-size: 0.85em;
-    text-align: right;
+    white-space: nowrap;
   }
   .castling-checkbox {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     cursor: pointer;
-    font-size: 0.9em;
-    padding: 2px 6px;
+    font-size: 0.85em;
+    padding: 2px 4px;
     border-radius: 4px;
     border: 1px solid transparent;
+    white-space: nowrap;
     transition: all 0.15s;
   }
   .castling-checkbox.active {
@@ -250,7 +251,7 @@
   }
   .tool-buttons {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 4px;
   }
   .tool-buttons.bottom {
