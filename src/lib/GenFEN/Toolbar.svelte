@@ -121,14 +121,22 @@
     return fen.split(" ")[0];
   }
 
+  function validateEnPassant() {
+    if (_enPassant !== "-" && !enPassantFiles.includes(_enPassant[0])) {
+      _enPassant = "-";
+    }
+  }
+
   onMount(() => {
     enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn);
+    validateEnPassant();
     eventBus.on("updateUI", (fenStr: string) => {
       if (fenStr) {
         enPassantFiles = computeEnPassantFilesFor(boardPart(fenStr), _turn);
       } else {
         enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn);
       }
+      validateEnPassant();
     });
   });
 </script>
@@ -172,9 +180,7 @@
       id="genfen-ep"
       class="fen-select"
       value={_enPassant === "-" ? "-" : _enPassant[0]}
-      onfocus={() => {
-        enPassantFiles = computeEnPassantFilesFor(fen, _turn);
-      }}
+      onfocus={() => enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn)}
       onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
     >
       <option value="-">{t("genfen.enpassant_off", _lv)}</option>
