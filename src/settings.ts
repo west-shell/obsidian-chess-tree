@@ -50,6 +50,7 @@ function addSliderWithValue(
       valueDisplay.setText(`${v}${unit}`);
       onChange(v);
     });
+    // 拖动时实时更新
     slider.sliderEl.addEventListener('input', () => {
       const v = slider.getValue();
       currentValue = v;
@@ -75,16 +76,17 @@ export class ChessSettingTab extends PluginSettingTab {
 
     new Setting(containerEl).setName('Language / 语言').addDropdown(d =>
       d
-        .addOptions({ auto: 'Auto / 跟随软件', en: 'English', 'zh-cn': '中文' })
+        .addOptions({ auto: 'Auto/跟随软件', en: 'English', 'zh-cn': '中文' })
         .setValue(settings.lang)
         .onChange(v => {
           settings.lang = v as ISettings['lang'];
-          this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           initI18n(v);
           this.display();
         }),
     );
 
+    // ==================== 棋盘外观 ====================
     new Setting(containerEl).setName(t('board.title')).setHeading();
 
     new Setting(containerEl)
@@ -94,7 +96,7 @@ export class ChessSettingTab extends PluginSettingTab {
         dropdown.addOptions(THEME_OPTIONS);
         dropdown.setValue(settings.theme).onChange(theme => {
           settings.theme = theme as ISettings['theme'];
-          this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           this.plugin.refresh();
         });
       });
@@ -108,7 +110,7 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.cellSize = v;
-        this.plugin.saveSettings();
+        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
@@ -122,11 +124,22 @@ export class ChessSettingTab extends PluginSettingTab {
           .setValue(settings.position)
           .onChange(position => {
             settings.position = position as 'bottom' | 'right';
-            this.plugin.saveSettings();
+            void this.plugin.saveSettings();
             this.plugin.refresh();
           });
       });
 
+    new Setting(containerEl)
+      .setName(t('board.coordinates'))
+      .setDesc(t('board.coordinates.desc'))
+      .addToggle(toggle =>
+        toggle.setValue(settings.showCoordinateLabels).onChange(value => {
+          settings.showCoordinateLabels = value;
+          void this.plugin.saveSettings();
+        }),
+      );
+
+    // ==================== 对局提示 ====================
     new Setting(containerEl).setName(t('game.title')).setHeading();
 
     new Setting(containerEl)
@@ -135,7 +148,7 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showLastMove).onChange(value => {
           settings.showLastMove = value;
-          this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -146,7 +159,7 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showNextMove).onChange(value => {
           settings.showNextMove = value;
-          this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -157,7 +170,7 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showTurnBorder).onChange(value => {
           settings.showTurnBorder = value;
-          this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -169,11 +182,12 @@ export class ChessSettingTab extends PluginSettingTab {
         .addToggle(toggle =>
           toggle.setValue(settings.enableSpeech).onChange(value => {
             settings.enableSpeech = value;
-            this.plugin.saveSettings();
+            void this.plugin.saveSettings();
           }),
         );
     }
 
+    // ==================== 着法列表 ====================
     new Setting(containerEl).setName(t('movelist.title')).setHeading();
 
     new Setting(containerEl)
@@ -182,7 +196,7 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showMovelist).onChange(value => {
           settings.showMovelist = value;
-          this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -193,7 +207,7 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showMovelistText).onChange(value => {
           settings.showMovelistText = value;
-          this.plugin.saveSettings();
+          void this.plugin.saveSettings();
           this.plugin.refresh();
           this.display();
         }),
@@ -208,7 +222,7 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.fontSize = v;
-        this.plugin.saveSettings();
+        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
@@ -226,10 +240,11 @@ export class ChessSettingTab extends PluginSettingTab {
           .setValue(settings.autoJump)
           .onChange(async value => {
             settings.autoJump = value as 'never' | 'always' | 'auto';
-            this.plugin.saveSettings();
+            void this.plugin.saveSettings();
           });
       });
 
+    // ---- 边距 ----
     new Setting(containerEl).setName(t('margin.title')).setHeading();
 
     addSliderWithValue(
@@ -241,7 +256,7 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.boardMarginTop = v;
-        this.plugin.saveSettings();
+        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
@@ -255,7 +270,7 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.boardMarginBottom = v;
-        this.plugin.saveSettings();
+        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
