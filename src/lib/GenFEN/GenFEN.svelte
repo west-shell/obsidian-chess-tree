@@ -9,14 +9,11 @@
   interface Props {
     settings: ISettings;
     fen: string;
-    currentTurn: string;
-    castling: string;
-    enPassant: string;
     selectedPiece: string | null;
     eventBus: EventBus;
   }
 
-  let { settings, fen, currentTurn, castling, enPassant, selectedPiece, eventBus }: Props = $props();
+  let { settings, fen, selectedPiece, eventBus }: Props = $props();
 
   let position = $derived(settings.position);
   let flipped = $state(false);
@@ -41,7 +38,7 @@
   </div>
   <div class="editor-sidebar {position}">
     <PieceBTNs {settings} {fen} {eventBus} {position} {selectedPiece} />
-    <Toolbar {eventBus} {position} {fen} {currentTurn} {castling} {enPassant} />
+    <Toolbar {eventBus} {position} {fen} />
   </div>
 </div>
 

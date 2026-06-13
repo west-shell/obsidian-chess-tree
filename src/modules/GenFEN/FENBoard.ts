@@ -16,9 +16,6 @@ const BoardModule = {
           selectedPiece: host.selectedPiece,
           settings: host.settings,
           fen: host.fen,
-          currentTurn: host.currentTurn,
-          castling: host.castling,
-          enPassant: host.enPassant,
           eventBus: host.eventBus,
         },
       });
@@ -29,9 +26,6 @@ const BoardModule = {
         selectedPiece: host.selectedPiece,
         settings: { ...host.settings },
         fen: host.fen,
-        currentTurn: host.currentTurn,
-        castling: host.castling,
-        enPassant: host.enPassant,
       });
     });
 

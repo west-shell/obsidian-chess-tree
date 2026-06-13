@@ -6,32 +6,28 @@
   interface Props {
     eventBus: EventBus;
     position: string;
-    fen: string;
-    currentTurn: string;
-    castling: string;
-    enPassant: string;
+    fen: string; // 完整 FEN
   }
-  let { eventBus, position, fen, currentTurn, castling, enPassant }: Props = $props();
+  let { eventBus, position, fen }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
-  // svelte-ignore state_referenced_locally
-  let _turn = $state(currentTurn);
-  // svelte-ignore state_referenced_locally
-  let _castling = $state(castling);
-  // svelte-ignore state_referenced_locally
-  let _enPassant = $state(enPassant);
+  // 从完整 FEN 解析一次作为本地状态初始值
+  function parseFen(fen: string) {
+    const parts = fen.split(" ");
+    return {
+      turn: (parts[1] || "w") as string,
+      castling: (parts[2] || "-") as string,
+      enPassant: (parts[3] || "-") as string,
+    };
+  }
 
-  $effect(() => {
-    _turn = currentTurn;
-  });
-  $effect(() => {
-    _castling = castling;
-  });
-  $effect(() => {
-    _enPassant = enPassant;
-  });
+  // svelte-ignore state_referenced_locally
+  const initial = parseFen(fen);
+  let _turn = $state(initial.turn);
+  let _castling = $state(initial.castling);
+  let _enPassant = $state(initial.enPassant);
 
   let turnLabel = $derived(_turn === "b" ? "black" : "white");
 
@@ -73,7 +69,7 @@
 
   function buttonClick(action: string) {
     if (action === "save") {
-      eventBus.emit("saveFen", `${fen} ${_turn} ${_castling} ${_enPassant} 0 1`);
+      eventBus.emit("saveFen", { turn: _turn, castling: _castling, enPassant: _enPassant });
       return;
     }
     eventBus.emit("btn-click", action);
@@ -121,13 +117,17 @@
 
   let enPassantFiles = $state<string[]>([]);
 
+  function boardPart(fen: string): string {
+    return fen.split(" ")[0];
+  }
+
   onMount(() => {
-    enPassantFiles = computeEnPassantFilesFor(fen, _turn);
+    enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn);
     eventBus.on("updateUI", (fenStr: string) => {
       if (fenStr) {
-        enPassantFiles = computeEnPassantFilesFor(fenStr, _turn);
+        enPassantFiles = computeEnPassantFilesFor(boardPart(fenStr), _turn);
       } else {
-        enPassantFiles = computeEnPassantFilesFor(fen, _turn);
+        enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn);
       }
     });
   });

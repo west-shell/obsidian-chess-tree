@@ -6,12 +6,13 @@ import type { IGenFENHost } from '../../types';
 import { DEFAULT_FEN } from '../../types';
 
 function setBoardOnly(host: IGenFENHost, boardPart: string): void {
-  host.fen = boardPart;
+  const parts = host.fen.split(' ');
+  parts[0] = boardPart;
+  host.fen = parts.join(' ');
 }
 
 function setFullStartPosition(host: IGenFENHost): void {
-  const parts = DEFAULT_FEN.split(' ');
-  host.fen = parts[0];
+  host.fen = DEFAULT_FEN;
 }
 
 const ActionsModule = {
@@ -24,8 +25,8 @@ const ActionsModule = {
       host.eventBus.emit('updateUI', host.fen);
     });
 
-    eventBus.on('saveFen', (fullFen: string) => {
-      onSaveBTNClick(host, fullFen);
+    eventBus.on('saveFen', (meta: { turn: string; castling: string; enPassant: string }) => {
+      onSaveBTNClick(host, meta);
     });
 
     eventBus.on('btn-click', (action: any) => {
@@ -56,8 +57,7 @@ const ActionsModule = {
         case 'setPreset': {
           const fenStr = action.fen as string;
           if (fenStr) {
-            const parts = fenStr.split(' ');
-            host.fen = parts[0];
+            host.fen = fenStr;
             host.selectedPiece = null;
           }
           break;
@@ -65,8 +65,7 @@ const ActionsModule = {
         case 'setFen': {
           const newFen = action.fen as string;
           if (newFen) {
-            const parts = newFen.split(' ');
-            host.fen = parts[0];
+            host.fen = newFen;
           }
           break;
         }
@@ -78,11 +77,14 @@ const ActionsModule = {
 
 registerGenFENModule('actions', ActionsModule);
 
-async function onSaveBTNClick(host: IGenFENHost, fullFen: string) {
+async function onSaveBTNClick(host: IGenFENHost, meta: { turn: string; castling: string; enPassant: string }) {
   const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
   if (!view) return;
   const file = view.file;
   if (!file) return;
+
+  const boardPart = host.fen.split(' ')[0];
+  const fullFen = `${boardPart} ${meta.turn} ${meta.castling} ${meta.enPassant} 0 1`;
 
   host.plugin.app.vault.process(file, fileContent => {
     const section = host.ctx.getSectionInfo(host.containerEl);
