@@ -113,22 +113,22 @@
       <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.K}>
         <input type="checkbox" checked={hasCastling.K} onchange={() => toggleCastling("K")} />
-        <span>{t("genfen.castling_short", _lv)}</span>
+        <span>O-O</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.Q}>
         <input type="checkbox" checked={hasCastling.Q} onchange={() => toggleCastling("Q")} />
-        <span>{t("genfen.castling_long", _lv)}</span>
+        <span>O-O-O</span>
       </label>
     </div>
     <div class="castling-row">
       <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.k}>
         <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling("k")} />
-        <span>{t("genfen.castling_short", _lv)}</span>
+        <span>O-O</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.q}>
         <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling("q")} />
-        <span>{t("genfen.castling_long", _lv)}</span>
+        <span>O-O-O</span>
       </label>
     </div>
   </div>
