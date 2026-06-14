@@ -41,7 +41,6 @@ const ActionsModule = {
       host.currentStep++;
       host.updateMainPath();
       eventBus.emit('updateUI');
-      eventBus.emit('updatePGN');
     });
 
     eventBus.on('node-click', (id: string) => {
@@ -178,7 +177,6 @@ const ActionsModule = {
       }
 
       eventBus.emit('updateUI');
-      eventBus.emit('updatePGN');
     });
   },
 };

@@ -31,8 +31,23 @@ export class TreeRenderChild extends MarkdownRenderChild {
   saveFile = () => {
     const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
     if (!view?.file) return;
-    const content = (this as any).data as string;
-    this.plugin.app.vault.modify(view.file, content);
+    const newContent = (this as any).data as string;
+
+    this.plugin.app.vault.process(view.file, fileContent => {
+      const section = this.ctx.getSectionInfo(this.containerEl);
+      if (!section) return fileContent;
+
+      const { lineStart, lineEnd } = section;
+      const lines = fileContent.split('\n');
+      const blockLines = lines.slice(lineStart, lineEnd + 1);
+
+      if (blockLines.length < 2) return fileContent;
+
+      // 保留第一行（```tree）和最后一行（```），替换中间内容
+      const updated = [blockLines[0], newContent, blockLines[blockLines.length - 1]];
+      const newLines = [...lines.slice(0, lineStart), ...updated, ...lines.slice(lineEnd + 1)];
+      return newLines.join('\n');
+    });
   };
 
   onload(): void {
