@@ -14,9 +14,15 @@
   let modified = $state(false);
 
   $effect(() => {
-    eventBus.on("updatePGN", () => { modified = true; });
-    eventBus.on("setViewData", () => { modified = false; });
-    eventBus.on("save", () => { modified = false; });
+    eventBus.on("modified", () => {
+      modified = true;
+    });
+    eventBus.on("setViewData", () => {
+      modified = false;
+    });
+    eventBus.on("save", () => {
+      modified = false;
+    });
   });
 
   let saveBtnClass = $derived(modified ? "unsaved" : "saved");

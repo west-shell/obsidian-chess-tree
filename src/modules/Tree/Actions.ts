@@ -41,6 +41,7 @@ const ActionsModule = {
       host.currentStep++;
       host.updateMainPath();
       eventBus.emit('updateUI');
+      eventBus.emit('modified', null);
     });
 
     eventBus.on('node-click', (id: string) => {
@@ -48,12 +49,6 @@ const ActionsModule = {
       host.currentNode = host.nodeMap.get(id);
       host.updateMainPath();
       host.eventBus.emit('updateUI');
-    });
-
-    eventBus.on('updatePGN', () => {
-      const pgn = stringifyPGN(host.root);
-      const content = [host.tags?.trim(), pgn].filter(Boolean).join('\n');
-      host.data = content;
     });
 
     eventBus.on('btn-click', async (payload: { name: string; payload: any }) => {
@@ -96,6 +91,7 @@ const ActionsModule = {
               host.currentNode = { ...host.currentNode };
               host.nodeMap.set(host.currentNode.id, host.currentNode);
               eventBus.emit('node-click', host.currentNode.id);
+              eventBus.emit('modified', null);
             }
             break;
           }
@@ -115,6 +111,7 @@ const ActionsModule = {
           deleteSubtree(removeNode);
           host.updateMainPath();
           eventBus.emit('node-click', host.currentNode.id);
+          eventBus.emit('modified', null);
           break;
         }
         case 'promote': {
@@ -137,6 +134,7 @@ const ActionsModule = {
             const item = children[index];
             const otherChildren = children.filter((c: ChessNode) => c.id !== item.id);
             parent.children = [item, ...otherChildren];
+            eventBus.emit('modified', null);
           }
           host.updateMainPath();
           break;
@@ -170,7 +168,9 @@ const ActionsModule = {
           break;
         }
         case 'save': {
-          eventBus.emit('updatePGN');
+          const pgn = stringifyPGN(host.root);
+          const content = [host.tags?.trim(), pgn].filter(Boolean).join('\n');
+          host.data = content;
           host.saveFile();
           eventBus.emit('save');
           break;
