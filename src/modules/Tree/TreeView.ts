@@ -1,6 +1,6 @@
 import { mount, unmount } from 'svelte';
 
-import { registerTreeModule } from '../../core/module-system';
+import { registerPGNViewModule, registerTreeModule } from '../../core/module-system';
 import TreeView from '../../lib/Tree/Chess.svelte';
 
 const TreeViewModule = {
@@ -53,4 +53,5 @@ const TreeViewModule = {
   },
 };
 
+registerPGNViewModule('Tree', TreeViewModule);
 registerTreeModule('Tree', TreeViewModule);

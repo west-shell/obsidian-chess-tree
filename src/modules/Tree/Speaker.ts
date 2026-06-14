@@ -1,4 +1,4 @@
-import { registerTreeModule } from '../../core/module-system';
+import { registerPGNViewModule, registerTreeModule } from '../../core/module-system';
 import { speak } from '../speak';
 
 const SpeakerModule = {
@@ -20,4 +20,5 @@ const SpeakerModule = {
   },
 };
 
+registerPGNViewModule('speech', SpeakerModule);
 registerTreeModule('speech', SpeakerModule);

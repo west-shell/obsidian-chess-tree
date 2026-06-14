@@ -1,5 +1,5 @@
 import { type Move } from '../../chess';
-import { registerTreeModule } from '../../core/module-system';
+import { registerPGNViewModule, registerTreeModule } from '../../core/module-system';
 import { t } from '../../i18n';
 import type { ChessNode } from '../../types';
 import { ConfirmModal } from '../../utils/confirmModal';
@@ -181,6 +181,7 @@ const ActionsModule = {
   },
 };
 
+registerPGNViewModule('actions', ActionsModule);
 registerTreeModule('actions', ActionsModule);
 
 function stringifyPGN(root: ChessNode): string {
