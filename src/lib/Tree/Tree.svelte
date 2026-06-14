@@ -147,11 +147,13 @@
       minY = Infinity,
       maxY = -Infinity;
     for (const n of renderedNodes) {
-      minX = Math.min(minX, n.x!);
-      maxX = Math.max(maxX, n.x!);
-      minY = Math.min(minY, n.y!);
-      maxY = Math.max(maxY, n.y!);
+      if (n.x === undefined || n.y === undefined) continue;
+      minX = Math.min(minX, n.x);
+      maxX = Math.max(maxX, n.x);
+      minY = Math.min(minY, n.y);
+      maxY = Math.max(maxY, n.y);
     }
+    if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) return;
     const treeWidth = (maxX - minX) * spacingX;
     const treeHeight = (maxY - minY) * spacingY;
     const { clientWidth, clientHeight } = svgEl;
