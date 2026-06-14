@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
         output: {
           entryFileNames: 'main.js',
           assetFileNames: 'styles.css',
-          sourcemapBaseUrl: pathToFileURL(`${__dirname}/test-vault/.obsidian/plugins/chess/`).toString(),
+          sourcemapBaseUrl: pathToFileURL(`${__dirname}/test-vault/.obsidian/plugins/chess-tree/`).toString(),
         },
         external: [
           'obsidian',
@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => {
       outDir: setOutDir(mode),
       emptyOutDir: false,
       minify: isMin,
-      sourcemap: isMin ? false : 'inline',
+      sourcemap: isMin ? false : true,
     },
   };
 });

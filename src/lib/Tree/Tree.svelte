@@ -25,6 +25,13 @@
   // ---- D3 Zoom ----
   let zoomTransform = $state(d3.zoomIdentity);
   let zoomBehavior: d3.ZoomBehavior<SVGSVGElement, unknown>;
+  const TRANSFORM_SAFE = $derived.by(() => {
+    const t = zoomTransform;
+    if (!t || !Number.isFinite(t.x) || !Number.isFinite(t.y) || !Number.isFinite(t.k)) {
+      return "translate(0,0) scale(1)";
+    }
+    return `translate(${t.x},${t.y}) scale(${t.k})`;
+  });
 
   const spacingX = 22;
   const spacingY = 15;
@@ -141,6 +148,7 @@
   function resetView() {
     updateTreeLayout();
     if (!svgEl || !zoomBehavior) return;
+    if (svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
     const padding = 40;
     let minX = Infinity,
       maxX = -Infinity,
@@ -168,9 +176,11 @@
 
   function panToNodeIfNeeded(node: ChessNode) {
     if (!node || !svgEl || node.x === undefined || node.y === undefined) return;
+    const { x: tx, y: ty, k: sc } = zoomTransform;
+    if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc)) return;
     const { clientWidth, clientHeight } = svgEl;
     const padding = 50;
-    let { x: translateX, y: translateY, k: scale } = zoomTransform;
+    let translateX = tx, translateY = ty, scale = sc;
     const nodeScreenX = node.x * spacingX * scale + translateX;
     const nodeScreenY = node.y * spacingY * scale + translateY;
 
@@ -191,11 +201,13 @@
 
   function zoomAtCenter(factor: number) {
     if (!svgEl) return;
+    const { x: tx, y: ty, k: sc } = zoomTransform;
+    if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc)) return;
     const w = svgEl.clientWidth,
       h = svgEl.clientHeight;
     const cx = w / 2,
       cy = h / 2;
-    let { x: translateX, y: translateY, k: scale } = zoomTransform;
+    let translateX = tx, translateY = ty, scale = sc;
     const prev = scale;
     const next = prev * factor;
     const worldX = (cx - translateX) / prev;
@@ -248,7 +260,10 @@
     if (!svgEl) return;
     updateTreeLayout();
     zoomBehavior = d3.zoom<SVGSVGElement, unknown>().on("zoom", (event) => {
-      zoomTransform = event.transform;
+      const t = event.transform;
+      if (t && Number.isFinite(t.x) && Number.isFinite(t.y) && Number.isFinite(t.k)) {
+        zoomTransform = t;
+      }
     });
     d3.select(svgEl).call(zoomBehavior);
     await tick();
@@ -283,7 +298,7 @@
 <div class="tree-container">
   <div class="svg-wrapper">
     <svg bind:this={svgEl} width="100%" height="100%" class="tree-svg">
-      <g transform={zoomTransform.toString()}>
+      <g transform={TRANSFORM_SAFE}>
         {#each renderedNodes as node}
           {#each node.children as child}
             <path

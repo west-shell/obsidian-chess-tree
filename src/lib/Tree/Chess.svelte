@@ -151,10 +151,6 @@
     align-items: center;
   }
 
-  .board-area :global(.xq-wrap) {
-    height: auto !important;
-  }
-
   .tree-view.bottom {
     flex-direction: column;
     align-items: center;

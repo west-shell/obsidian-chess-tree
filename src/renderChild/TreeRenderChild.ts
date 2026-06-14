@@ -3,7 +3,6 @@ import '../modules/Tree/TreeMap';
 import '../modules/Tree/TreeView';
 import '../modules/BoardClick';
 import '../modules/Tree/Actions';
-import '../modules/Tree/Speaker';
 
 import { type MarkdownPostProcessorContext, MarkdownRenderChild } from 'obsidian';
 
@@ -15,6 +14,7 @@ import type { ISettings } from '../types';
 export class TreeRenderChild extends MarkdownRenderChild {
   settings: ISettings;
   eventBus!: EventBus;
+  contentEl!: HTMLElement;
   constructor(
     public containerEl: HTMLElement,
     public ctx: MarkdownPostProcessorContext,
@@ -23,20 +23,25 @@ export class TreeRenderChild extends MarkdownRenderChild {
   ) {
     super(containerEl);
     this.settings = this.plugin.settings;
-    // TreeView 等模块取 host.contentEl（PGNView 由 TextFileView 提供）
-    (this as any).contentEl = containerEl;
-    // 给代码块容器一点高度，防止树塌缩
-    containerEl.style.minHeight = '300px';
-    containerEl.style.overflow = 'hidden';
+    this.contentEl = containerEl;
+    containerEl.classList.add('tree-codeblock');
     createPGNViewModuleRegistry(this);
   }
 
   onload(): void {
     this.plugin.instances.add(this);
-    // 直接触发 TreeMap 解析和 TreeView 挂载，不走 Source.ts
     (this as any).data = this.source;
     this.eventBus.emit('setViewData');
     this.eventBus.emit('createUI');
+
+    // 撑满代码块容器：计算视口剩余高度
+    requestAnimationFrame(() => {
+      // const rect = this.containerEl.getBoundingClientRect();
+      // const top = rect.top;
+      // const bottomGap = 20;
+      const h = this.settings.cellSize * 10; // 10行棋谱 + 标题等
+      if (h > 300) this.containerEl.style.height = h + 'px';
+    });
   }
 
   refresh(): void {
