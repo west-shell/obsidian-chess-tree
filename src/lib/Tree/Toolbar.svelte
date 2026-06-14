@@ -11,6 +11,16 @@
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
+  let modified = $state(false);
+
+  $effect(() => {
+    eventBus.on("updatePGN", () => { modified = true; });
+    eventBus.on("setViewData", () => { modified = false; });
+    eventBus.on("save", () => { modified = false; });
+  });
+
+  let saveBtnClass = $derived(modified ? "unsaved" : "saved");
+
   const buildButtons = (v: number) => [
     { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
     { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
@@ -21,7 +31,6 @@
     { title: t("toolbar.end", v), icon: "arrow-right-to-line", event: "toEnd" },
     { title: t("toolbar.flip", v), icon: "flip-vertical", event: "rotate" },
     { title: t("toolbar.annotate", v), icon: "tag", event: "toggle-annotation-menu" },
-    { title: t("toolbar.save", v), icon: "save", event: "save" },
   ];
   let buttons = $derived(buildButtons(_lv));
 
@@ -40,6 +49,10 @@
 
   function useSetIcon(el: HTMLElement, icon: string) {
     setIcon(el, icon);
+  }
+
+  function useSetSaveIcon(el: HTMLElement) {
+    setIcon(el, "save");
   }
 
   function handleAnnotationMenu(evt: MouseEvent) {
@@ -74,6 +87,13 @@
       }}
     ></button>
   {/each}
+
+  <button
+    class="toolbar-btn {saveBtnClass}"
+    aria-label={t("toolbar.save", _lv)}
+    use:useSetSaveIcon
+    onclick={() => emitEvent("save")}
+  ></button>
 </div>
 
 <style>
@@ -100,5 +120,23 @@
     font-size: clamp(12px, 3vw, 16px);
     padding: 0;
     margin: 0;
+  }
+
+  .toolbar-btn {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.1s ease;
+  }
+
+  .toolbar-btn.saved {
+    background-color: hsl(122, 39%, 49%);
+  }
+
+  .toolbar-btn.unsaved {
+    background-color: hsl(35, 100%, 50%);
   }
 </style>
