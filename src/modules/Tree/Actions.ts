@@ -166,8 +166,9 @@ const ActionsModule = {
           break;
         }
         case 'reset': {
-          host.currentNode = host.nodeMap.get('node-root');
-          host.updateMainPath();
+          host.data = host.source;
+          eventBus.emit('setViewData');
+          eventBus.emit('updateUI');
           break;
         }
         case 'save': {
