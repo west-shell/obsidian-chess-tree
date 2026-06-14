@@ -41,7 +41,6 @@ const ActionsModule = {
       host.currentStep++;
       host.updateMainPath();
       eventBus.emit('updateUI');
-      eventBus.emit('updatePGN');
     });
 
     eventBus.on('node-click', (id: string) => {
@@ -165,10 +164,19 @@ const ActionsModule = {
           host.currentNode = host.nodeMap.get(host.currentPath[host.currentPath.length - 1]);
           break;
         }
+        case 'reset': {
+          host.data = host.source;
+          eventBus.emit('setViewData');
+          eventBus.emit('updateUI');
+          break;
+        }
+        case 'save': {
+          eventBus.emit('updatePGN');
+          break;
+        }
       }
 
       eventBus.emit('updateUI');
-      eventBus.emit('updatePGN');
     });
   },
 };

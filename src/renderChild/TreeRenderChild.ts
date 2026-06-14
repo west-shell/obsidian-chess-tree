@@ -55,14 +55,13 @@ export class TreeRenderChild extends MarkdownRenderChild {
     (this as any).data = this.source;
     this.eventBus.emit('setViewData');
     this.eventBus.emit('createUI');
-
-    requestAnimationFrame(() => {
-      const h = this.settings.cellSize * 10;
-      if (h > 300) this.containerEl.style.height = h + 'px';
-    });
+    const h = this.settings.cellSize * 8;
+    this.containerEl.style.height = h + 'px';
   }
 
   refresh(): void {
+    const h = this.settings.cellSize * 8;
+    this.containerEl.style.height = h + 'px';
     this.eventBus.emit('updateUI');
   }
 

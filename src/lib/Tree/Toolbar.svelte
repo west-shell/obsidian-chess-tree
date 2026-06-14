@@ -12,6 +12,7 @@
   onLangChange(() => _lv++);
 
   const buildButtons = (v: number) => [
+    { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
     { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
     { title: t("toolbar.promote", v), icon: "arrow-up-wide-narrow", event: "promote" },
     { title: t("toolbar.start", v), icon: "arrow-left-to-line", event: "toStart" },
@@ -20,6 +21,7 @@
     { title: t("toolbar.end", v), icon: "arrow-right-to-line", event: "toEnd" },
     { title: t("toolbar.flip", v), icon: "flip-vertical", event: "rotate" },
     { title: t("toolbar.annotate", v), icon: "tag", event: "toggle-annotation-menu" },
+    { title: t("toolbar.save", v), icon: "save", event: "save" },
   ];
   let buttons = $derived(buildButtons(_lv));
 
