@@ -1,5 +1,5 @@
 import { type Move } from '../../chess';
-import { registerPGNViewModule } from '../../core/module-system';
+import { registerTreeModule } from '../../core/module-system';
 import { t } from '../../i18n';
 import type { ChessNode } from '../../types';
 import { ConfirmModal } from '../../utils/confirmModal';
@@ -165,6 +165,15 @@ const ActionsModule = {
           host.currentNode = host.nodeMap.get(host.currentPath[host.currentPath.length - 1]);
           break;
         }
+        case 'reset': {
+          host.currentNode = host.nodeMap.get('node-root');
+          host.updateMainPath();
+          break;
+        }
+        case 'save': {
+          eventBus.emit('updatePGN');
+          break;
+        }
       }
 
       eventBus.emit('updateUI');
@@ -173,7 +182,7 @@ const ActionsModule = {
   },
 };
 
-registerPGNViewModule('actions', ActionsModule);
+registerTreeModule('actions', ActionsModule);
 
 function stringifyPGN(root: ChessNode): string {
   let nodeBrothers = genNodeBrothers(root);

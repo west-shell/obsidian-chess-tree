@@ -12,6 +12,8 @@
   onLangChange(() => _lv++);
 
   const buildButtons = (v: number) => [
+    { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
+    { title: t("toolbar.save", v), icon: "save", event: "save" },
     { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
     { title: t("toolbar.promote", v), icon: "arrow-up-wide-narrow", event: "promote" },
     { title: t("toolbar.start", v), icon: "arrow-left-to-line", event: "toStart" },
