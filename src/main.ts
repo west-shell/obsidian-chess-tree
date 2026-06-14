@@ -7,6 +7,7 @@ import { MarkdownView, Plugin, TFile } from 'obsidian';
 import { initI18n, t } from './i18n';
 import { GenFENRenderChild } from './renderChild/GenFENRenderChild';
 import { ChessRenderChild } from './renderChild/MoveListRenderChild';
+import { TreeRenderChild } from './renderChild/TreeRenderChild';
 import { ChessSettingTab, DEFAULT_SETTINGS } from './settings';
 import { applyThemes } from './themes';
 import type { ISettings } from './types';
@@ -31,6 +32,11 @@ export default class ChessPlugin extends Plugin {
 
     this.registerMarkdownCodeBlockProcessor('fen', (source, el, ctx) => {
       const renderChild = new GenFENRenderChild(el, ctx, source, this);
+      ctx.addChild(renderChild);
+    });
+
+    this.registerMarkdownCodeBlockProcessor('tree', (source, el, ctx) => {
+      const renderChild = new TreeRenderChild(el, ctx, source, this);
       ctx.addChild(renderChild);
     });
 
