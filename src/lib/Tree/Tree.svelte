@@ -161,7 +161,13 @@
       minY = Math.min(minY, n.y);
       maxY = Math.max(maxY, n.y);
     }
-    if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) return;
+    if (
+      !Number.isFinite(minX) ||
+      !Number.isFinite(maxX) ||
+      !Number.isFinite(minY) ||
+      !Number.isFinite(maxY)
+    )
+      return;
     const treeWidth = (maxX - minX) * spacingX;
     const treeHeight = (maxY - minY) * spacingY;
     const { clientWidth, clientHeight } = svgEl;
@@ -180,7 +186,9 @@
     if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc)) return;
     const { clientWidth, clientHeight } = svgEl;
     const padding = 50;
-    let translateX = tx, translateY = ty, scale = sc;
+    let translateX = tx,
+      translateY = ty,
+      scale = sc;
     const nodeScreenX = node.x * spacingX * scale + translateX;
     const nodeScreenY = node.y * spacingY * scale + translateY;
 
@@ -207,7 +215,9 @@
       h = svgEl.clientHeight;
     const cx = w / 2,
       cy = h / 2;
-    let translateX = tx, translateY = ty, scale = sc;
+    let translateX = tx,
+      translateY = ty,
+      scale = sc;
     const prev = scale;
     const next = prev * factor;
     const worldX = (cx - translateX) / prev;
@@ -369,7 +379,7 @@
                   {@html iconSvg("house", 12, 1.5)}
                 </g>
               {:else if nodeMode === 0 && getPieceIcon(node)}
-                <g transform="translate(-6, -6)" color={node.side === 'white' ? '#333' : '#fff'}>
+                <g transform="translate(-6, -6)" color={node.side === "white" ? "#333" : "#fff"}>
                   {@html iconSvg(getPieceIcon(node)!, 12, 1.5)}
                 </g>
               {:else}
