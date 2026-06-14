@@ -54,7 +54,6 @@ const ActionsModule = {
       const pgn = stringifyPGN(host.root);
       const content = [host.tags?.trim(), pgn].filter(Boolean).join('\n');
       host.data = content;
-      host.saveFile();
     });
 
     eventBus.on('btn-click', async (payload: { name: string; payload: any }) => {
@@ -172,6 +171,8 @@ const ActionsModule = {
         }
         case 'save': {
           eventBus.emit('updatePGN');
+          host.saveFile();
+          eventBus.emit('save');
           break;
         }
       }
