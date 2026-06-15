@@ -97,5 +97,22 @@
   "pgn.newFile": "New PGN file",
   "pgn.error": "Failed to create PGN file:",
   "menu.markdown": "Open in Markdown view",
-  "menu.pgn": "Open in PGN view"
+  "menu.pgn": "Open in PGN view",
+  "codeblock.title": "Code Block Names",
+  "codeblock.chessAliases": "List mode",
+  "codeblock.chessAliases.desc": "Custom aliases for list code block, comma separated",
+  "codeblock.fenAliases": "FEN generation mode",
+  "codeblock.fenAliases.desc": "Custom aliases for FEN generation code block, comma separated",
+  "codeblock.treeAliases": "Branch diagram mode",
+  "codeblock.treeAliases.desc": "Custom aliases for branch diagram code block, comma separated",
+  "codeblock.genfenSaveType": "FEN save type",
+  "codeblock.genfenSaveType.desc": "Code block type when FEN saves",
+  "codeblock.apply": "Apply code block names",
+  "codeblock.apply.desc": "Check duplicates and re-register code block processors",
+  "codeblock.applyBtn": "Apply",
+  "codeblock.duplicate": "Duplicate code block names, please fix",
+  "codeblock.registered": "Code blocks re-registered",
+  "codeblock.restartNotice": "Changes require restarting the plugin or Obsidian to take effect.",
+  "codeblock.modeList": "List mode",
+  "codeblock.modeBranch": "Branch diagram mode"
 }

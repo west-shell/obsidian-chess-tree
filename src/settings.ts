@@ -25,6 +25,12 @@ export const DEFAULT_SETTINGS: ISettings = {
   boardMarginBottom: 20,
   viewOnly: false,
   rotated: false,
+  codeBlockNames: {
+    chess: ['chess'],
+    fen: ['fen'],
+    tree: ['tree'],
+  },
+  genfenSaveType: 'chess',
 };
 
 function addSliderWithValue(
@@ -274,6 +280,75 @@ export class ChessSettingTab extends PluginSettingTab {
         this.plugin.refresh();
       },
     );
+
+    // ==================== 代码块名称 ====================
+    new Setting(containerEl).setName(t('codeblock.title')).setDesc(t('codeblock.restartNotice')).setHeading();
+
+    const chessSetting = new Setting(containerEl)
+      .setName(t('codeblock.chessAliases'))
+      .setDesc(t('codeblock.chessAliases.desc') + ' (默认: chess)')
+      .addText(text =>
+        text.setValue(settings.codeBlockNames.chess.join(', ')).onChange(value => {
+          settings.codeBlockNames.chess = value
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+        }),
+      )
+      .addButton(button =>
+        button.setIcon('rotate-ccw').onClick(() => {
+          settings.codeBlockNames.chess = ['chess'];
+          chessSetting.controlEl.querySelector('input')!.value = 'chess';
+        }),
+      );
+
+    const treeSetting = new Setting(containerEl)
+      .setName(t('codeblock.treeAliases'))
+      .setDesc(t('codeblock.treeAliases.desc') + ' (默认: tree)')
+      .addText(text =>
+        text.setValue(settings.codeBlockNames.tree.join(', ')).onChange(value => {
+          settings.codeBlockNames.tree = value
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+        }),
+      )
+      .addButton(button =>
+        button.setIcon('rotate-ccw').onClick(() => {
+          settings.codeBlockNames.tree = ['tree'];
+          treeSetting.controlEl.querySelector('input')!.value = 'tree';
+        }),
+      );
+
+    const fenSetting = new Setting(containerEl)
+      .setName(t('codeblock.fenAliases'))
+      .setDesc(t('codeblock.fenAliases.desc') + ' (默认: fen)')
+      .addText(text =>
+        text.setValue(settings.codeBlockNames.fen.join(', ')).onChange(value => {
+          settings.codeBlockNames.fen = value
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+        }),
+      )
+      .addButton(button =>
+        button.setIcon('rotate-ccw').onClick(() => {
+          settings.codeBlockNames.fen = ['fen'];
+          fenSetting.controlEl.querySelector('input')!.value = 'fen';
+        }),
+      );
+
+    new Setting(containerEl)
+      .setName(t('codeblock.genfenSaveType'))
+      .setDesc(t('codeblock.genfenSaveType.desc'))
+      .addDropdown(dropdown =>
+        dropdown
+          .addOptions({ chess: t('codeblock.modeList'), tree: t('codeblock.modeBranch') })
+          .setValue(settings.genfenSaveType)
+          .onChange(value => {
+            settings.genfenSaveType = value as 'chess' | 'tree';
+          }),
+      );
 
     containerEl.parentElement?.classList.add('ws-setting-tab');
   }

@@ -24,6 +24,12 @@ export interface ISettings {
   boardMarginBottom: number;
   viewOnly?: boolean;
   rotated?: boolean;
+  codeBlockNames: {
+    chess: string[];
+    fen: string[];
+    tree: string[];
+  };
+  genfenSaveType: 'chess' | 'tree';
 }
 
 export type IOptions = {

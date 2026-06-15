@@ -99,7 +99,7 @@ async function onSaveBTNClick(
     let blockLines: string[] = lines.slice(lineStart, lineEnd + 1);
     if (blockLines.length < 2) return fileContent;
 
-    blockLines[0] = blockLines[0].replace(/^```fen\b.*$/, '```chess');
+    blockLines[0] = blockLines[0].replace(/^```\S+\b.*$/, `\`\`\`${host.plugin.settings.genfenSaveType}`);
     blockLines = [blockLines[0], `[FEN "${fullFen}"]`, '```'];
 
     const newContent = [...lines.slice(0, lineStart), ...blockLines, ...lines.slice(lineEnd + 1)].join('\n');

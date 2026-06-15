@@ -2,7 +2,7 @@ import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.brown.css';
 import 'chessground/assets/chessground.cburnett.css';
 
-import { MarkdownView, Plugin, TFile } from 'obsidian';
+import { MarkdownView, Notice, Plugin, TFile } from 'obsidian';
 
 import { initI18n, t } from './i18n';
 import { GenFENRenderChild } from './renderChild/GenFENRenderChild';
@@ -25,20 +25,7 @@ export default class ChessPlugin extends Plugin {
 
     applyThemes(this.settings);
 
-    this.registerMarkdownCodeBlockProcessor('chess', (source, el, ctx) => {
-      const renderChild = new ChessRenderChild(el, ctx, source, this);
-      ctx.addChild(renderChild);
-    });
-
-    this.registerMarkdownCodeBlockProcessor('fen', (source, el, ctx) => {
-      const renderChild = new GenFENRenderChild(el, ctx, source, this);
-      ctx.addChild(renderChild);
-    });
-
-    this.registerMarkdownCodeBlockProcessor('tree', (source, el, ctx) => {
-      const renderChild = new TreeRenderChild(el, ctx, source, this);
-      ctx.addChild(renderChild);
-    });
+    this.registerCodeBlocks();
 
     this.registerView(PGNView.VIEW_TYPE, leaf => new PGNView(leaf, this));
 
@@ -107,6 +94,28 @@ export default class ChessPlugin extends Plugin {
     this.instances.forEach(instance => {
       instance.refresh();
     });
+  }
+
+  registerCodeBlocks() {
+    const { codeBlockNames } = this.settings;
+
+    for (const name of codeBlockNames.chess) {
+      this.registerMarkdownCodeBlockProcessor(name, (source, el, ctx) => {
+        ctx.addChild(new ChessRenderChild(el, ctx, source, this));
+      });
+    }
+
+    for (const name of codeBlockNames.fen) {
+      this.registerMarkdownCodeBlockProcessor(name, (source, el, ctx) => {
+        ctx.addChild(new GenFENRenderChild(el, ctx, source, this));
+      });
+    }
+
+    for (const name of codeBlockNames.tree) {
+      this.registerMarkdownCodeBlockProcessor(name, (source, el, ctx) => {
+        ctx.addChild(new TreeRenderChild(el, ctx, source, this));
+      });
+    }
   }
 
   async changeView(file: TFile, targetViewType: string) {
