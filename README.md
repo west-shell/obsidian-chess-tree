@@ -1,4 +1,4 @@
-# chess tree
+# Chess Tree
 
 ![Version](https://img.shields.io/github/v/release/west-shell/obsidian-chess-tree)
 [![License](https://img.shields.io/github/license/west-shell/obsidian-chess-tree)](./LICENSE)
@@ -19,9 +19,10 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 
 - **Manual Save**: Any changes (moves, variations, comments, annotations) are saved back to the file when clicking Save button
 - **Variation Tree**: Interactive tree graph showing all branches — click nodes to navigate
-- **Comments & Annotations**: Supports `!` `?` `W+` `B+` `=` and other standard annotations
-- **View Toggle**: Switch between text view and PGN view via the file menu
+- **Comments & Annotations**: Supports branch diagram and board annotation symbols, comments
+- **Mode Toggle**: Switch between icon mode and text mode in branch diagram
 - **Quick Create**: New PGN files from the ribbon button
+- **Custom File Types**: Set specific file types as PGN files
 
 > **Note**: `.pgn` files only support single games. For multi-game PGN files, use AI to add code block markers and convert to Markdown format:
 >
@@ -37,11 +38,12 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 > ```
 > ````
 
-![PGN File](./IMAGE/PGN文件.png)
+![PGN File](./IMAGE/tree.png)
 
 ## Code Blocks
 
 Three code block types:
+All code block names are customizable
 
 ---
 
@@ -55,7 +57,7 @@ Three code block types:
 ```
 ````
 
-![Move List](./IMAGE/MoveList.png)
+![Move List](./IMAGE/list.png)
 
 ---
 
@@ -80,6 +82,8 @@ Three code block types:
 3. Bb5 a6
 ```
 ````
+
+![Branch Diagram](./IMAGE/tree.png)
 
 ---
 
@@ -112,7 +116,9 @@ Enable/disable PGN file view and customize file extensions:
 - **Move List**: Full move record with click-to-navigate
 - **Variation Tree**: Tree graph with icon/SAN display modes for node labels
 - **Visual FEN Editor**: Drag/click to place pieces, clear/fill board, toggle side to move
-- **PGN Saving**: Button colors — **gray** (empty), **green** (saved), **orange** (modified)
+- **PGN Saving**:
+  - Button colors — **gray** (empty), **green** (saved), **orange** (modified)
+  - Confirmation dialog before saving
 - **Customizable Settings**:
   - Board themes: Wood, Green, Blue, Grey, Dark, Light
   - Toolbar position: right / bottom
@@ -154,6 +160,7 @@ Enable/disable PGN file view and customize file extensions:
 ````markdown
 ```chess
 r:true
+p:true
 [FEN "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"]
 1... e5 2. Nf3 Nc6
 ```
@@ -163,8 +170,6 @@ r:true
 - FEN value works with or without quotes
 
 ## Installation
-
-> ~~This plugin is available on the Obsidian Community Plugin marketplace. Search for "Chess" to install.~~ (Not yet published)
 
 1. Open Obsidian
 2. Go to **Settings**
