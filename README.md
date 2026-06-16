@@ -17,7 +17,7 @@ Likes, coins, and feedback are greatly appreciated.
 
 Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pgn` file view with an interactive board interface.
 
-- **Real-time I/O**: Any changes (moves, variations, comments, annotations) are saved back to the file automatically
+- **Manual Save**: Any changes (moves, variations, comments, annotations) are saved back to the file when clicking Save button
 - **Variation Tree**: Interactive tree graph showing all branches — click nodes to navigate
 - **Comments & Annotations**: Supports `!` `?` `W+` `B+` `=` and other standard annotations
 - **View Toggle**: Switch between text view and PGN view via the file menu
