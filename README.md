@@ -41,7 +41,7 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 
 ## Code Blocks
 
-Two code block types:
+Three code block types:
 
 ---
 
@@ -70,6 +70,40 @@ Two code block types:
 ![FEN Editor](./IMAGE/GenFEN.png)
 
 ---
+
+`tree`: Branch diagram — display game variations as a tree graph
+
+````markdown
+```tree
+1. e4 e5
+2. Nf3 Nc6
+3. Bb5 a6
+```
+````
+
+---
+
+## Settings
+
+### Code Block Names
+
+Customize code block aliases in **Settings > Chess > Code Block Names**:
+
+- **List mode** (chess): Default `chess`, add custom aliases separated by commas
+- **FEN generation mode** (fen): Default `fen`, add custom aliases
+- **Branch diagram mode** (tree): Default `tree`, add custom aliases
+- **FEN save type**: Choose which code block type to save as (List mode / Branch diagram mode)
+
+> **Note**: Changes require restarting the plugin or Obsidian to take effect.
+
+### PGN File View
+
+Enable/disable PGN file view and customize file extensions:
+
+- **Enable PGN file view**: Toggle to register/unregister PGN view
+- **PGN file extensions**: Default `pgn`, add custom extensions separated by commas
+
+> **Note**: Changes require restarting the plugin or Obsidian to take effect.
 
 ## Features
 
