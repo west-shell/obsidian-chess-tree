@@ -65,6 +65,8 @@
 
   function toggleTurn() {
     _turn = _turn === "w" ? "b" : "w";
+    enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn);
+    validateEnPassant();
   }
 
   function buttonClick(action: string) {
