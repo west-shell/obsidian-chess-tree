@@ -38,7 +38,7 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 > ```
 > ````
 
-![PGN File](./IMAGE/tree.png)
+![PGN File](./IMAGE/Tree.png)
 
 ## Code Blocks
 
@@ -57,7 +57,7 @@ All code block names are customizable
 ```
 ````
 
-![Move List](./IMAGE/list.png)
+![Move List](./IMAGE/List.png)
 
 ---
 
@@ -83,7 +83,7 @@ All code block names are customizable
 ```
 ````
 
-![Branch Diagram](./IMAGE/tree.png)
+![Branch Diagram](./IMAGE/Tree.png)
 
 ---
 

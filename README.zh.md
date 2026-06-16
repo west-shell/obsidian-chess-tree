@@ -40,7 +40,7 @@
 > ```
 > ````
 
-![PGN 文件](./IMAGE/tree.png)
+![PGN 文件](./IMAGE/Tree.png)
 
 ## 代码块
 
@@ -59,7 +59,7 @@
 ```
 ````
 
-![着法列表](./IMAGE/list.png)
+![着法列表](./IMAGE/List.png)
 
 ---
 
@@ -85,7 +85,9 @@
 ```
 ````
 
-## ![分支图](./IMAGE/tree.png)
+![分支图](./IMAGE/Tree.png)
+
+---
 
 ## 设置
 
