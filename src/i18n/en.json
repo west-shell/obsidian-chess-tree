@@ -114,5 +114,12 @@
   "codeblock.registered": "Code blocks re-registered",
   "codeblock.restartNotice": "Changes require restarting the plugin or Obsidian to take effect.",
   "codeblock.modeList": "List mode",
-  "codeblock.modeBranch": "Branch diagram mode"
+  "codeblock.modeBranch": "Branch diagram mode",
+  "settings.restartRequired.title": "Restart Required",
+  "settings.restartRequired.desc": "The following settings require restarting the plugin or Obsidian to take effect.",
+  "pgn.title": "PGN File View",
+  "pgn.enable": "Enable PGN file view",
+  "pgn.enable.desc": "Register PGN file view for opening .pgn files",
+  "pgn.extensions": "PGN file extensions",
+  "pgn.extensions.desc": "Custom file extensions for PGN view, comma separated"
 }

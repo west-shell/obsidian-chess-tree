@@ -114,5 +114,12 @@
   "codeblock.registered": "代码块已重新注册",
   "codeblock.restartNotice": "代码块名称更改后，需重启插件或软件才能生效",
   "codeblock.modeList": "列表模式",
-  "codeblock.modeBranch": "分支图模式"
+  "codeblock.modeBranch": "分支图模式",
+  "settings.restartRequired.title": "重启后生效",
+  "settings.restartRequired.desc": "以下设置需要重启插件或软件才能生效",
+  "pgn.title": "PGN 文件视图",
+  "pgn.enable": "启用 PGN 文件视图",
+  "pgn.enable.desc": "注册 PGN 文件视图以打开 .pgn 文件",
+  "pgn.extensions": "PGN 文件扩展名",
+  "pgn.extensions.desc": "自定义 PGN 视图的文件扩展名，逗号分隔"
 }

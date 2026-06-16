@@ -30,6 +30,8 @@ export interface ISettings {
     tree: string[];
   };
   genfenSaveType: 'chess' | 'tree';
+  enablePGNView: boolean;
+  pgnFileExtensions: string[];
 }
 
 export type IOptions = {

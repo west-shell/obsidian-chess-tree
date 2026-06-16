@@ -31,6 +31,8 @@ export const DEFAULT_SETTINGS: ISettings = {
     tree: ['tree'],
   },
   genfenSaveType: 'chess',
+  enablePGNView: true,
+  pgnFileExtensions: ['pgn'],
 };
 
 function addSliderWithValue(
@@ -86,7 +88,6 @@ export class ChessSettingTab extends PluginSettingTab {
         .setValue(settings.lang)
         .onChange(v => {
           settings.lang = v as ISettings['lang'];
-          void this.plugin.saveSettings();
           initI18n(v);
           this.display();
         }),
@@ -102,7 +103,6 @@ export class ChessSettingTab extends PluginSettingTab {
         dropdown.addOptions(THEME_OPTIONS);
         dropdown.setValue(settings.theme).onChange(theme => {
           settings.theme = theme as ISettings['theme'];
-          void this.plugin.saveSettings();
           this.plugin.refresh();
         });
       });
@@ -116,7 +116,6 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.cellSize = v;
-        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
@@ -130,7 +129,6 @@ export class ChessSettingTab extends PluginSettingTab {
           .setValue(settings.position)
           .onChange(position => {
             settings.position = position as 'bottom' | 'right';
-            void this.plugin.saveSettings();
             this.plugin.refresh();
           });
       });
@@ -141,7 +139,6 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showCoordinateLabels).onChange(value => {
           settings.showCoordinateLabels = value;
-          void this.plugin.saveSettings();
         }),
       );
 
@@ -154,7 +151,6 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showLastMove).onChange(value => {
           settings.showLastMove = value;
-          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -165,7 +161,6 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showNextMove).onChange(value => {
           settings.showNextMove = value;
-          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -176,7 +171,6 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showTurnBorder).onChange(value => {
           settings.showTurnBorder = value;
-          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -188,7 +182,6 @@ export class ChessSettingTab extends PluginSettingTab {
         .addToggle(toggle =>
           toggle.setValue(settings.enableSpeech).onChange(value => {
             settings.enableSpeech = value;
-            void this.plugin.saveSettings();
           }),
         );
     }
@@ -202,7 +195,6 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showMovelist).onChange(value => {
           settings.showMovelist = value;
-          void this.plugin.saveSettings();
           this.plugin.refresh();
         }),
       );
@@ -213,7 +205,6 @@ export class ChessSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(settings.showMovelistText).onChange(value => {
           settings.showMovelistText = value;
-          void this.plugin.saveSettings();
           this.plugin.refresh();
           this.display();
         }),
@@ -228,7 +219,6 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.fontSize = v;
-        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
@@ -246,7 +236,6 @@ export class ChessSettingTab extends PluginSettingTab {
           .setValue(settings.autoJump)
           .onChange(async value => {
             settings.autoJump = value as 'never' | 'always' | 'auto';
-            void this.plugin.saveSettings();
           });
       });
 
@@ -262,7 +251,6 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.boardMarginTop = v;
-        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
@@ -276,13 +264,18 @@ export class ChessSettingTab extends PluginSettingTab {
       'px',
       v => {
         settings.boardMarginBottom = v;
-        void this.plugin.saveSettings();
         this.plugin.refresh();
       },
     );
 
-    // ==================== 代码块名称 ====================
-    new Setting(containerEl).setName(t('codeblock.title')).setDesc(t('codeblock.restartNotice')).setHeading();
+    // ==================== 重启后生效的设置 ====================
+    new Setting(containerEl)
+      .setName(t('settings.restartRequired.title'))
+      .setDesc(t('settings.restartRequired.desc'))
+      .setHeading();
+
+    // ---- 代码块名称 ----
+    new Setting(containerEl).setName(t('codeblock.title')).setHeading();
 
     const chessSetting = new Setting(containerEl)
       .setName(t('codeblock.chessAliases'))
@@ -293,12 +286,14 @@ export class ChessSettingTab extends PluginSettingTab {
             .split(',')
             .map(s => s.trim())
             .filter(Boolean);
+          void this.plugin.saveSettings();
         }),
       )
       .addButton(button =>
         button.setIcon('rotate-ccw').onClick(() => {
           settings.codeBlockNames.chess = ['chess'];
           chessSetting.controlEl.querySelector('input')!.value = 'chess';
+          void this.plugin.saveSettings();
         }),
       );
 
@@ -311,12 +306,14 @@ export class ChessSettingTab extends PluginSettingTab {
             .split(',')
             .map(s => s.trim())
             .filter(Boolean);
+          void this.plugin.saveSettings();
         }),
       )
       .addButton(button =>
         button.setIcon('rotate-ccw').onClick(() => {
           settings.codeBlockNames.tree = ['tree'];
           treeSetting.controlEl.querySelector('input')!.value = 'tree';
+          void this.plugin.saveSettings();
         }),
       );
 
@@ -329,12 +326,14 @@ export class ChessSettingTab extends PluginSettingTab {
             .split(',')
             .map(s => s.trim())
             .filter(Boolean);
+          void this.plugin.saveSettings();
         }),
       )
       .addButton(button =>
         button.setIcon('rotate-ccw').onClick(() => {
           settings.codeBlockNames.fen = ['fen'];
           fenSetting.controlEl.querySelector('input')!.value = 'fen';
+          void this.plugin.saveSettings();
         }),
       );
 
@@ -347,7 +346,41 @@ export class ChessSettingTab extends PluginSettingTab {
           .setValue(settings.genfenSaveType)
           .onChange(value => {
             settings.genfenSaveType = value as 'chess' | 'tree';
+            void this.plugin.saveSettings();
           }),
+      );
+
+    // ---- PGN 文件视图 ----
+    new Setting(containerEl).setName(t('pgn.title')).setHeading();
+
+    new Setting(containerEl)
+      .setName(t('pgn.enable'))
+      .setDesc(t('pgn.enable.desc'))
+      .addToggle(toggle =>
+        toggle.setValue(settings.enablePGNView).onChange(value => {
+          settings.enablePGNView = value;
+          void this.plugin.saveSettings();
+        }),
+      );
+
+    const pgnExtSetting = new Setting(containerEl)
+      .setName(t('pgn.extensions'))
+      .setDesc(t('pgn.extensions.desc') + ' (默认: pgn)')
+      .addText(text =>
+        text.setValue(settings.pgnFileExtensions.join(', ')).onChange(value => {
+          settings.pgnFileExtensions = value
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+          void this.plugin.saveSettings();
+        }),
+      )
+      .addButton(button =>
+        button.setIcon('rotate-ccw').onClick(() => {
+          settings.pgnFileExtensions = ['pgn'];
+          pgnExtSetting.controlEl.querySelector('input')!.value = 'pgn';
+          void this.plugin.saveSettings();
+        }),
       );
 
     containerEl.parentElement?.classList.add('ws-setting-tab');
@@ -355,5 +388,6 @@ export class ChessSettingTab extends PluginSettingTab {
 
   async hide() {
     this.plugin.refresh();
+    void this.plugin.saveSettings();
   }
 }
