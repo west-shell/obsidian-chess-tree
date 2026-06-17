@@ -6,7 +6,7 @@ import { MarkdownView, Notice, Plugin, TFile } from 'obsidian';
 
 import { initI18n, t } from './i18n';
 import { GenFENRenderChild } from './renderChild/GenFENRenderChild';
-import { ChessRenderChild } from './renderChild/MoveListRenderChild';
+import { ChessRenderChild } from './renderChild/ListRenderChild';
 import { TreeRenderChild } from './renderChild/TreeRenderChild';
 import { ChessSettingTab, DEFAULT_SETTINGS } from './settings';
 import { applyThemes } from './themes';
