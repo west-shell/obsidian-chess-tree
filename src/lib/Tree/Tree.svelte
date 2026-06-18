@@ -78,7 +78,7 @@
     return node.comments?.filter((c) => ALL_ANNOTATION_KEYS.includes(c)) ?? [];
   }
 
-  const SHAPES_RE = /^{([a-h][1-8])([a-h][1-8])?:([gryb])}$/;
+  const SHAPES_RE = /^([a-h][1-8])([a-h][1-8])?:([gryb])$/;
 
   function getRegularComments(node: ChessNode): string[] {
     return (
