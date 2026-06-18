@@ -1,7 +1,7 @@
 import { MarkdownView, Notice } from 'obsidian';
 
 import { Chess, type Move } from '../../chess';
-import { registerXQModule } from '../../core/module-system';
+import { registerListModule } from '../../core/module-system';
 import { t } from '../../i18n';
 import type { ITurn, IXQHost } from '../../types';
 import { ConfirmModal } from '../../utils/confirmModal';
@@ -112,7 +112,7 @@ const ActionsModule = {
   },
 };
 
-registerXQModule('actions', ActionsModule);
+registerListModule('actions', ActionsModule);
 
 function undo(host: IXQHost) {
   if (host.currentStep > 0) {

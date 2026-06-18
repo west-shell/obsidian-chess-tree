@@ -1,5 +1,5 @@
 import type { Move } from '../../chess';
-import { registerXQModule } from '../../core/module-system';
+import { registerListModule } from '../../core/module-system';
 import type { IXQHost } from '../../types';
 
 const HistoryModule = {
@@ -10,8 +10,9 @@ const HistoryModule = {
       host.modified = false;
     });
 
-    eventBus.on('edithistory', (move: Move) => {
-      editHistory(host, move);
+    eventBus.on('edithistory', (payload?: unknown) => {
+      if (!payload || typeof payload !== 'object') return;
+      editHistory(host, payload as Move);
     });
   },
 };
@@ -33,4 +34,4 @@ function editHistory(host: IXQHost, move: Move) {
   host.history.push(move);
 }
 
-registerXQModule('history', HistoryModule);
+registerListModule('history', HistoryModule);

@@ -96,7 +96,12 @@ export interface IGenFENHost extends IHost {
   settings: ISettings;
   file: { path: string };
 }
-
+export interface ITreeHost extends IXQHost {
+  fen: string;
+  nodeMap: NodeMap;
+  currentNode: ChessNode | null;
+  currentPath: string[];
+}
 export interface IPGNViewHost extends IHost {
   nodeMap: NodeMap;
   currentNode: ChessNode | null;

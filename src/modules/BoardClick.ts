@@ -1,5 +1,5 @@
 import { Chess } from '../chess';
-import { registerPGNViewModule, registerTreeModule, registerXQModule } from '../core/module-system';
+import { registerListModule, registerPGNViewModule, registerTreeModule } from '../core/module-system';
 import type { IXQHost } from '../types';
 
 const BoardClickModule = {
@@ -36,6 +36,6 @@ const BoardClickModule = {
   },
 };
 
-registerXQModule('BoardClick', BoardClickModule);
+registerListModule('BoardClick', BoardClickModule);
 registerPGNViewModule('BoardClick', BoardClickModule);
 registerTreeModule('BoardClick', BoardClickModule);

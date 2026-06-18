@@ -1,7 +1,7 @@
 import '../core/event-bus';
 import '../modules/Source';
-import '../modules/List/ChessBoard';
 import '../modules/BoardClick';
+import '../modules/List/ChessBoard';
 import '../modules/List/History';
 import '../modules/List/Actions';
 import '../modules/List/Speaker';

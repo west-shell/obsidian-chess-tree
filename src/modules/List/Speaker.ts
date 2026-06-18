@@ -1,4 +1,4 @@
-import { registerXQModule } from '../../core/module-system';
+import { registerListModule } from '../../core/module-system';
 import type { IXQHost } from '../../types';
 import { speak } from '../speak';
 
@@ -19,4 +19,4 @@ const SpeakerModule = {
   },
 };
 
-registerXQModule('speech', SpeakerModule);
+registerListModule('speech', SpeakerModule);

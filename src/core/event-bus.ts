@@ -1,18 +1,19 @@
+import type { Move } from '../chess';
 import {
   registerGenFENModule,
+  registerListModule,
   registerPGNViewModule,
   registerTreeModule,
-  registerXQModule,
 } from './module-system';
 
 type EventType = string | symbol;
-type Payload = string | number | boolean | object;
+type Payload = string | number | boolean | object | Move;
 type Handler = (payload?: Payload) => void;
 
 export class EventBus {
   private handlers = new Map<EventType, Set<Handler>>();
 
-  constructor(public host: object) {}
+  constructor(public host: object) { }
 
   static init(host: Record<string, any>): void {
     host.eventBus = new EventBus(host);
@@ -49,7 +50,7 @@ export class EventBus {
   }
 }
 
-registerXQModule('eventBus', EventBus);
+registerListModule('eventBus', EventBus);
 registerGenFENModule('eventBus', EventBus);
 registerPGNViewModule('eventBus', EventBus);
 registerTreeModule('eventBus', EventBus);
