@@ -4,7 +4,7 @@ import '../modules/BoardClick';
 import '../modules/List/ChessBoard';
 import '../modules/List/History';
 import '../modules/List/Actions';
-import '../modules/List/Speaker';
+import '../modules/List/Speak';
 
 import { type MarkdownPostProcessorContext, MarkdownRenderChild } from 'obsidian';
 
