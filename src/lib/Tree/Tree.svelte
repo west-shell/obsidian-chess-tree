@@ -15,7 +15,12 @@
     currentPath: string[];
   }
 
-  let { nodeMap, eventBus, currentNode = $bindable(), currentPath }: Props = $props();
+  let {
+    nodeMap,
+    eventBus,
+    currentNode = $bindable(),
+    currentPath,
+  }: Props = $props();
 
   let commentsText = $state("");
   let textareaEl: HTMLTextAreaElement | undefined = $state();
@@ -27,7 +32,12 @@
   let zoomBehavior: d3.ZoomBehavior<SVGSVGElement, unknown>;
   const TRANSFORM_SAFE = $derived.by(() => {
     const t = zoomTransform;
-    if (!t || !Number.isFinite(t.x) || !Number.isFinite(t.y) || !Number.isFinite(t.k)) {
+    if (
+      !t ||
+      !Number.isFinite(t.x) ||
+      !Number.isFinite(t.y) ||
+      !Number.isFinite(t.k)
+    ) {
       return "translate(0,0) scale(1)";
     }
     return `translate(${t.x},${t.y}) scale(${t.k})`;
@@ -38,9 +48,16 @@
   const nodeWidth = 20;
   const nodeHeight = 13;
 
-  const ANNOTATION_DEFINITIONS: Record<string, { symbol: string; color: string; icon: string }> = {
+  const ANNOTATION_DEFINITIONS: Record<
+    string,
+    { symbol: string; color: string; icon: string }
+  > = {
     "W+": { symbol: "White +", color: "var(--piece-red)", icon: "thumbs-up" },
-    "B+": { symbol: "Black +", color: "var(--piece-black)", icon: "thumbs-down" },
+    "B+": {
+      symbol: "Black +",
+      color: "var(--piece-black)",
+      icon: "thumbs-down",
+    },
     "=": { symbol: "Equal", color: "green", icon: "handshake" },
     "?": { symbol: "Key", color: "var(--text-warning)", icon: "bookmark" },
     "!": { symbol: "Brilliant", color: "var(--color-yellow)", icon: "star" },
@@ -63,7 +80,8 @@
 
   function getPieceIcon(node: ChessNode): string | null {
     if (!node.move) return null;
-    if (node.move.isKingsideCastle() || node.move.isQueensideCastle()) return "castle";
+    if (node.move.isKingsideCastle() || node.move.isQueensideCastle())
+      return "castle";
     if (node.move.promotion) return "chevrons-up";
     return PIECE_ICONS[node.move.piece] ?? null;
   }
@@ -82,7 +100,9 @@
 
   function getRegularComments(node: ChessNode): string[] {
     return (
-      node.comments?.filter((c) => !ALL_ANNOTATION_KEYS.includes(c) && !SHAPES_RE.test(c)) ?? []
+      node.comments?.filter(
+        (c) => !ALL_ANNOTATION_KEYS.includes(c) && !SHAPES_RE.test(c),
+      ) ?? []
     );
   }
 
@@ -126,18 +146,27 @@
 
   function saveComments() {
     if (!currentNode) return;
-    const regularComments = commentsText.split("\n").filter((c) => c.trim() !== "");
+    const regularComments = commentsText
+      .split("\n")
+      .filter((c) => c.trim() !== "");
     const existingAnnotations = getAllAnnotations(currentNode);
     const existingShapes = getAllShapes(currentNode);
-    currentNode.comments = [...existingAnnotations, ...existingShapes, ...regularComments];
-    eventBus.emit("updateUI", null);
-    eventBus.emit("modified", null);
+    currentNode.comments = [
+      ...existingAnnotations,
+      ...existingShapes,
+      ...regularComments,
+    ];
+    eventBus.emit("updateUI");
+    eventBus.emit("modified");
   }
 
   function adjustTextareaHeight() {
     if (!textareaEl) return;
     textareaEl.classList.add("auto-height");
-    textareaEl.style.setProperty("--textarea-height", `${textareaEl.scrollHeight}px`);
+    textareaEl.style.setProperty(
+      "--textarea-height",
+      `${textareaEl.scrollHeight}px`,
+    );
     textareaEl.classList.remove("auto-height");
   }
 
@@ -183,7 +212,8 @@
   function panToNodeIfNeeded(node: ChessNode) {
     if (!node || !svgEl || node.x === undefined || node.y === undefined) return;
     const { x: tx, y: ty, k: sc } = zoomTransform;
-    if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc)) return;
+    if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc))
+      return;
     const { clientWidth, clientHeight } = svgEl;
     const padding = 50;
     let translateX = tx,
@@ -195,9 +225,11 @@
     let dx = 0,
       dy = 0;
     if (nodeScreenX < padding) dx = padding - nodeScreenX;
-    else if (nodeScreenX > clientWidth - padding) dx = clientWidth - padding - nodeScreenX;
+    else if (nodeScreenX > clientWidth - padding)
+      dx = clientWidth - padding - nodeScreenX;
     if (nodeScreenY < padding) dy = padding - nodeScreenY;
-    else if (nodeScreenY > clientHeight - padding) dy = clientHeight - padding - nodeScreenY;
+    else if (nodeScreenY > clientHeight - padding)
+      dy = clientHeight - padding - nodeScreenY;
 
     if (dx || dy) {
       translateX += dx;
@@ -210,7 +242,8 @@
   function zoomAtCenter(factor: number) {
     if (!svgEl) return;
     const { x: tx, y: ty, k: sc } = zoomTransform;
-    if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc)) return;
+    if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc))
+      return;
     const w = svgEl.clientWidth,
       h = svgEl.clientHeight;
     const cx = w / 2,
@@ -271,7 +304,12 @@
     updateTreeLayout();
     zoomBehavior = d3.zoom<SVGSVGElement, unknown>().on("zoom", (event) => {
       const t = event.transform;
-      if (t && Number.isFinite(t.x) && Number.isFinite(t.y) && Number.isFinite(t.k)) {
+      if (
+        t &&
+        Number.isFinite(t.x) &&
+        Number.isFinite(t.y) &&
+        Number.isFinite(t.k)
+      ) {
         zoomTransform = t;
       }
     });
@@ -319,11 +357,16 @@
               `}
               stroke="var(--board-line)"
               stroke-linejoin="round"
-              stroke-width={currentPath.includes(node.id) && currentPath.includes(child.id)
+              stroke-width={currentPath.includes(node.id) &&
+              currentPath.includes(child.id)
                 ? 1.5
                 : 1}
-              opacity={currentPath.includes(node.id) && currentPath.includes(child.id) ? 1.5 : 0.7}
-              filter={currentPath.includes(node.id) && currentPath.includes(child.id)
+              opacity={currentPath.includes(node.id) &&
+              currentPath.includes(child.id)
+                ? 1.5
+                : 0.7}
+              filter={currentPath.includes(node.id) &&
+              currentPath.includes(child.id)
                 ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
                 : "grayscale(50%) brightness(0.75)"}
               fill="none"
@@ -357,7 +400,11 @@
                 height={nodeHeight}
                 rx="2.5"
                 ry="2.5"
-                fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
+                fill={node.side === "white"
+                  ? "#fff"
+                  : node.side === "black"
+                    ? "#333"
+                    : "green"}
                 stroke="var(--board-line)"
               />
               <g transform="translate(-6, -6)" color={def.color}>
@@ -371,7 +418,11 @@
                 height={nodeHeight}
                 rx="2.5"
                 ry="2.5"
-                fill={node.side === "white" ? "#fff" : node.side === "black" ? "#333" : "green"}
+                fill={node.side === "white"
+                  ? "#fff"
+                  : node.side === "black"
+                    ? "#333"
+                    : "green"}
                 stroke="var(--board-line)"
               />
               {#if nodeMode === 0 && !node.move}
@@ -379,7 +430,10 @@
                   {@html iconSvg("house", 12, 1.5)}
                 </g>
               {:else if nodeMode === 0 && getPieceIcon(node)}
-                <g transform="translate(-6, -6)" color={node.side === "white" ? "#333" : "#fff"}>
+                <g
+                  transform="translate(-6, -6)"
+                  color={node.side === "white" ? "#333" : "#fff"}
+                >
                   {@html iconSvg(getPieceIcon(node)!, 12, 1.5)}
                 </g>
               {:else}
@@ -405,7 +459,12 @@
 
     <div class="toolbar">
       {#each zoomBTN as { title, icon, event }}
-        <button class="toolbar-btn" {title} aria-label={title} use:useSetIcon={icon} onclick={event}
+        <button
+          class="toolbar-btn"
+          {title}
+          aria-label={title}
+          use:useSetIcon={icon}
+          onclick={event}
         ></button>
       {/each}
       <button

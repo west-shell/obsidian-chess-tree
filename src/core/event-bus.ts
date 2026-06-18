@@ -1,5 +1,3 @@
-import type { Move } from '../chess';
-
 import {
   registerGenFENModule,
   registerListModule,
@@ -8,8 +6,7 @@ import {
 } from './module-system';
 
 type EventType = string | symbol;
-type Payload = string | number | boolean | object | Move;
-type Handler = (payload?: Payload) => void;
+type Handler = (payload?: any) => void;
 
 export class EventBus {
   private handlers = new Map<EventType, Set<Handler>>();
@@ -30,10 +27,10 @@ export class EventBus {
       set = new Set();
       this.handlers.set(event, set);
     }
-    set.add(handler);
+    if (handler) set.add(handler);
   }
 
-  emit(event: EventType, payload?: Payload) {
+  emit(event: EventType, payload?: any) {
     const set = this.handlers.get(event);
     if (!set) return;
     const hasPayload = arguments.length === 2;

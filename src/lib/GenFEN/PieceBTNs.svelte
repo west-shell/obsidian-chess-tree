@@ -13,8 +13,18 @@
   let { settings, fen, eventBus, position, selectedPiece }: Props = $props();
 
   const MAX_COUNT: Record<string, number> = {
-    K: 1, Q: 1, R: 2, B: 2, N: 2, P: 8,
-    k: 1, q: 1, r: 2, b: 2, n: 2, p: 8,
+    K: 1,
+    Q: 1,
+    R: 2,
+    B: 2,
+    N: 2,
+    P: 8,
+    k: 1,
+    q: 1,
+    r: 2,
+    b: 2,
+    n: 2,
+    p: 8,
   };
 
   const PIECES: { key: string; color: "white" | "black"; icon: string }[] = [
@@ -33,17 +43,25 @@
   ];
 
   let pieceCount = $derived(
-    fen.split(' ')[0].split('').reduce((acc: Record<string, number>, c) => {
-      if (/[1-8]/.test(c)) return acc;
-      if (/[a-zA-Z]/.test(c)) {
-        acc[c] = (acc[c] || 0) + 1;
-      }
-      return acc;
-    }, {}),
+    fen
+      .split(" ")[0]
+      .split("")
+      .reduce((acc: Record<string, number>, c) => {
+        if (/[1-8]/.test(c)) return acc;
+        if (/[a-zA-Z]/.test(c)) {
+          acc[c] = (acc[c] || 0) + 1;
+        }
+        return acc;
+      }, {}),
   );
 
   let count = $derived(
-    Object.fromEntries(Object.keys(MAX_COUNT).map((p) => [p, MAX_COUNT[p] - (pieceCount[p] || 0)])),
+    Object.fromEntries(
+      Object.keys(MAX_COUNT).map((p) => [
+        p,
+        MAX_COUNT[p] - (pieceCount[p] || 0),
+      ]),
+    ),
   );
 
   function useIcon(el: HTMLElement, icon: string) {
@@ -51,7 +69,10 @@
   }
 </script>
 
-<div class="pieces {position}" style="--h:{8 * settings.cellSize}px;--w:{8 * settings.cellSize}px;">
+<div
+  class="pieces {position}"
+  style="--h:{8 * settings.cellSize}px;--w:{8 * settings.cellSize}px;"
+>
   {#each PIECES as { key, color, icon }}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button

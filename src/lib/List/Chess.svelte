@@ -46,7 +46,15 @@
 </script>
 
 <div class="XQ-container {settings.position}">
-  <Board {settings} {fen} {lastMove} {checkColor} {selectedSquare} {eventBus} {rotated} />
+  <Board
+    {settings}
+    {fen}
+    {lastMove}
+    {checkColor}
+    {selectedSquare}
+    {eventBus}
+    {rotated}
+  />
   <Toolbar {settings} {eventBus} {modified} {PGN} {isprotected} />
   {#if settings.showMovelist}
     <List {settings} {currentStep} {moves} {eventBus} />

@@ -1,6 +1,15 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { type Api, type cg, Chess, Chessground, type Config, type DrawShape, type Move, type Square } from "../chess";
+  import {
+    type Api,
+    type cg,
+    Chess,
+    Chessground,
+    type Config,
+    type DrawShape,
+    type Move,
+    type Square,
+  } from "../chess";
   import type { EventBus } from "../core/event-bus";
   import type { ISettings } from "../types";
 
@@ -72,9 +81,13 @@
     }
     promotingMove = null;
   }
-  let turnColor: cg.Color = $derived(fen.split(" ")[1] === "b" ? "black" : "white");
+  let turnColor: cg.Color = $derived(
+    fen.split(" ")[1] === "b" ? "black" : "white",
+  );
   let turnClass = $derived(
-    settings.showTurnBorder ? `turn-${fen.split(" ")[1] === "b" ? "black" : "white"}` : "",
+    settings.showTurnBorder
+      ? `turn-${fen.split(" ")[1] === "b" ? "black" : "white"}`
+      : "",
   );
 
   function computeDests(fen: string): Map<cg.Key, cg.Key[]> {
@@ -104,7 +117,9 @@
     }));
   }
 
-  let shapes = $derived(settings.showNextMove ? computeVariationShapes(variations) : []);
+  let shapes = $derived(
+    settings.showNextMove ? computeVariationShapes(variations) : [],
+  );
   let dests = $derived(computeDests(fen));
   let _check: cg.Color | false = $derived(checkColor || false);
 
@@ -127,8 +142,13 @@
               // Check if any legal promotion exists
               try {
                 const testChess = new Chess(fen);
-                const moves = testChess.moves({ square: orig as Square, verbose: true }) as Move[];
-                const promoMoves = moves.filter((m) => m.to === dest && m.promotion);
+                const moves = testChess.moves({
+                  square: orig as Square,
+                  verbose: true,
+                }) as Move[];
+                const promoMoves = moves.filter(
+                  (m) => m.to === dest && m.promotion,
+                );
                 if (promoMoves.length > 0) {
                   api?.cancelMove();
                   promotingMove = { from: orig as Square, to: dest as Square };
@@ -236,7 +256,12 @@
     if (freeMode) {
       api.set({ fen, turnColor, check: _check });
     } else {
-      api.set({ fen, turnColor, movable: { color: turnColor, dests }, check: _check });
+      api.set({
+        fen,
+        turnColor,
+        movable: { color: turnColor, dests },
+        check: _check,
+      });
     }
     api.selectSquare(null);
   });
@@ -293,7 +318,10 @@
     <div class="promotion-overlay" onclick={() => (promotingMove = null)}>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div class="promotion-choices {promotingColor}" onclick={(e) => e.stopPropagation()}>
+      <div
+        class="promotion-choices {promotingColor}"
+        onclick={(e) => e.stopPropagation()}
+      >
         {#each PROMOTION_PIECES as { type, icon }}
           <button class="promotion-btn" onclick={() => completePromotion(type)}>
             {@html iconSvg(icon, boardWidth * 0.11, 1.2)}

@@ -14,18 +14,15 @@
   let { settings, currentStep, moves, eventBus }: Props = $props();
 
   let itemRefs: HTMLLIElement[] = [];
-  let ulRef: HTMLUListElement;
+  let ulRef: HTMLUListElement | null = null;
 
   $effect(() => {
     void currentStep;
     void moves;
-
     (async () => {
       await tick();
-
       const index = currentStep === 0 ? 0 : Math.ceil(currentStep / 2);
       const targetEl = itemRefs[index];
-
       if (targetEl) {
         scrollToBTN(targetEl, ulRef);
       }

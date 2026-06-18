@@ -8,8 +8,18 @@
   import { onMount, tick } from "svelte";
 
   const SHAPES_RE = /^([a-h][1-8])([a-h][1-8])?:([gryb])$/;
-  const BRUSH_MAP: Record<string, string> = { green: "g", red: "r", blue: "b", yellow: "y" };
-  const BRUSH_REV: Record<string, string> = { g: "green", r: "red", b: "blue", y: "yellow" };
+  const BRUSH_MAP: Record<string, string> = {
+    green: "g",
+    red: "r",
+    blue: "b",
+    yellow: "y",
+  };
+  const BRUSH_REV: Record<string, string> = {
+    g: "green",
+    r: "red",
+    b: "blue",
+    y: "yellow",
+  };
 
   function loadShapes(node: ChessNode): DrawShape[] {
     if (!node.comments) return [];
@@ -18,7 +28,11 @@
       const m = c.match(SHAPES_RE);
       if (m) {
         const brush = BRUSH_REV[m[3]];
-        shapes.push({ orig: m[1] as cg.Key, dest: m[2] as cg.Key | undefined, brush });
+        shapes.push({
+          orig: m[1] as cg.Key,
+          dest: m[2] as cg.Key | undefined,
+          brush,
+        });
       }
     }
     return shapes;
@@ -28,7 +42,10 @@
     const shapeComments = shapes.map(
       (s) => s.orig + (s.dest ?? "") + ":" + BRUSH_MAP[s.brush ?? "green"],
     );
-    node.comments = [...(node.comments ?? []).filter((c) => !SHAPES_RE.test(c)), ...shapeComments];
+    node.comments = [
+      ...(node.comments ?? []).filter((c) => !SHAPES_RE.test(c)),
+      ...shapeComments,
+    ];
   }
 
   interface Props {
@@ -40,7 +57,8 @@
     currentPath: string[];
   }
 
-  let { settings, fen, eventBus, nodeMap, currentNode, currentPath }: Props = $props();
+  let { settings, fen, eventBus, nodeMap, currentNode, currentPath }: Props =
+    $props();
 
   let lastMove: [Square, Square] | null = $derived(
     currentNode.move ? [currentNode.move.from, currentNode.move.to] : null,
@@ -48,7 +66,9 @@
   let { position } = $derived(settings);
   let rotated = $state(false);
   let variations = $derived(
-    currentNode.children.map((child) => child.move).filter((m): m is Move => m != null) ?? [],
+    currentNode.children
+      .map((child) => child.move)
+      .filter((m): m is Move => m != null) ?? [],
   );
   let userShapes = $derived(loadShapes(currentNode));
   let checkColor = $derived(

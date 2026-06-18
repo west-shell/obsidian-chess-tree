@@ -19,16 +19,16 @@
   let flipped = $state(false);
 
   function onBtnClick(action: any) {
-    if (typeof action === 'string' && action === 'flip') {
+    if (typeof action === "string" && action === "flip") {
       flipped = !flipped;
     }
   }
 
   onMount(() => {
-    eventBus.on('btn-click', onBtnClick);
+    eventBus.on("btn-click", onBtnClick);
   });
   onDestroy(() => {
-    eventBus.off('btn-click', onBtnClick);
+    eventBus.off("btn-click", onBtnClick);
   });
 </script>
 

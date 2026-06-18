@@ -6,7 +6,7 @@
   interface Props {
     eventBus: EventBus;
     position: string;
-    fen: string; // 完整 FEN
+    fen: string;
   }
   let { eventBus, position, fen }: Props = $props();
 
@@ -71,7 +71,11 @@
 
   function buttonClick(action: string) {
     if (action === "save") {
-      eventBus.emit("saveFen", { turn: _turn, castling: _castling, enPassant: _enPassant });
+      eventBus.emit("saveFen", {
+        turn: _turn,
+        castling: _castling,
+        enPassant: _enPassant,
+      });
       return;
     }
     eventBus.emit("btn-click", action);
@@ -146,7 +150,9 @@
 <div class="fen-editor-tools {position}">
   <div class="tool-section turn-row">
     <button class="turn-toggle" onclick={toggleTurn}
-      >{turnLabel === "black" ? t("genfen.black_turn", _lv) : t("genfen.white_turn", _lv)}</button
+      >{turnLabel === "black"
+        ? t("genfen.black_turn", _lv)
+        : t("genfen.white_turn", _lv)}</button
     >
   </div>
 
@@ -155,34 +161,53 @@
     <div class="castling-row">
       <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.K}>
-        <input type="checkbox" checked={hasCastling.K} onchange={() => toggleCastling("K")} />
+        <input
+          type="checkbox"
+          checked={hasCastling.K}
+          onchange={() => toggleCastling("K")}
+        />
         <span>K</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.Q}>
-        <input type="checkbox" checked={hasCastling.Q} onchange={() => toggleCastling("Q")} />
+        <input
+          type="checkbox"
+          checked={hasCastling.Q}
+          onchange={() => toggleCastling("Q")}
+        />
         <span>Q</span>
       </label>
     </div>
     <div class="castling-row">
       <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
       <label class="castling-checkbox" class:active={hasCastling.k}>
-        <input type="checkbox" checked={hasCastling.k} onchange={() => toggleCastling("k")} />
+        <input
+          type="checkbox"
+          checked={hasCastling.k}
+          onchange={() => toggleCastling("k")}
+        />
         <span>k</span>
       </label>
       <label class="castling-checkbox" class:active={hasCastling.q}>
-        <input type="checkbox" checked={hasCastling.q} onchange={() => toggleCastling("q")} />
+        <input
+          type="checkbox"
+          checked={hasCastling.q}
+          onchange={() => toggleCastling("q")}
+        />
         <span>q</span>
       </label>
     </div>
   </div>
 
   <div class="tool-section">
-    <label class="section-label" for="genfen-ep">{t("genfen.enpassant", _lv)}</label>
+    <label class="section-label" for="genfen-ep"
+      >{t("genfen.enpassant", _lv)}</label
+    >
     <select
       id="genfen-ep"
       class="fen-select"
       value={_enPassant === "-" ? "-" : _enPassant[0]}
-      onfocus={() => enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn)}
+      onfocus={() =>
+        (enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn))}
       onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
     >
       <option value="-">{t("genfen.enpassant_off", _lv)}</option>
@@ -288,7 +313,11 @@
   }
   .castling-checkbox.active {
     border-color: var(--interactive-accent, #6a9fb5);
-    background: color-mix(in srgb, var(--interactive-accent, #6a9fb5) 15%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--interactive-accent, #6a9fb5) 15%,
+      transparent
+    );
   }
   .castling-checkbox input {
     margin: 0;

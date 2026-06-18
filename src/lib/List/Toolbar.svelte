@@ -25,10 +25,18 @@
 
   let buttons = $derived([
     { title: t("toolbar.reset", _lv), icon: "refresh-cw", event: "reset" },
-    { title: t("toolbar.start", _lv), icon: "arrow-left-to-line", event: "toStart" },
+    {
+      title: t("toolbar.start", _lv),
+      icon: "arrow-left-to-line",
+      event: "toStart",
+    },
     { title: t("toolbar.back", _lv), icon: "arrow-left", event: "undo" },
     { title: t("toolbar.forward", _lv), icon: "arrow-right", event: "redo" },
-    { title: t("toolbar.end", _lv), icon: "arrow-right-to-line", event: "toEnd" },
+    {
+      title: t("toolbar.end", _lv),
+      icon: "arrow-right-to-line",
+      event: "toEnd",
+    },
     { title: t("toolbar.flip", _lv), icon: "flip-vertical", event: "rotate" },
   ]);
 

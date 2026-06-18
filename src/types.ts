@@ -1,4 +1,4 @@
-import type { MarkdownPostProcessorContext, MarkdownSectionInformation } from 'obsidian';
+import type { MarkdownPostProcessorContext } from 'obsidian';
 
 import type { Move, Square } from './chess';
 import type { EventBus } from './core/event-bus';

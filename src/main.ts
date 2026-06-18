@@ -2,7 +2,7 @@ import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.brown.css';
 import 'chessground/assets/chessground.cburnett.css';
 
-import { MarkdownView, Notice, Plugin, TFile } from 'obsidian';
+import { MarkdownView, Plugin, TFile } from 'obsidian';
 
 import { initI18n, t } from './i18n';
 import { GenFENRenderChild } from './renderChild/GenFENRenderChild';
