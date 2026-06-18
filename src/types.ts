@@ -9,7 +9,7 @@ export const DEFAULT_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
 
 export interface ISettings {
   position: 'bottom' | 'right';
-  lang: 'auto' | 'en' | 'zh-cn';
+  lang: 'auto' | 'en' | 'zh';
   theme: ThemeName;
   cellSize: number;
   fontSize: number;

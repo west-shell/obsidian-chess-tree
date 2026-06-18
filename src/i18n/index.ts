@@ -1,7 +1,7 @@
 import en from './en.json';
-import zh_CN from './zh_CN.json';
+import zh from './zh.json';
 
-const messages: Record<string, Record<string, string>> = { en, 'zh-cn': zh_CN };
+const messages: Record<string, Record<string, string>> = { en, zh };
 
 let lang = 'en';
 let _sysLang: string | null = null;
@@ -11,12 +11,12 @@ const listeners = new Set<() => void>();
 function detect(): string {
   const docLang = document.documentElement.lang;
   if (docLang) {
-    if (docLang.toLowerCase().startsWith('zh')) return 'zh-cn';
+    if (docLang.toLowerCase().startsWith('zh')) return 'zh';
     if (messages[docLang]) return docLang;
   }
   const raw = navigator.language;
   if (messages[raw]) return raw;
-  if (raw.toLowerCase().startsWith('zh')) return 'zh-cn';
+  if (raw.toLowerCase().startsWith('zh')) return 'zh';
   return 'en';
 }
 
@@ -50,6 +50,6 @@ export function initI18n(locale: string) {
 
 function resolve(raw: string): string {
   if (messages[raw]) return raw;
-  if (raw?.toLowerCase().startsWith('zh')) return 'zh-cn';
+  if (raw?.toLowerCase().startsWith('zh')) return 'zh';
   return 'en';
 }
