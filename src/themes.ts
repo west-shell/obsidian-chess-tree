@@ -9,6 +9,7 @@ const themes: Record<string, { name: string; bg: string; white: string; black: s
   light: { name: 'Light', bg: '#e0d8cf', white: '#fafafa', black: '#8b7355' },
 };
 
+export type ThemeName = keyof typeof themes;
 export const THEME_OPTIONS = Object.fromEntries(
   Object.entries(themes).map(([k, v]) => [k, v.name]),
 ) as Record<string, string>;

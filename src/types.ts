@@ -2,6 +2,7 @@ import type { MarkdownPostProcessorContext, MarkdownSectionInformation } from 'o
 
 import type { Move } from './chess';
 import type { EventBus } from './core/event-bus';
+import type { ThemeName } from './themes';
 import type XQPlugin from './main';
 
 export const DEFAULT_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -9,7 +10,7 @@ export const DEFAULT_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
 export interface ISettings {
   position: 'bottom' | 'right';
   lang: 'auto' | 'en' | 'zh-cn';
-  theme: 'wood' | 'green' | 'blue' | 'grey' | 'dark' | 'light';
+  theme: ThemeName;
   cellSize: number;
   fontSize: number;
   showCoordinateLabels: boolean;
