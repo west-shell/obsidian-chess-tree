@@ -1,6 +1,5 @@
 import '../core/event-bus';
-import '../modules/Tree/TreeMap';
-import '../modules/Tree/TreeView';
+import '../modules/Tree/PGNView';
 import '../modules/BoardClick';
 import '../modules/Tree/Actions';
 import '../modules/Tree/Speaker';

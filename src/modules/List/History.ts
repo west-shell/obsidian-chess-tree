@@ -1,9 +1,9 @@
 import type { Move } from '../../chess';
 import { registerListModule } from '../../core/module-system';
-import type { IXQHost } from '../../types';
+import type { IListHost } from '../../types';
 
 const HistoryModule = {
-  init(host: IXQHost) {
+  init(host: IListHost) {
     const eventBus = host.eventBus;
 
     eventBus.on('load', () => {
@@ -17,7 +17,7 @@ const HistoryModule = {
   },
 };
 
-function editHistory(host: IXQHost, move: Move) {
+function editHistory(host: IListHost, move: Move) {
   let { currentStep, history } = host;
 
   const existingMove = history[currentStep];

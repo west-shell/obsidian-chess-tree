@@ -1,12 +1,12 @@
-import { Chess } from '../chess';
+import { Chess, type Square } from '../chess';
 import { registerListModule, registerPGNViewModule, registerTreeModule } from '../core/module-system';
-import type { IXQHost } from '../types';
+import type { IGenFENHost, IListHost, ITreeHost } from '../types';
 
 const BoardClickModule = {
-  init(host: IXQHost) {
+  init(host: IListHost | ITreeHost | IGenFENHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on('click', (clickedKey: string) => {
+    eventBus.on('click', (clickedKey: Square) => {
       // In non-free mode, Board.svelte handles moves via "runmove" directly
       // This is kept for PGN view compatibility
       if (!host.markedPos) {

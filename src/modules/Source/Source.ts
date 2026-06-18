@@ -1,8 +1,9 @@
-import { validateFen } from '../chess';
-import { registerGenFENModule, registerListModule, registerTreeModule } from '../core/module-system';
-import { DEFAULT_FEN } from '../types';
-import { parseSource } from '../utils/parse';
-import { PGNParser } from './Tree/parser';
+import { validateFen } from '../../chess';
+import { registerGenFENModule, registerListModule, registerTreeModule } from '../../core/module-system';
+import { DEFAULT_FEN } from '../../types';
+import { parseSource } from '../../utils/parse';
+
+import { PGNParser } from './parser';
 
 const SourceModule = {
   init(host: any) {
@@ -20,16 +21,16 @@ const SourceModule = {
         host.updateMainPath();
         return;
       }
-      const { haveFEN, fen, fenRoot, PGN, firstTurn, options } = parseSource(host.source);
+      const { haveFEN, fen, initFEN, PGN, firstTurn, options } = parseSource(host.source);
       switch (renderChild) {
         case 'fen': {
           host.fen = validateFen(fen).ok ? fen : DEFAULT_FEN; // 完整 FEN
           break;
         }
-        case 'chess': {
+        case 'list': {
           host.haveFEN = haveFEN;
-          host.fen = fenRoot;
-          host.fenRoot = fenRoot;
+          host.fen = fen;
+          host.initFEN = initFEN;
           host.PGN = PGN;
           host.history = [...PGN];
           host.currentTurn = firstTurn;

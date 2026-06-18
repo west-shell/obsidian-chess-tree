@@ -20,6 +20,9 @@
     eventBus.on("setViewData", () => {
       modified = false;
     });
+    eventBus.on("load",() => {
+      modified = false;
+    })
     eventBus.on("save", () => {
       modified = false;
     });

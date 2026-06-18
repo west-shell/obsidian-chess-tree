@@ -1,9 +1,9 @@
 import type { MarkdownPostProcessorContext, MarkdownSectionInformation } from 'obsidian';
 
-import type { Move } from './chess';
+import type { Move, Square } from './chess';
 import type { EventBus } from './core/event-bus';
-import type { ThemeName } from './themes';
 import type XQPlugin from './main';
+import type { ThemeName } from './themes';
 
 export const DEFAULT_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
@@ -57,51 +57,54 @@ export type ChessNode = {
 };
 
 export type NodeMap = Map<string, ChessNode>;
-export type IHistory = Move[];
 
 export interface IHost {
   plugin: XQPlugin;
   eventBus: EventBus;
+  settings: ISettings;
+}
+interface IBlockHost extends IHost {
+  containerEl: HTMLElement;
+  ctx: MarkdownPostProcessorContext;
+  source: string;
 }
 
-export interface IXQHost extends IHost {
-  containerEl: HTMLElement;
-  ctx: MarkdownPostProcessorContext & {
-    getSectionInfo(el: HTMLElement): MarkdownSectionInformation;
-  };
+export interface IGenFENHost extends IBlockHost {
   fen: string;
-  fenRoot: string;
+  selectedPiece: string | null;
+  markedPos: Square | null;
+}
+
+export interface IListHost extends IBlockHost {
+  fen: string;
+  initFEN: string;
   currentTurn: ITurn;
-  history: IHistory;
+  history: Move[];
   PGN: Move[];
   currentStep: number;
   modified: boolean;
   modifiedStep: number | null;
-  markedPos?: any;
-  settings: ISettings;
-  rotated: boolean;
-  options?: IOptions;
-  haveFEN?: boolean;
-  Chess?: any;
-  source: string;
+  markedPos: Square | null;
+  haveFEN: boolean;
+  options: IOptions;
+  Chess: any;
 }
 
-export interface IGenFENHost extends IHost {
-  containerEl: HTMLElement;
-  ctx: MarkdownPostProcessorContext & {
-    getSectionInfo(el: HTMLElement): MarkdownSectionInformation;
-  };
-  fen: string; // 完整 FEN，如 "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-  selectedPiece: string | null;
-  settings: ISettings;
-  file: { path: string };
-}
-export interface ITreeHost extends IXQHost {
+export interface ITreeHost extends IBlockHost {
   fen: string;
+  tags: Map<string, string>;
+  root: ChessNode;
   nodeMap: NodeMap;
   currentNode: ChessNode | null;
   currentPath: string[];
+  modified: boolean;
+  markedPos: Square | null;
+  haveFEN: boolean;
+  options: IOptions;
+  stringifyPGN: (root: ChessNode) => string;
+  Chess: any;
 }
+
 export interface IPGNViewHost extends IHost {
   nodeMap: NodeMap;
   currentNode: ChessNode | null;

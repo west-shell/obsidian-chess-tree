@@ -5,7 +5,7 @@ import { DEFAULT_FEN } from '../types';
 export function parseSource(source: string): {
   haveFEN: boolean;
   fen: string;
-  fenRoot: string;
+  initFEN: string;
   PGN: Move[];
   firstTurn: ITurn;
   options: IOptions;
@@ -39,7 +39,7 @@ export function parseSource(source: string): {
   return {
     haveFEN: fen !== DEFAULT_FEN,
     fen: chess.fen(),
-    fenRoot: fen,
+    initFEN: fen,
     PGN,
     firstTurn,
     options,

@@ -1,7 +1,6 @@
 import '../core/event-bus';
-import '../modules/Source';
+import '../modules/Source/Source';
 import '../modules/BoardClick';
-import '../modules/Tree/TreeMap';
 import '../modules/Tree/ChessBoard';
 // import '../modules/Tree/TreeView';
 import '../modules/Tree/Actions';
@@ -9,7 +8,7 @@ import '../modules/Tree/Actions';
 import { type MarkdownPostProcessorContext, MarkdownRenderChild } from 'obsidian';
 
 import type { EventBus } from '../core/event-bus';
-import { createTreeModuleRegistry, destroyTreeModuleRegistry } from '../core/module-system';
+import { createTreeModuleRegistry } from '../core/module-system';
 import type ChessPlugin from '../main';
 import type { ISettings } from '../types';
 
@@ -34,6 +33,7 @@ export class TreeRenderChild extends MarkdownRenderChild {
     const h = this.settings.cellSize * 8;
     document.body.style.setProperty('--tree-hight', `${h}px`);
     this.eventBus.emit('load', 'tree');
+    this.eventBus.emit('creatUI');
   }
 
   refresh(): void {
@@ -45,6 +45,6 @@ export class TreeRenderChild extends MarkdownRenderChild {
   onunload(): void {
     this.plugin.instances.delete(this);
     this.eventBus.emit('unload');
-    destroyTreeModuleRegistry(this);
+    // destroyTreeModuleRegistry(this);
   }
 }

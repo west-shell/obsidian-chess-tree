@@ -1,5 +1,5 @@
 import '../core/event-bus';
-import '../modules/Source';
+import '../modules/Source/Source';
 import '../modules/BoardClick';
 import '../modules/List/ChessBoard';
 import '../modules/List/History';
@@ -29,7 +29,8 @@ export class ChessRenderChild extends MarkdownRenderChild {
 
   onload(): void {
     this.plugin.instances.add(this);
-    this.eventBus.emit('load', 'chess');
+    this.eventBus.emit('load', 'list');
+    this.eventBus.emit('creatUI');
   }
 
   refresh(): void {
