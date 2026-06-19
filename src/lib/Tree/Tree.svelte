@@ -448,7 +448,7 @@
             {/if}
 
             {#if hasComments}
-              <g transform="translate(7, -7)">
+              <g transform="translate(4.8, -8)">
                 {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
               </g>
             {/if}
