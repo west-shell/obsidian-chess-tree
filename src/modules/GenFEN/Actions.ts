@@ -55,7 +55,7 @@ const ActionsModule = {
 
       switch (action.action) {
         case 'setPreset': {
-          const fenStr = action.fen as string;
+          const fenStr = action.fen;
           if (fenStr) {
             host.fen = fenStr;
             host.selectedPiece = null;
@@ -63,7 +63,7 @@ const ActionsModule = {
           break;
         }
         case 'setFen': {
-          const newFen = action.fen as string;
+          const newFen = action.fen;
           if (newFen) {
             host.fen = newFen;
           }

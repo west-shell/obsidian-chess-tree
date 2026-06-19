@@ -1,8 +1,9 @@
 import { Chess, type PieceSymbol, type Square } from '../../chess';
 import { registerGenFENModule } from '../../core/module-system';
+import type { IGenFENHost } from '../../types';
 
 const BoardClickModule = {
-  init(host: Record<string, any>) {
+  init(host: IGenFENHost) {
     const eventBus = host.eventBus;
 
     eventBus.on('click', (clickedKey: Square) => {

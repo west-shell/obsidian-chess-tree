@@ -70,8 +70,10 @@ export interface IHost {
 
 export interface IGenFENHost extends IHost {
   fen: string;
+  modified: boolean;
   selectedPiece: string | null;
   markedPos: Square | null;
+  Chess: any;
 }
 
 export interface IListHost extends IGenFENHost {
@@ -83,7 +85,6 @@ export interface IListHost extends IGenFENHost {
   currentStep: number;
   modified: boolean;
   modifiedStep: number | null;
-  markedPos: Square | null;
   haveFEN: boolean;
   options: IOptions;
   Chess: any;
@@ -99,12 +100,9 @@ export interface ITreeHost extends IGenFENHost {
   currentTurn: ITurn;
   currentNode: ChessNode;
   currentPath: string[];
-  modified: boolean;
-  markedPos: Square | null;
   haveFEN: boolean;
   options: IOptions;
   stringifyPGN: (root: ChessNode) => string;
-  Chess: any;
 }
 
 export interface IPGNViewHost extends ITreeHost {

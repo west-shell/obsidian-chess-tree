@@ -299,7 +299,7 @@
 
   $effect(() => {
     if (!api) return;
-    const cfg: any = {
+    const cfg: Config = {
       coordinates: true,
       viewOnly: settings.viewOnly ?? false,
     };
