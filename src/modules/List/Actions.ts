@@ -93,7 +93,7 @@ const ActionsModule = {
       eventBus.emit('updateUI', 'save');
     });
 
-    eventBus.on('clickstep', step => {
+    eventBus.on<number>('clickstep', step => {
       if (step === undefined || step === host.currentStep) return;
       host.currentStep = step;
       host.fen = replayFen(host);

@@ -136,7 +136,7 @@
   onMount(() => {
     enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn);
     validateEnPassant();
-    eventBus.on("updateUI", (fenStr: string) => {
+    eventBus.on<string>("updateUI", (fenStr) => {
       if (fenStr) {
         enPassantFiles = computeEnPassantFilesFor(boardPart(fenStr), _turn);
       } else {
