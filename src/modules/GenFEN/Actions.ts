@@ -19,13 +19,14 @@ const ActionsModule = {
   init(host: IGenFENHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on('clickPieceBTN', (piece: string) => {
+    eventBus.on<string>('clickPieceBTN', piece => {
       if (!piece) return;
       host.selectedPiece = piece;
       host.eventBus.emit('updateUI', host.fen);
     });
 
-    eventBus.on('saveFen', (meta: { turn: string; castling: string; enPassant: string }) => {
+    eventBus.on<{ turn: string; castling: string; enPassant: string }>('saveFen', meta => {
+      if (!meta) return;
       onSaveBTNClick(host, meta);
     });
 

@@ -16,10 +16,10 @@ export function applyThemes(settings: ISettings) {
   const { theme, boardMarginTop, boardMarginBottom, showCoordinateLabels } = settings;
   const t = themes[theme] ?? themes.wood;
 
-  document.body.style.setProperty('--board-bg', t.bg);
-  document.body.style.setProperty('--xq-piece-red', t.white);
-  document.body.style.setProperty('--xq-piece-black', t.black);
-  document.body.style.setProperty('--board-margin-top', `${boardMarginTop}px`);
-  document.body.style.setProperty('--board-margin-bottom', `${boardMarginBottom}px`);
-  document.body.style.setProperty('--xq-coords-display', showCoordinateLabels ? 'flex' : 'none');
+  activeDocument.body.style.setProperty('--board-bg', t.bg);
+  activeDocument.body.style.setProperty('--xq-piece-red', t.white);
+  activeDocument.body.style.setProperty('--xq-piece-black', t.black);
+  activeDocument.body.style.setProperty('--board-margin-top', `${boardMarginTop}px`);
+  activeDocument.body.style.setProperty('--board-margin-bottom', `${boardMarginBottom}px`);
+  activeDocument.body.style.setProperty('--xq-coords-display', showCoordinateLabels ? 'flex' : 'none');
 }

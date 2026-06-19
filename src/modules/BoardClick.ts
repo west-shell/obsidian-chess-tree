@@ -6,9 +6,8 @@ const BoardClickModule = {
   init(host: IListHost | ITreeHost | IPGNViewHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on('click', (clickedKey: Square) => {
-      // In non-free mode, Board.svelte handles moves via "runmove" directly
-      // This is kept for PGN view compatibility
+    eventBus.on<Square>('click', clickedKey => {
+      if (!clickedKey) return;
       if (!host.markedPos) {
         // Try to read the piece at the clicked square
         host.markedPos = clickedKey;

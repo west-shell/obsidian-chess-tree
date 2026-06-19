@@ -10,7 +10,7 @@ const ActionsModule = {
   init(host: IListHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on('runmove', (move: Move) => {
+    eventBus.on<Move>('runmove', move => {
       if (!move) return;
       if (!host.modified) host.modifiedStep = host.currentStep;
       host.modified = true;
