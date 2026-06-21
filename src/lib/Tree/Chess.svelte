@@ -142,8 +142,11 @@
 </div>
 
 <style>
-  :global(.tree-codeblock) .tree-view {
+  :global(.tree-codeblock) .tree-view.right {
     height: var(--tree-hight, 300px) !important;
+  }
+    :global(.tree-codeblock) .tree-view.bottom {
+    height: calc(var(--tree-hight, 300px) * 2) !important;
   }
   :global(.view-content.pgn-view) {
     overflow: hidden !important;
