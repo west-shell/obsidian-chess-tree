@@ -26,6 +26,7 @@
   let textareaEl: HTMLTextAreaElement | undefined = $state();
   let svgEl: SVGSVGElement | undefined = $state();
   let renderedNodes: ChessNode[] = $state([]);
+  let foldedNodes = $state(new Set<string>());
 
   // ---- D3 Zoom ----
   let zoomTransform = $state(d3.zoomIdentity);
@@ -171,16 +172,17 @@
   }
 
   function updateTreeLayout() {
-    renderedNodes = calculateTreeLayout(nodeMap);
+    renderedNodes = calculateTreeLayout(nodeMap, foldedNodes);
   }
 
   function toggleFold(node: ChessNode) {
-    if (node._hiddenChildren) {
-      node.children.splice(1, 0, ...node._hiddenChildren);
-      delete node._hiddenChildren;
+    const cur = foldedNodes.has(node.id);
+    if (cur) {
+      foldedNodes.delete(node.id);
     } else {
-      node._hiddenChildren = node.children.splice(1);
+      foldedNodes.add(node.id);
     }
+    foldedNodes = new Set(foldedNodes);
     updateTreeLayout();
   }
 
@@ -358,7 +360,8 @@
     <svg bind:this={svgEl} width="100%" height="100%" class="tree-svg">
       <g transform={TRANSFORM_SAFE}>
         {#each renderedNodes as node}
-          {#each node.children as child}
+          {#each node.children as child, idx}
+            {#if !(foldedNodes.has(node.id) && idx > 0)}
             <path
               d={`
               M ${node.x! * spacingX} ${node.y! * spacingY}
@@ -381,10 +384,11 @@
                 : "grayscale(50%) brightness(0.75)"}
               fill="none"
             />
+            {/if}
           {/each}
         {/each}
 
-        {#each renderedNodes as node (node.id)}
+        {#each renderedNodes as node}
           {@const primaryAnnotation = getPrimaryAnnotation(node)}
           {@const hasComments = getRegularComments(node).length > 0}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -465,12 +469,11 @@
 
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            {#if node.children.length > 1 || node._hiddenChildren}
-              {@const btnX = (node.y ?? 0) % 2 === 0 ? -nodeWidth / 2 - 6 : nodeWidth / 2 + 6}
-              <g transform="translate({btnX}, 0)" style="cursor: pointer" onclick={(e) => { e.stopPropagation(); toggleFold(node); }}>
+            {#if node.children.length > 1}
+              <g transform="translate({(node.y ?? 0) % 2 === 0 ? -nodeWidth / 2 : nodeWidth / 2}, 0)" style="cursor: pointer" onclick={(e) => { e.stopPropagation(); toggleFold(node); }}>
                 <circle r="5" fill="var(--board-line)" stroke="none" />
                 <text text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="8px" font-weight="bold">
-                  {node._hiddenChildren ? "+" : "−"}
+                  {foldedNodes.has(node.id) ? "+" : "−"}
                 </text>
               </g>
             {/if}

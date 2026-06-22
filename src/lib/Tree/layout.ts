@@ -41,7 +41,7 @@ interface LowEntry {
 
 // ─── 构建内部树 ────────────────────
 
-function buildWNode(node: ChessNode, parent: WNode | null): WNode {
+function buildWNode(node: ChessNode, parent: WNode | null, foldedNodes: Set<string>): WNode {
   const wn: WNode = {
     node,
     parent,
@@ -63,8 +63,10 @@ function buildWNode(node: ChessNode, parent: WNode | null): WNode {
   wn.lExt = wn;
   wn.rExt = wn;
 
-  for (const child of node.children) {
-    wn.children.push(buildWNode(child, wn));
+  for (let i = 0; i < node.children.length; i++) {
+    const child = node.children[i];
+    if (i > 0 && foldedNodes.has(node.id)) continue;
+    wn.children.push(buildWNode(child, wn, foldedNodes));
   }
   return wn;
 }
@@ -263,12 +265,12 @@ function resolveX(w: WNode, prevSum?: number, parentX?: number): void {
  * 输出：ChessNode 数组，每个节点有 x（水平位置）、y（深度）。
  * 渲染时用 x * spacingX、y * spacingY 转为像素坐标。
  */
-export function calculateTreeLayout(nodeMap: NodeMap): ChessNode[] {
+export function calculateTreeLayout(nodeMap: NodeMap, foldedNodes: Set<string>): ChessNode[] {
   const root = nodeMap.get('node-root');
   if (!root) return [];
 
   // 1) 建树
-  const wRoot = buildWNode(root, null);
+  const wRoot = buildWNode(root, null, foldedNodes);
 
   // 2) 布局
   layoutChildren(wRoot, 0, () => 0.3);

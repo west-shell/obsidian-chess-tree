@@ -55,7 +55,6 @@ export type ChessNode = {
   mainID?: string | null;
   children: ChessNode[];
   comments?: string[];
-  _hiddenChildren?: ChessNode[];
 };
 
 export type NodeMap = Map<string, ChessNode>;
