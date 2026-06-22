@@ -470,11 +470,17 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             {#if node.children.length > 1}
-              <g transform="translate({(node.y ?? 0) % 2 === 0 ? -nodeWidth / 2 : nodeWidth / 2}, 0)" style="cursor: pointer" onclick={(e) => { e.stopPropagation(); toggleFold(node); }}>
-                <circle r="5" fill="var(--board-line)" stroke="none" />
-                <text text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="8px" font-weight="bold">
-                  {foldedNodes.has(node.id) ? "+" : "−"}
-                </text>
+              {@const isLeft = (node.y ?? 0) % 2 === 0}
+              <g transform="translate({isLeft ? -nodeWidth / 2 : nodeWidth / 2}, 0)" style="cursor: pointer" onclick={(e) => { e.stopPropagation(); toggleFold(node); }}>
+                <polygon
+                  points={foldedNodes.has(node.id)
+                    ? (isLeft ? "0,-4 0,4 -3,3 -3,-3" : "0,-4 0,4 3,3 3,-3")
+                    : (isLeft ? "0,-4 0,4 -5,0" : "0,-4 0,4 5,0")}
+                  fill="var(--board-line)"
+                  stroke="var(--board-line)"
+                  stroke-width="1"
+                  stroke-linejoin="round"
+                />
               </g>
             {/if}
           </g>
