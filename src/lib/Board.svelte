@@ -213,8 +213,12 @@
     };
 
     // 等待容器布局完成，避免 bounds 为 0 时 renderCircle 产生 NaN
+    // 但加入超时 fallback：多个 list 同时渲染时可能 ResizeObserver 不触发
     if (!boardElement.offsetWidth) {
-      await new Promise<void>((resolve) => {
+      const layoutTimeout = new Promise<void>((resolve) => {
+        setTimeout(() => resolve(), 100);
+      });
+      const layoutObserved = new Promise<void>((resolve) => {
         const ro = new ResizeObserver(() => {
           if (boardElement.offsetWidth) {
             ro.disconnect();
@@ -223,6 +227,7 @@
         });
         ro.observe(boardElement);
       });
+      await Promise.race([layoutObserved, layoutTimeout]);
     }
     api = Chessground(boardElement, config);
 
