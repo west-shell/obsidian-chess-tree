@@ -26,13 +26,23 @@ const SourceModule = {
         case 'list': {
           const listHost = host as IListHost;
           listHost.haveFEN = haveFEN;
-          listHost.fen = fen;
           listHost.initFEN = initFEN;
           listHost.PGN = PGN;
           listHost.history = [...PGN];
           listHost.currentTurn = firstTurn;
-          listHost.currentStep = 0;
           listHost.options = options;
+
+          // 根据 autoJump 设置决定初始步数和棋盘局面
+          const shouldJump =
+            host.settings.autoJump === 'always' ||
+            (host.settings.autoJump === 'auto' && !haveFEN);
+          if (shouldJump) {
+            listHost.currentStep = PGN.length;
+            listHost.fen = fen; // parseSource 返回的 fen 已是最终局面
+          } else {
+            listHost.currentStep = 0;
+            listHost.fen = initFEN;
+          }
           break;
         }
 
