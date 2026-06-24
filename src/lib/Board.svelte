@@ -203,21 +203,11 @@
         },
       },
       events,
+      ...(freeMode ? { draggable: { deleteOnDropOff: true } } : {}),
+      ...(_check ? { check: _check } : {}),
+      ...(lastMove ? { lastMove } : {}),
+      ...(selectedSquare ? { selected: selectedSquare } : {}),
     };
-
-    if (freeMode) {
-      config.draggable = { deleteOnDropOff: true };
-    }
-
-    config.check = _check;
-
-    if (lastMove) {
-      config.lastMove = lastMove;
-    }
-
-    if (selectedSquare) {
-      config.selected = selectedSquare;
-    }
 
     // 等待容器布局完成，避免 bounds 为 0 时 renderCircle 产生 NaN
     if (!boardElement.offsetWidth) {
