@@ -2,9 +2,9 @@
   import Board from "../Board.svelte";
   import Toolbar from "./Toolbar.svelte";
   import List from "./List.svelte";
-  import type { IOptions, ISettings } from "../../types";
+  import type { ChessNode, IOptions, ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
-  import type { Move, Square } from "../../chess";
+  import type { Square } from "../../chess";
   import { onMount, tick } from "svelte";
 
   interface Props {
@@ -15,8 +15,8 @@
     currentStep: number;
     eventBus: EventBus;
     modified: boolean;
-    PGN: Move[];
-    history: Move[];
+    PGN: ChessNode[];
+    history: ChessNode[];
     lastMove: [Square, Square] | null;
     options: IOptions;
   }
@@ -37,11 +37,18 @@
 
   let moves = $derived(modified ? history : PGN);
   let isprotected = $derived(options.protected || false);
-  let rotated = $derived(options.rotated || false);
+  // svelte-ignore state_referenced_locally
+  let rotated = $state(options.rotated || false);
 
   onMount(async () => {
     await tick();
     eventBus.emit("ready");
+  });
+
+  $effect(() => {
+    eventBus.on("rotate", () => {
+      rotated = !rotated;
+    });
   });
 </script>
 

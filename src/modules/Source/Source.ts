@@ -1,14 +1,46 @@
 import { registerGenFENModule, registerListModule, registerTreeModule } from '../../core/module-system';
 import { DEFAULT_FEN, type IGenFENHost, type IListHost, type ITreeHost } from '../../types';
-import { parseSource } from '../../utils/parse';
+import { parseOption } from '../../utils/parse';
 
 import { PGNParser } from './parser';
+
+/**
+ * Prepare source for PGNParser:
+ * 1. Extract options (p/protected, r/rotated)
+ * 2. Remove option lines from source
+ * 3. Ensure FEN is in [FEN "..."] tag format
+ * 4. Return cleaned source + options
+ */
+function prepareSource(raw: string): { cleaned: string; options: ReturnType<typeof parseOption> } {
+  const options = parseOption(raw);
+
+  // Remove option lines (e.g. "p: true", "protected: true", "r: false")
+  let cleaned = raw.replace(/^(protected|P|rotated|R|r)\s*[:：]\s*(true|false)\s*$/gim, '');
+
+  // If raw FEN exists without [FEN "..."] tag, wrap it
+  const fenMatch = cleaned.match(
+    /([rnbqkpRNBQKP1-8]+\/){7}[rnbqkpRNBQKP1-8]+(?:\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)/,
+  );
+  const hasFENTag = /\[FEN\s+"/.test(cleaned);
+  if (fenMatch && !hasFENTag) {
+    cleaned = cleaned.replace(fenMatch[0], `[FEN "${fenMatch[0]}"]`);
+  }
+
+  return { cleaned, options };
+}
+
+/** Extract fen string from source */
+function extractFEN(source: string): string {
+  const fen = source.match(
+    /([rnbqkpRNBQKP1-8]+\/){7}[rnbqkpRNBQKP1-8]+(?:\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)/,
+  )?.[0];
+  return fen ?? DEFAULT_FEN;
+}
 
 const SourceModule = {
   init(host: IGenFENHost) {
     const eventBus = host.eventBus;
     eventBus.on<string>('load', renderChild => {
-      const { haveFEN, fen, initFEN, PGN, firstTurn, options } = parseSource(host.source);
       switch (renderChild) {
         case 'tree': {
           const treeHost = host as ITreeHost;
@@ -35,29 +67,37 @@ const SourceModule = {
         }
         case 'list': {
           const listHost = host as IListHost;
-          listHost.haveFEN = haveFEN;
-          listHost.initFEN = initFEN;
-          listHost.PGN = PGN;
-          listHost.history = [...PGN];
-          listHost.currentTurn = firstTurn;
-          listHost.options = options;
+
+          // Prepare source and use PGNParser to build tree
+          const { cleaned, options: opts } = prepareSource(host.source);
+          const parser = new PGNParser(cleaned);
+          const mainLine = parser.getMainLine();
+
+          listHost.root = parser.getRoot();
+          listHost.nodeMap = parser.getMap();
+          listHost.haveFEN = parser.haveFEN;
+          listHost.initFEN = parser.getRoot().fen;
+          listHost.PGN = mainLine;
+          listHost.history = [...mainLine];
+          listHost.currentTurn = getTurnFromFen(parser.getRoot().fen);
+          listHost.options = opts;
 
           // 根据 autoJump 设置决定初始步数和棋盘局面
           const shouldJump =
             host.settings.autoJump === 'always' ||
-            (host.settings.autoJump === 'auto' && !haveFEN);
+            (host.settings.autoJump === 'auto' && !listHost.haveFEN);
           if (shouldJump) {
-            listHost.currentStep = PGN.length;
-            listHost.fen = fen; // parseSource 返回的 fen 已是最终局面
+            listHost.currentStep = mainLine.length;
+            listHost.fen = mainLine.length > 0 ? mainLine[mainLine.length - 1].fen : parser.getRoot().fen;
           } else {
             listHost.currentStep = 0;
-            listHost.fen = initFEN;
+            listHost.fen = parser.getRoot().fen;
           }
           break;
         }
 
         case 'fen': {
-          host.fen = fen;
+          host.fen = extractFEN(host.source);
           break;
         }
       }
@@ -72,3 +112,8 @@ const SourceModule = {
 registerGenFENModule('source', SourceModule);
 registerListModule('source', SourceModule);
 registerTreeModule('source', SourceModule);
+
+/** Read turn from fen string */
+function getTurnFromFen(fen: string): 'white' | 'black' {
+  return fen.split(' ')[1] === 'b' ? 'black' : 'white';
+}

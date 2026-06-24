@@ -36,9 +36,14 @@ const BoardModule = {
 
     eventBus.on('updateUI', () => {
       const currentMoves = host.modified ? host.history : host.PGN;
-      const lastMove = currentMoves[host.currentStep - 1] ?? null;
+      const lastNode = currentMoves[host.currentStep - 1] ?? null;
+      const lastMove: [Square, Square] | null = lastNode?.move
+        ? ([lastNode.move.from, lastNode.move.to] as [Square, Square])
+        : null;
       const checkColor =
-        lastMove && /\+|#/.test(lastMove.san) ? (lastMove.color === 'w' ? 'black' : 'white') : null;
+        lastNode?.move && /\+|#/.test(lastNode.move.san)
+          ? (lastNode.move.color === 'w' ? 'black' : 'white')
+          : null;
       host.Chess?.$set({
         settings: { ...host.settings },
         fen: host.fen,
@@ -47,7 +52,7 @@ const BoardModule = {
         currentStep: host.currentStep,
         modified: host.modified,
         history: [...host.history],
-        lastMove: lastMove ? ([lastMove.from, lastMove.to] as [Square, Square]) : null,
+        lastMove,
         options: { ...host.options },
       });
     });

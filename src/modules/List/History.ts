@@ -1,6 +1,6 @@
+import type { ChessNode, IListHost, NodeMap } from '../../types';
 import type { Move } from '../../chess';
 import { registerListModule } from '../../core/module-system';
-import type { IListHost } from '../../types';
 
 const HistoryModule = {
   init(host: IListHost) {
@@ -17,21 +17,53 @@ const HistoryModule = {
   },
 };
 
+let nodeIdCounter = 1; // Simple counter for generating node IDs
+
 function editHistory(host: IListHost, move: Move) {
   let { currentStep, history } = host;
 
-  const existingMove = history[currentStep];
+  const existingNode = history[currentStep];
   if (
-    existingMove &&
-    existingMove.from === move.from &&
-    existingMove.to === move.to &&
-    existingMove.promotion === move.promotion
+    existingNode &&
+    existingNode.move &&
+    existingNode.move.from === move.from &&
+    existingNode.move.to === move.to &&
+    existingNode.move.promotion === move.promotion
   ) {
     return;
   }
 
+  // Find parent node: the node at currentStep-1, or root if step === 0
+  let parentNode: ChessNode;
+  if (currentStep === 0) {
+    parentNode = host.root;
+  } else {
+    parentNode = history[currentStep - 1];
+  }
+
+  // Create new ChessNode
+  const side = move.color === 'w' ? 'white' : 'black';
+  const newNode: ChessNode = {
+    id: `node-${nodeIdCounter++}`,
+    fen: move.after,
+    move,
+    step: currentStep,
+    side,
+    parentID: parentNode.id,
+    children: [],
+    mainID: null,
+    comments: [],
+  };
+
+  // Register in nodeMap
+  host.nodeMap.set(newNode.id, newNode);
+
+  // Truncate history at currentStep and add new node
   host.history.splice(currentStep);
-  host.history.push(move);
+  host.history.push(newNode);
+
+  // Link to parent
+  parentNode.children.push(newNode);
 }
 
 registerListModule('history', HistoryModule);

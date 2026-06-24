@@ -13,7 +13,10 @@ const SpeakerModule = {
         host.currentStep > 0 &&
         host.history[host.currentStep - 1]
       ) {
-        speak(host.history[host.currentStep - 1]);
+        const node = host.history[host.currentStep - 1];
+        if (node.move) {
+          speak(node.move);
+        }
       }
     });
   },
