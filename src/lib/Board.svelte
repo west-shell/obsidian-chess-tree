@@ -123,7 +123,7 @@
   let dests = $derived(computeDests(fen));
   let _check: cg.Color | false = $derived(checkColor || false);
   // 响应式 chess 引擎实例，确保 move 回调始终使用最新 fen
-  let chessEngine = $state(new Chess(fen));
+  let chessEngine = $state<Chess | null>(null);
   $effect(() => {
     chessEngine = new Chess(fen);
   });
@@ -140,12 +140,12 @@
         }
       : {
           move: (orig, dest) => {
-            const piece = chessEngine.get(orig as Square);
+            const piece = chessEngine!.get(orig as Square);
             const color = piece?.color;
             if (piece?.type === "p" && color && isPromotionRank(dest, color)) {
               // Check if any legal promotion exists
               try {
-                const moves = chessEngine.moves({
+                const moves = chessEngine!.moves({
                   square: orig as Square,
                   verbose: true,
                 }) as Move[];
@@ -163,7 +163,7 @@
               }
             }
             try {
-              const move = chessEngine.move({ from: orig, to: dest });
+              const move = chessEngine!.move({ from: orig, to: dest });
               if (move) {
                 eventBus.emit("runmove", move);
               } else {
