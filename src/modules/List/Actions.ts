@@ -18,24 +18,24 @@ const ActionsModule = {
       host.fen = move.after;
       host.currentStep++;
       host.currentTurn = getTurnFromFen(host.fen);
-      eventBus.emit('updateUI', 'runmove');
+      eventBus.emit('updateUI');
     });
 
     eventBus.on('undo', () => {
       undo(host);
-      eventBus.emit('updateUI', 'undo');
+      eventBus.emit('updateUI');
     });
 
     eventBus.on('redo', () => {
       redo(host);
-      eventBus.emit('updateUI', 'redo');
+      eventBus.emit('updateUI');
     });
 
     eventBus.on('toStart', () => {
       while (host.currentStep !== 0) {
         undo(host);
       }
-      eventBus.emit('updateUI', 'toStart');
+      eventBus.emit('updateUI');
     });
 
     eventBus.on('toEnd', () => {
@@ -44,7 +44,7 @@ const ActionsModule = {
       for (let i = 0; i < dif; i++) {
         redo(host);
       }
-      eventBus.emit('updateUI', 'toEnd');
+      eventBus.emit('updateUI');
     });
 
     eventBus.on('reset', () => {
@@ -60,7 +60,7 @@ const ActionsModule = {
           }
         }
         host.modifiedStep = null;
-        eventBus.emit('updateUI', 'reset');
+        eventBus.emit('updateUI');
       } else {
         eventBus.emit('toStart');
       }
@@ -90,7 +90,7 @@ const ActionsModule = {
         await savePGN(host);
         new Notice(t('notice.saveSuccess'));
       }
-      eventBus.emit('updateUI', 'save');
+      eventBus.emit('updateUI');
     });
 
     eventBus.on<number>('clickstep', step => {
@@ -107,7 +107,7 @@ const ActionsModule = {
       } else {
         host.options.rotated = !host.options.rotated;
       }
-      eventBus.emit('updateUI', 'rotate');
+      eventBus.emit('updateUI');
     });
   },
 };
