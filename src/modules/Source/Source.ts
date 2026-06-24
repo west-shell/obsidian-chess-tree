@@ -89,6 +89,7 @@ const SourceModule = {
           listHost.history = [...mainLine];
           listHost.currentTurn = getTurnFromFen(parser.getRoot().fen);
           listHost.options = opts;
+          listHost.tags = new Map(parser.tags);
 
           // 根据 autoJump 设置决定初始步数和棋盘局面
           const shouldJump =

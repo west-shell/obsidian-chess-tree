@@ -12,6 +12,25 @@ const ActionsModule = {
 
     eventBus.on<Move>('runmove', move => {
       if (!move) return;
+      // 先检查当前节点下是否已有相同招法
+      const parentNode = host.currentStep > 0 ? host.history[host.currentStep - 1] : host.root;
+      for (const child of parentNode.children) {
+        if (child.move?.from === move.from && child.move?.to === move.to && child.move?.promotion === move.promotion) {
+          const idx = parentNode.children.indexOf(child);
+          if (idx > 0) {
+            parentNode.children.splice(idx, 1);
+            parentNode.children.unshift(child);
+          }
+          host.history = [...host.history.slice(0, host.currentStep), child];
+          host.currentStep++;
+          host.fen = child.fen;
+          host.currentTurn = getTurnFromFen(host.fen);
+          host.modified = true;
+          eventBus.emit('updateUI');
+          return;
+        }
+      }
+      // 新招法
       if (!host.modified) host.modifiedStep = host.currentStep;
       host.modified = true;
       eventBus.emit('edithistory', move);
@@ -66,12 +85,7 @@ const ActionsModule = {
     });
 
     eventBus.on('reset', () => {
-      host.history = [...host.PGN];
-      host.modified = false;
-      host.modifiedStep = null;
-      host.currentStep = 0;
-      host.fen = host.root.fen;
-      host.currentTurn = getTurnFromFen(host.fen);
+      eventBus.emit('load', 'list');
       eventBus.emit('updateUI');
     });
 
@@ -82,7 +96,8 @@ const ActionsModule = {
       }
 
       const hasBranches = host.history.some(n => n.children.length > 1)
-        || host.PGN.some(n => n.children.length > 1);
+        || host.PGN.some(n => n.children.length > 1)
+        || host.root.children.length > 1;
       const modal = new SaveConfirmModal(host.plugin.app, hasBranches, t);
 
       modal.open();
@@ -164,11 +179,12 @@ function stringifyPGN(root: ChessNode): string {
 
   function walk(node: ChessNode, stepNum: number): string {
     let result = '';
-    if (!node.move) return result;
-    if (node.side === 'white') {
-      result += `${stepNum}. ${node.move.san}`;
-    } else if (node.side === 'black') {
-      result += `${node.move.san}`;
+    if (node.move) {
+      if (node.side === 'white') {
+        result += `${stepNum}. ${node.move.san}`;
+      } else if (node.side === 'black') {
+        result += `${node.move.san}`;
+      }
     }
     if (node.comments?.length) {
       for (const c of node.comments) result += `{${c}}`;
@@ -195,14 +211,21 @@ function stringifyPGN(root: ChessNode): string {
 
 async function savePGN(host: IListHost) {
   const pgnText = buildPgnText(host.history);
-  const tagLines = buildOptionsTags(host.options);
-  await writeBlock(host, [tagLines.join('\n'), pgnText].filter(Boolean).join('\n'));
+  const allTags = serializeTags(host.tags, host.options);
+  await writeBlock(host, [allTags, pgnText].filter(Boolean).join('\n'));
 }
 
 async function saveAllPGN(host: IListHost) {
   const pgnText = stringifyPGN(host.root);
-  const tagLines = buildOptionsTags(host.options);
-  await writeBlock(host, [tagLines.join('\n'), pgnText].filter(Boolean).join('\n'));
+  const allTags = serializeTags(host.tags, host.options);
+  await writeBlock(host, [allTags, pgnText].filter(Boolean).join('\n'));
+}
+
+function serializeTags(tags: Map<string, string> | undefined, opts: { protected?: boolean; rotated?: boolean }): string {
+  const map = new Map(tags ?? []);
+  if (opts.protected !== undefined) map.set('Protected', String(opts.protected));
+  if (opts.rotated !== undefined) map.set('Rotated', String(opts.rotated));
+  return [...map.entries()].map(([k, v]) => `[${k} "${v}"]`).join('\n');
 }
 
 function buildOptionsTags(opts: { protected?: boolean; rotated?: boolean }): string[] {
