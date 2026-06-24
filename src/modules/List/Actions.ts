@@ -81,7 +81,8 @@ const ActionsModule = {
         return;
       }
 
-      const hasBranches = host.history.some(n => n.children.length > 1);
+      const hasBranches = host.history.some(n => n.children.length > 1)
+        || host.PGN.some(n => n.children.length > 1);
       const modal = new SaveConfirmModal(host.plugin.app, hasBranches, t);
 
       modal.open();
@@ -112,11 +113,6 @@ const ActionsModule = {
     });
 
     eventBus.on('rotate', () => {
-      if (!host.options) {
-        host.options = { rotated: true };
-      } else {
-        host.options.rotated = !host.options.rotated;
-      }
       eventBus.emit('updateUI');
     });
 
@@ -198,66 +194,48 @@ function stringifyPGN(root: ChessNode): string {
 }
 
 async function savePGN(host: IListHost) {
-  const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-  if (!view) return;
-  const file = view.file;
-  if (!file) return;
-
-  host.plugin.app.vault.process(file, fileContent => {
-    const section = host.ctx.getSectionInfo(host.containerEl);
-    if (!section) return fileContent;
-
-    const { lineStart, lineEnd } = section;
-    const lines = fileContent.split('\n');
-
-    let blockLines: string[] = lines.slice(lineStart, lineEnd + 1);
-
-    if (blockLines.length < 2) return fileContent;
-
-    // Remove all SAN move lines
-    blockLines = blockLines.filter(
-      line => !/\b(O-O(?:-O)?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?)\b/.test(line),
-    );
-
-    if (host.currentStep > 0) {
-      const moves = host.history.slice(0, host.currentStep).map((node: ChessNode) => node.move?.san ?? '');
-
-      const pgnLines: string[] = [];
-      for (let i = 0; i < moves.length; i += 2) {
-        const line = `${Math.ceil((i + 1) / 2)}. ${moves[i]} ${moves[i + 1] || ''}`.trim();
-        pgnLines.push(line);
-      }
-      const PGN = pgnLines.join('\n');
-
-      blockLines.splice(blockLines.length - 1, 0, PGN);
-    }
-
-    const newContent = [...lines.slice(0, lineStart), ...blockLines, ...lines.slice(lineEnd + 1)].join('\n');
-    return newContent;
-  });
+  const pgnText = buildPgnText(host.history);
+  const tagLines = buildOptionsTags(host.options);
+  await writeBlock(host, [tagLines.join('\n'), pgnText].filter(Boolean).join('\n'));
 }
 
 async function saveAllPGN(host: IListHost) {
+  const pgnText = stringifyPGN(host.root);
+  const tagLines = buildOptionsTags(host.options);
+  await writeBlock(host, [tagLines.join('\n'), pgnText].filter(Boolean).join('\n'));
+}
+
+function buildOptionsTags(opts: { protected?: boolean; rotated?: boolean }): string[] {
+  const tags: string[] = [];
+  if (opts.protected !== undefined) tags.push(`[Protected "${opts.protected}"]`);
+  if (opts.rotated !== undefined) tags.push(`[Rotated "${opts.rotated}"]`);
+  return tags;
+}
+
+function buildPgnText(nodes: ChessNode[]): string {
+  if (nodes.length === 0) return '';
+  const moves = nodes.map(n => n.move?.san ?? '').filter(Boolean);
+  const lines: string[] = [];
+  for (let i = 0; i < moves.length; i += 2) {
+    const line = `${Math.ceil((i + 1) / 2)}. ${moves[i]} ${moves[i + 1] || ''}`.trim();
+    lines.push(line);
+  }
+  return lines.join('\n');
+}
+
+async function writeBlock(host: IListHost, newContent: string) {
   const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-  if (!view) return;
-  const file = view.file;
-  if (!file) return;
+  if (!view?.file) return;
 
-  const pgn = stringifyPGN(host.root);
-
-  host.plugin.app.vault.process(file, fileContent => {
+  host.plugin.app.vault.process(view.file, fileContent => {
     const section = host.ctx.getSectionInfo(host.containerEl);
     if (!section) return fileContent;
-
     const { lineStart, lineEnd } = section;
     const lines = fileContent.split('\n');
     const blockLines = lines.slice(lineStart, lineEnd + 1);
-
     if (blockLines.length < 2) return fileContent;
 
-    // Keep first line (```chess) and last line (```), replace middle with full PGN (with variations)
-    const updated = [blockLines[0], pgn, blockLines[blockLines.length - 1]];
-    const newLines = [...lines.slice(0, lineStart), ...updated, ...lines.slice(lineEnd + 1)];
-    return newLines.join('\n');
+    const updated = [blockLines[0], newContent, blockLines[blockLines.length - 1]];
+    return [...lines.slice(0, lineStart), ...updated, ...lines.slice(lineEnd + 1)].join('\n');
   });
 }

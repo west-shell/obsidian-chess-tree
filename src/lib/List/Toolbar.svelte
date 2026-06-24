@@ -37,6 +37,7 @@
       event: "toEnd",
     },
     { title: t("toolbar.flip", _lv), icon: "flip-vertical", event: "rotate" },
+    { title: t("toolbar.delete", _lv), icon: "circle-x", event: "delete" },
   ]);
 
   let saveBtnEl: HTMLButtonElement;

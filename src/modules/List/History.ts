@@ -20,25 +20,15 @@ const HistoryModule = {
 let nodeIdCounter = 1; // Simple counter for generating node IDs
 
 function editHistory(host: IListHost, move: Move) {
-  let { currentStep, history } = host;
+  const { currentStep } = host;
+  const parentNode = currentStep > 0 ? host.history[currentStep - 1] : host.root;
 
-  const existingNode = history[currentStep];
-  if (
-    existingNode &&
-    existingNode.move &&
-    existingNode.move.from === move.from &&
-    existingNode.move.to === move.to &&
-    existingNode.move.promotion === move.promotion
-  ) {
-    return;
-  }
-
-  // Find parent node: the node at currentStep-1, or root if step === 0
-  let parentNode: ChessNode;
-  if (currentStep === 0) {
-    parentNode = host.root;
-  } else {
-    parentNode = history[currentStep - 1];
+  // Check if parent already has this move as a child
+  for (const child of parentNode.children) {
+    if (child.move?.from === move.from && child.move?.to === move.to && child.move?.promotion === move.promotion) {
+      host.history = [...host.history.slice(0, currentStep), child];
+      return;
+    }
   }
 
   // Create new ChessNode
@@ -47,7 +37,7 @@ function editHistory(host: IListHost, move: Move) {
     id: `node-${nodeIdCounter++}`,
     fen: move.after,
     move,
-    step: currentStep,
+    step: parentNode.step! + 1,
     side,
     parentID: parentNode.id,
     children: [],
@@ -55,15 +45,9 @@ function editHistory(host: IListHost, move: Move) {
     comments: [],
   };
 
-  // Register in nodeMap
   host.nodeMap.set(newNode.id, newNode);
-
-  // Truncate history at currentStep and add new node
-  host.history.splice(currentStep);
-  host.history.push(newNode);
-
-  // Link to parent
-  parentNode.children.push(newNode);
+  parentNode.children.unshift(newNode);
+  host.history = [...host.history.slice(0, currentStep), newNode];
 }
 
 registerListModule('history', HistoryModule);

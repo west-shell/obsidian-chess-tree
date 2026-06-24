@@ -26,6 +26,14 @@ function prepareSource(raw: string): { cleaned: string; options: ReturnType<type
     cleaned = cleaned.replace(fenMatch[0], `[FEN "${fenMatch[0]}"]`);
   }
 
+  // Inject Protected/Rotated PGN tags if present in source
+  const tags: string[] = [];
+  if (options.protected !== undefined) tags.push(`[Protected "${options.protected}"]`);
+  if (options.rotated !== undefined) tags.push(`[Rotated "${options.rotated}"]`);
+  if (tags.length > 0) {
+    cleaned = tags.join('\n') + '\n' + cleaned;
+  }
+
   return { cleaned, options };
 }
 
