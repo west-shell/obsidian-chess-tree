@@ -9,21 +9,18 @@ const BoardClickModule = {
     eventBus.on<Square>('click', clickedKey => {
       if (!clickedKey) return;
       if (!host.markedPos) {
-        // Try to read the piece at the clicked square
         host.markedPos = clickedKey;
         eventBus.emit('updateUI');
         return;
       }
 
-      // Second click - try to make a move
       try {
         const chess = new Chess(host.fen);
-        const move = chess.move({ from: host.markedPos as string, to: clickedKey });
+        const move = chess.move({ from: host.markedPos, to: clickedKey });
         if (move) {
           host.markedPos = null;
           eventBus.emit('runmove', move);
         } else {
-          // Perhaps selecting a different piece
           host.markedPos = clickedKey;
           eventBus.emit('updateUI');
         }
