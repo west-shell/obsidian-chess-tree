@@ -23,7 +23,6 @@
     checkColor?: cg.Color | null;
     variations?: Move[];
     freeMode?: boolean;
-    boardWidth?: number;
     userShapes?: DrawShape[];
   }
 
@@ -37,13 +36,13 @@
     checkColor = null,
     variations = [],
     freeMode = false,
-    boardWidth: boardWidthOverride,
     userShapes = [],
   }: Props = $props();
 
   import { iconSvg } from "../utils/icon";
 
-  let boardWidth = $derived(boardWidthOverride ?? settings.cellSize * 8);
+  // 升变弹窗图标尺寸基于 cellSize 推算（棋盘宽 = cellSize * 8）
+  let promoIconSize = $derived(settings.cellSize * 8 * 0.11);
   // oxlint-disable-next-line no-unassigned-vars
   let boardElement: HTMLDivElement;
   let api: Api | null = null;
@@ -311,7 +310,7 @@
   });
 </script>
 
-<div class="board-wrapper" style="width: {boardWidth}px">
+<div class="board-wrapper" style="--xq-cell-size:{settings.cellSize}px">
   <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -325,7 +324,7 @@
       >
         {#each PROMOTION_PIECES as { type, icon }}
           <button class="promotion-btn" onclick={() => completePromotion(type)}>
-            {@html iconSvg(icon, boardWidth * 0.11, 1.2)}
+            {@html iconSvg(icon, promoIconSize, 1.2)}
           </button>
         {/each}
       </div>
@@ -349,6 +348,8 @@
   }
 
   .board-wrapper {
+    --bw: var(--board-width, calc(var(--xq-cell-size, 50px) * 8));
+    width: var(--bw);
     position: relative;
   }
 

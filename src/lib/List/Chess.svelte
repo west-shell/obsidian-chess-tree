@@ -72,7 +72,6 @@
   .XQ-container {
     --red: #861818;
     --black: #000080;
-    margin: 10px;
   }
 
   .XQ-container.right {

@@ -123,7 +123,7 @@
   });
 </script>
 
-<div class="tree-view {position}" bind:this={treeViewEl}>
+<div class="tree-view {position}" bind:this={treeViewEl} style="--adaptive-board-width:{adaptiveBoardWidth}px">
   <div class="board-area">
     <Board
       {settings}
@@ -134,7 +134,6 @@
       {rotated}
       {variations}
       {userShapes}
-      boardWidth={adaptiveBoardWidth}
     />
   </div>
   <Toolbar {eventBus} />
@@ -146,7 +145,10 @@
     height: var(--tree-hight, 300px) !important;
   }
     :global(.tree-codeblock) .tree-view.bottom {
-    height: calc(var(--tree-hight, 300px) * 2) !important;
+    height: calc(var(--tree-hight, 300px) * 1.5) !important;
+  }
+  :global(.view-content.pgn-view) .tree-view {
+    --board-width: var(--adaptive-board-width, 300px);
   }
   :global(.view-content.pgn-view) {
     overflow: hidden !important;
