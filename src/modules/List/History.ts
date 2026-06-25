@@ -1,4 +1,4 @@
-import type { ChessNode, IListHost, NodeMap } from '../../types';
+import type { ChessNode, IListHost } from '../../types';
 import type { Move } from '../../chess';
 import { registerListModule } from '../../core/module-system';
 

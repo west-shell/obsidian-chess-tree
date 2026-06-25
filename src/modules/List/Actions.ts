@@ -222,17 +222,10 @@ async function saveAllPGN(host: IListHost) {
 }
 
 function serializeTags(tags: Map<string, string> | undefined, opts: { protected?: boolean; rotated?: boolean }): string {
-  const map = new Map(tags ?? []);
+  const map = new Map(tags);
   if (opts.protected !== undefined) map.set('Protected', String(opts.protected));
   if (opts.rotated !== undefined) map.set('Rotated', String(opts.rotated));
   return [...map.entries()].map(([k, v]) => `[${k} "${v}"]`).join('\n');
-}
-
-function buildOptionsTags(opts: { protected?: boolean; rotated?: boolean }): string[] {
-  const tags: string[] = [];
-  if (opts.protected !== undefined) tags.push(`[Protected "${opts.protected}"]`);
-  if (opts.rotated !== undefined) tags.push(`[Rotated "${opts.rotated}"]`);
-  return tags;
 }
 
 function buildPgnText(nodes: ChessNode[]): string {
