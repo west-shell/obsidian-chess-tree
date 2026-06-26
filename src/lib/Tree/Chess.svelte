@@ -109,7 +109,7 @@
   });
 
   $effect(() => {
-    eventBus.on<DrawShape[]>("user-shapes-changed", (shapes ) => {
+    eventBus.on<DrawShape[]>("user-shapes-changed", (shapes) => {
       saveShapes(currentNode, shapes ?? []);
       eventBus.emit("modified", null);
       eventBus.emit("updateUI", null);
@@ -123,19 +123,21 @@
   });
 </script>
 
-<div class="tree-view {position}" bind:this={treeViewEl} style="--adaptive-board-width:{adaptiveBoardWidth}px">
-  <div class="board-area">
-    <Board
-      {settings}
-      {fen}
-      {lastMove}
-      {checkColor}
-      {eventBus}
-      {rotated}
-      {variations}
-      {userShapes}
-    />
-  </div>
+<div
+  class="tree-view {position}"
+  bind:this={treeViewEl}
+  style="--adaptive-board-width:{adaptiveBoardWidth}px"
+>
+  <Board
+    {settings}
+    {fen}
+    {lastMove}
+    {checkColor}
+    {eventBus}
+    {rotated}
+    {variations}
+    {userShapes}
+  />
   <Toolbar {eventBus} />
   <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
 </div>
@@ -144,7 +146,7 @@
   :global(.tree-codeblock) .tree-view.right {
     height: var(--tree-hight, 300px) !important;
   }
-    :global(.tree-codeblock) .tree-view.bottom {
+  :global(.tree-codeblock) .tree-view.bottom {
     height: calc(var(--tree-hight, 300px) * 1.5) !important;
   }
   :global(.view-content.pgn-view) .tree-view {
@@ -171,12 +173,6 @@
     flex: 1 1 auto;
     min-width: 25%;
     max-width: 50%;
-  }
-
-  .board-area {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
   }
 
   .tree-view.bottom {

@@ -9,7 +9,7 @@ import '../modules/List/Speak';
 import { type MarkdownPostProcessorContext, MarkdownRenderChild } from 'obsidian';
 
 import type { EventBus } from '../core/event-bus';
-import { createXQModuleRegistry } from '../core/module-system';
+import { createListModuleRegistry } from '../core/module-system';
 import type ChessPlugin from '../main';
 import type { ISettings } from '../types';
 
@@ -24,7 +24,7 @@ export class ChessRenderChild extends MarkdownRenderChild {
   ) {
     super(containerEl);
     this.settings = this.plugin.settings;
-    createXQModuleRegistry(this);
+    createListModuleRegistry(this);
   }
 
   onload(): void {
@@ -40,6 +40,6 @@ export class ChessRenderChild extends MarkdownRenderChild {
   onunload(): void {
     this.plugin.instances.delete(this);
     this.eventBus.emit('unload');
-    // destroyXQModuleRegistry(this);
+    // destroyListModuleRegistry(this);
   }
 }

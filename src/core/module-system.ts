@@ -46,19 +46,17 @@ function createModuleSystem() {
   };
 }
 
-// 实例化 XQ 模块系统
 const ListModules = createModuleSystem();
 
-// 导出 XQ 模块相关函数
 export function registerListModule(name: string, module: ChessModule) {
   ListModules.register(name, module);
 }
 
-export function createXQModuleRegistry(host: object) {
+export function createListModuleRegistry(host: object) {
   return ListModules.createRegistry(host);
 }
 
-export function destroyXQModuleRegistry(host: object) {
+export function destroyListModuleRegistry(host: object) {
   ListModules.destroyRegistry(host);
 }
 

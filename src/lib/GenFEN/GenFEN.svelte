@@ -32,10 +32,8 @@
   });
 </script>
 
-<div class="XQ-container {position}">
-  <div class="board-area">
-    <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
-  </div>
+<div class="chess-container {position}">
+  <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
   <div class="editor-sidebar {position}">
     <PieceBTNs {settings} {fen} {eventBus} {position} {selectedPiece} />
     <Toolbar {eventBus} {position} {fen} />
@@ -43,19 +41,19 @@
 </div>
 
 <style>
-  .XQ-container {
+  .chess-container {
     --red: #861818;
     --black: #000080;
   }
 
-  .XQ-container.right {
+  .chess-container.right {
     display: flex;
     flex-direction: row;
     gap: 8px;
     align-items: flex-start;
   }
 
-  .XQ-container.bottom {
+  .chess-container.bottom {
     display: flex;
     flex-direction: column;
   }
@@ -78,7 +76,4 @@
     width: 100%;
   }
 
-  .board-area {
-    flex-shrink: 0;
-  }
 </style>

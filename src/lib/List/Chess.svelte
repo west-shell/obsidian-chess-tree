@@ -52,7 +52,7 @@
   });
 </script>
 
-<div class="XQ-container {settings.position}">
+<div class="chess-container {settings.position}">
   <Board
     {settings}
     {fen}
@@ -69,18 +69,18 @@
 </div>
 
 <style>
-  .XQ-container {
+  .chess-container {
     --red: #861818;
     --black: #000080;
   }
 
-  .XQ-container.right {
+  .chess-container.right {
     display: flex;
     flex-direction: row;
     gap: 2px;
   }
 
-  .XQ-container.bottom {
+  .chess-container.bottom {
     display: flex;
     flex-direction: column;
   }
