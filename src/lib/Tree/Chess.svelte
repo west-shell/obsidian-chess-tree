@@ -143,6 +143,9 @@
 </div>
 
 <style>
+  :global(.tree-codeblock) .tree-view {
+    margin: 1rem 0;
+  }
   :global(.tree-codeblock) .tree-view.right {
     height: var(--tree-hight, 300px) !important;
   }

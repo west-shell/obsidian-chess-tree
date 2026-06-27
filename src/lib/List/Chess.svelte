@@ -72,6 +72,7 @@
   .chess-container {
     --red: #861818;
     --black: #000080;
+    margin: 1rem 0;
   }
 
   .chess-container.right {
