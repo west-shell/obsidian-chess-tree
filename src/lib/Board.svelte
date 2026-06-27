@@ -387,25 +387,4 @@
     background: var(--background-modifier-hover);
     border-color: var(--color-accent);
   }
-
-  :global(.xq-slider-value) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 42px;
-    height: 24px;
-    margin-right: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-accent);
-    background: var(--background-modifier-border);
-    border-radius: 4px;
-    padding: 0 6px;
-  }
-  :global(.chess-setting-tab .setting-item) {
-    border-top: none;
-  }
-  :global(cg-board) {
-    background-color: var(--board-bg, #f0d9b5);
-  }
 </style>
