@@ -69,10 +69,7 @@
   }
 </script>
 
-<div
-  class="pieces {position}"
-  style="--h:{8 * settings.cellSize}px;--w:{8 * settings.cellSize}px;"
->
+<div class="pieces {position}">
   {#each PIECES as { key, color, icon }}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
@@ -91,7 +88,7 @@
   }
   .pieces.right {
     flex-direction: column;
-    height: var(--h);
+    height: calc(var(--chess-cell-size, 50px) * 8);
     justify-content: space-between;
     flex-shrink: 0;
   }
@@ -99,7 +96,7 @@
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    width: var(--w);
+    width: calc(var(--chess-cell-size, 50px) * 8);
   }
   .btn {
     border: 2px solid transparent;

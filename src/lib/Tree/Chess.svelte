@@ -147,19 +147,19 @@
     margin: 1rem 0;
   }
   :global(.tree-codeblock) .tree-view.right {
-    height: var(--tree-hight, 300px) !important;
+    height: calc(var(--chess-cell-size, 50px) * 8) !important;
   }
   :global(.tree-codeblock) .tree-view.bottom {
-    height: calc(var(--tree-hight, 300px) * 1.5) !important;
+    height: calc(var(--chess-cell-size, 50px) * 12) !important;
   }
   :global(.view-content.pgn-view) .tree-view {
-    --board-width: var(--adaptive-board-width, 300px);
+    --chess-board-width: var(--adaptive-board-width, 300px);
   }
   :global(.view-content.pgn-view) {
     overflow: hidden !important;
     margin: 0 !important;
-    padding-top: var(--board-margin-top, 0px) !important;
-    padding-bottom: var(--board-margin-bottom, 0px) !important;
+    padding-top: var(--chess-board-margin-top, 0px) !important;
+    padding-bottom: var(--chess-board-margin-bottom, 0px) !important;
   }
   .tree-view {
     display: flex;

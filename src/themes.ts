@@ -13,13 +13,15 @@ export type ThemeName = keyof typeof themes;
 export const THEME_KEYS = Object.keys(themes);
 
 export function applyThemes(settings: ISettings) {
-  const { theme, boardMarginTop, boardMarginBottom, showCoordinateLabels } = settings;
+  const { theme, cellSize, boardMarginTop, boardMarginBottom, showCoordinateLabels } = settings;
   const t = themes[theme] ?? themes.wood;
 
-  activeDocument.body.style.setProperty('--board-bg', t.bg);
-  activeDocument.body.style.setProperty('--xq-piece-red', t.white);
-  activeDocument.body.style.setProperty('--xq-piece-black', t.black);
-  activeDocument.body.style.setProperty('--board-margin-top', `${boardMarginTop}px`);
-  activeDocument.body.style.setProperty('--board-margin-bottom', `${boardMarginBottom}px`);
-  activeDocument.body.style.setProperty('--xq-coords-display', showCoordinateLabels ? 'flex' : 'none');
+  activeDocument.body.style.setProperty('--chess-cell-size', `${cellSize}px`);
+  activeDocument.body.style.setProperty('--chess-font-size', `${settings.fontSize}px`);
+  activeDocument.body.style.setProperty('--chess-board-bg', t.bg);
+  activeDocument.body.style.setProperty('--chess-piece-white', t.white);
+  activeDocument.body.style.setProperty('--chess-piece-black', t.black);
+  activeDocument.body.style.setProperty('--chess-board-margin-top', `${boardMarginTop}px`);
+  activeDocument.body.style.setProperty('--chess-board-margin-bottom', `${boardMarginBottom}px`);
+  activeDocument.body.style.setProperty('--chess-coords-display', showCoordinateLabels ? 'flex' : 'none');
 }

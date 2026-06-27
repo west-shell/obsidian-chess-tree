@@ -310,7 +310,7 @@
   });
 </script>
 
-<div class="board-wrapper" style="--xq-cell-size:{settings.cellSize}px">
+  <div class="board-wrapper">
   <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -348,7 +348,7 @@
   }
 
   .board-wrapper {
-    --bw: var(--board-width, calc(var(--xq-cell-size, 50px) * 8));
+    --bw: var(--chess-board-width, calc(var(--chess-cell-size, 50px) * 8));
     width: var(--bw);
     position: relative;
   }

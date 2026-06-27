@@ -29,12 +29,7 @@
   });
 </script>
 
-<div
-  class="move-container {settings.position}"
-  style="--height: {8 * settings.cellSize}px;
-    --width: {8 * settings.cellSize}px;
-    --fontsize: {settings.fontSize}px;"
->
+<div class="move-container {settings.position}">
   <ul class="move-list {settings.position}" bind:this={ulRef}>
     <li class="start" bind:this={itemRefs[0]}>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -83,7 +78,7 @@
 <style>
   /* ========== 基础容器样式 ========== */
   .move-container {
-    font-size: var(--fontsize);
+    font-size: var(--chess-font-size, 12px);
     padding: 0;
     margin: 0;
   }
@@ -101,7 +96,7 @@
   /* ========== 右侧垂直布局 (right) ========== */
   .move-list.right {
     flex-direction: column;
-    height: var(--height);
+    height: calc(var(--chess-cell-size, 50px) * 8);
     overflow-y: auto;
     overflow-x: hidden;
     flex-wrap: nowrap;
@@ -175,7 +170,7 @@
 
   /* ========== 底部水平布局 (bottom) - 竖向文字 ========== */
   .move-list.bottom {
-    width: var(--width);
+    width: calc(var(--chess-cell-size, 50px) * 8);
     overflow-x: auto;
     overflow-y: hidden;
     flex-wrap: nowrap;

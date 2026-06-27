@@ -368,7 +368,7 @@
               L ${(child.x! - 0.3 * Math.sign(child.x! - node.x!)) * spacingX} ${node.y! * spacingY}
               L ${child.x! * spacingX} ${child.y! * spacingY}
               `}
-              stroke="var(--board-line)"
+              stroke="var(--chess-board-line)"
               stroke-linejoin="round"
               stroke-width={currentPath.includes(node.id) &&
               currentPath.includes(child.id)
@@ -419,7 +419,7 @@
                   : node.side === "black"
                     ? "#333"
                     : "green"}
-                stroke="var(--board-line)"
+                stroke="var(--chess-board-line)"
               />
               <g transform="translate(-6, -6)" color={def.color}>
                 {@html iconSvg(def.icon, 12, 1.5)}
@@ -437,7 +437,7 @@
                   : node.side === "black"
                     ? "#333"
                     : "green"}
-                stroke="var(--board-line)"
+                stroke="var(--chess-board-line)"
               />
               {#if nodeMode === 0 && !node.move}
                 <g transform="translate(-6, -6)" color="#fff">
@@ -476,8 +476,8 @@
                   points={foldedNodes.has(node.id)
                     ? (isLeft ? "0,-4 0,4 -3,3 -3,-3" : "0,-4 0,4 3,3 3,-3")
                     : (isLeft ? "0,-4 0,4 -5,0" : "0,-4 0,4 5,0")}
-                  fill="var(--board-line)"
-                  stroke="var(--board-line)"
+                  fill="var(--chess-board-line)"
+                  stroke="var(--chess-board-line)"
                   stroke-width="1"
                   stroke-linejoin="round"
                   opacity={currentPath.includes(node.id) && node.children[0] && !currentPath.includes(node.children[0].id) ? 1.5 : 0.7}
@@ -529,17 +529,17 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    --board-background: var(--background-primary-alt);
-    --board-line: var(--text-normal);
-    --piece-red: var(--xq-piece-red, var(--color-red));
-    --piece-black: var(--xq-piece-black, var(--color-blue));
+    --chess-board-background: var(--background-primary-alt);
+    --chess-board-line: var(--text-normal);
+    --piece-red: var(--chess-piece-white, var(--color-red));
+    --piece-black: var(--chess-piece-black, var(--color-blue));
     --text-color: var(--text-normal);
   }
 
   .svg-wrapper {
     flex: 1 1 auto;
     overflow: hidden;
-    background-color: var(--board-background);
+    background-color: var(--chess-board-background);
     position: relative;
     width: 100%;
     height: 100%;
