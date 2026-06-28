@@ -536,11 +536,11 @@
     --text-color: var(--text-normal);
   }
 
-  :global(.tree-view.right) .tree-container {
+  :global(.tree-codeblock .tree-view.right) .tree-container {
     height: calc(var(--chess-cell-size, 50px) * 8);
   }
 
-  :global(.tree-view.bottom) .tree-container {
+  :global(.tree-codeblock .tree-view.bottom) .tree-container {
     height: calc(var(--chess-cell-size, 50px) * 5);
   }
 
