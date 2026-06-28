@@ -147,10 +147,10 @@
     margin: 1rem 0;
   }
   :global(.tree-codeblock) .tree-view.right {
-    height: calc(var(--chess-cell-size, 50px) * 8) !important;
+    justify-content: flex-start;
   }
   :global(.tree-codeblock) .tree-view.bottom {
-    height: calc(var(--chess-cell-size, 50px) * 12) !important;
+    align-items: stretch;
   }
   :global(.view-content.pgn-view) .tree-view {
     --chess-board-width: var(--adaptive-board-width, 300px);
