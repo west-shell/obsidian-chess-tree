@@ -239,12 +239,13 @@
         api.state.dom.redraw();
       }
     };
-    document.body.addEventListener("layout-change", layoutChangeHandler);
+    activeDocument.body.addEventListener("chess-layout-change", layoutChangeHandler);
+
   });
 
   onDestroy(() => {
     if (layoutChangeHandler) {
-      document.body.removeEventListener("layout-change", layoutChangeHandler);
+      activeDocument.body.removeEventListener("chess-layout-change", layoutChangeHandler);
     }
     if (api) {
       api.destroy();
