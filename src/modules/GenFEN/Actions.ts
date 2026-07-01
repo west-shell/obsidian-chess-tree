@@ -21,8 +21,12 @@ const ActionsModule = {
 
     eventBus.on<string>('clickPieceBTN', piece => {
       if (!piece) return;
-      host.selectedPiece = piece;
-      host.eventBus.emit('updateUI', host.fen);
+      if(host.selectedPiece === piece) {
+        host.selectedPiece = null;
+      } else {
+        host.selectedPiece = piece;
+      }
+      eventBus.emit('updateUI', host.fen);
     });
 
     eventBus.on<{ turn: string; castling: string; enPassant: string }>('saveFen', meta => {
