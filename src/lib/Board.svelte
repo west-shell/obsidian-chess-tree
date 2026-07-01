@@ -166,7 +166,8 @@
               if (move) {
                 // 同步更新 Chessground 的 turn/movable，
                 // 避免依赖异步 $effect 可能延迟或丢失更新
-                const newTurn: cg.Color = chessEngine!.turn() === "b" ? "black" : "white";
+                const newTurn: cg.Color =
+                  chessEngine!.turn() === "b" ? "black" : "white";
                 api?.set({
                   fen: move.after,
                   turnColor: newTurn,
@@ -239,13 +240,18 @@
         api.state.dom.redraw();
       }
     };
-    activeDocument.body.addEventListener("chess-layout-change", layoutChangeHandler);
-
+    activeDocument.body.addEventListener(
+      "chess-layout-change",
+      layoutChangeHandler,
+    );
   });
 
   onDestroy(() => {
     if (layoutChangeHandler) {
-      activeDocument.body.removeEventListener("chess-layout-change", layoutChangeHandler);
+      activeDocument.body.removeEventListener(
+        "chess-layout-change",
+        layoutChangeHandler,
+      );
     }
     if (api) {
       api.destroy();
@@ -311,7 +317,7 @@
   });
 </script>
 
-  <div class="board-wrapper">
+<div class="board-wrapper">
   <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -387,5 +393,9 @@
   .promotion-btn:hover {
     background: var(--background-modifier-hover);
     border-color: var(--color-accent);
+  }
+
+  :global(cg-board) {
+    background-color: var(--chess-board-bg, #f0d9b5);
   }
 </style>
