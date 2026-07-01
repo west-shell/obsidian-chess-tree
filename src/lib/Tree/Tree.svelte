@@ -125,6 +125,8 @@
   }
 
   let layoutChangeHandler: (() => void) | null = null;
+  let handleSliderMouseMove: ((evt: MouseEvent) => void) | null = null;
+  let handleSliderMouseUp: (() => void) | null = null;
 
   onDestroy(() => {
     if (saveTimeout) {
@@ -135,6 +137,8 @@
       activeDocument.body.removeEventListener("chess-layout-change", layoutChangeHandler);
       layoutChangeHandler = null;
     }
+    if (handleSliderMouseMove) activeDocument.removeEventListener("mousemove", handleSliderMouseMove);
+    if (handleSliderMouseUp) activeDocument.removeEventListener("mouseup", handleSliderMouseUp);
   });
 
   function handleCommentsBlur() {
@@ -344,7 +348,7 @@
     setIcon(el, icon);
   }
 
-  onMount(async () => {
+  onMount(() => {
     if (!svgEl) return;
     updateTreeLayout();
     zoomBehavior = d3.zoom<SVGSVGElement, unknown>().on("zoom", (event) => {
@@ -358,26 +362,25 @@
         zoomTransform = t;
       }
     });
-    d3.select(svgEl).call(zoomBehavior);
-    await tick();
-    await new Promise(requestAnimationFrame);
-    resetView();
 
-    layoutChangeHandler = () => resetView();
-    activeDocument.body.addEventListener("chess-layout-change", layoutChangeHandler);
-
-    const handleSliderMouseMove = (evt: MouseEvent) => {
+    handleSliderMouseMove = (evt: MouseEvent) => {
       if (!sliderMouseDown) return;
       navigateFromSliderY(evt.clientY);
     };
-    const handleSliderMouseUp = () => {
+    handleSliderMouseUp = () => {
       sliderMouseDown = false;
     };
     activeDocument.addEventListener("mousemove", handleSliderMouseMove);
     activeDocument.addEventListener("mouseup", handleSliderMouseUp);
-    onDestroy(() => {
-      activeDocument.removeEventListener("mousemove", handleSliderMouseMove);
-      activeDocument.removeEventListener("mouseup", handleSliderMouseUp);
+
+    layoutChangeHandler = () => resetView();
+    activeDocument.body.addEventListener("chess-layout-change", layoutChangeHandler);
+
+    tick().then(() => new Promise(requestAnimationFrame)).then(() => {
+      if (!svgEl || svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
+      d3.select(svgEl).call(zoomBehavior);
+      resetView();
+      return undefined;
     });
   });
 

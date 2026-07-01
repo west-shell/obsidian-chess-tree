@@ -36,7 +36,7 @@ const ActionsModule = {
       if (typeof action === 'string') {
         switch (action) {
           case 'empty':
-            setBoardOnly(host, '8/8/8/8/8/8/8/8');
+            setBoardOnly(host, '4k3/8/8/8/8/8/8/4K3');
             host.selectedPiece = null;
             break;
           case 'full':

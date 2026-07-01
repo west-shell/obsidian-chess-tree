@@ -71,12 +71,12 @@ export class PGNParser {
     this.tags.set(tagName, tagValue);
 
     if (tagName.toUpperCase() === 'FEN') {
-      this.haveFEN = true;
       try {
         this.chess.load(tagValue);
         this.rootNode.fen = tagValue;
+        this.haveFEN = true;
       } catch {
-        // invalid FEN, ignore
+        // invalid FEN, ignore — rootNode.fen stays DEFAULT_FEN, haveFEN stays false
       }
     }
   }
