@@ -12,34 +12,24 @@
   }
   let { settings, fen, eventBus, position, selectedPiece }: Props = $props();
 
-  const MAX_COUNT: Record<string, number> = {
-    K: 1,
-    Q: 1,
-    R: 2,
-    B: 2,
-    N: 2,
-    P: 8,
-    k: 1,
-    q: 1,
-    r: 2,
-    b: 2,
-    n: 2,
-    p: 8,
-  };
-
-  const PIECES: { key: string; color: "white" | "black"; icon: string }[] = [
-    { key: "k", color: "black", icon: "chess-king" },
-    { key: "q", color: "black", icon: "chess-queen" },
-    { key: "r", color: "black", icon: "chess-rook" },
-    { key: "b", color: "black", icon: "chess-bishop" },
-    { key: "n", color: "black", icon: "chess-knight" },
-    { key: "p", color: "black", icon: "chess-pawn" },
-    { key: "K", color: "white", icon: "chess-king" },
-    { key: "Q", color: "white", icon: "chess-queen" },
-    { key: "R", color: "white", icon: "chess-rook" },
-    { key: "B", color: "white", icon: "chess-bishop" },
-    { key: "N", color: "white", icon: "chess-knight" },
-    { key: "P", color: "white", icon: "chess-pawn" },
+  const PIECES: {
+    key: string;
+    color: "white" | "black";
+    icon: string;
+    maxCount: number;
+  }[] = [
+    { key: "k", color: "black", icon: "chess-king", maxCount: 1 },
+    { key: "q", color: "black", icon: "chess-queen", maxCount: 1 },
+    { key: "r", color: "black", icon: "chess-rook", maxCount: 2 },
+    { key: "b", color: "black", icon: "chess-bishop", maxCount: 2 },
+    { key: "n", color: "black", icon: "chess-knight", maxCount: 2 },
+    { key: "p", color: "black", icon: "chess-pawn", maxCount: 8 },
+    { key: "K", color: "white", icon: "chess-king", maxCount: 1 },
+    { key: "Q", color: "white", icon: "chess-queen", maxCount: 1 },
+    { key: "R", color: "white", icon: "chess-rook", maxCount: 2 },
+    { key: "B", color: "white", icon: "chess-bishop", maxCount: 2 },
+    { key: "N", color: "white", icon: "chess-knight", maxCount: 2 },
+    { key: "P", color: "white", icon: "chess-pawn", maxCount: 8 },
   ];
 
   let pieceCount = $derived(
@@ -57,9 +47,9 @@
 
   let count = $derived(
     Object.fromEntries(
-      Object.keys(MAX_COUNT).map((p) => [
-        p,
-        MAX_COUNT[p] - (pieceCount[p] || 0),
+      PIECES.map(({ key, maxCount }) => [
+        key,
+        maxCount - (pieceCount[key] || 0),
       ]),
     ),
   );
@@ -69,7 +59,7 @@
   }
 </script>
 
-<div class="pieces {position}">
+<div class="piece-btn-container {position}">
   {#each PIECES as { key, color, icon }}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
@@ -83,58 +73,73 @@
 </div>
 
 <style>
-  .pieces {
-    display: flex;
+  .piece-btn-container {
+     font-size: clamp(10px, calc(var(--xq-cell-size, 50px) * 0.3), 24px);
   }
-  .pieces.right {
-    flex-direction: column;
-    height: calc(var(--chess-cell-size, 50px) * 8);
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .pieces.bottom {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    width: calc(var(--chess-cell-size, 50px) * 8);
-  }
-  .btn {
-    border: 2px solid transparent;
+
+  /* 共用样式 */
+  .piece-btn {
     border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
-    transition: all 0.15s;
+    border: 1.5px solid rgba(0, 0, 0, 0.35);
+    transition: box-shadow 0.15s, border-color 0.15s;
+    color: white;
   }
-  .btn.right {
+
+  /* 右侧布局 - 使用flex（因为子元素用了flex:1） */
+  .piece-btn-container.right {
+    display: flex;
+    flex-direction: column;
+    height: clamp(10px, calc(var(--xq-cell-size, 50px) * 10), 600px);
+    width: fit-content;
+    justify-content: space-between;
+  }
+
+  .piece-btn.right {
     flex: 1;
-    aspect-ratio: 1;
-    margin: 1px 0;
+    width: 100%;
+   
+    /* margin: 1px 0; */
   }
-  .btn.bottom {
-    margin: 1px;
+
+  /* 底部布局 - 使用grid */
+  .piece-btn-container.bottom {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    width: calc(var(--xq-cell-size, 50px) * 9);
+    height: auto;
+    justify-content: center;
   }
-  .btn.white {
-    background: #f0d9b5;
-    border-color: rgba(0, 0, 0, 0.15);
-    color: #3a3a3a;
+
+  .piece-btn.bottom {
+    padding: 0;
+    width: calc(var(--xq-cell-size, 50px) * 9 / 7);
   }
-  .btn.black {
-    background: #3a3a3a;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #e8e8e8;
+
+  /* 颜色 - 合并color: white */
+  .white-piece {
+    background-color: var(--chess-piece-white);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
-  .btn.active {
+
+  .black-piece {
+    background-color: var(--chess-piece-black);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 状态样式 */
+  .active {
     border-color: #ffd700;
     box-shadow: 0 0 0 2px #ffd700;
+    filter: brightness(1.5) saturate(1.4) drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
   }
-  .btn.empty {
+
+  .empty {
     pointer-events: none;
-    opacity: 0.2;
-  }
-  .btn:hover:not(.empty) {
-    filter: brightness(1.15);
+    opacity: 0.35;
   }
 </style>
