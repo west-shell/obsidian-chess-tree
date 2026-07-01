@@ -63,7 +63,7 @@
   {#each PIECES as { key, color, icon }}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-      class="btn {position} {color}"
+      class="piece-btn {position} {color}"
       class:empty={count[key] === 0}
       class:active={selectedPiece === key}
       use:useIcon={icon}
@@ -74,7 +74,7 @@
 
 <style>
   .piece-btn-container {
-     font-size: clamp(10px, calc(var(--xq-cell-size, 50px) * 0.3), 24px);
+    font-size: clamp(10px, calc(var(--xq-cell-size, 50px) * 0.3), 24px);
   }
 
   /* 共用样式 */
@@ -85,49 +85,50 @@
     align-items: center;
     justify-content: center;
     border: 1.5px solid rgba(0, 0, 0, 0.35);
-    transition: box-shadow 0.15s, border-color 0.15s;
+    transition:
+      box-shadow 0.15s,
+      border-color 0.15s;
     color: white;
   }
 
   /* 右侧布局 - 使用flex（因为子元素用了flex:1） */
   .piece-btn-container.right {
-    display: flex;
-    flex-direction: column;
-    height: clamp(10px, calc(var(--xq-cell-size, 50px) * 10), 600px);
-    width: fit-content;
-    justify-content: space-between;
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    height: calc(var(--chess-cell-size, 50px) * 6);
+    width: auto;
+    justify-content: left;
   }
 
   .piece-btn.right {
-    flex: 1;
-    width: 100%;
-   
-    /* margin: 1px 0; */
+    height: calc(var(--chess-cell-size, 50px) * 8 / 6);
   }
 
   /* 底部布局 - 使用grid */
   .piece-btn-container.bottom {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    width: calc(var(--xq-cell-size, 50px) * 9);
+    width: calc(var(--chess-cell-size, 50px) * 6);
     height: auto;
-    justify-content: center;
+    justify-content: left;
   }
 
   .piece-btn.bottom {
-    padding: 0;
-    width: calc(var(--xq-cell-size, 50px) * 9 / 7);
+    width: calc(var(--chess-cell-size, 50px) * 8 / 6);
   }
 
   /* 颜色 - 合并color: white */
-  .white-piece {
+  .piece-btn.white {
     background-color: var(--chess-piece-white);
+    color: black;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
 
-  .black-piece {
+  .piece-btn.black {
     background-color: var(--chess-piece-black);
+    color: white;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
 
@@ -135,7 +136,8 @@
   .active {
     border-color: #ffd700;
     box-shadow: 0 0 0 2px #ffd700;
-    filter: brightness(1.5) saturate(1.4) drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+    filter: brightness(1.5) saturate(1.4)
+      drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
   }
 
   .empty {
