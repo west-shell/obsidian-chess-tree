@@ -1,6 +1,6 @@
 import type { MarkdownPostProcessorContext } from 'obsidian';
 
-import type { Move, Square } from './chess';
+import type { Move,Piece,  Square } from './chess';
 import type { EventBus } from './core/event-bus';
 import type ChessPlugin from './main';
 import type { PGNParser } from './modules/Source/parser';
@@ -71,7 +71,7 @@ export interface IHost {
 export interface IGenFENHost extends IHost {
   fen: string;
   modified: boolean;
-  selectedPiece: string | null;
+  selectedPiece: Piece  | null;
   markedPos: Square | null;
   Chess: any;
 }

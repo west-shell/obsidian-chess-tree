@@ -4,6 +4,7 @@ import { registerGenFENModule } from '../../core/module-system';
 import { t } from '../../i18n';
 import type { IGenFENHost } from '../../types';
 import { DEFAULT_FEN } from '../../types';
+import type { Piece } from '../../chess';
 
 function setBoardOnly(host: IGenFENHost, boardPart: string): void {
   const parts = host.fen.split(' ');
@@ -19,7 +20,7 @@ const ActionsModule = {
   init(host: IGenFENHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on<string>('clickPieceBTN', piece => {
+    eventBus.on<Piece>('clickPieceBTN', piece => {
       if (!piece) return;
       if (host.selectedPiece === piece) {
         host.selectedPiece = null;

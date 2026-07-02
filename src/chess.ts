@@ -6,4 +6,12 @@ export type { DrawShape } from 'chessground/draw';
 export type * as cg from 'chessground/types';
 
 // Re-export from chess.js
-export { Chess, validateFen, type Color, type Move, type PieceSymbol, type Square } from 'chess.js';
+export {
+  Chess,
+  validateFen,
+  type Piece,
+  type Color,
+  type Move,
+  type PieceSymbol,
+  type Square,
+} from 'chess.js';

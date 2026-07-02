@@ -1,5 +1,6 @@
 <script lang="ts">
   import { setIcon } from "obsidian";
+  import type { Piece } from "../../chess";
   import type { ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
 
@@ -8,28 +9,29 @@
     fen: string;
     eventBus: EventBus;
     position: string;
-    selectedPiece: string | null;
+    selectedPiece: Piece | null;
   }
   let { settings, fen, eventBus, position, selectedPiece }: Props = $props();
 
   const PIECES: {
     key: string;
+    piece: Piece;
     color: "white" | "black";
     icon: string;
     maxCount: number;
   }[] = [
-    { key: "k", color: "black", icon: "chess-king", maxCount: 1 },
-    { key: "q", color: "black", icon: "chess-queen", maxCount: 1 },
-    { key: "r", color: "black", icon: "chess-rook", maxCount: 2 },
-    { key: "b", color: "black", icon: "chess-bishop", maxCount: 2 },
-    { key: "n", color: "black", icon: "chess-knight", maxCount: 2 },
-    { key: "p", color: "black", icon: "chess-pawn", maxCount: 8 },
-    { key: "K", color: "white", icon: "chess-king", maxCount: 1 },
-    { key: "Q", color: "white", icon: "chess-queen", maxCount: 1 },
-    { key: "R", color: "white", icon: "chess-rook", maxCount: 2 },
-    { key: "B", color: "white", icon: "chess-bishop", maxCount: 2 },
-    { key: "N", color: "white", icon: "chess-knight", maxCount: 2 },
-    { key: "P", color: "white", icon: "chess-pawn", maxCount: 8 },
+    { key: "k", color: "black", piece: { type: 'k', color: 'b' }, icon: "chess-king", maxCount: 1 },
+    { key: "q", color: "black", piece: { type: 'q', color: 'b' }, icon: "chess-queen", maxCount: 1 },
+    { key: "r", color: "black", piece: { type: 'r', color: 'b' }, icon: "chess-rook", maxCount: 2 },
+    { key: "b", color: "black", piece: { type: 'b', color: 'b' }, icon: "chess-bishop", maxCount: 2 },
+    { key: "n", color: "black", piece: { type: 'n', color: 'b' }, icon: "chess-knight", maxCount: 2 },
+    { key: "p", color: "black", piece: { type: 'p', color: 'b' }, icon: "chess-pawn", maxCount: 8 },
+    { key: "K", color: "white", piece: { type: 'k', color: 'w' }, icon: "chess-king", maxCount: 1 },
+    { key: "Q", color: "white", piece: { type: 'q', color: 'w' }, icon: "chess-queen", maxCount: 1 },
+    { key: "R", color: "white", piece: { type: 'r', color: 'w' }, icon: "chess-rook", maxCount: 2 },
+    { key: "B", color: "white", piece: { type: 'b', color: 'w' }, icon: "chess-bishop", maxCount: 2 },
+    { key: "N", color: "white", piece: { type: 'n', color: 'w' }, icon: "chess-knight", maxCount: 2 },
+    { key: "P", color: "white", piece: { type: 'p', color: 'w' }, icon: "chess-pawn", maxCount: 8 },
   ];
 
   let pieceCount = $derived(
@@ -60,14 +62,14 @@
 </script>
 
 <div class="piece-btn-container {position}">
-  {#each PIECES as { key, color, icon }}
+  {#each PIECES as { key, color, icon,piece }}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
       class="piece-btn {position} {color}"
       class:empty={count[key] === 0}
-      class:active={selectedPiece === key}
+      class:active={selectedPiece === piece}
       use:useIcon={icon}
-      onclick={() => eventBus.emit("clickPieceBTN", key)}
+      onclick={() => eventBus.emit("clickPieceBTN", piece)}
     ></button>
   {/each}
 </div>

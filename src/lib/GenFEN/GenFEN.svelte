@@ -5,11 +5,12 @@
   import type { EventBus } from "../../core/event-bus";
   import Toolbar from "./Toolbar.svelte";
   import { onDestroy, onMount } from "svelte";
+    import type { Piece } from "../../chess";
 
   interface Props {
     settings: ISettings;
     fen: string;
-    selectedPiece: string | null;
+    selectedPiece: Piece | null;
     eventBus: EventBus;
   }
 
