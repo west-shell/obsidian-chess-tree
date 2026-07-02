@@ -121,11 +121,6 @@
   );
   let dests = $derived(computeDests(fen));
   let _check: cg.Color | false = $derived(checkColor || false);
-  let chessEngine = $state<Chess | null>(null);
-  $effect(() => {
-    chessEngine = new Chess(fen, { skipValidation: freeMode });
-  });
-
   onMount(async () => {
     const events: Config["events"] = freeMode
       ? {
