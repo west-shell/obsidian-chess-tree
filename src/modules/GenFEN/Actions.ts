@@ -22,7 +22,7 @@ const ActionsModule = {
 
     eventBus.on<Piece>('clickPieceBTN', piece => {
       if (!piece) return;
-      if (host.selectedPiece === piece) {
+      if (host.selectedPiece && host.selectedPiece.type === piece.type && host.selectedPiece.color === piece.color) {
         host.selectedPiece = null;
       } else {
         host.selectedPiece = piece;

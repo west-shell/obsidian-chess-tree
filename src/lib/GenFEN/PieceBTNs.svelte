@@ -67,7 +67,7 @@
     <button
       class="piece-btn {position} {color}"
       class:empty={count[key] === 0}
-      class:active={selectedPiece === piece}
+      class:active={selectedPiece && selectedPiece.type === piece.type && selectedPiece.color === piece.color}
       use:useIcon={icon}
       onclick={() => eventBus.emit("clickPieceBTN", piece)}
     ></button>
