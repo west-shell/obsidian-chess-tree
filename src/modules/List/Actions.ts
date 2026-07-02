@@ -15,7 +15,11 @@ const ActionsModule = {
       // 先检查当前节点下是否已有相同招法
       const parentNode = host.currentStep > 0 ? host.history[host.currentStep - 1] : host.root;
       for (const child of parentNode.children) {
-        if (child.move?.from === move.from && child.move?.to === move.to && child.move?.promotion === move.promotion) {
+        if (
+          child.move?.from === move.from &&
+          child.move?.to === move.to &&
+          child.move?.promotion === move.promotion
+        ) {
           const idx = parentNode.children.indexOf(child);
           if (idx > 0) {
             parentNode.children.splice(idx, 1);
@@ -95,9 +99,10 @@ const ActionsModule = {
         return;
       }
 
-      const hasBranches = host.history.some(n => n.children.length > 1)
-        || host.PGN.some(n => n.children.length > 1)
-        || host.root.children.length > 1;
+      const hasBranches =
+        host.history.some(n => n.children.length > 1) ||
+        host.PGN.some(n => n.children.length > 1) ||
+        host.root.children.length > 1;
       const modal = new SaveConfirmModal(host.plugin.app, hasBranches, t);
 
       modal.open();
@@ -140,7 +145,10 @@ registerListModule('actions', ActionsModule);
 function undo(host: IListHost) {
   if (host.currentStep > 0) {
     host.currentStep--;
-    host.fen = host.currentStep === 0 ? host.root.fen : (host.modified ? host.history : host.PGN)[host.currentStep - 1].fen;
+    host.fen =
+      host.currentStep === 0
+        ? host.root.fen
+        : (host.modified ? host.history : host.PGN)[host.currentStep - 1].fen;
     host.currentTurn = getTurnFromFen(host.fen);
   }
 }
@@ -221,7 +229,10 @@ async function saveAllPGN(host: IListHost) {
   await writeBlock(host, [allTags, pgnText].filter(Boolean).join('\n'));
 }
 
-function serializeTags(tags: Map<string, string> | undefined, opts: { protected?: boolean; rotated?: boolean }): string {
+function serializeTags(
+  tags: Map<string, string> | undefined,
+  opts: { protected?: boolean; rotated?: boolean },
+): string {
   const map = new Map(tags);
   if (opts.protected !== undefined) map.set('Protected', String(opts.protected));
   if (opts.rotated !== undefined) map.set('Rotated', String(opts.rotated));

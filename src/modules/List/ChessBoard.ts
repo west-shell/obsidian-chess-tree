@@ -42,7 +42,9 @@ const BoardModule = {
         : null;
       const checkColor =
         lastNode?.move && /\+|#/.test(lastNode.move.san)
-          ? (lastNode.move.color === 'w' ? 'black' : 'white')
+          ? lastNode.move.color === 'w'
+            ? 'black'
+            : 'white'
           : null;
       host.Chess?.$set({
         settings: { ...host.settings },

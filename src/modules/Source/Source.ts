@@ -64,8 +64,7 @@ const SourceModule = {
 
           // 根据 autoJump 设置决定初始节点位置
           const shouldJump =
-            host.settings.autoJump === 'always' ||
-            (host.settings.autoJump === 'auto' && !treeHost.haveFEN);
+            host.settings.autoJump === 'always' || (host.settings.autoJump === 'auto' && !treeHost.haveFEN);
           if (shouldJump && treeHost.currentPath.length > 0) {
             treeHost.currentNode = treeHost.nodeMap.get(
               treeHost.currentPath[treeHost.currentPath.length - 1],
@@ -93,8 +92,7 @@ const SourceModule = {
 
           // 根据 autoJump 设置决定初始步数和棋盘局面
           const shouldJump =
-            host.settings.autoJump === 'always' ||
-            (host.settings.autoJump === 'auto' && !listHost.haveFEN);
+            host.settings.autoJump === 'always' || (host.settings.autoJump === 'auto' && !listHost.haveFEN);
           if (shouldJump) {
             listHost.currentStep = mainLine.length;
             listHost.fen = mainLine.length > 0 ? mainLine[mainLine.length - 1].fen : parser.getRoot().fen;

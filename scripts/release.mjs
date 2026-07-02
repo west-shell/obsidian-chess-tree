@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 const type = process.argv[2];
 if (!['patch', 'minor', 'major'].includes(type)) {

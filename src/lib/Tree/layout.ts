@@ -106,10 +106,7 @@ function layoutChildren(w: WNode, y: number, spacingFn: (a: WNode, b: WNode) => 
   positionRoot(w);
 }
 
-function separate(
-  w: WNode, i: number, lows: LowEntry,
-  spacingFn: (a: WNode, b: WNode) => number,
-): void {
+function separate(w: WNode, i: number, lows: LowEntry, spacingFn: (a: WNode, b: WNode) => number): void {
   const lSib = w.children[i - 1];
   const cur = w.children[i];
 
@@ -123,9 +120,12 @@ function separate(
     if (nodeBottom(rContour) > lows.lowY) lows = lows.next!;
 
     const dist =
-      (rSumMods + rContour.prelim) - (lSumMods + lContour.prelim)
-      + 0.5 + 0.5  // xSize/2 + xSize/2 = 1/2 + 1/2
-      + spacingFn(rContour, lContour);
+      rSumMods +
+      rContour.prelim -
+      (lSumMods + lContour.prelim) +
+      0.5 +
+      0.5 + // xSize/2 + xSize/2 = 1/2 + 1/2
+      spacingFn(rContour, lContour);
 
     if (dist > 0 || (dist < 0 && isFirst)) {
       lSumMods += dist;
@@ -170,7 +170,8 @@ function distributeExtra(w: WNode, curI: number, leftI: number, dist: number): v
 
 function shiftChange(w: WNode): void {
   const kids = w.children;
-  let lastShiftSum = 0, lastChangeSum = 0;
+  let lastShiftSum = 0,
+    lastChangeSum = 0;
   for (const c of kids) {
     const shiftSum = lastShiftSum + c.shift;
     const changeSum = lastChangeSum + shiftSum + c.change;
@@ -204,7 +205,8 @@ function nextLContour(w: WNode): WNode | null {
 }
 
 function nextRContour(w: WNode): WNode | null {
-  if (w.children.length > 0 && w.children[w.children.length - 1] !== w.rThr) return w.children[w.children.length - 1];
+  if (w.children.length > 0 && w.children[w.children.length - 1] !== w.rThr)
+    return w.children[w.children.length - 1];
   return w.rThr;
 }
 

@@ -1,6 +1,6 @@
-import type { ChessNode, IListHost } from '../../types';
 import type { Move } from '../../chess';
 import { registerListModule } from '../../core/module-system';
+import type { ChessNode, IListHost } from '../../types';
 
 const HistoryModule = {
   init(host: IListHost) {
@@ -25,7 +25,11 @@ function editHistory(host: IListHost, move: Move) {
 
   // Check if parent already has this move as a child
   for (const child of parentNode.children) {
-    if (child.move?.from === move.from && child.move?.to === move.to && child.move?.promotion === move.promotion) {
+    if (
+      child.move?.from === move.from &&
+      child.move?.to === move.to &&
+      child.move?.promotion === move.promotion
+    ) {
       host.history = [...host.history.slice(0, currentStep), child];
       return;
     }

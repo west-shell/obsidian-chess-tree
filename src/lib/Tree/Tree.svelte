@@ -134,11 +134,16 @@
       saveTimeout = undefined;
     }
     if (layoutChangeHandler) {
-      activeDocument.body.removeEventListener("chess-layout-change", layoutChangeHandler);
+      activeDocument.body.removeEventListener(
+        "chess-layout-change",
+        layoutChangeHandler,
+      );
       layoutChangeHandler = null;
     }
-    if (handleSliderMouseMove) activeDocument.removeEventListener("mousemove", handleSliderMouseMove);
-    if (handleSliderMouseUp) activeDocument.removeEventListener("mouseup", handleSliderMouseUp);
+    if (handleSliderMouseMove)
+      activeDocument.removeEventListener("mousemove", handleSliderMouseMove);
+    if (handleSliderMouseUp)
+      activeDocument.removeEventListener("mouseup", handleSliderMouseUp);
   });
 
   function handleCommentsBlur() {
@@ -316,7 +321,7 @@
   let sliderText = $derived.by(() => {
     if (!currentNode || currentPath.length <= 1) return "";
     const idx = currentPath.indexOf(currentNode.id);
-    return idx !== -1 ? `${idx + 1}/${currentPath.length}` : "";
+    return idx !== -1 ? `${idx}/${currentPath.length - 1}` : "";
   });
 
   let nodeMode = $state(0);
@@ -374,14 +379,20 @@
     activeDocument.addEventListener("mouseup", handleSliderMouseUp);
 
     layoutChangeHandler = () => resetView();
-    activeDocument.body.addEventListener("chess-layout-change", layoutChangeHandler);
+    activeDocument.body.addEventListener(
+      "chess-layout-change",
+      layoutChangeHandler,
+    );
 
-    tick().then(() => new Promise(requestAnimationFrame)).then(() => {
-      if (!svgEl || svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
-      d3.select(svgEl).call(zoomBehavior);
-      resetView();
-      return undefined;
-    });
+    tick()
+      .then(() => new Promise(requestAnimationFrame))
+      .then(() => {
+        if (!svgEl || svgEl.clientWidth === 0 || svgEl.clientHeight === 0)
+          return;
+        d3.select(svgEl).call(zoomBehavior);
+        resetView();
+        return undefined;
+      });
   });
 
   $effect(() => {
@@ -412,28 +423,28 @@
         {#each renderedNodes as node}
           {#each node.children as child, idx}
             {#if !(foldedNodes.has(node.id) && idx > 0)}
-            <path
-              d={`
+              <path
+                d={`
               M ${node.x! * spacingX} ${node.y! * spacingY}
               L ${(child.x! - 0.3 * Math.sign(child.x! - node.x!)) * spacingX} ${node.y! * spacingY}
               L ${child.x! * spacingX} ${child.y! * spacingY}
               `}
-              stroke="var(--chess-board-line)"
-              stroke-linejoin="round"
-              stroke-width={currentPath.includes(node.id) &&
-              currentPath.includes(child.id)
-                ? 1.5
-                : 1}
-              opacity={currentPath.includes(node.id) &&
-              currentPath.includes(child.id)
-                ? 1.5
-                : 0.7}
-              filter={currentPath.includes(node.id) &&
-              currentPath.includes(child.id)
-                ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
-                : "grayscale(50%) brightness(0.75)"}
-              fill="none"
-            />
+                stroke="var(--chess-board-line)"
+                stroke-linejoin="round"
+                stroke-width={currentPath.includes(node.id) &&
+                currentPath.includes(child.id)
+                  ? 1.5
+                  : 1}
+                opacity={currentPath.includes(node.id) &&
+                currentPath.includes(child.id)
+                  ? 1.5
+                  : 0.7}
+                filter={currentPath.includes(node.id) &&
+                currentPath.includes(child.id)
+                  ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
+                  : "grayscale(50%) brightness(0.75)"}
+                fill="none"
+              />
             {/if}
           {/each}
         {/each}
@@ -445,7 +456,8 @@
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <g
             class="node-group"
-            transform="translate({node.x! * spacingX} {node.y! * spacingY}){node.id === currentNode?.id ? ' scale(1.15)' : ''}"
+            transform="translate({node.x! * spacingX} {node.y! *
+              spacingY}){node.id === currentNode?.id ? ' scale(1.15)' : ''}"
             opacity={currentPath.includes(node.id) ? 1 : 0.8}
             filter={!currentPath.includes(node.id)
               ? "grayscale(100%) brightness(0.75)"
@@ -521,17 +533,36 @@
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             {#if node.children.length > 1}
               {@const isLeft = (node.y ?? 0) % 2 === 0}
-              <g transform="translate({isLeft ? -nodeWidth / 2 : nodeWidth / 2}, 0)" style="cursor: pointer" onclick={(e) => { e.stopPropagation(); toggleFold(node); }}>
+              <g
+                transform="translate({isLeft
+                  ? -nodeWidth / 2
+                  : nodeWidth / 2}, 0)"
+                style="cursor: pointer"
+                onclick={(e) => {
+                  e.stopPropagation();
+                  toggleFold(node);
+                }}
+              >
                 <polygon
                   points={foldedNodes.has(node.id)
-                    ? (isLeft ? "0,-4 0,4 -3,3 -3,-3" : "0,-4 0,4 3,3 3,-3")
-                    : (isLeft ? "0,-4 0,4 -5,0" : "0,-4 0,4 5,0")}
+                    ? isLeft
+                      ? "0,-4 0,4 -3,3 -3,-3"
+                      : "0,-4 0,4 3,3 3,-3"
+                    : isLeft
+                      ? "0,-4 0,4 -5,0"
+                      : "0,-4 0,4 5,0"}
                   fill="var(--chess-board-line)"
                   stroke="var(--chess-board-line)"
                   stroke-width="1"
                   stroke-linejoin="round"
-                  opacity={currentPath.includes(node.id) && node.children[0] && !currentPath.includes(node.children[0].id) ? 1.5 : 0.7}
-                  filter={currentPath.includes(node.id) && node.children[0] && !currentPath.includes(node.children[0].id)
+                  opacity={currentPath.includes(node.id) &&
+                  node.children[0] &&
+                  !currentPath.includes(node.children[0].id)
+                    ? 1.5
+                    : 0.7}
+                  filter={currentPath.includes(node.id) &&
+                  node.children[0] &&
+                  !currentPath.includes(node.children[0].id)
                     ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
                     : "grayscale(50%) brightness(0.75)"}
                 />
@@ -562,8 +593,20 @@
     </div>
 
     <div class="slider" class:active={sliderMouseDown}>
-      <button class="slider-btn slider-to-start" aria-label="To start" use:useSetIcon={"minus"} onclick={() => eventBus.emit('btn-click', { name: 'toStart', payload: null })}></button>
-      <button class="slider-btn slider-prev" aria-label="Previous" use:useSetIcon={"arrow-up"} onclick={() => eventBus.emit('btn-click', { name: 'back', payload: null })}></button>
+      <button
+        class="slider-btn slider-to-start"
+        aria-label="To start"
+        use:useSetIcon={"minus"}
+        onclick={() =>
+          eventBus.emit("btn-click", { name: "toStart", payload: null })}
+      ></button>
+      <button
+        class="slider-btn slider-prev"
+        aria-label="Previous"
+        use:useSetIcon={"arrow-up"}
+        onclick={() =>
+          eventBus.emit("btn-click", { name: "back", payload: null })}
+      ></button>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
@@ -575,11 +618,27 @@
         {#if sliderText}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <span class="slider-label" style="top: {sliderPercent}%" onmousedown={handleSliderAreaMouseDown}>{sliderText}</span>
+          <span
+            class="slider-label"
+            style="top: {sliderPercent}%"
+            onmousedown={handleSliderAreaMouseDown}>{sliderText}</span
+          >
         {/if}
       </div>
-      <button class="slider-btn slider-next" aria-label="Next" use:useSetIcon={"arrow-down"} onclick={() => eventBus.emit('btn-click', { name: 'next', payload: null })}></button>
-      <button class="slider-btn slider-to-end" aria-label="To end" use:useSetIcon={"minus"} onclick={() => eventBus.emit('btn-click', { name: 'toEnd', payload: null })}></button>
+      <button
+        class="slider-btn slider-next"
+        aria-label="Next"
+        use:useSetIcon={"arrow-down"}
+        onclick={() =>
+          eventBus.emit("btn-click", { name: "next", payload: null })}
+      ></button>
+      <button
+        class="slider-btn slider-to-end"
+        aria-label="To end"
+        use:useSetIcon={"minus"}
+        onclick={() =>
+          eventBus.emit("btn-click", { name: "toEnd", payload: null })}
+      ></button>
     </div>
   </div>
 
@@ -670,7 +729,9 @@
     justify-content: center;
     padding: 0;
     margin: 0;
-    transition: color 0.2s, background 0.2s;
+    transition:
+      color 0.2s,
+      background 0.2s;
   }
   .slider-btn + .slider-btn {
     border-top-left-radius: 0;
@@ -727,7 +788,7 @@
     transition: none;
   }
   .slider-label::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     right: -4px;
