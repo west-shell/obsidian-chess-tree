@@ -1,6 +1,42 @@
-import { Chess, type Square } from '../chess';
+import { Chess, type Move, type Square } from '../chess';
 import { registerListModule, registerPGNViewModule, registerTreeModule } from '../core/module-system';
 import type { IListHost, IPGNViewHost, ITreeHost } from '../types';
+
+type PromotePayload = { from: Square; to: Square; color: 'w' | 'b' };
+type TryMovePayload = { from: Square; to: Square };
+
+function isPromotionRank(to: string, color: 'w' | 'b'): boolean {
+  return (color === 'w' && to[1] === '8') || (color === 'b' && to[1] === '1');
+}
+
+function tryMove(host: IListHost | ITreeHost | IPGNViewHost, from: Square, to: Square): void {
+  const eventBus = host.eventBus;
+  try {
+    const chess = new Chess(host.fen);
+    const piece = chess.get(from);
+    const color = piece?.color;
+    if (piece?.type === 'p' && color && isPromotionRank(to, color)) {
+      const moves = chess.moves({ square: from, verbose: true }) as Move[];
+      const promoMoves = moves.filter(m => m.to === to && m.promotion);
+      if (promoMoves.length > 0) {
+        host.markedPos = null;
+        eventBus.emit('promote', { from, to, color } as PromotePayload);
+        return;
+      }
+    }
+    const move = chess.move({ from, to });
+    if (move) {
+      host.markedPos = null;
+      eventBus.emit('runmove', move);
+    } else {
+      host.markedPos = to;
+      eventBus.emit('updateUI');
+    }
+  } catch {
+    host.markedPos = null;
+    eventBus.emit('updateUI');
+  }
+}
 
 const BoardClickModule = {
   init(host: IListHost | ITreeHost | IPGNViewHost) {
@@ -13,21 +49,12 @@ const BoardClickModule = {
         eventBus.emit('updateUI');
         return;
       }
+      tryMove(host, host.markedPos, clickedKey);
+    });
 
-      try {
-        const chess = new Chess(host.fen);
-        const move = chess.move({ from: host.markedPos, to: clickedKey });
-        if (move) {
-          host.markedPos = null;
-          eventBus.emit('runmove', move);
-        } else {
-          host.markedPos = clickedKey;
-          eventBus.emit('updateUI');
-        }
-      } catch {
-        host.markedPos = null;
-        eventBus.emit('updateUI');
-      }
+    eventBus.on<TryMovePayload>('trymove', (payload) => {
+      if (!payload) return;
+      tryMove(host, payload.from, payload.to);
     });
   },
 };

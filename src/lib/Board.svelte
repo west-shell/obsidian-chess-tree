@@ -48,7 +48,7 @@
   let api: Api | null = null;
   let layoutChangeHandler: (() => void) | null = null;
 
-  // Promotion state
+  // Promotion state (driven by promote event from BoardClick)
   let promotingMove: { from: Square; to: Square } | null = $state(null);
   let promotingColor: "w" | "b" = $state("w");
 
@@ -58,10 +58,6 @@
     { type: "b", icon: "chess-bishop" },
     { type: "n", icon: "chess-knight" },
   ];
-
-  function isPromotionRank(to: string, color: "w" | "b"): boolean {
-    return (color === "w" && to[1] === "8") || (color === "b" && to[1] === "1");
-  }
 
   function completePromotion(pieceType: "q" | "r" | "b" | "n") {
     if (!promotingMove) return;
@@ -78,6 +74,10 @@
     } catch {
       /* ignore */
     }
+    promotingMove = null;
+  }
+
+  function cancelPromotion() {
     promotingMove = null;
   }
   let turnColor: cg.Color = $derived(
@@ -121,12 +121,6 @@
   );
   let dests = $derived(computeDests(fen));
   let _check: cg.Color | false = $derived(checkColor || false);
-  // 响应式 chess 引擎实例，确保 move 回调始终使用最新 fen
-  let chessEngine = $state<Chess | null>(null);
-  $effect(() => {
-    chessEngine = new Chess(fen);
-  });
-
   onMount(async () => {
     const events: Config["events"] = freeMode
       ? {
@@ -139,49 +133,8 @@
         }
       : {
           move: (orig, dest) => {
-            const piece = chessEngine!.get(orig as Square);
-            const color = piece?.color;
-            if (piece?.type === "p" && color && isPromotionRank(dest, color)) {
-              // Check if any legal promotion exists
-              try {
-                const moves = chessEngine!.moves({
-                  square: orig as Square,
-                  verbose: true,
-                }) as Move[];
-                const promoMoves = moves.filter(
-                  (m) => m.to === dest && m.promotion,
-                );
-                if (promoMoves.length > 0) {
-                  api?.cancelMove();
-                  promotingMove = { from: orig as Square, to: dest as Square };
-                  promotingColor = color;
-                  return;
-                }
-              } catch {
-                /* fall through */
-              }
-            }
-            try {
-              const move = chessEngine!.move({ from: orig, to: dest });
-              if (move) {
-                // 同步更新 Chessground 的 turn/movable，
-                // 避免依赖异步 $effect 可能延迟或丢失更新
-                const newTurn: cg.Color =
-                  chessEngine!.turn() === "b" ? "black" : "white";
-                api?.set({
-                  fen: move.after,
-                  turnColor: newTurn,
-                  movable: { color: newTurn, dests: computeDests(move.after) },
-                });
-                eventBus.emit("runmove", move);
-              } else {
-                api?.cancelMove();
-                eventBus.emit("invalid-move", { from: orig, to: dest });
-              }
-            } catch {
-              api?.cancelMove();
-              eventBus.emit("invalid-move", { from: orig, to: dest });
-            }
+            api?.cancelMove();
+            eventBus.emit("trymove", { from: orig as Square, to: dest as Square });
           },
         };
 
@@ -233,6 +186,11 @@
       });
     }
     api = Chessground(boardElement, config);
+
+    eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>("promote", (payload) => {
+      promotingMove = { from: payload.from, to: payload.to };
+      promotingColor = payload.color;
+    });
 
     layoutChangeHandler = () => {
       if (api) {
@@ -322,7 +280,7 @@
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="promotion-overlay" onclick={() => (promotingMove = null)}>
+    <div class="promotion-overlay" onclick={cancelPromotion}>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
