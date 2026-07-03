@@ -455,8 +455,47 @@
         {/each}
 
         {#each renderedNodes as node}
+          {#if node.children.length > 1}
+            {@const isLeft = (node.y ?? 0) % 2 === 0}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <g
+              transform="translate({node.x! * spacingX + (isLeft ? -nodeWidth / 2 : nodeWidth / 2)} {node.y! * spacingY})"
+              style="cursor: pointer"
+              onclick={(e) => {
+                e.stopPropagation();
+                toggleFold(node);
+              }}
+            >
+              <polygon
+                points={foldedNodes.has(node.id)
+                  ? isLeft
+                    ? "0,-4 0,4 -3,3 -3,-3"
+                    : "0,-4 0,4 3,3 3,-3"
+                  : isLeft
+                    ? "0,-4 0,4 -5,0"
+                    : "0,-4 0,4 5,0"}
+                fill="var(--chess-board-line)"
+                stroke="var(--chess-board-line)"
+                stroke-width="1"
+                stroke-linejoin="round"
+                opacity={currentPath.includes(node.id) &&
+                node.children[0] &&
+                !currentPath.includes(node.children[0].id)
+                  ? 1.5
+                  : 0.7}
+                filter={currentPath.includes(node.id) &&
+                node.children[0] &&
+                !currentPath.includes(node.children[0].id)
+                  ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
+                  : "grayscale(50%) brightness(0.75)"}
+              />
+            </g>
+          {/if}
+        {/each}
+
+        {#each renderedNodes as node}
           {@const primaryAnnotation = getPrimaryAnnotation(node)}
-          {@const hasComments = getRegularComments(node).length > 0}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <g
@@ -527,53 +566,19 @@
                 >
               {/if}
             {/if}
-
-            {#if hasComments}
-              <g transform="translate(4.8, -8)">
-                {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
-              </g>
-            {/if}
-
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            {#if node.children.length > 1}
-              {@const isLeft = (node.y ?? 0) % 2 === 0}
-              <g
-                transform="translate({isLeft
-                  ? -nodeWidth / 2
-                  : nodeWidth / 2}, 0)"
-                style="cursor: pointer"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  toggleFold(node);
-                }}
-              >
-                <polygon
-                  points={foldedNodes.has(node.id)
-                    ? isLeft
-                      ? "0,-4 0,4 -3,3 -3,-3"
-                      : "0,-4 0,4 3,3 3,-3"
-                    : isLeft
-                      ? "0,-4 0,4 -5,0"
-                      : "0,-4 0,4 5,0"}
-                  fill="var(--chess-board-line)"
-                  stroke="var(--chess-board-line)"
-                  stroke-width="1"
-                  stroke-linejoin="round"
-                  opacity={currentPath.includes(node.id) &&
-                  node.children[0] &&
-                  !currentPath.includes(node.children[0].id)
-                    ? 1.5
-                    : 0.7}
-                  filter={currentPath.includes(node.id) &&
-                  node.children[0] &&
-                  !currentPath.includes(node.children[0].id)
-                    ? "brightness(1.5) saturate(1.4) drop-shadow(0 0 1px rgba(255, 255, 255, 0.6))"
-                    : "grayscale(50%) brightness(0.75)"}
-                />
-              </g>
-            {/if}
           </g>
+        {/each}
+
+        {#each renderedNodes as node}
+          {#if getRegularComments(node).length > 0}
+            <g
+              transform="translate({node.x! * spacingX + 4.8} {node.y! * spacingY - 8}){node.id === currentNode?.id ? ' scale(1.15)' : ''}"
+              opacity={currentPath.includes(node.id) ? 1 : 0.8}
+              style="pointer-events: none"
+            >
+              {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
+            </g>
+          {/if}
         {/each}
       </g>
     </svg>
