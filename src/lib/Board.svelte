@@ -78,7 +78,6 @@
   }
 
   function cancelPromotion() {
-    promotingMove = null;
   }
   let turnColor: cg.Color = $derived(
     fen.split(" ")[1] === "b" ? "black" : "white",
@@ -186,10 +185,11 @@
     }
     api = Chessground(boardElement, config);
 
-    eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>("promote", (payload) => {
-      promotingMove = { from: payload.from, to: payload.to };
-      promotingColor = payload.color;
-    });
+     eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>("promote", (payload) => {
+       if (!payload) return;
+       promotingMove = { from: payload.from, to: payload.to };
+       promotingColor = payload.color;
+     });
 
     layoutChangeHandler = () => {
       if (api) {
@@ -216,8 +216,8 @@
   });
 
   $effect(() => {
-    if (!api) return;
-    if (freeMode) {
+     if (!api || promotingMove) return;
+     if (freeMode) {
       api.set({ fen, turnColor, check: _check });
     } else {
       api.set({
@@ -279,7 +279,7 @@
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="promotion-overlay" onclick={cancelPromotion}>
+    <div class="promotion-overlay">
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
