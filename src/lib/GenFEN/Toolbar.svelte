@@ -187,77 +187,79 @@
 </script>
 
 <div class="fen-editor-tools {position}">
-  <div class="tool-section turn-row">
-    <button class="turn-toggle" onclick={toggleTurn}
-      >{turnLabel === "black"
-        ? t("genfen.black_turn", _lv)
-        : t("genfen.white_turn", _lv)}</button
-    >
-  </div>
-
-  <div class="tool-section">
-    <span class="section-label">{t("genfen.castling", _lv)}</span>
-    <div class="castling-row">
-      <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
-      <label class="castling-checkbox" class:active={hasCastling.q} class:invalid={!validCastling.q}>
-        <input
-          type="checkbox"
-          checked={hasCastling.q}
-          disabled={!validCastling.q}
-          onchange={() => toggleCastling("q")}
-        />
-        <span>q</span>
-      </label>
-      <label class="castling-checkbox" class:active={hasCastling.k} class:invalid={!validCastling.k}>
-        <input
-          type="checkbox"
-          checked={hasCastling.k}
-          disabled={!validCastling.k}
-          onchange={() => toggleCastling("k")}
-        />
-        <span>k</span>
-      </label>
+  <div class="tool-group-fen-meta">
+    <div class="tool-section turn-row">
+      <button class="turn-toggle" onclick={toggleTurn}
+        >{turnLabel === "black"
+          ? t("genfen.black_turn", _lv)
+          : t("genfen.white_turn", _lv)}</button
+      >
     </div>
-    <div class="castling-row">
-      <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
-      <label class="castling-checkbox" class:active={hasCastling.Q} class:invalid={!validCastling.Q}>
-        <input
-          type="checkbox"
-          checked={hasCastling.Q}
-          disabled={!validCastling.Q}
-          onchange={() => toggleCastling("Q")}
-        />
-        <span>Q</span>
-      </label>
-      <label class="castling-checkbox" class:active={hasCastling.K} class:invalid={!validCastling.K}>
-        <input
-          type="checkbox"
-          checked={hasCastling.K}
-          disabled={!validCastling.K}
-          onchange={() => toggleCastling("K")}
-        />
-        <span>K</span>
-      </label>
-    </div>
-  </div>
 
-  <div class="tool-section">
-    <label class="section-label" for="genfen-ep"
-      >{t("genfen.enpassant", _lv)}</label
-    >
-    <select
-      id="genfen-ep"
-      class="fen-select"
-      value={_enPassant === "-" ? "-" : _enPassant[0]}
-      onfocus={() =>
-        (enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn))}
-      onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
-    >
-      <option value="-">{t("genfen.enpassant_off", _lv)}</option>
-      {#each enPassantFiles as f}
-        <option value={f}>{f}{_turn === "w" ? "6" : "3"}</option>
-      {/each}
-    </select>
+    <div class="tool-section">
+      <span class="section-label">{t("genfen.castling", _lv)}</span>
+      <div class="castling-row">
+        <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
+        <label class="castling-checkbox" class:active={hasCastling.q} class:invalid={!validCastling.q}>
+          <input
+            type="checkbox"
+            checked={hasCastling.q}
+            disabled={!validCastling.q}
+            onchange={() => toggleCastling("q")}
+          />
+          <span>q</span>
+        </label>
+        <label class="castling-checkbox" class:active={hasCastling.k} class:invalid={!validCastling.k}>
+          <input
+            type="checkbox"
+            checked={hasCastling.k}
+            disabled={!validCastling.k}
+            onchange={() => toggleCastling("k")}
+          />
+          <span>k</span>
+        </label>
+      </div>
+      <div class="castling-row">
+        <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
+        <label class="castling-checkbox" class:active={hasCastling.Q} class:invalid={!validCastling.Q}>
+          <input
+            type="checkbox"
+            checked={hasCastling.Q}
+            disabled={!validCastling.Q}
+            onchange={() => toggleCastling("Q")}
+          />
+          <span>Q</span>
+        </label>
+        <label class="castling-checkbox" class:active={hasCastling.K} class:invalid={!validCastling.K}>
+          <input
+            type="checkbox"
+            checked={hasCastling.K}
+            disabled={!validCastling.K}
+            onchange={() => toggleCastling("K")}
+          />
+          <span>K</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-section">
+      <label class="section-label" for="genfen-ep"
+        >{t("genfen.enpassant", _lv)}</label
+      >
+      <select
+        id="genfen-ep"
+        class="fen-select"
+        value={_enPassant === "-" ? "-" : _enPassant[0]}
+        onfocus={() =>
+          (enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn))}
+        onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
+      >
+        <option value="-">{t("genfen.enpassant_off", _lv)}</option>
+        {#each enPassantFiles as f}
+          <option value={f}>{f}{_turn === "w" ? "6" : "3"}</option>
+        {/each}
+      </select>
+    </div>
   </div>
 
   <div class="tool-section tool-buttons">
@@ -341,6 +343,7 @@
     font-weight: 600;
     font-size: 0.85em;
     white-space: nowrap;
+    min-width: 3em;
   }
   .castling-checkbox {
     display: flex;
