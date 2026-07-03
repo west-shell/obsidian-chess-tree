@@ -59,6 +59,7 @@ const SourceModule = {
           treeHost.nodeMap = parser.getMap();
           treeHost.tags = parser.getTags();
           treeHost.currentNode = treeHost.nodeMap.get('node-root')!;
+          treeHost.fen = treeHost.currentNode.fen;
           treeHost.currentTurn = treeHost.currentNode.move?.color === 'b' ? 'white' : 'black';
           eventBus.emit('updateMainPath');
 
@@ -69,6 +70,7 @@ const SourceModule = {
             treeHost.currentNode = treeHost.nodeMap.get(
               treeHost.currentPath[treeHost.currentPath.length - 1],
             )!;
+            treeHost.fen = treeHost.currentNode.fen;
           }
           break;
         }
