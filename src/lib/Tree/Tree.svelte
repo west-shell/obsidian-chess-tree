@@ -161,13 +161,18 @@
       .filter((c) => c.trim() !== "");
     const existingAnnotations = getAllAnnotations(currentNode);
     const existingShapes = getAllShapes(currentNode);
-    currentNode.comments = [
+    const newComments = [
       ...existingAnnotations,
       ...existingShapes,
       ...regularComments,
     ];
+    const oldComments = currentNode.comments ?? [];
+    const changed =
+      newComments.length !== oldComments.length ||
+      newComments.some((c, i) => c !== oldComments[i]);
+    currentNode.comments = newComments;
     eventBus.emit("updateUI");
-    eventBus.emit("modified");
+    if (changed) eventBus.emit("modified");
   }
 
   function adjustTextareaHeight() {
