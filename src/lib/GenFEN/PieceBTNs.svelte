@@ -48,12 +48,32 @@
   );
 
   let count = $derived(
-    Object.fromEntries(
-      PIECES.map(({ key, maxCount }) => [
-        key,
-        maxCount - (pieceCount[key] || 0),
-      ]),
-    ),
+    (() => {
+      const whitePromoBudget = 8 - (pieceCount['P'] || 0);
+      const blackPromoBudget = 8 - (pieceCount['p'] || 0);
+      const whiteOverflow = ['Q', 'R', 'B', 'N'].reduce(
+        (s, k) => s + Math.max(0, (pieceCount[k] || 0) - (PIECES.find(p => p.key === k)!.maxCount)), 0);
+      const blackOverflow = ['q', 'r', 'b', 'n'].reduce(
+        (s, k) => s + Math.max(0, (pieceCount[k] || 0) - (PIECES.find(p => p.key === k)!.maxCount)), 0);
+
+      return Object.fromEntries(
+        PIECES.map(({ key, maxCount }) => {
+          const onBoard = pieceCount[key] || 0;
+          const isWhite = key === key.toUpperCase();
+          const isPawn = key === 'P' || key === 'p';
+          const isKing = key === 'K' || key === 'k';
+          if (isKing) return [key, maxCount - onBoard];
+          if (isPawn) {
+            const overflow = isWhite ? whiteOverflow : blackOverflow;
+            return [key, maxCount - onBoard - overflow];
+          }
+          const promoBudget = isWhite ? whitePromoBudget : blackPromoBudget;
+          const selfOverflow = Math.max(0, onBoard - maxCount);
+          const otherOverflow = (isWhite ? whiteOverflow : blackOverflow) - selfOverflow;
+          return [key, maxCount + promoBudget - onBoard - otherOverflow];
+        }),
+      );
+    })()
   );
 
   function useIcon(el: HTMLElement, icon: string) {
