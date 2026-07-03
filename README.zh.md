@@ -11,7 +11,7 @@
 
 ## 插件简介
 
-**Obsidian 国际象棋插件** 是一款为 Obsidian 笔记软件量身打造的国际象棋渲染引擎，支持以 FEN 和 PGN 格式展示棋局、推演走棋、管理分支变着。基于 [chess.js](https://github.com/jhlywa/chess.js) 提供完整的棋规支持。
+Obsidian 国际象棋插件，提供笔记内棋局渲染与探索功能。支持 PGN 文件查看、三种代码块类型（`chess`、`fen`、`tree`）、基于 [chess.js](https://github.com/jhlywa/chess.js) 的完整棋规、通过 [chessground](https://github.com/lichess-org/chessground) 实现的交互式棋盘，以及变着分支树可视化。
 
 ## PGN 文件支持
 

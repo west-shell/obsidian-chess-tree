@@ -483,7 +483,7 @@
                     : "green"}
                 stroke="var(--chess-board-line)"
               />
-              <g transform="translate(-6, -6)" color={def.color}>
+              <g transform="translate(-6, -6)" color={node.side === "white" ? "#333" : "#fff"}>
                 {@html iconSvg(def.icon, 12, 1.5)}
               </g>
             {:else}

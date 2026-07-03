@@ -11,7 +11,7 @@ Likes, coins, and feedback are greatly appreciated.
 
 ## Overview
 
-**Obsidian Chess Plugin** is a chess rendering engine built for Obsidian. It displays chess positions and games in FEN and PGN formats, supports move exploration and variation management. Full rules engine powered by [chess.js](https://github.com/jhlywa/chess.js).
+Obsidian plugin providing chess rendering and exploration inside notes. Supports PGN file viewing, three code block types (`chess`, `fen`, `tree`), full chess rules via [chess.js](https://github.com/jhlywa/chess.js), interactive board via [chessground](https://github.com/lichess-org/chessground), and variation tree visualization.
 
 ## PGN File Support
 

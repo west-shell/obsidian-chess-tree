@@ -112,6 +112,7 @@ const ActionsModule = {
               node.comments.push(data);
             }
           }
+          eventBus.emit('modified', null);
           break;
         }
         case 'remove': {
