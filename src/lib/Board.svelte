@@ -353,8 +353,4 @@
     background: var(--background-modifier-hover);
     border-color: var(--color-accent);
   }
-
-  :global(cg-board) {
-    background-color: var(--chess-board-bg, #f0d9b5);
-  }
 </style>

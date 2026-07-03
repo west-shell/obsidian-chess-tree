@@ -1,6 +1,6 @@
-import 'chessground/assets/chessground.base.css';
-import 'chessground/assets/chessground.brown.css';
-import 'chessground/assets/chessground.cburnett.css';
+import './style/base.css';
+import './style/board.css';
+import './style/pieces.css';
 
 import { MarkdownView, Plugin, TFile } from 'obsidian';
 
