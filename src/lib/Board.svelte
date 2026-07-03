@@ -62,7 +62,7 @@
   function completePromotion(pieceType: "q" | "r" | "b" | "n") {
     if (!promotingMove) return;
     try {
-      const chess = new Chess(fen);
+      chess.load(fen);
       const move = chess.move({
         from: promotingMove.from,
         to: promotingMove.to,
