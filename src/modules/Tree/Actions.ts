@@ -44,7 +44,7 @@ const ActionsModule = {
       const { from, to } = move;
       const currentNode = host.currentNode;
       for (let node of currentNode!.children) {
-        if (node.move && node.move.from === from && node.move.to === to) {
+        if (node.move && node.move.from === from && node.move.to === to && node.move.promotion === move.promotion) {
           host.currentNode = node;
           host.fen = node.fen;
           eventBus.emit('updateMainPath');
