@@ -89,7 +89,7 @@
   ];
   let annotations = $derived(buildAnnotations(_lv));
 
-  function emitEvent(name: string, payload: any = null) {
+  function emitEvent(name: string, payload: string | null = null) {
     eventBus.emit("btn-click", { name, payload });
   }
 

@@ -1,4 +1,11 @@
-export type TokenType = 'san-move' | 'left-paren' | 'right-paren' | 'comment' | 'tag' | 'result' | 'eof';
+export type TokenType =
+  | "san-move"
+  | "left-paren"
+  | "right-paren"
+  | "comment"
+  | "tag"
+  | "result"
+  | "eof";
 
 export interface Token {
   type: TokenType;
@@ -16,7 +23,7 @@ export function tokenize(pgn: string): Token[] {
   const advance = (n: number) => {
     while (n-- > 0) {
       const c = pgn[pos++];
-      if (c === '\n') {
+      if (c === "\n") {
         line++;
         column = 1;
       } else {
@@ -52,52 +59,84 @@ export function tokenize(pgn: string): Token[] {
     }
 
     // SAN move: O-O, O-O-O, exd5, Nf3, e8=Q, etc.
-    const san = matchAndConsume(/^(O-O(?:-O)?[+#]?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)\b/);
+    const san = matchAndConsume(
+      /^(O-O(?:-O)?[+#]?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)\b/,
+    );
     if (san) {
-      tokens.push({ type: 'san-move', value: san, line: startLine, column: startCol });
+      tokens.push({
+        type: "san-move",
+        value: san,
+        line: startLine,
+        column: startCol,
+      });
       continue;
     }
 
     // Comment { ... }
-    if (char === '{') {
+    if (char === "{") {
       let depth = 1;
       let end = pos + 1;
       while (end < pgn.length && depth > 0) {
-        if (pgn[end] === '{') depth++;
-        else if (pgn[end] === '}') depth--;
+        if (pgn[end] === "{") depth++;
+        else if (pgn[end] === "}") depth--;
         end++;
       }
       const comment = pgn.slice(pos, end);
       advance(end - pos);
-      tokens.push({ type: 'comment', value: comment, line: startLine, column: startCol });
+      tokens.push({
+        type: "comment",
+        value: comment,
+        line: startLine,
+        column: startCol,
+      });
       continue;
     }
 
     // Tag [ ... ]
     const tag = matchAndConsume(/^\[[^\]]*\]/);
     if (tag) {
-      tokens.push({ type: 'tag', value: tag, line: startLine, column: startCol });
+      tokens.push({
+        type: "tag",
+        value: tag,
+        line: startLine,
+        column: startCol,
+      });
       continue;
     }
 
     // Result
     const result = matchAndConsume(/^(1-0|0-1|1\/2-1\/2|\*)/);
     if (result) {
-      tokens.push({ type: 'result', value: result, line: startLine, column: startCol });
+      tokens.push({
+        type: "result",
+        value: result,
+        line: startLine,
+        column: startCol,
+      });
       continue;
     }
 
     // Left paren
-    if (char === '(') {
+    if (char === "(") {
       advance(1);
-      tokens.push({ type: 'left-paren', value: '(', line: startLine, column: startCol });
+      tokens.push({
+        type: "left-paren",
+        value: "(",
+        line: startLine,
+        column: startCol,
+      });
       continue;
     }
 
     // Right paren
-    if (char === ')') {
+    if (char === ")") {
       advance(1);
-      tokens.push({ type: 'right-paren', value: ')', line: startLine, column: startCol });
+      tokens.push({
+        type: "right-paren",
+        value: ")",
+        line: startLine,
+        column: startCol,
+      });
       continue;
     }
 
@@ -106,7 +145,12 @@ export function tokenize(pgn: string): Token[] {
       /^[rnbqkpRNBQKP1-8]+(\/[rnbqkpRNBQKP1-8]+){7}(\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)?/,
     );
     if (fen) {
-      tokens.push({ type: 'tag', value: `[FEN "${fen}"]`, line: startLine, column: startCol });
+      tokens.push({
+        type: "tag",
+        value: `[FEN "${fen}"]`,
+        line: startLine,
+        column: startCol,
+      });
       continue;
     }
 
@@ -114,6 +158,6 @@ export function tokenize(pgn: string): Token[] {
     advance(1);
   }
 
-  tokens.push({ type: 'eof', value: '', line, column });
+  tokens.push({ type: "eof", value: "", line, column });
   return tokens;
 }

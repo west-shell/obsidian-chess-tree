@@ -5,7 +5,7 @@
   import type { EventBus } from "../../core/event-bus";
   import Toolbar from "./Toolbar.svelte";
   import { onDestroy, onMount } from "svelte";
-    import type { Piece } from "../../chess";
+  import type { Piece } from "../../chess";
 
   interface Props {
     settings: ISettings;
@@ -19,7 +19,7 @@
   let position = $derived(settings.position);
   let flipped = $state(false);
 
-  function onBtnClick(action: any) {
+  function onBtnClick(action: string | { action: string; fen?: string }) {
     if (typeof action === "string" && action === "flip") {
       flipped = !flipped;
     }

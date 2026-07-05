@@ -100,10 +100,15 @@
   }
 
   function expandBoard(boardFen: string): string[][] {
-    return boardFen.split("/").map(row => expandRow(row));
+    return boardFen.split("/").map((row) => expandRow(row));
   }
 
-  function computeValidCastlingRights(boardFen: string): { K: boolean; Q: boolean; k: boolean; q: boolean } {
+  function computeValidCastlingRights(boardFen: string): {
+    K: boolean;
+    Q: boolean;
+    k: boolean;
+    q: boolean;
+  } {
     const board = expandBoard(boardFen);
     const result = { K: false, Q: false, k: false, q: false };
 
@@ -200,7 +205,11 @@
       <span class="section-label">{t("genfen.castling", _lv)}</span>
       <div class="castling-row">
         <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
-        <label class="castling-checkbox" class:active={hasCastling.q} class:invalid={!validCastling.q}>
+        <label
+          class="castling-checkbox"
+          class:active={hasCastling.q}
+          class:invalid={!validCastling.q}
+        >
           <input
             type="checkbox"
             checked={hasCastling.q}
@@ -209,7 +218,11 @@
           />
           <span>q</span>
         </label>
-        <label class="castling-checkbox" class:active={hasCastling.k} class:invalid={!validCastling.k}>
+        <label
+          class="castling-checkbox"
+          class:active={hasCastling.k}
+          class:invalid={!validCastling.k}
+        >
           <input
             type="checkbox"
             checked={hasCastling.k}
@@ -221,7 +234,11 @@
       </div>
       <div class="castling-row">
         <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
-        <label class="castling-checkbox" class:active={hasCastling.Q} class:invalid={!validCastling.Q}>
+        <label
+          class="castling-checkbox"
+          class:active={hasCastling.Q}
+          class:invalid={!validCastling.Q}
+        >
           <input
             type="checkbox"
             checked={hasCastling.Q}
@@ -230,7 +247,11 @@
           />
           <span>Q</span>
         </label>
-        <label class="castling-checkbox" class:active={hasCastling.K} class:invalid={!validCastling.K}>
+        <label
+          class="castling-checkbox"
+          class:active={hasCastling.K}
+          class:invalid={!validCastling.K}
+        >
           <input
             type="checkbox"
             checked={hasCastling.K}

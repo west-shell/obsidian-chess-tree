@@ -5,8 +5,8 @@ import {
   type Move,
   type PieceSymbol,
   type Square,
-} from '../chess';
-import { DEFAULT_FEN } from '../types';
+} from "../chess";
+import { DEFAULT_FEN } from "../types";
 
 export type { Move, Square, PieceSymbol, Color };
 
@@ -16,7 +16,7 @@ let _chess: Chess | null = null;
  * Load a FEN position into a shared Chess instance.
  */
 export function loadGame(fen: string = DEFAULT_FEN): Chess {
-  if (!_chess) _chess = new Chess();
+  _chess ??= new Chess();
   _chess.load(fen);
   return _chess;
 }
@@ -106,16 +106,18 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
  * Get the turn color from a FEN string ('w' or 'b').
  */
 export function getTurn(fen: string): Color {
-  return (fen.split(' ')[1] as Color) || 'w';
+  return (fen.split(" ")[1] as Color) || "w";
 }
 
 /**
  * Extract PieceSymbol and Color from a piece character in FEN.
  * e.g. 'K' → { type: 'k', color: 'w' }, 'n' → { type: 'n', color: 'b' }
  */
-export function parsePiece(pieceChar: string): { type: PieceSymbol; color: Color } | null {
+export function parsePiece(
+  pieceChar: string,
+): { type: PieceSymbol; color: Color } | null {
   if (!pieceChar || !/[a-zA-Z]/.test(pieceChar)) return null;
   const lower = pieceChar.toLowerCase() as PieceSymbol;
-  const color: Color = pieceChar === pieceChar.toUpperCase() ? 'w' : 'b';
+  const color: Color = pieceChar === pieceChar.toUpperCase() ? "w" : "b";
   return { type: lower, color };
 }

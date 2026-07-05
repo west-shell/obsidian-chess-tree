@@ -1,8 +1,17 @@
-import { registerGenFENModule, registerListModule, registerTreeModule } from '../../core/module-system';
-import { DEFAULT_FEN, type IGenFENHost, type IListHost, type ITreeHost } from '../../types';
-import { parseOption } from '../../utils/parse';
+import {
+  registerGenFENModule,
+  registerListModule,
+  registerTreeModule,
+} from "../../core/module-system";
+import {
+  DEFAULT_FEN,
+  type IGenFENHost,
+  type IListHost,
+  type ITreeHost,
+} from "../../types";
+import { parseOption } from "../../utils/parse";
 
-import { PGNParser } from './parser';
+import { PGNParser } from "./parser";
 
 /**
  * Prepare source for PGNParser:
@@ -11,11 +20,17 @@ import { PGNParser } from './parser';
  * 3. Ensure FEN is in [FEN "..."] tag format
  * 4. Return cleaned source + options
  */
-function prepareSource(raw: string): { cleaned: string; options: ReturnType<typeof parseOption> } {
+function prepareSource(raw: string): {
+  cleaned: string;
+  options: ReturnType<typeof parseOption>;
+} {
   const options = parseOption(raw);
 
   // Remove option lines (e.g. "p: true", "protected: true", "r: false")
-  let cleaned = raw.replace(/^(protected|P|rotated|R|r)\s*[:：]\s*(true|false)\s*$/gim, '');
+  let cleaned = raw.replace(
+    /^(protected|P|rotated|R|r)\s*[:：]\s*(true|false)\s*$/gim,
+    "",
+  );
 
   // If raw FEN exists without [FEN "..."] tag, wrap it
   const fenMatch = cleaned.match(
@@ -28,10 +43,12 @@ function prepareSource(raw: string): { cleaned: string; options: ReturnType<type
 
   // Inject Protected/Rotated PGN tags if present in source
   const tags: string[] = [];
-  if (options.protected !== undefined) tags.push(`[Protected "${options.protected}"]`);
-  if (options.rotated !== undefined) tags.push(`[Rotated "${options.rotated}"]`);
+  if (options.protected !== undefined)
+    tags.push(`[Protected "${options.protected}"]`);
+  if (options.rotated !== undefined)
+    tags.push(`[Rotated "${options.rotated}"]`);
   if (tags.length > 0) {
-    cleaned = tags.join('\n') + '\n' + cleaned;
+    cleaned = tags.join("\n") + "\n" + cleaned;
   }
 
   return { cleaned, options };
@@ -48,9 +65,9 @@ function extractFEN(source: string): string {
 const SourceModule = {
   init(host: IGenFENHost) {
     const eventBus = host.eventBus;
-    eventBus.on<string>('load', renderChild => {
+    eventBus.on<string>("load", (renderChild) => {
       switch (renderChild) {
-        case 'tree': {
+        case "tree": {
           const treeHost = host as ITreeHost;
           const parser = new PGNParser(treeHost.source);
           treeHost.parser = parser;
@@ -58,14 +75,16 @@ const SourceModule = {
           treeHost.root = parser.getRoot();
           treeHost.nodeMap = parser.getMap();
           treeHost.tags = parser.getTags();
-          treeHost.currentNode = treeHost.nodeMap.get('node-root')!;
+          treeHost.currentNode = treeHost.nodeMap.get("node-root")!;
           treeHost.fen = treeHost.currentNode.fen;
-          treeHost.currentTurn = treeHost.currentNode.move?.color === 'b' ? 'white' : 'black';
-          eventBus.emit('updateMainPath');
+          treeHost.currentTurn =
+            treeHost.currentNode.move?.color === "b" ? "white" : "black";
+          eventBus.emit("updateMainPath");
 
           // 根据 autoJump 设置决定初始节点位置
           const shouldJump =
-            host.settings.autoJump === 'always' || (host.settings.autoJump === 'auto' && !treeHost.haveFEN);
+            host.settings.autoJump === "always" ||
+            (host.settings.autoJump === "auto" && !treeHost.haveFEN);
           if (shouldJump && treeHost.currentPath.length > 0) {
             treeHost.currentNode = treeHost.nodeMap.get(
               treeHost.currentPath[treeHost.currentPath.length - 1],
@@ -74,7 +93,7 @@ const SourceModule = {
           }
           break;
         }
-        case 'list': {
+        case "list": {
           const listHost = host as IListHost;
 
           // Prepare source and use PGNParser to build tree
@@ -94,10 +113,14 @@ const SourceModule = {
 
           // 根据 autoJump 设置决定初始步数和棋盘局面
           const shouldJump =
-            host.settings.autoJump === 'always' || (host.settings.autoJump === 'auto' && !listHost.haveFEN);
+            host.settings.autoJump === "always" ||
+            (host.settings.autoJump === "auto" && !listHost.haveFEN);
           if (shouldJump) {
             listHost.currentStep = mainLine.length;
-            listHost.fen = mainLine.length > 0 ? mainLine[mainLine.length - 1].fen : parser.getRoot().fen;
+            listHost.fen =
+              mainLine.length > 0
+                ? mainLine[mainLine.length - 1].fen
+                : parser.getRoot().fen;
           } else {
             listHost.currentStep = 0;
             listHost.fen = parser.getRoot().fen;
@@ -105,24 +128,24 @@ const SourceModule = {
           break;
         }
 
-        case 'fen': {
+        case "fen": {
           host.fen = extractFEN(host.source);
           break;
         }
       }
     });
 
-    eventBus.on('full', () => {
+    eventBus.on("full", () => {
       host.fen = DEFAULT_FEN;
     });
   },
 };
 
-registerGenFENModule('source', SourceModule);
-registerListModule('source', SourceModule);
-registerTreeModule('source', SourceModule);
+registerGenFENModule("source", SourceModule);
+registerListModule("source", SourceModule);
+registerTreeModule("source", SourceModule);
 
 /** Read turn from fen string */
-function getTurnFromFen(fen: string): 'white' | 'black' {
-  return fen.split(' ')[1] === 'b' ? 'black' : 'white';
+function getTurnFromFen(fen: string): "white" | "black" {
+  return fen.split(" ")[1] === "b" ? "black" : "white";
 }

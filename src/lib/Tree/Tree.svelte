@@ -411,11 +411,12 @@
     tick().then(() => {
       if (textareaEl) adjustTextareaHeight();
       panToNodeIfNeeded(node);
+      return undefined;
     });
   });
 
   $effect(() => {
-    // oxlint-disable-next-line no-unused-expressions
+    // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
     nodeMap.size;
     updateTreeLayout();
   });
@@ -460,7 +461,9 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <g
-              transform="translate({node.x! * spacingX + (isLeft ? -nodeWidth / 2 : nodeWidth / 2)} {node.y! * spacingY})"
+              transform="translate({node.x! * spacingX +
+                (isLeft ? -nodeWidth / 2 : nodeWidth / 2)} {node.y! *
+                spacingY})"
               style="cursor: pointer"
               onclick={(e) => {
                 e.stopPropagation();
@@ -527,7 +530,10 @@
                     : "green"}
                 stroke="var(--chess-board-line)"
               />
-              <g transform="translate(-6, -6)" color={node.side === "white" ? "#333" : "#fff"}>
+              <g
+                transform="translate(-6, -6)"
+                color={node.side === "white" ? "#333" : "#fff"}
+              >
                 {@html iconSvg(def.icon, 12, 1.5)}
               </g>
             {:else}
@@ -572,7 +578,9 @@
         {#each renderedNodes as node}
           {#if getRegularComments(node).length > 0}
             <g
-              transform="translate({node.x! * spacingX + 4.8} {node.y! * spacingY - 8}){node.id === currentNode?.id ? ' scale(1.15)' : ''}"
+              transform="translate({node.x! * spacingX + 4.8} {node.y! *
+                spacingY -
+                8}){node.id === currentNode?.id ? ' scale(1.15)' : ''}"
               opacity={currentPath.includes(node.id) ? 1 : 0.8}
               style="pointer-events: none"
             >
@@ -659,8 +667,7 @@
     bind:this={textareaEl}
     oninput={handleCommentsInput}
     onblur={handleCommentsBlur}
-    rows="1"
-  ></textarea>
+    rows="1"></textarea>
 </div>
 
 <style>

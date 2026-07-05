@@ -1,18 +1,21 @@
-import '../core/event-bus';
-import '../modules/BoardClick';
-import '../modules/Tree/PGNView';
-import '../modules/Tree/Actions';
-import '../modules/Tree/Speak';
+import "../core/event-bus";
+import "../modules/BoardClick";
+import "../modules/Tree/PGNView";
+import "../modules/Tree/Actions";
+import "../modules/Tree/Speak";
 
-import { TextFileView, type WorkspaceLeaf } from 'obsidian';
+import { TextFileView, type WorkspaceLeaf } from "obsidian";
 
-import { type EventBus } from '../core/event-bus';
-import { createPGNViewModuleRegistry, destroyPGNViewModuleRegistry } from '../core/module-system';
-import type ChessPlugin from '../main';
-import type { ISettings } from '../types';
+import { type EventBus } from "../core/event-bus";
+import {
+  createPGNViewModuleRegistry,
+  destroyPGNViewModuleRegistry,
+} from "../core/module-system";
+import type ChessPlugin from "../main";
+import type { ISettings } from "../types";
 
 export class PGNView extends TextFileView {
-  static readonly VIEW_TYPE = 'PGN_VIEW';
+  static readonly VIEW_TYPE = "PGN_VIEW";
   settings: ISettings;
   eventBus!: EventBus;
   constructor(
@@ -21,15 +24,15 @@ export class PGNView extends TextFileView {
   ) {
     super(leaf);
     this.settings = this.plugin.settings;
-    this.data = '';
+    this.data = "";
     createPGNViewModuleRegistry(this);
   }
 
   setViewData(data: string, clear: boolean = true): void {
     this.contentEl.empty();
     this.data = data;
-    this.eventBus.emit('setViewData');
-    this.eventBus.emit('createUI');
+    this.eventBus.emit("setViewData");
+    this.eventBus.emit("createUI");
   }
 
   saveFile() {
@@ -45,10 +48,10 @@ export class PGNView extends TextFileView {
   }
 
   refresh() {
-    this.eventBus.emit('updateUI');
+    this.eventBus.emit("updateUI");
   }
   protected async onClose(): Promise<void> {
-    this.eventBus.emit('unload');
+    this.eventBus.emit("unload");
     this.plugin.instances.delete(this);
     return super.onClose();
   }
@@ -64,11 +67,11 @@ export class PGNView extends TextFileView {
     if (this.file) {
       return this.file.basename;
     }
-    return 'Pgn view';
+    return "Pgn view";
   }
 
   getIcon() {
-    return 'chess-knight';
+    return "chess-knight";
   }
 
   clear(): void {

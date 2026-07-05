@@ -77,8 +77,8 @@
     promotingMove = null;
   }
 
-  function cancelPromotion() {
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function cancelPromotion() {}
   let turnColor: cg.Color = $derived(
     fen.split(" ")[1] === "b" ? "black" : "white",
   );
@@ -125,8 +125,7 @@
   onMount(async () => {
     const events: Config["events"] = freeMode
       ? {
-          change: () => {
-          },
+          change: () => {},
           select: (key) => {
             eventBus.emit("click", key);
           },
@@ -134,7 +133,10 @@
       : {
           move: (orig, dest) => {
             api?.cancelMove();
-            eventBus.emit("trymove", { from: orig as Square, to: dest as Square });
+            eventBus.emit("trymove", {
+              from: orig as Square,
+              to: dest as Square,
+            });
           },
         };
 
@@ -187,11 +189,14 @@
     }
     api = Chessground(boardElement, config);
 
-     eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>("promote", (payload) => {
-       if (!payload) return;
-       promotingMove = { from: payload.from, to: payload.to };
-       promotingColor = payload.color;
-     });
+    eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>(
+      "promote",
+      (payload) => {
+        if (!payload) return;
+        promotingMove = { from: payload.from, to: payload.to };
+        promotingColor = payload.color;
+      },
+    );
 
     layoutChangeHandler = () => {
       if (api && boardElement.offsetWidth) {
@@ -218,8 +223,8 @@
   });
 
   $effect(() => {
-     if (!api || promotingMove) return;
-     if (freeMode) {
+    if (!api || promotingMove) return;
+    if (freeMode) {
       api.set({ fen, turnColor, check: _check });
     } else {
       api.set({

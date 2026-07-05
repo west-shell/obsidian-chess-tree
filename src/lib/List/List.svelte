@@ -66,7 +66,9 @@
               class:active={currentStep === i + 2}
               onclick={() => eventBus.emit("clickstep", i + 2)}
             >
-              {settings.showMovelistText ? (moves[i + 1].move?.san ?? "...") : "B"}
+              {settings.showMovelistText
+                ? (moves[i + 1].move?.san ?? "...")
+                : "B"}
             </span>
           {/if}
         </li>

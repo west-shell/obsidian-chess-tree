@@ -1,17 +1,17 @@
-import { mount, unmount } from 'svelte';
+import { mount, unmount } from "svelte";
 
-import type { Square } from '../../chess';
-import { registerListModule } from '../../core/module-system';
-import Chess from '../../lib/List/Chess.svelte';
-import type { IListHost } from '../../types';
+import type { Square } from "../../chess";
+import { registerListModule } from "../../core/module-system";
+import Chess from "../../lib/List/Chess.svelte";
+import type { IListHost } from "../../types";
 
 const BoardModule = {
   init(host: IListHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on('creatUI', () => {
+    eventBus.on("creatUI", () => {
       host.modified = false;
-      const Container = host.containerEl.createEl('div');
+      const Container = host.containerEl.createDiv();
       host.Chess = mount(Chess, {
         target: Container,
         props: {
@@ -30,11 +30,11 @@ const BoardModule = {
       });
     });
 
-    eventBus.on('ready', () => {
+    eventBus.on("ready", () => {
       // autoJump 逻辑已移至 Source.ts 加载阶段，无需再跳转
     });
 
-    eventBus.on('updateUI', () => {
+    eventBus.on("updateUI", () => {
       const currentMoves = host.modified ? host.history : host.PGN;
       const lastNode = currentMoves[host.currentStep - 1] ?? null;
       const lastMove: [Square, Square] | null = lastNode?.move
@@ -42,9 +42,9 @@ const BoardModule = {
         : null;
       const checkColor =
         lastNode?.move && /\+|#/.test(lastNode.move.san)
-          ? lastNode.move.color === 'w'
-            ? 'black'
-            : 'white'
+          ? lastNode.move.color === "w"
+            ? "black"
+            : "white"
           : null;
       host.Chess?.$set?.({
         settings: { ...host.settings },
@@ -59,10 +59,10 @@ const BoardModule = {
       });
     });
 
-    eventBus.on('unload', () => {
+    eventBus.on("unload", () => {
       if (host.Chess) void unmount(host.Chess);
     });
   },
 };
 
-registerListModule('board', BoardModule);
+registerListModule("board", BoardModule);

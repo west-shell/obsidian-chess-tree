@@ -1,16 +1,16 @@
-import { mount, unmount } from 'svelte';
+import { mount, unmount } from "svelte";
 
-import { registerGenFENModule } from '../../core/module-system';
-import GenFEN from '../../lib/GenFEN/GenFEN.svelte';
-import type { IGenFENHost } from '../../types';
+import { registerGenFENModule } from "../../core/module-system";
+import GenFEN from "../../lib/GenFEN/GenFEN.svelte";
+import type { IGenFENHost } from "../../types";
 
 const BoardModule = {
   init(host: IGenFENHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on('creatUI', () => {
+    eventBus.on("creatUI", () => {
       host.modified = false;
-      const Container = host.containerEl.createEl('div');
+      const Container = host.containerEl.createDiv();
       host.Chess = mount(GenFEN, {
         target: Container,
         props: {
@@ -22,7 +22,7 @@ const BoardModule = {
       });
     });
 
-    eventBus.on('updateUI', () => {
+    eventBus.on("updateUI", () => {
       host.Chess?.$set?.({
         selectedPiece: host.selectedPiece,
         settings: { ...host.settings },
@@ -30,10 +30,10 @@ const BoardModule = {
       });
     });
 
-    eventBus.on('unload', () => {
+    eventBus.on("unload", () => {
       if (host.Chess) void unmount(host.Chess);
     });
   },
 };
 
-registerGenFENModule('board', BoardModule);
+registerGenFENModule("board", BoardModule);

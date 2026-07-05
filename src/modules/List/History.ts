@@ -1,17 +1,17 @@
-import type { Move } from '../../chess';
-import { registerListModule } from '../../core/module-system';
-import type { ChessNode, IListHost } from '../../types';
+import type { Move } from "../../chess";
+import { registerListModule } from "../../core/module-system";
+import type { ChessNode, IListHost } from "../../types";
 
 const HistoryModule = {
   init(host: IListHost) {
     const eventBus = host.eventBus;
 
-    eventBus.on('load', () => {
+    eventBus.on("load", () => {
       host.modified = false;
     });
 
-    eventBus.on('edithistory', (payload?: unknown) => {
-      if (!payload || typeof payload !== 'object') return;
+    eventBus.on("edithistory", (payload?: unknown) => {
+      if (!payload || typeof payload !== "object") return;
       editHistory(host, payload as Move);
     });
   },
@@ -21,7 +21,8 @@ let nodeIdCounter = 1; // Simple counter for generating node IDs
 
 function editHistory(host: IListHost, move: Move) {
   const { currentStep } = host;
-  const parentNode = currentStep > 0 ? host.history[currentStep - 1] : host.root;
+  const parentNode =
+    currentStep > 0 ? host.history[currentStep - 1] : host.root;
 
   // Check if parent already has this move as a child
   for (const child of parentNode.children) {
@@ -36,7 +37,7 @@ function editHistory(host: IListHost, move: Move) {
   }
 
   // Create new ChessNode
-  const side = move.color === 'w' ? 'white' : 'black';
+  const side = move.color === "w" ? "white" : "black";
   const newNode: ChessNode = {
     id: `node-${nodeIdCounter++}`,
     fen: move.after,
@@ -54,4 +55,4 @@ function editHistory(host: IListHost, move: Move) {
   host.history = [...host.history.slice(0, currentStep), newNode];
 }
 
-registerListModule('history', HistoryModule);
+registerListModule("history", HistoryModule);
