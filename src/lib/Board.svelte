@@ -306,18 +306,75 @@
 </div>
 
 <style>
-  .cg-wrap {
+  :global(.cg-wrap) {
+    container-type: inline-size;
     flex-shrink: 0;
     aspect-ratio: 1;
     border-radius: 2px;
   }
 
-  .cg-wrap.turn-white {
+  :global(.cg-wrap.turn-white) {
     box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.7);
   }
 
-  .cg-wrap.turn-black {
+  :global(.cg-wrap.turn-black) {
     box-shadow: 0 0 12px 3px rgba(0, 0, 0, 0.7);
+  }
+
+  :global(cg-container) {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+  }
+
+  :global(.cg-wrap coords) {
+    display: var(--chess-coords-display, flex);
+    font-size: clamp(7px, 2.5cqw, 14px);
+  }
+
+  :global(.cg-wrap coords.ranks) {
+    left: 0;
+    top: 0;
+    width: 12.5%;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  :global(.cg-wrap coords.files) {
+    bottom: 0;
+    left: 0;
+    height: 12.5%;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+
+  :global(.cg-wrap coords coord) {
+    line-height: 1;
+  }
+
+  :global(.cg-wrap coords.ranks coord) {
+    transform: none;
+    padding-left: 2%;
+    padding-top: 2%;
+  }
+
+  :global(.cg-wrap coords.files coord) {
+    padding-right: 0%;
+    padding-bottom: 0%;
+    text-align: right;
+  }
+
+  :global(cg-board) {
+    background-color: var(--chess-board-bg, #f0d9b5);
+  }
+
+  :global(cg-board square.oc.move-dest) {
+    background: radial-gradient(
+      transparent 0%,
+      transparent 75%,
+      rgba(20, 85, 0, 0.3) 75%
+    );
   }
 
   .board-wrapper {
