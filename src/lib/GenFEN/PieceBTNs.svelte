@@ -1,18 +1,15 @@
 <script lang="ts">
   import { setIcon } from "obsidian";
   import type { Piece } from "../../chess";
-  import type { ISettings } from "../../types";
   import type { EventBus } from "../../core/event-bus";
 
   interface Props {
-    settings: ISettings;
     fen: string;
     eventBus: EventBus;
     position: string;
     selectedPiece: Piece | null;
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let { settings, fen, eventBus, position, selectedPiece }: Props = $props();
+  let { fen, eventBus, position, selectedPiece }: Props = $props();
 
   const PIECES: {
     key: string;

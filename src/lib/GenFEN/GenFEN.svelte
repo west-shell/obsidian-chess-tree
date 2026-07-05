@@ -36,7 +36,7 @@
 <div class="chess-container {position}">
   <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
   <div class="editor-sidebar {position}">
-    <PieceBTNs {settings} {fen} {eventBus} {position} {selectedPiece} />
+    <PieceBTNs {fen} {eventBus} {position} {selectedPiece} />
     <Toolbar {eventBus} {position} {fen} />
   </div>
 </div>
