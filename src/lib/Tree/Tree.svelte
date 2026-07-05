@@ -429,7 +429,7 @@
     <svg bind:this={svgEl} width="100%" height="100%" class="tree-svg">
       <g transform={TRANSFORM_SAFE}>
         {#each renderedNodes as node (node.id)}
-          {#each node.children as child, idx (node.id + '-' + idx)}
+          {#each node.children as child, idx (node.id + "-" + idx)}
             {#if !(foldedNodes.has(node.id) && idx > 0)}
               <path
                 d={`
@@ -632,12 +632,18 @@
           eventBus.emit("btn-click", { name: "back", payload: null })}
       ></button>
       <div
+        role="slider"
+        tabindex={-1}
+        aria-valuenow={sliderPercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
         bind:this={sliderInnerEl}
         class="slider-inner"
         onmousedown={handleSliderAreaMouseDown}
       >
         <span class="slider-thumb" style="top: {sliderPercent}%"></span>
         {#if sliderText}
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
             class="slider-label"
             style="top: {sliderPercent}%"
