@@ -328,12 +328,12 @@
     margin: auto;
   }
 
-  :global(.cg-wrap coords) {
+  .cg-wrap :global(coords) {
     display: var(--chess-coords-display, flex);
     font-size: clamp(7px, 2.5cqw, 14px);
   }
 
-  :global(.cg-wrap coords.ranks) {
+  .cg-wrap :global(coords.ranks) {
     left: 0;
     top: 0;
     width: 12.5%;
@@ -341,7 +341,7 @@
     justify-content: flex-start;
   }
 
-  :global(.cg-wrap coords.files) {
+  .cg-wrap :global(coords.files) {
     bottom: 0;
     left: 0;
     height: 12.5%;
@@ -349,27 +349,27 @@
     justify-content: flex-end;
   }
 
-  :global(.cg-wrap coords coord) {
+  .cg-wrap :global(coords coord) {
     line-height: 1;
   }
 
-  :global(.cg-wrap coords.ranks coord) {
+  .cg-wrap :global(coords.ranks coord) {
     transform: none;
     padding-left: 2%;
     padding-top: 2%;
   }
 
-  :global(.cg-wrap coords.files coord) {
+  .cg-wrap :global(coords.files coord) {
     padding-right: 0%;
     padding-bottom: 0%;
     text-align: right;
   }
 
-  :global(cg-board) {
+  .cg-wrap :global(cg-board) {
     background-color: var(--chess-board-bg, #f0d9b5);
   }
 
-  :global(cg-board square.oc.move-dest) {
+  .cg-wrap :global(cg-board square.oc.move-dest) {
     background: radial-gradient(
       transparent 0%,
       transparent 75%,
