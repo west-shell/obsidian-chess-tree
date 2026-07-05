@@ -1,8 +1,7 @@
-import { Chess, type Move, type Square } from '../chess';
+import { Chess,type Square } from '../chess';
 import { registerListModule, registerPGNViewModule, registerTreeModule } from '../core/module-system';
 import type { IListHost, IPGNViewHost, ITreeHost } from '../types';
 
-type PromotePayload = { from: Square; to: Square; color: 'w' | 'b' };
 type TryMovePayload = { from: Square; to: Square };
 
 function isPromotionRank(to: string, color: 'w' | 'b'): boolean {
@@ -16,11 +15,11 @@ function tryMove(chess: Chess, host: IListHost | ITreeHost | IPGNViewHost, from:
     const piece = chess.get(from);
     const color = piece?.color;
     if (piece?.type === 'p' && color && isPromotionRank(to, color)) {
-      const moves = chess.moves({ square: from, verbose: true }) as Move[];
+      const moves = chess.moves({ square: from, verbose: true });
       const promoMoves = moves.filter(m => m.to === to && m.promotion);
       if (promoMoves.length > 0) {
         host.markedPos = null;
-        eventBus.emit('promote', { from, to, color } as PromotePayload);
+        eventBus.emit('promote', { from, to, color });
         return;
       }
     }

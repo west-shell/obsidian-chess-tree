@@ -254,7 +254,7 @@ async function writeBlock(host: IListHost, newContent: string) {
   const view = host.plugin.app.workspace.getActiveViewOfType(MarkdownView);
   if (!view?.file) return;
 
-  host.plugin.app.vault.process(view.file, fileContent => {
+  void host.plugin.app.vault.process(view.file, fileContent => {
     const section = host.ctx.getSectionInfo(host.containerEl);
     if (!section) return fileContent;
     const { lineStart, lineEnd } = section;

@@ -17,9 +17,9 @@ const BoardModule = {
         props: {
           nodeMap: host.nodeMap,
           settings: host.settings,
-          fen: host.currentNode!.fen,
+          fen: host.currentNode.fen,
           eventBus: host.eventBus,
-          currentNode: host.currentNode!,
+          currentNode: host.currentNode,
           currentPath: host.currentPath,
           options: host.options || {},
         },
@@ -31,7 +31,7 @@ const BoardModule = {
     });
 
     eventBus.on('updateUI', () => {
-      host.Chess?.$set({
+      host.Chess?.$set?.({
         settings: { ...host.settings },
         nodeMap: new Map(host.nodeMap),
         fen: host.currentNode?.fen ?? '',
@@ -51,7 +51,7 @@ const BoardModule = {
       const pgn = host.stringifyPGN(host.root);
       const newContent = [host.tags?.trim(), pgn].filter(Boolean).join('\n');
 
-      host.plugin.app.vault.process(view.file, fileContent => {
+      void host.plugin.app.vault.process(view.file, fileContent => {
         const section = host.ctx.getSectionInfo(host.containerEl);
         if (!section) return fileContent;
 
@@ -69,7 +69,7 @@ const BoardModule = {
     });
 
     eventBus.on('unload', () => {
-      unmount(host.Chess);
+      if (host.Chess) void unmount(host.Chess);
     });
   },
 };

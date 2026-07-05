@@ -25,7 +25,7 @@ const TreeViewModule = {
 
     eventBus.on('createUI', () => {
       if (host.Chess) {
-        unmount(host.Chess);
+        if (host.Chess) void unmount(host.Chess);
         host.Chess = null;
       }
       const Container = host.contentEl;
@@ -44,7 +44,7 @@ const TreeViewModule = {
     });
 
     eventBus.on('updateUI', () => {
-      host.Chess?.$set({
+      host.Chess?.$set?.({
         settings: { ...host.settings },
         nodeMap: new Map(host.nodeMap),
         fen: host.currentNode?.fen ?? '',
@@ -80,7 +80,7 @@ const TreeViewModule = {
     });
 
     eventBus.on('unload', () => {
-      unmount(host.Chess);
+      if (host.Chess) void unmount(host.Chess);
     });
   },
 };

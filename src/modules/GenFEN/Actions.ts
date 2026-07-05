@@ -16,6 +16,8 @@ function setFullStartPosition(host: IGenFENHost): void {
   host.fen = DEFAULT_FEN;
 }
 
+type BtnAction = string | { action: 'setPreset'; fen?: string } | { action: 'setFen'; fen?: string };
+
 const ActionsModule = {
   init(host: IGenFENHost) {
     const eventBus = host.eventBus;
@@ -35,7 +37,7 @@ const ActionsModule = {
       onSaveBTNClick(host, meta);
     });
 
-    eventBus.on('btn-click', (action: any) => {
+    eventBus.on<BtnAction>('btn-click', action => {
       if (!action) return;
 
       if (typeof action === 'string') {
@@ -95,7 +97,7 @@ async function onSaveBTNClick(
   const boardPart = host.fen.split(' ')[0];
   const fullFen = `${boardPart} ${meta.turn} ${meta.castling} ${meta.enPassant} 0 1`;
 
-  host.plugin.app.vault.process(file, fileContent => {
+  void host.plugin.app.vault.process(file, fileContent => {
     const section = host.ctx.getSectionInfo(host.containerEl);
     if (!section) return fileContent;
     const { lineStart, lineEnd } = section;

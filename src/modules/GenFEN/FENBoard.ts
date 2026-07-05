@@ -23,7 +23,7 @@ const BoardModule = {
     });
 
     eventBus.on('updateUI', () => {
-      host.Chess?.$set({
+      host.Chess?.$set?.({
         selectedPiece: host.selectedPiece,
         settings: { ...host.settings },
         fen: host.fen,
@@ -31,7 +31,7 @@ const BoardModule = {
     });
 
     eventBus.on('unload', () => {
-      unmount(host.Chess);
+      if (host.Chess) void unmount(host.Chess);
     });
   },
 };

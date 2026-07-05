@@ -68,12 +68,15 @@ export interface IHost {
   source: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type SvelteComponent = { $set?(props: Partial<Record<string, any>>): void };
+
 export interface IGenFENHost extends IHost {
   fen: string;
   modified: boolean;
   selectedPiece: Piece  | null;
   markedPos: Square | null;
-  Chess: any;
+  Chess: SvelteComponent | null;
 }
 
 export interface IListHost extends IGenFENHost {
@@ -87,7 +90,7 @@ export interface IListHost extends IGenFENHost {
   modifiedStep: number | null;
   haveFEN: boolean;
   options: IOptions;
-  Chess: any;
+  Chess: SvelteComponent | null;
   nodeMap: NodeMap;
   root: ChessNode;
   stringifyPGN?: (root: ChessNode) => string;

@@ -102,7 +102,7 @@ export class ChessSettingTab extends PluginSettingTab {
       .addDropdown(dropdown => {
         dropdown.addOptions(Object.fromEntries(THEME_KEYS.map(k => [k, t(`theme.${k}`)])));
         dropdown.setValue(settings.theme).onChange(theme => {
-          settings.theme = theme as ISettings['theme'];
+          settings.theme = theme;
           this.plugin.refresh();
         });
       });
@@ -386,7 +386,7 @@ export class ChessSettingTab extends PluginSettingTab {
     containerEl.parentElement?.classList.add('ws-setting-tab');
   }
 
-  async hide() {
+  hide(): void {
     this.plugin.refresh();
     void this.plugin.saveSettings();
   }

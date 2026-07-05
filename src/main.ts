@@ -46,7 +46,7 @@ export default class ChessPlugin extends Plugin {
 
         try {
           const newFile = await this.app.vault.create(fileName, fileContent);
-          this.app.workspace.getLeaf(true).openFile(newFile);
+          void this.app.workspace.getLeaf(true).openFile(newFile);
         } catch (error) {
           console.error(t('pgn.error'), error);
         }
@@ -132,10 +132,9 @@ export default class ChessPlugin extends Plugin {
 
   async loadSettings() {
     const savedData = await this.loadData();
-    this.settings = {
-      ...DEFAULT_SETTINGS,
-      ...savedData,
-    };
+    if (savedData && typeof savedData === 'object') {
+      this.settings = { ...DEFAULT_SETTINGS, ...(savedData as Partial<ISettings>) };
+    }
   }
 
   async saveSettings() {

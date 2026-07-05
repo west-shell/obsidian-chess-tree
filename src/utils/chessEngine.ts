@@ -41,7 +41,7 @@ export function makeMove(fen: string, san: string): Move | null {
 export function getLegalMoves(fen: string): Move[] {
   try {
     const chess = loadGame(fen);
-    return chess.moves({ verbose: true }) as Move[];
+    return chess.moves({ verbose: true });
   } catch {
     return [];
   }

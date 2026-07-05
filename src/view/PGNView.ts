@@ -34,7 +34,7 @@ export class PGNView extends TextFileView {
 
   saveFile() {
     if (this.file) {
-      this.app.vault.modify(this.file, this.data);
+      void this.app.vault.modify(this.file, this.data);
     }
   }
 
@@ -62,7 +62,7 @@ export class PGNView extends TextFileView {
 
   getDisplayText() {
     if (this.file) {
-      return this.file!.basename;
+      return this.file.basename;
     }
     return 'Pgn view';
   }

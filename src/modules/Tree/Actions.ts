@@ -40,10 +40,11 @@ const ActionsModule = {
       // 合并路径
       host.currentPath = [...ancestors, ...descendants];
     });
-    eventBus.on('runmove', (move: Move) => {
+    eventBus.on<Move>('runmove', move => {
+      if (!move) return;
       const { from, to } = move;
       const currentNode = host.currentNode;
-      for (let node of currentNode!.children) {
+      for (let node of currentNode.children) {
         if (node.move && node.move.from === from && node.move.to === to && node.move.promotion === move.promotion) {
           host.currentNode = node;
           host.fen = node.fen;
@@ -64,7 +65,7 @@ const ActionsModule = {
         comments: [],
       };
       host.nodeMap.set(newNode.id, newNode);
-      host.currentNode!.children.push(newNode);
+      host.currentNode.children.push(newNode);
       host.currentNode = newNode;
       host.fen = move.after;
       host.currentStep++;
@@ -73,7 +74,8 @@ const ActionsModule = {
       eventBus.emit('modified', null);
     });
 
-    eventBus.on('node-click', (id: string) => {
+    eventBus.on<string>('node-click', id => {
+      if (!id) return;
       host.markedPos = null;
       host.currentNode = host.nodeMap.get(id)!;
       host.fen = host.currentNode.fen;
@@ -81,7 +83,8 @@ const ActionsModule = {
       host.eventBus.emit('updateUI');
     });
 
-    eventBus.on('slider-navigate', (id: string) => {
+    eventBus.on<string>('slider-navigate', id => {
+      if (!id) return;
       const node = host.nodeMap.get(id);
       if (!node) return;
       host.markedPos = null;
@@ -90,7 +93,8 @@ const ActionsModule = {
       host.eventBus.emit('updateUI');
     });
 
-    eventBus.on('btn-click', async (payload: { name: string; payload: unknown }) => {
+    eventBus.on<{ name: string; payload: unknown }>('btn-click', async payload => {
+      if (!payload) return;
       host.markedPos = null;
       const { name } = payload;
       const data = payload.payload as string;
