@@ -117,7 +117,7 @@
 </script>
 
 <div class="toolbar-container">
-  {#each buttons as { title, icon, event }}
+  {#each buttons as { title, icon, event } (event)}
     <button
       class="toolbar-btn"
       aria-label={title}

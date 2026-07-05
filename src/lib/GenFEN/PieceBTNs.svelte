@@ -170,7 +170,7 @@
 </script>
 
 <div class="piece-btn-container {position}">
-  {#each PIECES as { key, color, icon, piece }}
+  {#each PIECES as { key, color, icon, piece } (key)}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
       class="piece-btn {position} {color}"

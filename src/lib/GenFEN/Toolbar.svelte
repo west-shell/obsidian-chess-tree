@@ -276,7 +276,7 @@
         onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
       >
         <option value="-">{t("genfen.enpassant_off", _lv)}</option>
-        {#each enPassantFiles as f}
+        {#each enPassantFiles as f (f)}
           <option value={f}>{f}{_turn === "w" ? "6" : "3"}</option>
         {/each}
       </select>

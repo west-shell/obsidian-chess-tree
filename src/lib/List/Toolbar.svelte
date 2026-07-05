@@ -14,13 +14,12 @@
 
   let { settings, eventBus, modified, PGN, isprotected }: Props = $props();
 
-  let buttonClass: string = $state("");
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
-  $effect(() => {
-    buttonClass = modified ? "unsaved" : PGN.length > 0 ? "saved" : "empty";
-  });
+  let buttonClass: string = $derived(
+    modified ? "unsaved" : PGN.length > 0 ? "saved" : "empty",
+  );
 
   let buttons = $derived([
     { title: t("toolbar.reset", _lv), icon: "refresh-cw", event: "reset" },
@@ -61,7 +60,7 @@
 </script>
 
 <div class="toolbar-container {settings.position}">
-  {#each buttons as { title, icon, event }}
+  {#each buttons as { title, icon, event } (event)}
     <button
       class="toolbar-btn"
       aria-label={title}

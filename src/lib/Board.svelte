@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+  import { SvelteMap } from "svelte/reactivity";
   import {
     type Api,
     type cg,
@@ -93,7 +94,7 @@
   function computeDests(fen: string): Map<cg.Key, cg.Key[]> {
     try {
       chess.load(fen);
-      const dests = new Map<cg.Key, cg.Key[]>();
+      const dests = new SvelteMap<cg.Key, cg.Key[]>();
       const moves = chess.moves({ verbose: true }) as Move[];
       for (const move of moves) {
         const orig = move.from;
@@ -105,7 +106,7 @@
       }
       return dests;
     } catch {
-      return new Map();
+      return new SvelteMap();
     }
   }
 
@@ -293,8 +294,9 @@
         class="promotion-choices {promotingColor}"
         onclick={(e) => e.stopPropagation()}
       >
-        {#each PROMOTION_PIECES as { type, icon }}
+        {#each PROMOTION_PIECES as { type, icon } (type)}
           <button class="promotion-btn" onclick={() => completePromotion(type)}>
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
             {@html iconSvg(icon, promoIconSize, 1.2)}
           </button>
         {/each}

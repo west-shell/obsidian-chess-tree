@@ -32,8 +32,6 @@
 <div class="move-container {settings.position}">
   <ul class="move-list {settings.position}" bind:this={ulRef}>
     <li class="start" bind:this={itemRefs[0]}>
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span class="roundnum">0</span>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -45,7 +43,7 @@
         {settings.showMovelistText ? "= Start =" : "Start"}
       </span>
     </li>
-    {#each moves as move, i}
+    {#each moves as move, i (i)}
       {#if i % 2 === 0}
         <li class="round" bind:this={itemRefs[i / 2 + 1]}>
           <span class="roundnum">{i / 2 + 1}</span>

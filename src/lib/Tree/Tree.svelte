@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
+  import { SvelteSet } from "svelte/reactivity";
   import type { EventBus } from "../../core/event-bus";
   import { type ChessNode, type NodeMap } from "../../types";
   import { onLangChange, t } from "../../i18n";
@@ -26,7 +27,8 @@
   let textareaEl: HTMLTextAreaElement | undefined = $state();
   let svgEl: SVGSVGElement | undefined = $state();
   let renderedNodes: ChessNode[] = $state([]);
-  let foldedNodes = $state(new Set<string>());
+  // eslint-disable-next-line svelte/no-unnecessary-state-wrap
+  let foldedNodes = $state(new SvelteSet<string>());
 
   // ---- D3 Zoom ----
   let zoomTransform = $state(d3.zoomIdentity);
@@ -196,7 +198,7 @@
     } else {
       foldedNodes.add(node.id);
     }
-    foldedNodes = new Set(foldedNodes);
+    foldedNodes = new SvelteSet(foldedNodes);
     updateTreeLayout();
   }
 
@@ -426,8 +428,8 @@
   <div class="svg-wrapper">
     <svg bind:this={svgEl} width="100%" height="100%" class="tree-svg">
       <g transform={TRANSFORM_SAFE}>
-        {#each renderedNodes as node}
-          {#each node.children as child, idx}
+        {#each renderedNodes as node (node.id)}
+          {#each node.children as child, idx (node.id + '-' + idx)}
             {#if !(foldedNodes.has(node.id) && idx > 0)}
               <path
                 d={`
@@ -455,7 +457,7 @@
           {/each}
         {/each}
 
-        {#each renderedNodes as node}
+        {#each renderedNodes as node (node.id)}
           {#if node.children.length > 1}
             {@const isLeft = (node.y ?? 0) % 2 === 0}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -497,7 +499,7 @@
           {/if}
         {/each}
 
-        {#each renderedNodes as node}
+        {#each renderedNodes as node (node.id)}
           {@const primaryAnnotation = getPrimaryAnnotation(node)}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -534,6 +536,7 @@
                 transform="translate(-6, -6)"
                 color={node.side === "white" ? "#333" : "#fff"}
               >
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html iconSvg(def.icon, 12, 1.5)}
               </g>
             {:else}
@@ -553,6 +556,7 @@
               />
               {#if nodeMode === 0 && !node.move}
                 <g transform="translate(-6, -6)" color="#fff">
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                   {@html iconSvg("house", 12, 1.5)}
                 </g>
               {:else if nodeMode === 0 && getPieceIcon(node)}
@@ -560,6 +564,7 @@
                   transform="translate(-6, -6)"
                   color={node.side === "white" ? "#333" : "#fff"}
                 >
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                   {@html iconSvg(getPieceIcon(node)!, 12, 1.5)}
                 </g>
               {:else}
@@ -575,7 +580,7 @@
           </g>
         {/each}
 
-        {#each renderedNodes as node}
+        {#each renderedNodes as node (node.id)}
           {#if getRegularComments(node).length > 0}
             <g
               transform="translate({node.x! * spacingX + 4.8} {node.y! *
@@ -584,6 +589,7 @@
               opacity={currentPath.includes(node.id) ? 1 : 0.8}
               style="pointer-events: none"
             >
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -->
               {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
             </g>
           {/if}
@@ -592,7 +598,7 @@
     </svg>
 
     <div class="toolbar">
-      {#each zoomBTN as { title, icon, event }}
+      {#each zoomBTN as { title, icon, event } (event)}
         <button
           class="toolbar-btn"
           {title}
@@ -625,8 +631,6 @@
         onclick={() =>
           eventBus.emit("btn-click", { name: "back", payload: null })}
       ></button>
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
         bind:this={sliderInnerEl}
         class="slider-inner"
@@ -634,8 +638,6 @@
       >
         <span class="slider-thumb" style="top: {sliderPercent}%"></span>
         {#if sliderText}
-          <!-- svelte-ignore a11y_click_events_have_key_events -->
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
             class="slider-label"
             style="top: {sliderPercent}%"
