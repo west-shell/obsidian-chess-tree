@@ -2,6 +2,7 @@
 
 ![Version](https://img.shields.io/github/v/release/west-shell/obsidian-chess-tree)
 [![License](https://img.shields.io/github/license/west-shell/obsidian-chess-tree)](./LICENSE)
+[![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
 
 [中文](./README.zh.md) | [English](./README.md)
 
@@ -11,7 +12,7 @@ Likes, coins, and feedback are greatly appreciated.
 
 ## Overview
 
-Obsidian plugin providing chess rendering and exploration inside notes. Supports PGN file viewing, three code block types (`chess`, `fen`, `tree`), full chess rules via [chess.js](https://github.com/jhlywa/chess.js), interactive board via [chessground](https://github.com/lichess-org/chessground), and variation tree visualization.
+Obsidian plugin for chess rendering and exploration inside notes. Supports PGN file viewing, three code block types (`chess`, `fen`, `tree`), full chess rules via [chess.js](https://github.com/jhlywa/chess.js), interactive board via [chessground](https://github.com/lichess-org/chessground), and variation tree visualization.
 
 ## PGN File Support
 
@@ -23,6 +24,7 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 - **Mode Toggle**: Switch between icon mode and text mode in branch diagram
 - **Quick Create**: New PGN files from the ribbon button
 - **Custom File Types**: Set specific file types as PGN files
+- **Context Menu**: Right-click PGN files to switch between PGN view and Markdown view
 
 > **Note**: `.pgn` files only support single games. For multi-game PGN files, use AI to add code block markers and convert to Markdown format:
 >
@@ -38,12 +40,11 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 > ```
 > ````
 
-![PGN File](./IMAGE/Tree.png)
+![PGN File](./IMAGE/PGN.en.png)
 
 ## Code Blocks
 
-Three code block types:
-All code block names are customizable
+Three code block types — all code block names are customizable.
 
 ---
 
@@ -69,7 +70,7 @@ All code block names are customizable
 ```
 ````
 
-![FEN Editor](./IMAGE/GenFEN.png)
+![FEN Editor](./IMAGE/fen.en.png)
 
 ---
 
@@ -88,6 +89,32 @@ All code block names are customizable
 ---
 
 ## Settings
+
+### Board Appearance
+
+- **Theme**: Wood, Green, Blue, Grey, Dark, Light
+- **Cell Size**: Adjustable board cell size (15–100 px)
+- **Layout**: Toolbar position — right / bottom
+- **Coordinate Labels**: Show/hide board coordinates
+
+### Game Hints
+
+- **Last Move Highlight**: Highlight the last move on the board
+- **Legal Moves**: Show legal move destinations
+- **Turn Border**: Highlight the current player's turn
+- **Move Narration**: Optional speech synthesis for moves (desktop only)
+
+### Move List
+
+- **Show Move List**: Toggle move list visibility
+- **Show Move Text**: Toggle text notation in move list
+- **Font Size**: Adjustable move text size (10–25 px)
+- **Auto Jump**: Jump to latest position — never / always / auto
+
+### Board Margins
+
+- **Top Margin**: Adjustable top margin (0–100 px)
+- **Bottom Margin**: Adjustable bottom margin (0–100 px)
 
 ### Code Block Names
 
@@ -119,13 +146,7 @@ Enable/disable PGN file view and customize file extensions:
 - **PGN Saving**:
   - Button colors — **gray** (empty), **green** (saved), **orange** (modified)
   - Confirmation dialog before saving
-- **Customizable Settings**:
-  - Board themes: Wood, Green, Blue, Grey, Dark, Light
-  - Toolbar position: right / bottom
-  - Adjustable board size and move text size
-  - Move list display options
-  - Auto-jump to end
-  - Optional move narration (desktop only)
+- **i18n**: Supports English and Chinese UI
 - **Board Markers**: Draw arrows and highlights on the board
 - **Mobile Friendly**: Adjust board size for small screens
 
@@ -147,6 +168,13 @@ Enable/disable PGN file view and customize file extensions:
    - After making moves, the list shows your modified sequence
    - Click **Reset** to revert to before manual edits
 4. Click **Save** to overwrite the original PGN
+
+### `tree` Code Block
+
+1. Write your game inside a `tree` code block (same format as `chess`)
+2. The variation tree displays all branches graphically
+3. Click any node to navigate to that position
+4. Switch between icon mode and text mode for node labels
 
 ### Optional Parameters
 
@@ -193,4 +221,7 @@ npm run build:min    # Minified build (for release)
 ## Donation
 
 If you like this plugin, feel free to support me!
+
+[![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
+
 ![Donation](./IMAGE/打赏.png)
