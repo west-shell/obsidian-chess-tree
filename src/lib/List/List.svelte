@@ -93,31 +93,21 @@
     border-radius: var(--radius-s);
   }
 
-  /* ========== 右侧垂直布局 (right) ========== */
-  .move-list.right {
-    flex-direction: column;
-    height: calc(var(--chess-cell-size, 50px) * 8);
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-  }
-
-  .move-list.right li {
+  /* ========== 共用行样式 ========== */
+  .move-list li {
     display: flex;
     flex-wrap: nowrap;
     flex-shrink: 0;
     flex-grow: 0;
     align-items: center;
     gap: 0.5em;
-    width: 100%;
     padding: 0;
     margin: 0;
     border-bottom: none;
     white-space: nowrap;
   }
 
-  .move-list.right .roundnum {
+  .move-list .roundnum {
     display: inline-block;
     min-width: 1.5em;
     max-width: 3em;
@@ -128,8 +118,7 @@
     white-space: nowrap;
   }
 
-  /* right 布局的 move 按钮 */
-  .move-list.right span.move {
+  .move-list span.move {
     display: inline-block;
     line-height: 1.2;
     text-align: center;
@@ -143,24 +132,21 @@
     color: var(--text-normal);
   }
 
-  .move-list.right span.move.white,
-  .move-list.right span.move.black {
+  .move-list span.move.white,
+  .move-list span.move.black {
     min-width: 4em;
   }
-  .move-list.bottom span.move.white,
-  .move-list.bottom span.move.black {
-    min-height: 4em;
-  }
-  .move-list.right span.start {
+
+  .move-list span.start {
     flex: 1;
   }
 
-  .move-list.right span.move:hover {
+  .move-list span.move:hover {
     background-color: var(--background-modifier-hover);
     transform: scale(1.02);
   }
 
-  .move-list.right span.move.active {
+  .move-list span.move.active {
     background-color: var(--color-accent);
     color: var(--text-on-accent);
     box-shadow: 0 0.125em 0.375em rgba(0, 0, 0, 0.15);
@@ -168,74 +154,32 @@
     transform: scale(1.02);
   }
 
-  /* ========== 底部水平布局 (bottom) - 竖向文字 ========== */
-  .move-list.bottom {
-    width: calc(var(--chess-cell-size, 50px) * 8);
-    overflow-x: auto;
-    overflow-y: hidden;
+  /* ========== 右侧垂直布局 (right) ========== */
+  .move-list.right {
+    flex-direction: column;
+    height: calc(var(--chess-cell-size, 50px) * 8);
+    overflow-y: auto;
+    overflow-x: hidden;
     flex-wrap: nowrap;
     align-items: flex-start;
   }
 
+  .move-list.right li {
+    width: 100%;
+  }
+
+  /* ========== 底部多列布局 (bottom) ========== */
+  .move-list.bottom {
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    max-height: 11.5em;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 0 0.5em;
+  }
+
   .move-list.bottom li {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-shrink: 0;
-    flex-grow: 0;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25em;
-    padding: 0.125em 0.125em; /* 减小上下内边距 */
-    margin: 0;
-    border-bottom: none;
-    white-space: nowrap;
-    writing-mode: vertical-rl;
-    text-orientation: upright;
-  }
-
-  .move-list.bottom .roundnum {
-    writing-mode: horizontal-tb;
-    text-orientation: mixed;
-    display: inline-block;
-    text-align: center;
-    margin-bottom: 0.125em; /* 减小底部间距 */
-  }
-
-  /* bottom 布局的 move 按钮 - 竖向文字，减小内边距 */
-  .move-list.bottom span.move {
-    display: inline-block;
-    line-height: 1.2;
-    text-align: center;
-    border-radius: 0.25em; /* 稍小圆角 */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-    padding: 0.125em 0.125em; /* 减小内边距，让竖向文字更紧凑 */
-    margin: 0.0625em 0; /* 极小垂直间距 */
-    color: var(--text-normal);
-    /* font-size: 0.9em; 可选：稍微缩小字体 */
-  }
-
-  .move-list.bottom span.move.white,
-  .move-list.bottom span.move.black {
-    min-width: auto; /* 竖向排列不需要固定最小宽度 */
-  }
-
-  .move-list.bottom span.start {
-    flex: 1;
-  }
-
-  .move-list.bottom span.move:hover {
-    background-color: var(--background-modifier-hover);
-    transform: scale(1.02);
-  }
-
-  .move-list.bottom span.move.active {
-    background-color: var(--color-accent);
-    color: var(--text-on-accent);
-    box-shadow: 0 0.125em 0.375em rgba(0, 0, 0, 0.15);
-    font-weight: 500;
-    transform: scale(1.02);
+    width: fit-content;
   }
 </style>
