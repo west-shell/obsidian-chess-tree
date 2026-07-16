@@ -17,6 +17,7 @@ build/
 .vscode/
 .claude/
 .codegraph/
+.obsidian-cache/
 .idea
 .DS_Store
 *.suo
