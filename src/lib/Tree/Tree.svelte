@@ -340,9 +340,15 @@
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
+  function toggleCurrentFold() {
+    if (!currentNode || currentNode.children.length <= 1) return;
+    toggleFold(currentNode);
+  }
+
   let zoomBTN = $derived([
     { title: t("tree.zoomIn", _lv), icon: "plus", event: zoomIn },
     { title: t("tree.zoomOut", _lv), icon: "minus", event: zoomOut },
+    { title: t("tree.fold", _lv), icon: "chevrons-right-left", event: toggleCurrentFold },
     { title: t("tree.resetView", _lv), icon: "rotate-ccw", event: resetView },
   ]);
   let nodeModeTitle = $derived(t("tree.nodeMode", _lv));

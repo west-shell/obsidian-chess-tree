@@ -95,6 +95,7 @@
   "tree.zoomOut": "Zoom out",
   "tree.resetView": "Reset view",
   "tree.nodeMode": "Node mode",
+  "tree.fold": "Fold",
   "speech.kingsideCastle": "kingside castle",
   "speech.queensideCastle": "queenside castle",
   "speech.check": "check",
