@@ -46,10 +46,9 @@
     return `translate(${t.x},${t.y}) scale(${t.k})`;
   });
 
-  const spacingX = 22;
+  const spacingX = 18;
   const spacingY = 15;
-  const nodeWidth = 20;
-  const nodeHeight = 13;
+  const nodeHeight = 11;
 
   const ANNOTATION_DEFINITIONS: Record<
     string,
@@ -355,11 +354,16 @@
 
   function nodeLabel(node: ChessNode): string {
     if (nodeMode === 1) return node.move?.san ?? "start";
-    return ""; // icon mode handled in template
+    return "";
   }
   function nodeFontSize(): string {
-    if (nodeMode === 1) return "7px";
-    return "12px";
+    if (nodeMode === 1) return "6px";
+    return "9px";
+  }
+  function getNodeWidth(node: ChessNode): number {
+    if (nodeMode === 0) return 13;
+    const san = node.move?.san ?? "start";
+    return Math.max(13, san.length * 5);
   }
   let modeIcon = $derived(MODE_ICONS[nodeMode]);
   function useSetIcon(el: HTMLElement, icon: string) {
@@ -466,11 +470,12 @@
         {#each renderedNodes as node (node.id)}
           {#if node.children.length > 1}
             {@const isLeft = (node.y ?? 0) % 2 === 0}
+            {@const nw = getNodeWidth(node)}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <g
               transform="translate({node.x! * spacingX +
-                (isLeft ? -nodeWidth / 2 : nodeWidth / 2)} {node.y! *
+                (isLeft ? -nw / 2 : nw / 2)} {node.y! *
                 spacingY}){node.id === currentNode?.id ? ' scale(1.2)' : ''}"
               style="cursor: pointer"
               onclick={(e) => {
@@ -507,6 +512,7 @@
 
         {#each renderedNodes as node (node.id)}
           {@const primaryAnnotation = getPrimaryAnnotation(node)}
+          {@const nw = getNodeWidth(node)}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <g
@@ -525,9 +531,9 @@
             {#if primaryAnnotation}
               {@const def = ANNOTATION_DEFINITIONS[primaryAnnotation]}
               <rect
-                x={-nodeWidth / 2}
+                x={-nw / 2}
                 y={-nodeHeight / 2}
-                width={nodeWidth}
+                width={nw}
                 height={nodeHeight}
                 rx="2.5"
                 ry="2.5"
@@ -539,17 +545,17 @@
                 stroke="var(--chess-board-line)"
               />
               <g
-                transform="translate(-6, -6)"
+                transform="translate(-4, -4)"
                 color={node.side === "white" ? "#333" : "#fff"}
               >
                 <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                {@html iconSvg(def.icon, 12, 1.5)}
+                {@html iconSvg(def.icon, 8, 1.5)}
               </g>
             {:else}
               <rect
-                x={-nodeWidth / 2}
+                x={-nw / 2}
                 y={-nodeHeight / 2}
-                width={nodeWidth}
+                width={nw}
                 height={nodeHeight}
                 rx="2.5"
                 ry="2.5"
@@ -561,21 +567,20 @@
                 stroke="var(--chess-board-line)"
               />
               {#if nodeMode === 0 && !node.move}
-                <g transform="translate(-6, -6)" color="#fff">
+                <g transform="translate(-4, -4)" color="#fff">
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html iconSvg("house", 12, 1.5)}
+                  {@html iconSvg("house", 8, 1.5)}
                 </g>
               {:else if nodeMode === 0 && getPieceIcon(node)}
                 <g
-                  transform="translate(-6, -6)"
+                  transform="translate(-4, -4)"
                   color={node.side === "white" ? "#333" : "#fff"}
                 >
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html iconSvg(getPieceIcon(node)!, 12, 1.5)}
+                  {@html iconSvg(getPieceIcon(node)!, 8, 1.5)}
                 </g>
               {:else}
                 <text
-                  x="0"
                   dominant-baseline="central"
                   text-anchor="middle"
                   fill={node.side === "white" ? "#333" : "#fff"}
@@ -588,10 +593,13 @@
 
         {#each renderedNodes as node (node.id)}
           {#if getRegularComments(node).length > 0}
+            {@const nw = getNodeWidth(node)}
             <g
-              transform="translate({node.x! * spacingX + 4.8} {node.y! *
-                spacingY -
-                8}){node.id === currentNode?.id ? ' scale(1.2)' : ''}"
+              transform="translate({node.x! * spacingX +
+                0.35 * nw} {node.y! * spacingY -
+                0.7 * nodeHeight}){node.id === currentNode?.id
+                ? ' scale(1.35)'
+                : ''}"
               opacity={currentPath.includes(node.id) ? 1 : 0.8}
               style="pointer-events: none"
             >
