@@ -471,7 +471,7 @@
             <g
               transform="translate({node.x! * spacingX +
                 (isLeft ? -nodeWidth / 2 : nodeWidth / 2)} {node.y! *
-                spacingY})"
+                spacingY}){node.id === currentNode?.id ? ' scale(1.2)' : ''}"
               style="cursor: pointer"
               onclick={(e) => {
                 e.stopPropagation();
@@ -512,7 +512,7 @@
           <g
             class="node-group"
             transform="translate({node.x! * spacingX} {node.y! *
-              spacingY}){node.id === currentNode?.id ? ' scale(1.15)' : ''}"
+              spacingY}){node.id === currentNode?.id ? ' scale(1.2)' : ''}"
             opacity={currentPath.includes(node.id) ? 1 : 0.8}
             filter={!currentPath.includes(node.id)
               ? "grayscale(100%) brightness(0.75)"
@@ -591,7 +591,7 @@
             <g
               transform="translate({node.x! * spacingX + 4.8} {node.y! *
                 spacingY -
-                8}){node.id === currentNode?.id ? ' scale(1.15)' : ''}"
+                8}){node.id === currentNode?.id ? ' scale(1.2)' : ''}"
               opacity={currentPath.includes(node.id) ? 1 : 0.8}
               style="pointer-events: none"
             >
