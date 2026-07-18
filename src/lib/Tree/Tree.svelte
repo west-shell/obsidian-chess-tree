@@ -500,7 +500,7 @@
                     : "0,-4 0,4 5,0"}
                 fill="var(--chess-board-line)"
                 stroke="var(--chess-board-line)"
-                stroke-width="1"
+                stroke-width="1.5"
                 stroke-linejoin="round"
                 opacity={currentPath.includes(node.id) &&
                 node.children[0] &&
