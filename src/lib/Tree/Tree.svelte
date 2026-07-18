@@ -360,10 +360,17 @@
     if (nodeMode === 1) return "6px";
     return "9px";
   }
+  let _measureCanvas: HTMLCanvasElement | undefined;
+  function measureTextWidth(text: string, fontSize: string): number {
+    if (!_measureCanvas) _measureCanvas = document.createElement("canvas");
+    const ctx = _measureCanvas.getContext("2d")!;
+    ctx.font = `${fontSize} sans-serif`;
+    return ctx.measureText(text).width;
+  }
   function getNodeWidth(node: ChessNode): number {
     if (nodeMode === 0) return 13;
     const san = node.move?.san ?? "start";
-    return Math.max(13, san.length * 5);
+    return Math.max(13, Math.ceil(measureTextWidth(san, nodeFontSize())) + 4);
   }
   let modeIcon = $derived(MODE_ICONS[nodeMode]);
   function useSetIcon(el: HTMLElement, icon: string) {
