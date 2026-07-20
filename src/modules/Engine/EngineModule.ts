@@ -76,7 +76,7 @@ function initEngine(host: object) {
       const queue: string[] = [];
       const nodeMap = h.nodeMap;
       for (const [, node] of nodeMap) {
-        if (!node.eval) {
+        if (!node.eval || node.eval.depth < settings.engineDepth) {
           queue.push(node.id);
         }
       }
