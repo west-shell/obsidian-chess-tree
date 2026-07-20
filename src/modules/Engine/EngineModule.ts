@@ -43,7 +43,7 @@ function initEngine(host: object) {
       const queue: string[] = [];
       const nodeMap = h.nodeMap;
       for (const [, node] of nodeMap) {
-        if (!node.eval && node.id !== "node-root") {
+        if (!node.eval) {
           queue.push(node.id);
         }
       }

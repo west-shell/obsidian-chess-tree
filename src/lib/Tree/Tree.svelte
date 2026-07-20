@@ -330,6 +330,60 @@
     return idx !== -1 ? `${idx}/${currentPath.length - 1}` : "";
   });
 
+  let evalChartData = $derived.by(() => {
+    if (currentPath.length === 0) return [];
+    return currentPath.map((id) => {
+      const n = nodeMap.get(id);
+      if (!n?.eval) return null;
+      const raw = n.eval.scoreType === "mate"
+        ? (n.eval.score > 0 ? 1 : -1) * Math.min(Math.abs(n.eval.score), 10) * 100
+        : n.eval.score;
+      return raw;
+    });
+  });
+
+  let evalChartMax = $derived.by(() => {
+    let max = 0;
+    for (const v of evalChartData) {
+      if (v !== null && Math.abs(v) > max) max = Math.abs(v);
+    }
+    return max || 1;
+  });
+
+  let evalChartSegments = $derived.by(() => {
+    const data = evalChartData;
+    const hasAny = data.some((v) => v !== null);
+    if (!hasAny || data.length <= 1) return null;
+    const w = 20;
+    const midX = w / 2;
+    const maxAbs = evalChartMax;
+    const scaleX = (w - 2) / 2 / maxAbs;
+    const segments: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
+    const validIndices: number[] = [];
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] === null) continue;
+      validIndices.push(i);
+    }
+    for (let j = 0; j < validIndices.length - 1; j++) {
+      const i1 = validIndices[j];
+      const i2 = validIndices[j + 1];
+      const v1 = data[i1]!;
+      const v2 = data[i2]!;
+      const x1 = midX + v1 * scaleX;
+      const x2 = midX + v2 * scaleX;
+      const color = v2 >= 0 ? "#4CAF50" : "#f44336";
+      if (v1 * v2 < 0) {
+        const ratio = Math.abs(v1) / (Math.abs(v1) + Math.abs(v2));
+        const crossI = i1 + ratio * (i2 - i1);
+        segments.push({ x1, y1: i1, x2: midX, y2: crossI, color: v1 >= 0 ? "#4CAF50" : "#f44336" });
+        segments.push({ x1: midX, y1: crossI, x2, y2: i2, color });
+      } else {
+        segments.push({ x1, y1: i1, x2, y2: i2, color });
+      }
+    }
+    return { w, h: data.length - 1, midX, segments };
+  });
+
   let nodeMode = $state(0);
   const MODE_ICONS = ["club", "align-justify"];
   function cycleNodeMode() {
@@ -655,7 +709,7 @@
       ></button>
     </div>
 
-    <div class="slider" class:active={sliderMouseDown}>
+    <div class="slider" class:active={sliderMouseDown} class:has-eval={!!evalChartSegments}>
       <button
         class="slider-btn slider-to-start"
         aria-label="To start"
@@ -680,6 +734,36 @@
         class="slider-inner"
         onmousedown={handleSliderAreaMouseDown}
       >
+        {#if evalChartSegments}
+          <svg
+            width={evalChartSegments.w}
+            height="100%"
+            viewBox="0 0 {evalChartSegments.w} {evalChartSegments.h}"
+            preserveAspectRatio="none"
+            class="eval-chart-bg"
+          >
+            <line
+              x1={evalChartSegments.midX}
+              y1="0"
+              x2={evalChartSegments.midX}
+              y2={evalChartSegments.h}
+              stroke="var(--text-faint)"
+              stroke-width="0.5"
+              vector-effect="non-scaling-stroke"
+            />
+            {#each evalChartSegments.segments as seg}
+              <line
+                x1={seg.x1}
+                y1={seg.y1}
+                x2={seg.x2}
+                y2={seg.y2}
+                stroke={seg.color}
+                stroke-width="1"
+                vector-effect="non-scaling-stroke"
+              />
+            {/each}
+          </svg>
+        {/if}
         <span class="slider-thumb" style="top: {sliderPercent}%"></span>
         {#if sliderText}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -777,6 +861,21 @@
     align-items: center;
     border-radius: 3px;
     margin: 6px;
+  }
+
+  .slider.has-eval {
+    width: 20px;
+    background: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+  }
+
+  .eval-chart-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
   .slider-btn {
