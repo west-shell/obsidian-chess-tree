@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Menu, setIcon } from "obsidian";
+  import { Menu, Notice, setIcon } from "obsidian";
   import type { EventBus } from "../../core/event-bus";
   import { onLangChange, t } from "../../i18n";
 
@@ -30,7 +30,6 @@
   });
 
   let analyzing = $state(false);
-  let engineResult = $state<string>("");
 
   $effect(() => {
     eventBus.on<{ bestmove: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null>("engine-result", (result) => {
@@ -44,20 +43,18 @@
             scoreStr = (result.score > 0 ? "+" : "") + (result.score / 100).toFixed(2);
           }
         }
-        engineResult = `${result.bestmove} (${scoreStr} @depth ${result.depth ?? "?"})`;
+        new Notice(`${result.bestmove} (${scoreStr} @depth ${result.depth ?? "?"})`);
       } else {
-        engineResult = t("engine.failed", _lv);
+        new Notice(t("engine.failed", _lv));
       }
     });
   });
 
   function toggleAnalyze() {
-    console.log('[Toolbar] toggleAnalyze, fen:', fen);
     if (analyzing) {
       eventBus.emit("engine-stop");
       analyzing = false;
     } else {
-      engineResult = "";
       analyzing = true;
       eventBus.emit("engine-analyze", fen);
     }
@@ -188,12 +185,6 @@
     use:useSetSaveIcon
     onclick={() => emitEvent("save")}
   ></button>
-
-  {#if analyzing}
-    <span class="engine-status analyzing">{t("engine.analyzing", _lv)}</span>
-  {:else if engineResult}
-    <span class="engine-status result">{engineResult}</span>
-  {/if}
 </div>
 
 <style>
@@ -257,22 +248,5 @@
   @keyframes engine-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
-  }
-
-  .engine-status {
-    font-size: 0.8em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
-  }
-
-  .engine-status.analyzing {
-    color: var(--text-muted);
-    animation: engine-pulse 1.2s ease-in-out infinite;
-  }
-
-  .engine-status.result {
-    color: var(--text-accent);
   }
 </style>
