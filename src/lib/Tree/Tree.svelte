@@ -670,25 +670,16 @@
                 style="pointer-events: none"
               />
             {/if}
+            {#if getRegularComments(node).length > 0}
+              <g
+                transform="translate({0.3 * nw} {-0.8 * nodeHeight})"
+                style="pointer-events: none"
+              >
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
+              </g>
+            {/if}
           </g>
-        {/each}
-
-        {#each renderedNodes as node (node.id)}
-          {#if getRegularComments(node).length > 0}
-            {@const nw = getNodeWidth(node)}
-            <g
-              transform="translate({node.x! * spacingX +
-                0.35 * nw} {node.y! * spacingY -
-                0.7 * nodeHeight}){node.id === currentNode?.id
-                ? ' scale(1.35)'
-                : ''}"
-              opacity={currentPath.includes(node.id) ? 1 : 0.8}
-              style="pointer-events: none"
-            >
-              <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-              {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
-            </g>
-          {/if}
         {/each}
       </g>
     </svg>
