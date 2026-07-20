@@ -1,4 +1,4 @@
-import stockfishJs from "../../engine/stockfish.js?raw";
+import stockfishJs from "../../engine/stockfish.txt?raw";
 
 export interface EngineResult {
   bestmove: string;
