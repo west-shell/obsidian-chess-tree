@@ -10,6 +10,12 @@ function initEngine(host: object) {
   let analyzing = false;
   let lastResult: { bestmove: string; ponder?: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null = null;
 
+  function applyOptions() {
+    engine.postCommand(`setoption name Skill Level value ${settings.engineSkillLevel}`);
+    engine.postCommand(`setoption name Ponder value false`);
+    engine.postCommand(`setoption name Hash value 16`);
+  }
+
   eventBus.on<import("../../chess").Move>("runmove", (move) => {
     if (!move || !lastResult) return;
     const moveUci = move.from + move.to;
@@ -33,7 +39,7 @@ function initEngine(host: object) {
     analyzing = true;
     try {
       await engine.ensureReady();
-      engine.postCommand(`setoption name Skill Level value ${settings.engineSkillLevel}`);
+      applyOptions();
       const result = await engine.analyze(fen ?? h.currentNode.fen, settings.engineDepth);
       if (result && result.score != null) {
         const nodeEval: NodeEval = {
@@ -66,7 +72,7 @@ function initEngine(host: object) {
     analyzing = true;
     try {
       await engine.ensureReady();
-      engine.postCommand(`setoption name Skill Level value ${settings.engineSkillLevel}`);
+      applyOptions();
       const queue: string[] = [];
       const nodeMap = h.nodeMap;
       for (const [, node] of nodeMap) {

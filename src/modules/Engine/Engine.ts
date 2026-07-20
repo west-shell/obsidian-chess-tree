@@ -17,7 +17,6 @@ export class ChessEngine {
   private msgHandler: UciHandler | null = null;
   private initResolve: ((value: void) => void) | null = null;
   private initReject: ((reason: Error) => void) | null = null;
-  private cachedWasmBase64: string | null = null;
 
   setPlugin(plugin: any): void {
     this.plugin = plugin;
@@ -33,11 +32,7 @@ export class ChessEngine {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
 
-    if (!this.cachedWasmBase64) {
-      const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`) as ArrayBuffer;
-      this.cachedWasmBase64 = this.arrayBufferToBase64(wasmBuffer);
-    }
-    const wasmBase64 = this.cachedWasmBase64;
+    const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`) as ArrayBuffer;
 
     const workerCode = `
 self.addEventListener('unhandledrejection', function(e) {
@@ -53,17 +48,19 @@ if (typeof process !== 'undefined' && process.versions) {
   try { delete process.versions.node; } catch(e) {}
 }
 
-var _SF_WB_ = (function() {
-  var b = atob('${wasmBase64}'), a = new Uint8Array(b.length), i;
-  for (i = 0; i < b.length; i++) a[i] = b.charCodeAt(i);
-  return a;
-})();
+var _SF_WB_ = null;
 
-try {
-  ${stockfishJs}
-} catch(e) {
-  self.postMessage({type:'error', data:'SF_LOAD:' + e.message + '|' + (e.stack||'')});
-}
+self.onmessage = function(e) {
+  if (e.data && e.data.type === 'wasm') {
+    _SF_WB_ = new Uint8Array(e.data.buffer);
+    self.onmessage = null;
+    try {
+      ${stockfishJs}
+    } catch(e) {
+      self.postMessage({type:'error', data:'SF_LOAD:' + e.message + '|' + (e.stack||'')});
+    }
+  }
+};
 `;
 
     const blobUrl = URL.createObjectURL(new Blob([workerCode], { type: 'text/javascript' }));
@@ -75,7 +72,7 @@ try {
         this.initResolve = null;
         this.initReject = null;
         reject(new Error('Engine init timeout'));
-      }, 60_000);
+      }, 120_000);
 
       this.initResolve = () => { window.clearTimeout(timeout); resolve(); };
       this.initReject = (err: Error) => { window.clearTimeout(timeout); reject(err); };
@@ -86,20 +83,9 @@ try {
         reject(new Error(err.message || 'Engine error'));
       };
 
+      this.worker!.postMessage({ type: 'wasm', buffer: wasmBuffer }, [wasmBuffer]);
       this.worker!.postMessage('uci');
     });
-  }
-
-  private arrayBufferToBase64(buffer: ArrayBuffer): string {
-    const bytes = new Uint8Array(buffer);
-    const chunks: string[] = [];
-    for (let i = 0; i < bytes.length; i += 0x8000) {
-      const slice = bytes.subarray(i, Math.min(i + 0x8000, bytes.length));
-      let chunk = '';
-      for (let j = 0; j < slice.length; j++) chunk += String.fromCharCode(slice[j]);
-      chunks.push(chunk);
-    }
-    return btoa(chunks.join(''));
   }
 
   private handleMessage(raw: unknown): void {
