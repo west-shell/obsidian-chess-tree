@@ -35,6 +35,8 @@ export interface ISettings {
   genfenSaveType: "chess" | "tree";
   enablePGNView: boolean;
   pgnFileExtensions: string[];
+  engineDepth: number;
+  engineSkillLevel: number;
 }
 
 export type IOptions = {

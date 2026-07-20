@@ -5,8 +5,9 @@
 
   interface Props {
     eventBus: EventBus;
+    fen?: string;
   }
-  let { eventBus }: Props = $props();
+  let { eventBus, fen = "" }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
@@ -27,6 +28,40 @@
       modified = false;
     });
   });
+
+  let analyzing = $state(false);
+  let engineResult = $state<string>("");
+
+  $effect(() => {
+    eventBus.on<{ bestmove: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null>("engine-result", (result) => {
+      analyzing = false;
+      if (result) {
+        let scoreStr = "?";
+        if (result.score != null) {
+          if (result.scoreType === 'mate') {
+            scoreStr = (result.score > 0 ? "+" : "") + "M" + Math.abs(result.score);
+          } else {
+            scoreStr = (result.score > 0 ? "+" : "") + (result.score / 100).toFixed(2);
+          }
+        }
+        engineResult = `${result.bestmove} (${scoreStr} @depth ${result.depth ?? "?"})`;
+      } else {
+        engineResult = "分析失败";
+      }
+    });
+  });
+
+  function toggleAnalyze() {
+    console.log('[Toolbar] toggleAnalyze, fen:', fen);
+    if (analyzing) {
+      eventBus.emit("engine-stop");
+      analyzing = false;
+    } else {
+      engineResult = "";
+      analyzing = true;
+      eventBus.emit("engine-analyze", fen);
+    }
+  }
 
   let saveBtnClass = $derived(modified ? "unsaved" : "saved");
 
@@ -95,6 +130,11 @@
 
   function useSetIcon(el: HTMLElement, icon: string) {
     setIcon(el, icon);
+    return {
+      update(newIcon: string) {
+        setIcon(el, newIcon);
+      },
+    };
   }
 
   function useSetSaveIcon(el: HTMLElement) {
@@ -135,11 +175,25 @@
   {/each}
 
   <button
+    class="toolbar-btn engine-btn"
+    class:analyzing
+    aria-label={analyzing ? t("toolbar.stop", _lv) : t("toolbar.analyze", _lv)}
+    use:useSetIcon={analyzing ? "circle-stop" : "brain"}
+    onclick={toggleAnalyze}
+  ></button>
+
+  <button
     class="toolbar-btn {saveBtnClass}"
     aria-label={t("toolbar.save", _lv)}
     use:useSetSaveIcon
     onclick={() => emitEvent("save")}
   ></button>
+
+  {#if analyzing}
+    <span class="engine-status analyzing">分析中...</span>
+  {:else if engineResult}
+    <span class="engine-status result">{engineResult}</span>
+  {/if}
 </div>
 
 <style>
@@ -194,5 +248,31 @@
 
   .toolbar-btn.unsaved {
     background-color: hsl(35, 100%, 50%);
+  }
+
+  .engine-btn.analyzing {
+    animation: engine-pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes engine-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .engine-status {
+    font-size: 0.8em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  .engine-status.analyzing {
+    color: var(--text-muted);
+    animation: engine-pulse 1.2s ease-in-out infinite;
+  }
+
+  .engine-status.result {
+    color: var(--text-accent);
   }
 </style>

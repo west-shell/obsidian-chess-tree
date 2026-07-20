@@ -33,6 +33,8 @@ export const DEFAULT_SETTINGS: ISettings = {
   genfenSaveType: "chess",
   enablePGNView: true,
   pgnFileExtensions: ["pgn"],
+  engineDepth: 18,
+  engineSkillLevel: 20,
 };
 
 function addSliderWithValue(
@@ -400,6 +402,35 @@ export class ChessSettingTab extends PluginSettingTab {
           void this.plugin.saveSettings();
         }),
       );
+
+    // ---- 引擎 ----
+    new Setting(containerEl).setName("Engine / 引擎").setHeading();
+
+    addSliderWithValue(
+      containerEl,
+      "Search Depth / 搜索深度",
+      "Engine analysis search depth (1-30). Higher = stronger but slower.",
+      settings.engineDepth,
+      { min: 1, max: 30, step: 1 },
+      "",
+      (v) => {
+        settings.engineDepth = v;
+        void this.plugin.saveSettings();
+      },
+    );
+
+    addSliderWithValue(
+      containerEl,
+      "Skill Level / 难度等级",
+      "Engine skill level (0-20). 20 = maximum strength.",
+      settings.engineSkillLevel,
+      { min: 0, max: 20, step: 1 },
+      "",
+      (v) => {
+        settings.engineSkillLevel = v;
+        void this.plugin.saveSettings();
+      },
+    );
 
     containerEl.parentElement?.classList.add("ws-setting-tab");
   }

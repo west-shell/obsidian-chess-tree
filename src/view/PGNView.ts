@@ -3,6 +3,7 @@ import "../modules/BoardClick";
 import "../modules/Tree/PGNView";
 import "../modules/Tree/Actions";
 import "../modules/Tree/Speak";
+import "../modules/Engine/EngineModule";
 
 import { TextFileView, type WorkspaceLeaf } from "obsidian";
 

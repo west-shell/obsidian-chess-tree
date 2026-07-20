@@ -71,6 +71,7 @@
       .filter((m): m is Move => m != null) ?? [],
   );
   let userShapes = $derived(loadShapes(currentNode));
+  let engineBestMove: { from: Square; to: Square } | null = $state(null);
   let checkColor = $derived(
     currentNode.move && /\+|#/.test(currentNode.move.san)
       ? currentNode.move.color === "w"
@@ -109,6 +110,18 @@
   });
 
   $effect(() => {
+    eventBus.on<{ bestmove: string; score?: number; depth?: number } | null>("engine-result", (result) => {
+      if (result) {
+        const from = result.bestmove.slice(0, 2) as Square;
+        const to = result.bestmove.slice(2, 4) as Square;
+        engineBestMove = { from, to };
+      } else {
+        engineBestMove = null;
+      }
+    });
+  });
+
+  $effect(() => {
     eventBus.on<DrawShape[]>("user-shapes-changed", (shapes) => {
       saveShapes(currentNode, shapes ?? []);
       eventBus.emit("modified", null);
@@ -137,8 +150,9 @@
     {rotated}
     {variations}
     {userShapes}
+    {engineBestMove}
   />
-  <Toolbar {eventBus} />
+  <Toolbar {eventBus} {fen} />
   <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
 </div>
 

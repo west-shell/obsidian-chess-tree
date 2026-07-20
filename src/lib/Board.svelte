@@ -25,6 +25,7 @@
     variations?: Move[];
     freeMode?: boolean;
     userShapes?: DrawShape[];
+    engineBestMove?: { from: Square; to: Square } | null;
   }
 
   let {
@@ -38,6 +39,7 @@
     variations = [],
     freeMode = false,
     userShapes = [],
+    engineBestMove = null,
   }: Props = $props();
 
   import { iconSvg } from "../utils/icon";
@@ -118,8 +120,14 @@
     }));
   }
 
+  let engineShapes: DrawShape[] = $derived(
+    engineBestMove ? [{ orig: engineBestMove.from, dest: engineBestMove.to, brush: "green" }] : [],
+  );
   let shapes = $derived(
-    settings.showNextMove ? computeVariationShapes(variations) : [],
+    [
+      ...(settings.showNextMove ? computeVariationShapes(variations) : []),
+      ...engineShapes,
+    ],
   );
   let dests = $derived(computeDests(fen));
   let _check: cg.Color | false = $derived(checkColor || false);

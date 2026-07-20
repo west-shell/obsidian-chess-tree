@@ -4,6 +4,7 @@ import "../modules/BoardClick";
 import "../modules/Tree/ChessBoard";
 // import '../modules/Tree/TreeView';
 import "../modules/Tree/Actions";
+import "../modules/Engine/EngineModule";
 
 import {
   type MarkdownPostProcessorContext,
