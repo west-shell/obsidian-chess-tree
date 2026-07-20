@@ -28,7 +28,7 @@ const typeCheckedRules = {
 
 export default tseslint.config(
   {
-    ignores: ['build/**', 'test-vault/**', 'node_modules/**', 'src/stockfish/**', '*.js', '*.mjs', '*.cjs'],
+    ignores: ['build/**', 'test-vault/**', 'node_modules/**', 'assets/**', '*.js', '*.mjs', '*.cjs'],
   },
 
   js.configs.recommended,
