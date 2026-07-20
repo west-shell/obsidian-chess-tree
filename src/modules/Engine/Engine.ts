@@ -36,7 +36,6 @@ export class ChessEngine {
     ]);
 
     const wasmBase64 = this.arrayBufferToBase64(wasmBuffer);
-    const patchedJs = this.patchStockfishJs(stockfishJs);
 
     const workerCode = `
 self.addEventListener('unhandledrejection', function(e) {
@@ -59,7 +58,7 @@ var _SF_WB_ = (function() {
 })();
 
 try {
-  ${patchedJs}
+  ${stockfishJs}
 } catch(e) {
   self.postMessage({type:'error', data:'SF_LOAD:' + e.message + '|' + (e.stack||'')});
 }
@@ -87,18 +86,6 @@ try {
 
       this.worker!.postMessage('uci');
     });
-  }
-
-  private patchStockfishJs(js: string): string {
-    const W = '_SF_WB_';
-    const patched = js.replace(
-      /r=\{locateFile:function\(e\)\{return-1<e\.indexOf\("\.wasm"\)\?-1<e\.indexOf\("\.wasm\.map"\)\?[a-zA-Z_$]+\+"\.map"\:[a-zA-Z_$]+\|\|[a-zA-Z_$]+:self\.location\.origin\+self\.location\.pathname\+"#"\+[a-zA-Z_$]\+",worker"\},listener:function\(e\)\{postMessage\(e\)\}\}/,
-      `r={wasmBinary:${W},locateFile:function(e){return e},listener:function(e){postMessage(e)}}`
-    );
-    if (patched === js) {
-      console.error('[Engine] patchStockfishJs failed');
-    }
-    return patched;
   }
 
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
