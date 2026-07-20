@@ -1,3 +1,5 @@
+import stockfishJs from "../../engine/stockfish.js?raw";
+
 export interface EngineResult {
   bestmove: string;
   score?: number;
@@ -29,11 +31,7 @@ export class ChessEngine {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
 
-    const [stockfishJs, wasmBuffer] = await Promise.all([
-      adapter.read(`${baseDir}/stockfish-18-lite-single.js`) as Promise<string>,
-      adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`) as Promise<ArrayBuffer>,
-    ]);
-
+    const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`) as ArrayBuffer;
     const wasmBase64 = this.arrayBufferToBase64(wasmBuffer);
 
     const workerCode = `
