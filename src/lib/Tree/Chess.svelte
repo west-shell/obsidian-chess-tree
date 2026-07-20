@@ -72,6 +72,7 @@
   );
   let userShapes = $derived(loadShapes(currentNode));
   let engineBestMove: { from: Square; to: Square } | null = $state(null);
+  let enginePonder: { from: Square; to: Square } | null = $state(null);
   let checkColor = $derived(
     currentNode.move && /\+|#/.test(currentNode.move.san)
       ? currentNode.move.color === "w"
@@ -110,17 +111,27 @@
   });
 
   $effect(() => {
-    eventBus.on<{ bestmove: string; score?: number; depth?: number } | null>("engine-result", (result) => {
+    eventBus.on<{ bestmove: string; ponder?: string; score?: number; depth?: number } | null>("engine-result", (result) => {
       if (result) {
         const from = result.bestmove.slice(0, 2) as Square;
         const to = result.bestmove.slice(2, 4) as Square;
         engineBestMove = { from, to };
+        if (result.ponder) {
+          enginePonder = {
+            from: result.ponder.slice(0, 2) as Square,
+            to: result.ponder.slice(2, 4) as Square,
+          };
+        } else {
+          enginePonder = null;
+        }
       } else {
         engineBestMove = null;
+        enginePonder = null;
       }
     });
     eventBus.on("clear-engine-bestmove", () => {
       engineBestMove = null;
+      enginePonder = null;
     });
   });
 
@@ -153,7 +164,8 @@
     {rotated}
     {variations}
     {userShapes}
-    {engineBestMove}
+     {engineBestMove}
+     {enginePonder}
   />
   <Toolbar {eventBus} {fen} />
   <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />

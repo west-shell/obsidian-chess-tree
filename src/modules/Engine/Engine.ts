@@ -2,6 +2,7 @@ import stockfishJs from "./stockfish.txt?raw";
 
 export interface EngineResult {
   bestmove: string;
+  ponder?: string;
   score?: number;
   depth?: number;
   scoreType?: 'cp' | 'mate';
@@ -157,10 +158,13 @@ try {
           const depthMatch = msg.match(/depth (\d+)/);
           if (depthMatch) lastDepth = Number.parseInt(depthMatch[1]);
         } else if (msg.startsWith('bestmove')) {
-          const bestmove = msg.split(' ')[1];
+          const parts = msg.split(/\s+/);
+          const bestmove = parts[1];
+          const ponderIdx = parts.indexOf('ponder');
+          const ponder = ponderIdx >= 0 && parts[ponderIdx + 1] ? parts[ponderIdx + 1] : undefined;
           this.msgHandler = null;
           if (bestmove && bestmove !== '(none)') {
-            resolve({ bestmove, score: lastScore, depth: lastDepth, scoreType: lastScoreType });
+            resolve({ bestmove, ponder, score: lastScore, depth: lastDepth, scoreType: lastScoreType });
           } else {
             reject(new Error('No move found'));
           }

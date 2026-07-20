@@ -8,6 +8,25 @@ function initEngine(host: object) {
   const { eventBus, settings } = h;
 
   let analyzing = false;
+  let lastResult: { bestmove: string; ponder?: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null = null;
+
+  eventBus.on<import("../../chess").Move>("runmove", (move) => {
+    if (!move || !lastResult) return;
+    const moveUci = move.from + move.to;
+    if (moveUci === lastResult.bestmove.slice(0, 4)) {
+      if (lastResult.ponder) {
+        const ponderMove = lastResult.ponder;
+        lastResult = { bestmove: ponderMove, score: lastResult.score, depth: lastResult.depth, scoreType: lastResult.scoreType };
+        eventBus.emit("engine-result", lastResult);
+      } else {
+        lastResult = null;
+        eventBus.emit("engine-result", null);
+      }
+    } else {
+      lastResult = null;
+      eventBus.emit("engine-result", null);
+    }
+  });
 
   eventBus.on("engine-analyze", async (fen?: string) => {
     if (analyzing) return;
@@ -27,6 +46,7 @@ function initEngine(host: object) {
           node.eval = nodeEval;
           h.currentNode = node;
         }
+        lastResult = result;
         eventBus.emit("engine-result", result);
         h.eventBus.emit("modified", null);
         h.eventBus.emit("updateUI");
@@ -81,6 +101,11 @@ function initEngine(host: object) {
   eventBus.on("engine-stop", () => {
     engine.stop();
     analyzing = false;
+    lastResult = null;
+  });
+
+  eventBus.on("clear-engine-bestmove", () => {
+    lastResult = null;
   });
 
   eventBus.on("unload", () => {

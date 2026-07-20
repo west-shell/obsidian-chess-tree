@@ -26,6 +26,7 @@
     freeMode?: boolean;
     userShapes?: DrawShape[];
     engineBestMove?: { from: Square; to: Square } | null;
+    enginePonder?: { from: Square; to: Square } | null;
   }
 
   let {
@@ -40,6 +41,7 @@
     freeMode = false,
     userShapes = [],
     engineBestMove = null,
+    enginePonder = null,
   }: Props = $props();
 
   import { iconSvg } from "../utils/icon";
@@ -120,9 +122,10 @@
     }));
   }
 
-  let engineShapes: DrawShape[] = $derived(
-    engineBestMove ? [{ orig: engineBestMove.from, dest: engineBestMove.to, brush: "green" }] : [],
-  );
+  let engineShapes: DrawShape[] = $derived([
+    ...(engineBestMove ? [{ orig: engineBestMove.from, dest: engineBestMove.to, brush: "green" }] : []),
+    ...(enginePonder ? [{ orig: enginePonder.from, dest: enginePonder.to, brush: "yellow" }] : []),
+  ]);
   let shapes = $derived(
     [
       ...(settings.showNextMove ? computeVariationShapes(variations) : []),
