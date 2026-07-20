@@ -655,10 +655,10 @@
                 : Math.abs(node.eval.score)}
               {@const intensity = Math.min(absScore / 300, 1)}
               {@const color = node.eval.score > 0
-                ? `rgba(76, 175, 80, ${0.3 + intensity * 0.7})`
+                ? `rgba(76, 175, 80, ${0.6 + intensity * 0.4})`
                 : node.eval.score < 0
-                  ? `rgba(244, 67, 54, ${0.3 + intensity * 0.7})`
-                  : `rgba(136, 136, 136, 0.3)`}
+                  ? `rgba(244, 67, 54, ${0.6 + intensity * 0.4})`
+                  : `rgba(136, 136, 136, 0.6)`}
               {@const barWidth = 2 + intensity * (nw - 4)}
               <rect
                 x={-barWidth / 2}
