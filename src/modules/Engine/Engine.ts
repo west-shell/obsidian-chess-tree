@@ -16,6 +16,7 @@ export class ChessEngine {
   private msgHandler: UciHandler | null = null;
   private initResolve: ((value: void) => void) | null = null;
   private initReject: ((reason: Error) => void) | null = null;
+  private cachedWasmBase64: string | null = null;
 
   setPlugin(plugin: any): void {
     this.plugin = plugin;
@@ -31,8 +32,11 @@ export class ChessEngine {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
 
-    const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`) as ArrayBuffer;
-    const wasmBase64 = this.arrayBufferToBase64(wasmBuffer);
+    if (!this.cachedWasmBase64) {
+      const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`) as ArrayBuffer;
+      this.cachedWasmBase64 = this.arrayBufferToBase64(wasmBuffer);
+    }
+    const wasmBase64 = this.cachedWasmBase64;
 
     const workerCode = `
 self.addEventListener('unhandledrejection', function(e) {
@@ -101,6 +105,7 @@ try {
     if (raw && typeof raw === 'object' && (raw as Record<string, unknown>).type) {
       const obj = raw as Record<string, string>;
       if (obj.type === 'error') {
+        console.warn('[Engine] worker error:', obj.data);
         this.initReject?.(new Error(obj.data));
         this.initResolve = null;
         this.initReject = null;
@@ -112,6 +117,7 @@ try {
     for (const line of raw.split('\n')) {
       const trimmed = line.trim();
       if (!trimmed) continue;
+      console.log('[Engine]', trimmed);
 
       if (trimmed === 'uciok') {
         this.ready = true;

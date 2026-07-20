@@ -87,6 +87,7 @@ const ActionsModule = {
       host.markedPos = null;
       host.currentNode = host.nodeMap.get(id)!;
       host.fen = host.currentNode.fen;
+      host.eventBus.emit("clear-engine-bestmove");
       host.eventBus.emit("updateMainPath");
       host.eventBus.emit("updateUI");
     });
@@ -98,14 +99,16 @@ const ActionsModule = {
       host.markedPos = null;
       host.currentNode = node;
       host.fen = node.fen;
+      host.eventBus.emit("clear-engine-bestmove");
       host.eventBus.emit("updateUI");
     });
 
     eventBus.on<{ name: string; payload: unknown }>(
       "btn-click",
       async (payload) => {
-        if (!payload) return;
-        host.markedPos = null;
+          if (!payload) return;
+          host.markedPos = null;
+          host.eventBus.emit("clear-engine-bestmove");
         const { name } = payload;
         const data = payload.payload as string;
         switch (name) {

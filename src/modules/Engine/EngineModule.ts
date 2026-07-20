@@ -9,21 +9,28 @@ function initEngine(host: object) {
 
   let analyzing = false;
 
-  eventBus.on("engine-analyze", async (fen: string) => {
+  eventBus.on("engine-analyze", async (fen?: string) => {
     if (analyzing) return;
     analyzing = true;
     try {
       await engine.ensureReady();
       engine.postCommand(`setoption name Skill Level value ${settings.engineSkillLevel}`);
-      const result = await engine.analyze(fen, settings.engineDepth);
+      const result = await engine.analyze(fen ?? h.currentNode.fen, settings.engineDepth);
       if (result && result.score != null) {
         const nodeEval: NodeEval = {
           score: result.score,
           scoreType: result.scoreType ?? 'cp',
           depth: result.depth ?? 0,
         };
-        h.currentNode.eval = nodeEval;
+        const node = h.nodeMap.get(h.currentNode.id);
+        if (node) {
+          node.eval = nodeEval;
+          h.currentNode = node;
+        }
+        eventBus.emit("engine-result", result);
         h.eventBus.emit("modified", null);
+        h.eventBus.emit("updateUI");
+        return;
       }
       eventBus.emit("engine-result", result);
     } catch (err) {

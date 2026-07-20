@@ -119,7 +119,7 @@
         engineBestMove = null;
       }
     });
-    eventBus.on("updateUI", () => {
+    eventBus.on("clear-engine-bestmove", () => {
       engineBestMove = null;
     });
   });
