@@ -497,6 +497,40 @@
 
 <div class="tree-container">
   <div class="svg-wrapper">
+    {#if currentNode?.eval}
+      {@const ce = currentNode.eval}
+      {@const absScore = ce.scoreType === 'mate'
+        ? Math.min(Math.abs(ce.score), 10) * 100
+        : Math.abs(ce.score)}
+      {@const evalMax = 300}
+      {@const evalRatio = Math.min(absScore / evalMax, 1)}
+      {@const evalColor = ce.score > 0
+        ? 'rgba(76, 175, 80, 0.8)'
+        : ce.score < 0
+          ? 'rgba(244, 67, 54, 0.8)'
+          : 'rgba(136, 136, 136, 0.6)'}
+      {@const fillPercent = evalRatio * 50}
+      {@const evalText = ce.scoreType === 'mate'
+        ? (ce.score > 0 ? '+' : '') + 'M' + ce.score
+        : (ce.score > 0 ? '+' : '') + (ce.score / 100).toFixed(1)}
+      <div class="eval-sidebar">
+        <div class="eval-bar">
+          {#if ce.score >= 0}
+            <div
+              class="eval-fill"
+              style="height: {fillPercent}%; top: {50 - fillPercent}%; background: {evalColor}"
+            ></div>
+          {:else}
+            <div
+              class="eval-fill"
+              style="height: {fillPercent}%; top: 50%; background: {evalColor}"
+            ></div>
+          {/if}
+          <div class="eval-center-line"></div>
+          <span class="eval-label" style="background: {evalColor}">{evalText}</span>
+        </div>
+      </div>
+    {/if}
     <svg bind:this={svgEl} width="100%" height="100%" class="tree-svg">
       <g transform={TRANSFORM_SAFE}>
         {#each renderedNodes as node (node.id)}
@@ -823,6 +857,61 @@
     position: relative;
     width: 100%;
     height: 100%;
+  }
+
+  .eval-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .eval-bar {
+    position: relative;
+    flex: 1 1 auto;
+    width: 4px;
+    background: var(--background-modifier-border);
+    border-radius: 2px;
+  }
+
+  .eval-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-radius: 2px;
+    transition: height 0.3s ease, top 0.3s ease, background 0.3s ease;
+  }
+
+  .eval-center-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 0;
+  }
+
+  .eval-label {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 4px);
+    height: 18px;
+    margin-top: -9px;
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-size: 0.6em;
+    line-height: 18px;
+    text-align: center;
+    padding: 0 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+    pointer-events: none;
   }
 
   .toolbar {

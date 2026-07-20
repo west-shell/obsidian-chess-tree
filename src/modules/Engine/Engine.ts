@@ -1,4 +1,5 @@
 import stockfishJs from "./stockfish.txt?raw";
+import type ChessPlugin from "../../main";
 
 export interface EngineResult {
   bestmove: string;
@@ -13,12 +14,12 @@ type UciHandler = (msg: string) => void;
 export class ChessEngine {
   private worker: Worker | null = null;
   private ready = false;
-  private plugin: any = null;
+  private plugin: ChessPlugin | null = null;
   private msgHandler: UciHandler | null = null;
   private initResolve: ((value: void) => void) | null = null;
   private initReject: ((reason: Error) => void) | null = null;
 
-  setPlugin(plugin: any): void {
+  setPlugin(plugin: ChessPlugin): void {
     this.plugin = plugin;
   }
 
@@ -104,7 +105,6 @@ self.onmessage = function(e) {
     for (const line of raw.split('\n')) {
       const trimmed = line.trim();
       if (!trimmed) continue;
-      console.log('[Engine]', trimmed);
 
       if (trimmed === 'uciok') {
         this.ready = true;

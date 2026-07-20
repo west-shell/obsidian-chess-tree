@@ -1,6 +1,6 @@
 // oxlint-disable no-useless-return
 import { Chess, type Move } from "../../chess";
-import { type ChessNode, type NodeEval, DEFAULT_FEN } from "../../types";
+import { type ChessNode, DEFAULT_FEN } from "../../types";
 
 import { type Token, tokenize, type TokenType } from "./Tokenizer";
 
