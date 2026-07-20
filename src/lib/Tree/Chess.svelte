@@ -119,6 +119,9 @@
         engineBestMove = null;
       }
     });
+    eventBus.on("updateUI", () => {
+      engineBestMove = null;
+    });
   });
 
   $effect(() => {
