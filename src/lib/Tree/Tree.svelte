@@ -649,6 +649,27 @@
                 >
               {/if}
             {/if}
+            {#if node.eval}
+              {@const absScore = node.eval.scoreType === 'mate'
+                ? Math.min(Math.abs(node.eval.score), 10) * 100
+                : Math.abs(node.eval.score)}
+              {@const intensity = Math.min(absScore / 300, 1)}
+              {@const color = node.eval.score > 0
+                ? `rgba(76, 175, 80, ${0.3 + intensity * 0.7})`
+                : node.eval.score < 0
+                  ? `rgba(244, 67, 54, ${0.3 + intensity * 0.7})`
+                  : `rgba(136, 136, 136, 0.3)`}
+              {@const barWidth = 2 + intensity * (nw - 4)}
+              <rect
+                x={-barWidth / 2}
+                y={nodeHeight / 2 - 0.5}
+                width={barWidth}
+                height="1.5"
+                rx="0.5"
+                fill={color}
+                style="pointer-events: none"
+              />
+            {/if}
           </g>
         {/each}
 
@@ -667,24 +688,6 @@
               <!-- eslint-disable-next-line svelte/no-at-html-tags -->
               {@html iconSvg("message-square-text", 8, 1.5, "royalblue")}
             </g>
-          {/if}
-        {/each}
-
-        {#each renderedNodes as node (node.id)}
-          {#if node.eval}
-            {@const nw = getNodeWidth(node)}
-            {@const evalLabel = node.eval.scoreType === 'mate'
-              ? (node.eval.score > 0 ? "+" : "") + "M" + Math.abs(node.eval.score)
-              : (node.eval.score > 0 ? "+" : "") + (node.eval.score / 100).toFixed(1)}
-            <text
-              x={node.x! * spacingX}
-              y={node.y! * spacingY + nodeHeight * 0.9}
-              dominant-baseline="hanging"
-              text-anchor="middle"
-              font-size="5px"
-              fill={node.eval.score > 0 ? "#4CAF50" : node.eval.score < 0 ? "#f44336" : "#888"}
-              style="pointer-events: none"
-            >{evalLabel}</text>
           {/if}
         {/each}
       </g>
