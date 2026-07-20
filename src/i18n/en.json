@@ -134,5 +134,13 @@
   "pgn.enable": "Enable PGN file view",
   "pgn.enable.desc": "Register PGN file view for opening .pgn files",
   "pgn.extensions": "PGN file extensions",
-  "pgn.extensions.desc": "Custom file extensions for PGN view, comma separated"
+  "pgn.extensions.desc": "Custom file extensions for PGN view, comma separated",
+  "engine.title": "Engine",
+  "engine.depth": "Search Depth",
+  "engine.depth.desc": "Engine analysis search depth (1–30). Higher = stronger but slower.",
+  "engine.skillLevel": "Skill Level",
+  "engine.skillLevel.desc": "Engine skill level (0–20). 20 = maximum strength.",
+  "engine.analyzing": "Analyzing…",
+  "engine.failed": "Analysis failed",
+  "engine.mate": "M"
 }

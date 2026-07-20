@@ -404,12 +404,12 @@ export class ChessSettingTab extends PluginSettingTab {
       );
 
     // ---- 引擎 ----
-    new Setting(containerEl).setName("Engine / 引擎").setHeading();
+    new Setting(containerEl).setName(t("engine.title")).setHeading();
 
     addSliderWithValue(
       containerEl,
-      "Search Depth / 搜索深度",
-      "Engine analysis search depth (1-30). Higher = stronger but slower.",
+      t("engine.depth"),
+      t("engine.depth.desc"),
       settings.engineDepth,
       { min: 1, max: 30, step: 1 },
       "",
@@ -421,8 +421,8 @@ export class ChessSettingTab extends PluginSettingTab {
 
     addSliderWithValue(
       containerEl,
-      "Skill Level / 难度等级",
-      "Engine skill level (0-20). 20 = maximum strength.",
+      t("engine.skillLevel"),
+      t("engine.skillLevel.desc"),
       settings.engineSkillLevel,
       { min: 0, max: 20, step: 1 },
       "",

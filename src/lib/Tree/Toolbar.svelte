@@ -39,14 +39,14 @@
         let scoreStr = "?";
         if (result.score != null) {
           if (result.scoreType === 'mate') {
-            scoreStr = (result.score > 0 ? "+" : "") + "M" + Math.abs(result.score);
+            scoreStr = (result.score > 0 ? "+" : "") + t("engine.mate", _lv) + Math.abs(result.score);
           } else {
             scoreStr = (result.score > 0 ? "+" : "") + (result.score / 100).toFixed(2);
           }
         }
         engineResult = `${result.bestmove} (${scoreStr} @depth ${result.depth ?? "?"})`;
       } else {
-        engineResult = "分析失败";
+        engineResult = t("engine.failed", _lv);
       }
     });
   });
@@ -190,7 +190,7 @@
   ></button>
 
   {#if analyzing}
-    <span class="engine-status analyzing">分析中...</span>
+    <span class="engine-status analyzing">{t("engine.analyzing", _lv)}</span>
   {:else if engineResult}
     <span class="engine-status result">{engineResult}</span>
   {/if}

@@ -134,5 +134,13 @@
   "pgn.enable": "启用 PGN 文件视图",
   "pgn.enable.desc": "注册 PGN 文件视图以打开 .pgn 文件",
   "pgn.extensions": "PGN 文件扩展名",
-  "pgn.extensions.desc": "自定义 PGN 视图的文件扩展名，逗号分隔"
+  "pgn.extensions.desc": "自定义 PGN 视图的文件扩展名，逗号分隔",
+  "engine.title": "引擎",
+  "engine.depth": "搜索深度",
+  "engine.depth.desc": "引擎分析搜索深度（1–30），数值越高越强但越慢",
+  "engine.skillLevel": "难度等级",
+  "engine.skillLevel.desc": "引擎难度等级（0–20），20 为最强",
+  "engine.analyzing": "分析中…",
+  "engine.failed": "分析失败",
+  "engine.mate": "将杀"
 }
