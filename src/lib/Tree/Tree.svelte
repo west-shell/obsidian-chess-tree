@@ -615,6 +615,24 @@
             </g>
           {/if}
         {/each}
+
+        {#each renderedNodes as node (node.id)}
+          {#if node.eval}
+            {@const nw = getNodeWidth(node)}
+            {@const evalLabel = node.eval.scoreType === 'mate'
+              ? (node.eval.score > 0 ? "+" : "") + "M" + Math.abs(node.eval.score)
+              : (node.eval.score > 0 ? "+" : "") + (node.eval.score / 100).toFixed(1)}
+            <text
+              x={node.x! * spacingX}
+              y={node.y! * spacingY + nodeHeight * 0.9}
+              dominant-baseline="hanging"
+              text-anchor="middle"
+              font-size="5px"
+              fill={node.eval.score > 0 ? "#4CAF50" : node.eval.score < 0 ? "#f44336" : "#888"}
+              style="pointer-events: none"
+            >{evalLabel}</text>
+          {/if}
+        {/each}
       </g>
     </svg>
 

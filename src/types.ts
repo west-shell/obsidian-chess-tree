@@ -46,6 +46,12 @@ export type IOptions = {
 
 export type ITurn = "white" | "black";
 
+export type NodeEval = {
+  score: number;
+  scoreType: 'cp' | 'mate';
+  depth: number;
+};
+
 export type ChessNode = {
   id: string;
   fen: string;
@@ -58,6 +64,7 @@ export type ChessNode = {
   mainID?: string | null;
   children: ChessNode[];
   comments?: string[];
+  eval?: NodeEval;
 };
 
 export type NodeMap = Map<string, ChessNode>;

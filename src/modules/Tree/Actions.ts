@@ -279,6 +279,13 @@ function stringifyPGN(root: ChessNode): string {
     if (node.comments?.length) {
       for (const c of node.comments) result += `{${c}}`;
     }
+    if (node.eval) {
+      const evalStr = node.eval.scoreType === 'mate'
+        ? `#${Math.abs(node.eval.score)}`
+        : (node.eval.score / 100).toFixed(2);
+      const sign = node.eval.score > 0 ? "+" : "";
+      result += `{[%eval ${sign}${evalStr}]}`;
+    }
     const brothers = nodeBrothers.get(node);
     if (brothers?.length) {
       for (const brother of brothers) {

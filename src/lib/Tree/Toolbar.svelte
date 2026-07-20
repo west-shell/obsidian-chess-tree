@@ -48,6 +48,7 @@
         new Notice(t("engine.failed", _lv));
       }
     });
+    eventBus.on("engine-batch-done", () => { analyzing = false; });
   });
 
   function toggleAnalyze() {
@@ -177,6 +178,14 @@
     aria-label={analyzing ? t("toolbar.stop", _lv) : t("toolbar.analyze", _lv)}
     use:useSetIcon={analyzing ? "circle-stop" : "brain"}
     onclick={toggleAnalyze}
+  ></button>
+
+  <button
+    class="toolbar-btn engine-btn"
+    class:analyzing
+    aria-label={t("toolbar.analyzeBatch", _lv)}
+    use:useSetIcon={"workflow"}
+    onclick={() => { if (!analyzing) { analyzing = true; eventBus.emit("engine-analyze-batch"); } }}
   ></button>
 
   <button

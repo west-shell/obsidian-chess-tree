@@ -54,6 +54,7 @@
   "toolbar.annotate": "Annotate",
   "toolbar.analyze": "Analyze",
   "toolbar.stop": "Stop",
+  "toolbar.analyzeBatch": "Analyze All",
   "genfen.turn": "Turn",
   "genfen.empty": "Empty",
   "genfen.full": "Full",

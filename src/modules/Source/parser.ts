@@ -1,6 +1,6 @@
 // oxlint-disable no-useless-return
 import { Chess, type Move } from "../../chess";
-import { type ChessNode, DEFAULT_FEN } from "../../types";
+import { type ChessNode, type NodeEval, DEFAULT_FEN } from "../../types";
 
 import { type Token, tokenize, type TokenType } from "./Tokenizer";
 
@@ -191,10 +191,34 @@ export class PGNParser {
 
   parseComment() {
     const token = this.consume();
-    const comment = token.value.replace(/^{|}$/g, "").replace(/^;/, "").trim();
+    const raw = token.value.replace(/^{|}$/g, "").replace(/^;/, "").trim();
 
-    this.currentNode.comments ??= [];
-    this.currentNode.comments.push(comment);
+    const evalMatch = raw.match(/\[%eval\s+([+#]?[\d.]+|-[+#]?[\d.]+|%eval\s+(-?\d+),(\d+),(\d+))\]/);
+    if (evalMatch) {
+      const evalStr = evalMatch[1];
+      if (evalStr.startsWith("#") || evalStr.startsWith("+#") || evalStr.startsWith("-#")) {
+        const mateVal = Number.parseInt(evalStr.replace(/[+#-]/g, ""));
+        this.currentNode.eval = {
+          score: evalStr.startsWith("-") ? -mateVal : mateVal,
+          scoreType: 'mate',
+          depth: 0,
+        };
+      } else {
+        this.currentNode.eval = {
+          score: Math.round(parseFloat(evalStr) * 100),
+          scoreType: 'cp',
+          depth: 0,
+        };
+      }
+      const cleaned = raw.replace(/\[%eval\s+[^\]]+\]/, "").trim();
+      if (cleaned) {
+        this.currentNode.comments ??= [];
+        this.currentNode.comments.push(cleaned);
+      }
+    } else {
+      this.currentNode.comments ??= [];
+      this.currentNode.comments.push(raw);
+    }
   }
 
   parseResult() {

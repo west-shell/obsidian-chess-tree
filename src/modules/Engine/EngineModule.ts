@@ -1,4 +1,4 @@
-import type { ITreeHost, IPGNViewHost } from "../../types";
+import type { ITreeHost, IPGNViewHost, NodeEval } from "../../types";
 import { registerTreeModule, registerPGNViewModule } from "../../core/module-system";
 import { engine } from "./Engine";
 
@@ -16,10 +16,56 @@ function initEngine(host: object) {
       await engine.ensureReady();
       engine.postCommand(`setoption name Skill Level value ${settings.engineSkillLevel}`);
       const result = await engine.analyze(fen, settings.engineDepth);
+      if (result && result.score != null) {
+        const nodeEval: NodeEval = {
+          score: result.score,
+          scoreType: result.scoreType ?? 'cp',
+          depth: result.depth ?? 0,
+        };
+        h.currentNode.eval = nodeEval;
+        h.eventBus.emit("modified", null);
+      }
       eventBus.emit("engine-result", result);
     } catch (err) {
       console.error("[Engine] analysis failed:", err);
       eventBus.emit("engine-result", null);
+    } finally {
+      analyzing = false;
+    }
+  });
+
+  eventBus.on("engine-analyze-batch", async () => {
+    if (analyzing) return;
+    analyzing = true;
+    try {
+      await engine.ensureReady();
+      engine.postCommand(`setoption name Skill Level value ${settings.engineSkillLevel}`);
+      const queue: string[] = [];
+      const nodeMap = h.nodeMap;
+      for (const [, node] of nodeMap) {
+        if (!node.eval && node.id !== "node-root") {
+          queue.push(node.id);
+        }
+      }
+      for (const nodeId of queue) {
+        const node = nodeMap.get(nodeId);
+        if (!node) continue;
+        try {
+          const result = await engine.analyze(node.fen, settings.engineDepth);
+          if (result && result.score != null) {
+            node.eval = {
+              score: result.score,
+              scoreType: result.scoreType ?? 'cp',
+              depth: result.depth ?? 0,
+            };
+          }
+        } catch {
+          break;
+        }
+      }
+      h.eventBus.emit("modified", null);
+      h.eventBus.emit("updateUI");
+      h.eventBus.emit("engine-batch-done");
     } finally {
       analyzing = false;
     }
