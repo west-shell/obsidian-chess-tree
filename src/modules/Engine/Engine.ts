@@ -33,7 +33,7 @@ export class ChessEngine {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
 
-    const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`) as ArrayBuffer;
+    const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`);
 
     const workerCode = `
 self.addEventListener('unhandledrejection', function(e) {
