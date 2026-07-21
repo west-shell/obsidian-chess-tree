@@ -53,6 +53,16 @@
   let api: Api | null = null;
   let layoutChangeHandler: (() => void) | null = null;
 
+  function handleWheel(e: WheelEvent) {
+    if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+    e.preventDefault();
+    if (e.deltaY > 0) {
+      eventBus.emit("btn-click", { name: "next" });
+    } else if (e.deltaY < 0) {
+      eventBus.emit("btn-click", { name: "back" });
+    }
+  }
+
   // Promotion state (driven by promote event from BoardClick)
   let promotingMove: { from: Square; to: Square } | null = $state(null);
   let promotingColor: "w" | "b" = $state("w");
@@ -293,7 +303,7 @@
   });
 </script>
 
-<div class="board-wrapper">
+<div class="board-wrapper" onwheel={handleWheel}>
   <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
