@@ -56,6 +56,7 @@ const ActionsModule = {
         ) {
           host.currentNode = node;
           host.fen = node.fen;
+          emitNodeEval(host);
           eventBus.emit("updateMainPath");
           eventBus.emit("updateUI");
           return;
@@ -77,6 +78,7 @@ const ActionsModule = {
       host.currentNode = newNode;
       host.fen = move.after;
       host.currentStep++;
+      emitNodeEval(host);
       eventBus.emit("updateMainPath");
       eventBus.emit("updateUI");
       eventBus.emit("modified", null);
