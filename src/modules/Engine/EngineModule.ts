@@ -135,6 +135,12 @@ function initEngine(host: object) {
           break;
         }
       }
+      const currentNodeEval = h.currentNode?.eval;
+      if (currentNodeEval?.bestmove) {
+        h.eventBus.emit("engine-result", { bestmove: currentNodeEval.bestmove, ponder: currentNodeEval.ponder, score: currentNodeEval.score, depth: currentNodeEval.depth, scoreType: currentNodeEval.scoreType });
+      } else {
+        h.eventBus.emit("clear-engine-bestmove");
+      }
       h.eventBus.emit("modified", null);
       h.eventBus.emit("updateUI");
       h.eventBus.emit("engine-batch-done");
