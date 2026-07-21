@@ -18,6 +18,8 @@ export class ChessEngine {
   private msgHandler: UciHandler | null = null;
   private initResolve: ((value: void) => void) | null = null;
   private initReject: ((reason: Error) => void) | null = null;
+  private analyzeReject: ((reason: Error) => void) | null = null;
+  private analyzeTimeout: number | null = null;
 
   setPlugin(plugin: ChessPlugin): void {
     this.plugin = plugin;
@@ -118,15 +120,32 @@ self.onmessage = function(e) {
   }
 
   analyze(fen: string, depth = 15): Promise<EngineResult> {
+    if (this.analyzeReject) {
+      this.analyzeReject(new Error('Analysis cancelled: new analysis started'));
+    }
+    if (this.analyzeTimeout !== null) {
+      clearTimeout(this.analyzeTimeout);
+    }
+
     return new Promise((resolve, reject) => {
       if (!this.worker || !this.ready) {
         reject(new Error('Engine not ready'));
         return;
       }
 
+      this.analyzeReject = reject;
+
       let lastScore: number | undefined;
       let lastDepth: number | undefined;
       let lastScoreType: 'cp' | 'mate' | undefined;
+
+      this.analyzeTimeout = window.setTimeout(() => {
+        this.analyzeTimeout = null;
+        this.msgHandler = null;
+        this.analyzeReject = null;
+        this.stop();
+        reject(new Error('Analysis timeout'));
+      }, 300_000);
 
       this.msgHandler = (msg: string) => {
         if (msg.startsWith('info')) {
@@ -149,6 +168,11 @@ self.onmessage = function(e) {
           const ponderIdx = parts.indexOf('ponder');
           const ponder = ponderIdx >= 0 && parts[ponderIdx + 1] ? parts[ponderIdx + 1] : undefined;
           this.msgHandler = null;
+          this.analyzeReject = null;
+          if (this.analyzeTimeout !== null) {
+            clearTimeout(this.analyzeTimeout);
+            this.analyzeTimeout = null;
+          }
           if (bestmove) {
             resolve({ bestmove, ponder, score: lastScore, depth: lastDepth, scoreType: lastScoreType });
           } else {
@@ -175,6 +199,14 @@ self.onmessage = function(e) {
   }
 
   terminate(): void {
+    if (this.analyzeReject) {
+      this.analyzeReject(new Error('Engine terminated'));
+      this.analyzeReject = null;
+    }
+    if (this.analyzeTimeout !== null) {
+      clearTimeout(this.analyzeTimeout);
+      this.analyzeTimeout = null;
+    }
     if (this.worker) {
       try { this.worker.postMessage('quit'); } catch { /* ignore */ }
       this.worker.terminate();
