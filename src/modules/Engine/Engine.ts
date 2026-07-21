@@ -149,7 +149,7 @@ self.onmessage = function(e) {
           const ponderIdx = parts.indexOf('ponder');
           const ponder = ponderIdx >= 0 && parts[ponderIdx + 1] ? parts[ponderIdx + 1] : undefined;
           this.msgHandler = null;
-          if (bestmove && bestmove !== '(none)') {
+          if (bestmove) {
             resolve({ bestmove, ponder, score: lastScore, depth: lastDepth, scoreType: lastScoreType });
           } else {
             reject(new Error('No move found'));

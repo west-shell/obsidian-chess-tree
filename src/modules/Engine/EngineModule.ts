@@ -8,6 +8,7 @@ function initEngine(host: object) {
   const { eventBus, settings } = h;
 
   let analyzing = false;
+  let pendingNodeId: string | null = null;
   let lastResult: { bestmove: string; ponder?: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null = null;
 
   function applyOptions() {
@@ -16,8 +17,20 @@ function initEngine(host: object) {
     engine.postCommand(`setoption name Hash value 16`);
   }
 
+  function adjustMateScore(score: number, scoreType: string | undefined, fen: string): number {
+    if (scoreType !== 'mate') return score;
+    let s = score;
+    if (fen.split(' ')[1] === 'b') {
+      s = -s;
+    }
+    if (s === 0) {
+      s = fen.split(' ')[1] === 'w' ? -1 : 1;
+    }
+    return s;
+  }
+
   eventBus.on<import("../../chess").Move>("runmove", (move) => {
-    if (!move || !lastResult) return;
+    if (!move || !lastResult || lastResult.bestmove === '(none)') return;
     const moveUci = move.from + move.to;
     if (moveUci === lastResult.bestmove.slice(0, 4)) {
       if (lastResult.ponder) {
@@ -34,22 +47,31 @@ function initEngine(host: object) {
     }
   });
 
-  eventBus.on("engine-analyze", async (fen?: string) => {
-    if (analyzing) return;
+  eventBus.on("engine-analyze", async () => {
+    const nodeId = h.currentNode.id;
+    if (analyzing) {
+      pendingNodeId = nodeId;
+      engine.stop();
+      return;
+    }
+    const node = h.nodeMap.get(nodeId);
+    if (!node) return;
+    if (node.eval && node.eval.depth >= settings.engineDepth) return;
     analyzing = true;
+    eventBus.emit("engine-analyze");
     try {
       await engine.ensureReady();
       applyOptions();
-      const result = await engine.analyze(fen ?? h.currentNode.fen, settings.engineDepth);
+      const result = await engine.analyze(node.fen, settings.engineDepth);
       if (result && result.score != null) {
+        const score = adjustMateScore(result.score, result.scoreType, node.fen);
         const nodeEval: NodeEval = {
-          score: result.score,
+          score,
           scoreType: result.scoreType ?? 'cp',
           depth: result.depth ?? 0,
         };
-        const node = h.nodeMap.get(h.currentNode.id);
-        if (node) {
-          node.eval = nodeEval;
+        node.eval = nodeEval;
+        if (h.currentNode.id === nodeId) {
           h.currentNode = node;
         }
         lastResult = result;
@@ -61,9 +83,21 @@ function initEngine(host: object) {
       eventBus.emit("engine-result", result);
     } catch (err) {
       console.error("[Engine] analysis failed:", err);
+      if (pendingNodeId) {
+        const next = pendingNodeId;
+        pendingNodeId = null;
+        analyzing = false;
+        eventBus.emit("engine-analyze");
+        return;
+      }
       eventBus.emit("engine-result", null);
     } finally {
       analyzing = false;
+      if (pendingNodeId) {
+        const next = pendingNodeId;
+        pendingNodeId = null;
+        eventBus.emit("engine-analyze");
+      }
     }
   });
 
@@ -86,8 +120,9 @@ function initEngine(host: object) {
         try {
           const result = await engine.analyze(node.fen, settings.engineDepth);
           if (result && result.score != null) {
+            const score = adjustMateScore(result.score, result.scoreType, node.fen);
             node.eval = {
-              score: result.score,
+              score,
               scoreType: result.scoreType ?? 'cp',
               depth: result.depth ?? 0,
             };
@@ -107,6 +142,7 @@ function initEngine(host: object) {
   eventBus.on("engine-stop", () => {
     engine.stop();
     analyzing = false;
+    pendingNodeId = null;
     lastResult = null;
   });
 

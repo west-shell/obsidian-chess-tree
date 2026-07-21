@@ -29,35 +29,25 @@
     });
   });
 
-  let analyzing = $state(false);
+  let autoAnalyze = $state(false);
+  let engineBusy = $state(false);
 
   $effect(() => {
-    eventBus.on<{ bestmove: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null>("engine-result", (result) => {
-      analyzing = false;
-      if (result) {
-        let scoreStr = "?";
-        if (result.score != null) {
-          if (result.scoreType === 'mate') {
-            scoreStr = (result.score > 0 ? "+" : "") + t("engine.mate", _lv) + Math.abs(result.score);
-          } else {
-            scoreStr = (result.score > 0 ? "+" : "") + (result.score / 100).toFixed(2);
-          }
-        }
-        new Notice(`${result.bestmove} (${scoreStr} @depth ${result.depth ?? "?"})`);
-      } else {
-        new Notice(t("engine.failed", _lv));
-      }
-    });
-    eventBus.on("engine-batch-done", () => { analyzing = false; });
+    eventBus.on("engine-analyze", () => { engineBusy = true; });
+    eventBus.on("engine-result", () => { engineBusy = false; });
+    eventBus.on("engine-batch-done", () => { engineBusy = false; });
   });
 
-  function toggleAnalyze() {
-    if (analyzing) {
+  $effect(() => {
+    if (autoAnalyze && fen) {
+      eventBus.emit("engine-analyze");
+    }
+  });
+
+  function toggleAutoAnalyze() {
+    autoAnalyze = !autoAnalyze;
+    if (!autoAnalyze) {
       eventBus.emit("engine-stop");
-      analyzing = false;
-    } else {
-      analyzing = true;
-      eventBus.emit("engine-analyze", fen);
     }
   }
 
@@ -174,18 +164,19 @@
 
   <button
     class="toolbar-btn engine-btn"
-    class:analyzing
-    aria-label={analyzing ? t("toolbar.stop", _lv) : t("toolbar.analyze", _lv)}
-    use:useSetIcon={analyzing ? "circle-stop" : "brain"}
-    onclick={toggleAnalyze}
+    class:active={autoAnalyze}
+    class:analyzing={engineBusy}
+    aria-label={autoAnalyze ? t("toolbar.stop", _lv) : t("toolbar.analyze", _lv)}
+    use:useSetIcon={autoAnalyze ? "circle-stop" : "brain"}
+    onclick={toggleAutoAnalyze}
   ></button>
 
   <button
     class="toolbar-btn engine-btn"
-    class:analyzing
+    class:analyzing={engineBusy}
     aria-label={t("toolbar.analyzeBatch", _lv)}
     use:useSetIcon={"workflow"}
-    onclick={() => { if (!analyzing) { analyzing = true; eventBus.emit("engine-analyze-batch"); } }}
+    onclick={() => eventBus.emit("engine-analyze-batch")}
   ></button>
 
   <button
@@ -252,6 +243,11 @@
 
   .engine-btn.analyzing {
     animation: engine-pulse 1.2s ease-in-out infinite;
+  }
+
+  .engine-btn.active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
   }
 
   @keyframes engine-pulse {
