@@ -33,7 +33,7 @@
   let engineBusy = $state(false);
 
   $effect(() => {
-    eventBus.on("engine-analyze", () => { engineBusy = true; });
+    eventBus.on("engine-busy", () => { engineBusy = true; });
     eventBus.on("engine-result", () => { engineBusy = false; });
     eventBus.on("engine-batch-done", () => { engineBusy = false; });
   });

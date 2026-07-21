@@ -335,17 +335,15 @@
     return currentPath.map((id) => {
       const n = nodeMap.get(id);
       if (!n?.eval) return null;
-      const raw = n.eval.scoreType === "mate"
-        ? (n.eval.score > 0 ? 1 : -1) * Math.min(Math.abs(n.eval.score), 10) * 100
-        : n.eval.score;
-      return raw;
+      if (n.eval.scoreType === "mate") return n.eval.score >= 0 ? Infinity : -Infinity;
+      return n.eval.score;
     });
   });
 
   let evalChartMax = $derived.by(() => {
     let max = 0;
     for (const v of evalChartData) {
-      if (v !== null && Math.abs(v) > max) max = Math.abs(v);
+      if (v !== null && isFinite(v) && Math.abs(v) > max) max = Math.abs(v);
     }
     return max || 1;
   });
@@ -353,11 +351,13 @@
   let evalChartSegments = $derived.by(() => {
     const data = evalChartData;
     const hasAny = data.some((v) => v !== null);
-    if (!hasAny || data.length <= 1) return null;
+    if (!hasAny || currentPath.length <= 1) return null;
     const w = 20;
     const midX = w / 2;
     const maxAbs = evalChartMax;
     const scaleX = (w - 2) / 2 / maxAbs;
+    const edgeR = w - 1;
+    const edgeL = 1;
     const segments: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
     const validIndices: number[] = [];
     for (let i = 0; i < data.length; i++) {
@@ -369,19 +369,18 @@
       const i2 = validIndices[j + 1];
       const v1 = data[i1]!;
       const v2 = data[i2]!;
-      const x1 = midX + v1 * scaleX;
-      const x2 = midX + v2 * scaleX;
-      const color = v2 >= 0 ? "#4CAF50" : "#f44336";
-      if (v1 * v2 < 0) {
-        const ratio = Math.abs(v1) / (Math.abs(v1) + Math.abs(v2));
-        const crossI = i1 + ratio * (i2 - i1);
-        segments.push({ x1, y1: i1, x2: midX, y2: crossI, color: v1 >= 0 ? "#4CAF50" : "#f44336" });
-        segments.push({ x1: midX, y1: crossI, x2, y2: i2, color });
+      const x1 = v1 === Infinity ? edgeR : v1 === -Infinity ? edgeL : midX + v1 * scaleX;
+      const x2 = v2 === Infinity ? edgeR : v2 === -Infinity ? edgeL : midX + v2 * scaleX;
+      const color = v2 === Infinity || (isFinite(v2) && v2 >= 0) ? "#4CAF50" : "#f44336";
+      const color1 = v1 === Infinity || (isFinite(v1) && v1 >= 0) ? "#4CAF50" : "#f44336";
+      if (color1 !== color) {
+        segments.push({ x1, y1: i1, x2: midX, y2: i1 + (i2 - i1) * 0.5, color: color1 });
+        segments.push({ x1: midX, y1: i1 + (i2 - i1) * 0.5, x2, y2: i2, color });
       } else {
         segments.push({ x1, y1: i1, x2, y2: i2, color });
       }
     }
-    return { w, h: data.length - 1, midX, segments };
+    return { w, h: currentPath.length - 1, midX, segments };
   });
 
   let nodeMode = $state(0);
@@ -497,25 +496,19 @@
 
 <div class="tree-container">
   <div class="svg-wrapper">
-    {#if currentNode?.eval}
-      {@const ce = currentNode.eval}
-      {@const absScore = ce.scoreType === 'mate'
-        ? Math.min(Math.abs(ce.score), 10) * 100
-        : Math.abs(ce.score)}
-      {@const evalMax = 300}
-      {@const evalRatio = Math.min(absScore / evalMax, 1)}
-      {@const evalColor = ce.score > 0
+    {#if nodeMap.get(currentNode?.id ?? '')?.eval}
+      {@const ce = nodeMap.get(currentNode!.id)!.eval!}
+      {@const isPositive = ce.score > 0 || (ce.scoreType === 'mate' && ce.score >= 0)}
+      {@const evalColor = isPositive
         ? 'rgba(76, 175, 80, 0.8)'
-        : ce.score < 0
-          ? 'rgba(244, 67, 54, 0.8)'
-          : 'rgba(136, 136, 136, 0.6)'}
-      {@const fillPercent = evalRatio * 50}
+        : 'rgba(244, 67, 54, 0.8)'}
+      {@const fillPercent = ce.scoreType === 'mate' ? 50 : Math.min(Math.abs(ce.score) / 300, 1) * 50}
       {@const evalText = ce.scoreType === 'mate'
-        ? (ce.score > 0 ? '+' : '') + 'M' + ce.score
+        ? (ce.score >= 0 ? '+' : '-') + 'M'
         : (ce.score > 0 ? '+' : '') + (ce.score / 100).toFixed(1)}
       <div class="eval-sidebar">
         <div class="eval-bar">
-          {#if ce.score >= 0}
+          {#if isPositive}
             <div
               class="eval-fill"
               style="height: {fillPercent}%; top: {50 - fillPercent}%; background: {evalColor}"
@@ -684,13 +677,10 @@
               {/if}
             {/if}
             {#if node.eval}
-              {@const absScore = node.eval.scoreType === 'mate'
-                ? Math.min(Math.abs(node.eval.score), 10) * 100
-                : Math.abs(node.eval.score)}
-              {@const intensity = Math.min(absScore / 300, 1)}
-              {@const color = node.eval.score > 0
+              {@const intensity = node.eval.scoreType === 'mate' ? 1 : Math.min(Math.abs(node.eval.score) / 300, 1)}
+              {@const color = node.eval.score > 0 || (node.eval.scoreType === 'mate' && node.eval.score >= 0)
                 ? `rgba(76, 175, 80, ${0.6 + intensity * 0.4})`
-                : node.eval.score < 0
+                : node.eval.score < 0 || (node.eval.scoreType === 'mate' && node.eval.score < 0)
                   ? `rgba(244, 67, 54, ${0.6 + intensity * 0.4})`
                   : `rgba(136, 136, 136, 0.6)`}
               {@const barWidth = 2 + intensity * (nw - 4)}

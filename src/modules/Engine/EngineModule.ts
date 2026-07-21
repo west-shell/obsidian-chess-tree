@@ -17,13 +17,12 @@ function initEngine(host: object) {
     engine.postCommand(`setoption name Hash value 16`);
   }
 
-  function adjustMateScore(score: number, scoreType: string | undefined, fen: string): number {
-    if (scoreType !== 'mate') return score;
+  function toWhiteView(score: number, scoreType: string | undefined, fen: string): number {
     let s = score;
     if (fen.split(' ')[1] === 'b') {
       s = -s;
     }
-    if (s === 0) {
+    if (scoreType === 'mate' && s === 0) {
       s = fen.split(' ')[1] === 'w' ? -1 : 1;
     }
     return s;
@@ -58,13 +57,13 @@ function initEngine(host: object) {
     if (!node) return;
     if (node.eval && node.eval.depth >= settings.engineDepth) return;
     analyzing = true;
-    eventBus.emit("engine-analyze");
+    eventBus.emit("engine-busy");
     try {
       await engine.ensureReady();
       applyOptions();
       const result = await engine.analyze(node.fen, settings.engineDepth);
       if (result && result.score != null) {
-        const score = adjustMateScore(result.score, result.scoreType, node.fen);
+        const score = toWhiteView(result.score, result.scoreType, node.fen);
         const nodeEval: NodeEval = {
           score,
           scoreType: result.scoreType ?? 'cp',
@@ -104,6 +103,7 @@ function initEngine(host: object) {
   eventBus.on("engine-analyze-batch", async () => {
     if (analyzing) return;
     analyzing = true;
+    eventBus.emit("engine-busy");
     try {
       await engine.ensureReady();
       applyOptions();
@@ -120,7 +120,7 @@ function initEngine(host: object) {
         try {
           const result = await engine.analyze(node.fen, settings.engineDepth);
           if (result && result.score != null) {
-            const score = adjustMateScore(result.score, result.scoreType, node.fen);
+            const score = toWhiteView(result.score, result.scoreType, node.fen);
             node.eval = {
               score,
               scoreType: result.scoreType ?? 'cp',
