@@ -101,7 +101,11 @@ function hasEvalInTree(root: ChessNode): boolean {
 async function promptSaveEval(host: ITreeHost): Promise<boolean | null> {
   if (!hasEvalInTree(host.root)) return true;
 
-  let includeEval = true;
+  if (!host.settings.saveEvalPrompt) {
+    return host.settings.saveEvalByDefault;
+  }
+
+  let includeEval = host.settings.saveEvalByDefault;
   const modal = new Modal(host.plugin.app);
   let resolve: (value: boolean | null) => void;
   const promise = new Promise<boolean | null>((r) => { resolve = r; });

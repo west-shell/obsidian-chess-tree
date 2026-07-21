@@ -37,6 +37,8 @@ export interface ISettings {
   pgnFileExtensions: string[];
   engineDepth: number;
   engineSkillLevel: number;
+  saveEvalByDefault: boolean;
+  saveEvalPrompt: boolean;
 }
 
 export type IOptions = {

@@ -144,5 +144,10 @@
   "engine.skillLevel.desc": "引擎难度等级（0–20），20 为最强",
   "engine.analyzing": "分析中…",
   "engine.failed": "分析失败",
-  "engine.mate": "将杀"
+  "engine.mate": "将杀",
+  "save.title": "保存",
+  "save.saveEval": "保存评分",
+  "save.saveEval.desc": "保存 PGN 时包含 AI 评分数据",
+  "save.saveEvalPrompt": "保存前询问",
+  "save.saveEvalPrompt.desc": "保存评分前显示确认对话框"
 }

@@ -77,7 +77,9 @@ function initEngine(host: object) {
         }
         lastResult = result;
         eventBus.emit("engine-result", result);
-        h.eventBus.emit("modified", null);
+        if (settings.saveEvalPrompt || settings.saveEvalByDefault) {
+          h.eventBus.emit("modified", null);
+        }
         h.eventBus.emit("updateUI");
         return;
       }
@@ -141,7 +143,9 @@ function initEngine(host: object) {
       } else {
         h.eventBus.emit("clear-engine-bestmove");
       }
-      h.eventBus.emit("modified", null);
+      if (settings.saveEvalPrompt || settings.saveEvalByDefault) {
+        h.eventBus.emit("modified", null);
+      }
       h.eventBus.emit("updateUI");
       h.eventBus.emit("engine-batch-done");
     } finally {

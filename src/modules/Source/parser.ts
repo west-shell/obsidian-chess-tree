@@ -193,7 +193,31 @@ export class PGNParser {
     const token = this.consume();
     const raw = token.value.replace(/^{|}$/g, "").replace(/^;/, "").trim();
 
-    const evalMatch = raw.match(/\[%eval\s+([+-]?#\d+|[+-]?\d+(?:\.\d+)?|%eval\s+(-?\d+),(\d+),(\d+))\]/);
+    const newFormatMatch = raw.match(/^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?$/);
+    if (newFormatMatch) {
+      const evalStr = newFormatMatch[1];
+      if (evalStr.startsWith("m")) {
+        const mateStr = evalStr.slice(1);
+        const isNeg = mateStr.startsWith("-");
+        const mateVal = Number.parseInt(mateStr.replace(/[^0-9]/g, ""));
+        this.currentNode.eval = {
+          score: isNeg ? -mateVal : mateVal,
+          scoreType: 'mate',
+          depth: 0,
+        };
+      } else {
+        this.currentNode.eval = {
+          score: Math.round(parseFloat(evalStr) * 100),
+          scoreType: 'cp',
+          depth: 0,
+        };
+      }
+      if (newFormatMatch[2]) this.currentNode.eval.bestmove = newFormatMatch[2];
+      if (newFormatMatch[3]) this.currentNode.eval.ponder = newFormatMatch[3];
+      return;
+    }
+
+    const evalMatch = raw.match(/\[%eval\s+([+-]?#\d+|[+-]?\d+(?:\.\d+)?)\]/);
     if (evalMatch) {
       const evalStr = evalMatch[1];
       if (evalStr.includes("#")) {
@@ -224,10 +248,11 @@ export class PGNParser {
         this.currentNode.comments ??= [];
         this.currentNode.comments.push(cleaned);
       }
-    } else {
-      this.currentNode.comments ??= [];
-      this.currentNode.comments.push(raw);
+      return;
     }
+
+    this.currentNode.comments ??= [];
+    this.currentNode.comments.push(raw);
   }
 
   parseResult() {

@@ -201,14 +201,12 @@ function stringifyPGN(root: ChessNode): string {
     if (node.eval) {
       const absScore = Math.abs(node.eval.score);
       const evalStr = node.eval.scoreType === 'mate'
-        ? `#${absScore}`
-        : (absScore / 100).toFixed(2);
-      const sign = node.eval.score >= 0 ? "+" : "-";
-      let annotation = `[%eval ${sign}${evalStr}]`;
+        ? `m${node.eval.score >= 0 ? "+" : "-"}${absScore}`
+        : `${node.eval.score >= 0 ? "+" : "-"}${(absScore / 100).toFixed(2)}`;
+      let annotation = `%e:${evalStr}`;
       if (node.eval.bestmove) {
-        annotation += ` [%bestmove ${node.eval.bestmove}`;
-        if (node.eval.ponder) annotation += ` [%ponder ${node.eval.ponder}]`;
-        annotation += `]`;
+        annotation += `,${node.eval.bestmove}`;
+        if (node.eval.ponder) annotation += `,${node.eval.ponder}`;
       }
       result += `{${annotation}}`;
     }

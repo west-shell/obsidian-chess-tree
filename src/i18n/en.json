@@ -144,5 +144,10 @@
   "engine.skillLevel.desc": "Engine skill level (0–20). 20 = maximum strength.",
   "engine.analyzing": "Analyzing…",
   "engine.failed": "Analysis failed",
-  "engine.mate": "M"
+  "engine.mate": "M",
+  "save.title": "Save",
+  "save.saveEval": "Save evaluation scores",
+  "save.saveEval.desc": "Include evaluation scores when saving PGN",
+  "save.saveEvalPrompt": "Ask before saving",
+  "save.saveEvalPrompt.desc": "Show a confirmation dialog before saving evaluation scores"
 }
