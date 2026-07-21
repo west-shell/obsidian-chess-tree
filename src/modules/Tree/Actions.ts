@@ -108,7 +108,6 @@ const ActionsModule = {
       async (payload) => {
           if (!payload) return;
           host.markedPos = null;
-          emitNodeEval(host);
         const { name } = payload;
         const data = payload.payload as string;
         switch (name) {
@@ -245,6 +244,7 @@ const ActionsModule = {
             break;
           }
         }
+        emitNodeEval(host);
         eventBus.emit("updateUI");
       },
     );
