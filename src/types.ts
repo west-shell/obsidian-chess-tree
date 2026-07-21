@@ -50,6 +50,8 @@ export type NodeEval = {
   score: number;
   scoreType: 'cp' | 'mate';
   depth: number;
+  bestmove?: string;
+  ponder?: string;
 };
 
 export type ChessNode = {

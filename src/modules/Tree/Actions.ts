@@ -289,7 +289,13 @@ function stringifyPGN(root: ChessNode, includeEval = true): string {
         ? `#${absScore}`
         : (absScore / 100).toFixed(2);
       const sign = node.eval.score >= 0 ? "+" : "-";
-      result += `{[%eval ${sign}${evalStr}]}`;
+      let annotation = `[%eval ${sign}${evalStr}]`;
+      if (node.eval.bestmove) {
+        annotation += ` [%bestmove ${node.eval.bestmove}`;
+        if (node.eval.ponder) annotation += ` [%ponder ${node.eval.ponder}]`;
+        annotation += `]`;
+      }
+      result += `{${annotation}}`;
     }
     const brothers = nodeBrothers.get(node);
     if (brothers?.length) {

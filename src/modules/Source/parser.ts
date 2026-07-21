@@ -211,7 +211,15 @@ export class PGNParser {
           depth: 0,
         };
       }
-      const cleaned = raw.replace(/\[%eval\s+[^\]]+\]/, "").trim();
+      const bestmoveMatch = raw.match(/\[%bestmove\s+([a-h][1-8][a-h][1-8][qrbn]?)/);
+      if (bestmoveMatch) {
+        this.currentNode.eval.bestmove = bestmoveMatch[1];
+        const ponderMatch = raw.match(/\[%ponder\s+([a-h][1-8][a-h][1-8][qrbn]?)/);
+        if (ponderMatch) {
+          this.currentNode.eval.ponder = ponderMatch[1];
+        }
+      }
+      const cleaned = raw.replace(/\[%eval\s+[^\]]+\]/, "").replace(/\[%bestmove\s+[^\]]*\]/, "").replace(/\[%ponder\s+[^\]]+\]/, "").trim();
       if (cleaned) {
         this.currentNode.comments ??= [];
         this.currentNode.comments.push(cleaned);

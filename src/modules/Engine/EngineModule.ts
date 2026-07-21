@@ -68,6 +68,8 @@ function initEngine(host: object) {
           score,
           scoreType: result.scoreType ?? 'cp',
           depth: result.depth ?? 0,
+          bestmove: result.bestmove !== '(none)' ? result.bestmove : undefined,
+          ponder: result.ponder,
         };
         node.eval = nodeEval;
         if (h.currentNode.id === nodeId) {
@@ -125,6 +127,8 @@ function initEngine(host: object) {
               score,
               scoreType: result.scoreType ?? 'cp',
               depth: result.depth ?? 0,
+              bestmove: result.bestmove !== '(none)' ? result.bestmove : undefined,
+              ponder: result.ponder,
             };
           }
         } catch {
