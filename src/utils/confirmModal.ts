@@ -1,12 +1,19 @@
 import { type App, Modal, Setting } from "obsidian";
 
+export type SaveConfirmResult = {
+  action: "save" | "saveAll" | "cancel";
+  includeEval: boolean;
+};
+
 export class SaveConfirmModal extends Modal {
-  private resolvePromise: (value: "save" | "saveAll" | "cancel") => void;
-  public promise: Promise<"save" | "saveAll" | "cancel">;
+  private resolvePromise: (value: SaveConfirmResult) => void;
+  public promise: Promise<SaveConfirmResult>;
+  private includeEval = true;
 
   constructor(
     app: App,
     private readonly hasBranches: boolean,
+    private readonly hasEval: boolean,
     private readonly t: (key: string) => string,
   ) {
     super(app);
@@ -20,6 +27,16 @@ export class SaveConfirmModal extends Modal {
     const { contentEl } = this;
     new Setting(contentEl).setName(this.t("confirm.saveTitle")).setHeading();
 
+    if (this.hasEval) {
+      new Setting(contentEl)
+        .setName(this.t("confirm.saveEval"))
+        .addToggle((toggle) => {
+          toggle.setValue(this.includeEval).onChange((val) => {
+            this.includeEval = val;
+          });
+        });
+    }
+
     if (this.hasBranches) {
       contentEl.createEl("p", { text: this.t("confirm.saveBranchesMsg") });
 
@@ -30,7 +47,7 @@ export class SaveConfirmModal extends Modal {
         cls: "mod-cta",
       });
       saveMainBtn.addEventListener("click", () => {
-        this.resolvePromise("save");
+        this.resolvePromise({ action: "save", includeEval: this.includeEval });
         this.close();
       });
 
@@ -38,7 +55,7 @@ export class SaveConfirmModal extends Modal {
         text: this.t("confirm.saveAll"),
       });
       saveAllBtn.addEventListener("click", () => {
-        this.resolvePromise("saveAll");
+        this.resolvePromise({ action: "saveAll", includeEval: this.includeEval });
         this.close();
       });
 
@@ -46,7 +63,7 @@ export class SaveConfirmModal extends Modal {
         text: this.t("confirm.cancel"),
       });
       cancelBtn.addEventListener("click", () => {
-        this.resolvePromise("cancel");
+        this.resolvePromise({ action: "cancel", includeEval: this.includeEval });
         this.close();
       });
     } else {
@@ -59,7 +76,7 @@ export class SaveConfirmModal extends Modal {
         cls: "mod-cta",
       });
       confirmBtn.addEventListener("click", () => {
-        this.resolvePromise("save");
+        this.resolvePromise({ action: "save", includeEval: this.includeEval });
         this.close();
       });
 
@@ -67,7 +84,7 @@ export class SaveConfirmModal extends Modal {
         text: this.t("confirm.cancel"),
       });
       cancelBtn.addEventListener("click", () => {
-        this.resolvePromise("cancel");
+        this.resolvePromise({ action: "cancel", includeEval: this.includeEval });
         this.close();
       });
     }

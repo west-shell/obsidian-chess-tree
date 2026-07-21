@@ -80,6 +80,7 @@
   "notice.saveSuccess": "保存成功！",
   "notice.saveEmpty": "历史记录和PGN记录为空，无需保存！",
   "notice.fenSaved": "FEN已保存到代码块",
+  "confirm.saveEval": "保存评分",
   "confirm.saveTitle": "确认保存",
   "confirm.saveClear": "当前PGN记录不为空，是否要清空？",
   "confirm.saveNew": "当前PGN记录为空，是否要保存历史为PGN？",

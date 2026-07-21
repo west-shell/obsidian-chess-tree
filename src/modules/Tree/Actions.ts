@@ -249,14 +249,15 @@ const ActionsModule = {
       },
     );
 
-    host.stringifyPGN = stringifyPGN;
+    host.stringifyPGN = (root: ChessNode, includeEval = true) =>
+      stringifyPGN(root, includeEval);
   },
 };
 
 registerPGNViewModule("actions", ActionsModule);
 registerTreeModule("actions", ActionsModule);
 
-function stringifyPGN(root: ChessNode): string {
+function stringifyPGN(root: ChessNode, includeEval = true): string {
   const nodeBrothers = genNodeBrothers(root);
 
   function genNodeBrothers(root: ChessNode): Map<ChessNode, ChessNode[]> {
@@ -282,7 +283,7 @@ function stringifyPGN(root: ChessNode): string {
     if (node.comments?.length) {
       for (const c of node.comments) result += `{${c}}`;
     }
-    if (node.eval) {
+    if (includeEval && node.eval) {
       const absScore = Math.abs(node.eval.score);
       const evalStr = node.eval.scoreType === 'mate'
         ? `#${absScore}`

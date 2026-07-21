@@ -80,6 +80,7 @@
   "notice.saveSuccess": "Saved successfully!",
   "notice.saveEmpty": "History and PGN are empty, nothing to save!",
   "notice.fenSaved": "FEN saved to code block",
+  "confirm.saveEval": "Save evaluation scores",
   "confirm.saveTitle": "Confirm Save",
   "confirm.saveClear": "PGN is not empty. Clear it?",
   "confirm.saveNew": "PGN is empty. Save history as PGN?",

@@ -120,7 +120,7 @@ export interface ITreeHost extends IGenFENHost {
   currentPath: string[];
   haveFEN: boolean;
   options: IOptions;
-  stringifyPGN: (root: ChessNode) => string;
+  stringifyPGN: (root: ChessNode, includeEval?: boolean) => string;
 }
 
 export interface IPGNViewHost extends ITreeHost {

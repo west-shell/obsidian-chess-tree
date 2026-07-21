@@ -104,15 +104,15 @@ const ActionsModule = {
         host.history.some((n) => n.children.length > 1) ||
         host.PGN.some((n) => n.children.length > 1) ||
         host.root.children.length > 1;
-      const modal = new SaveConfirmModal(host.plugin.app, hasBranches, t);
+      const modal = new SaveConfirmModal(host.plugin.app, hasBranches, false, t);
 
       modal.open();
       const result = await modal.promise;
 
-      if (result === "save") {
+      if (result.action === "save") {
         await savePGN(host);
         new Notice(t("notice.saveSuccess"));
-      } else if (result === "saveAll") {
+      } else if (result.action === "saveAll") {
         await saveAllPGN(host);
         new Notice(t("notice.saveSuccess"));
       }
