@@ -193,13 +193,14 @@ export class PGNParser {
     const token = this.consume();
     const raw = token.value.replace(/^{|}$/g, "").replace(/^;/, "").trim();
 
-    const evalMatch = raw.match(/\[%eval\s+([+#]?[\d.]+|-[+#]?[\d.]+|%eval\s+(-?\d+),(\d+),(\d+))\]/);
+    const evalMatch = raw.match(/\[%eval\s+([+-]?#\d+|[+-]?\d+(?:\.\d+)?|%eval\s+(-?\d+),(\d+),(\d+))\]/);
     if (evalMatch) {
       const evalStr = evalMatch[1];
-      if (evalStr.startsWith("#") || evalStr.startsWith("+#") || evalStr.startsWith("-#")) {
-        const mateVal = Number.parseInt(evalStr.replace(/[+#-]/g, ""));
+      if (evalStr.includes("#")) {
+        const isNeg = evalStr.startsWith("-");
+        const mateVal = Number.parseInt(evalStr.replace(/[^0-9]/g, ""));
         this.currentNode.eval = {
-          score: evalStr.startsWith("-") ? -mateVal : mateVal,
+          score: isNeg ? -mateVal : mateVal,
           scoreType: 'mate',
           depth: 0,
         };
