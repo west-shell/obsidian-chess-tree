@@ -87,7 +87,7 @@ const ActionsModule = {
       host.markedPos = null;
       host.currentNode = host.nodeMap.get(id)!;
       host.fen = host.currentNode.fen;
-      host.eventBus.emit("clear-engine-bestmove");
+      emitNodeEval(host);
       host.eventBus.emit("updateMainPath");
       host.eventBus.emit("updateUI");
     });
@@ -99,7 +99,7 @@ const ActionsModule = {
       host.markedPos = null;
       host.currentNode = node;
       host.fen = node.fen;
-      host.eventBus.emit("clear-engine-bestmove");
+      emitNodeEval(host);
       host.eventBus.emit("updateUI");
     });
 
@@ -108,7 +108,7 @@ const ActionsModule = {
       async (payload) => {
           if (!payload) return;
           host.markedPos = null;
-          host.eventBus.emit("clear-engine-bestmove");
+          emitNodeEval(host);
         const { name } = payload;
         const data = payload.payload as string;
         switch (name) {
@@ -315,4 +315,13 @@ function stringifyPGN(root: ChessNode, includeEval = true): string {
     return result;
   }
   return walk(root, 0);
+}
+
+function emitNodeEval(host: ITreeHost) {
+  const ev = host.currentNode?.eval;
+  if (ev?.bestmove) {
+    host.eventBus.emit("engine-result", { bestmove: ev.bestmove, ponder: ev.ponder, score: ev.score, depth: ev.depth, scoreType: ev.scoreType });
+  } else {
+    host.eventBus.emit("clear-engine-bestmove");
+  }
 }
