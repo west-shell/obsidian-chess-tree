@@ -68,7 +68,11 @@ function initEngine(host: object) {
     }
     const node = h.nodeMap.get(nodeId);
     if (!node) return;
-    if (node.eval && node.eval.depth >= settings.engineDepth) return;
+    if (node.eval && node.eval.depth >= settings.engineDepth) {
+      eventBus.emit("engine-busy");
+      eventBus.emit("engine-result", { bestmove: node.eval.bestmove, ponder: node.eval.ponder, score: node.eval.score, depth: node.eval.depth, scoreType: node.eval.scoreType });
+      return;
+    }
     analyzing = true;
     stopped = false;
     applyOptions();
@@ -117,11 +121,12 @@ function initEngine(host: object) {
       const missing = await engine.checkFileExists();
       if (missing.length > 0) {
         engine.openDownloadModal(missing);
+        eventBus.emit("engine-stop");
         return;
       }
       engineFileExists = true;
     }
-    try { await engine.ensureReady(); } catch (e) { console.error("[Engine] ensureReady failed:", e); return; }
+    try { await engine.ensureReady(); } catch (e) { console.error("[Engine] ensureReady failed:", e); eventBus.emit("engine-stop"); return; }
     if (analyzing) return;
     analyzing = true;
     stopped = false;

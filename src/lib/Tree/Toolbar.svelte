@@ -40,7 +40,7 @@
       if (pendingBatch) {
         batchAnalyzing = true;
         pendingBatch = false;
-      } else if (!autoAnalyze) {
+      } else {
         autoAnalyze = true;
       }
     });
@@ -60,7 +60,6 @@
       autoAnalyze = false;
       eventBus.emit("engine-stop");
     } else {
-      autoAnalyze = true;
       eventBus.emit("engine-analyze");
     }
   }
