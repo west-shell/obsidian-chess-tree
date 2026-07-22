@@ -84,7 +84,8 @@ export class ChessEngine {
         await adapter.writeBinary(`${baseDir}/${WASM_NAME}`, buffer.buffer);
         modal.done();
       } catch (err) {
-        modal.error(String(err));
+        const msg = err instanceof TypeError ? t("engine.downloadFailed", 0) : String(err);
+        modal.error(msg);
       }
     };
     void modal.promise.then(doDownload);
