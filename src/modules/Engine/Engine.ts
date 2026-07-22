@@ -1,6 +1,7 @@
 import stockfishJs from "./stockfish.txt?raw";
 import type ChessPlugin from "../../main";
 import { DownloadModal } from "../../utils/confirmModal";
+import { requestUrl } from "obsidian";
 import { t } from "../../i18n";
 
 const WASM_NAME = 'stockfish-18-lite-single.wasm';
@@ -57,36 +58,10 @@ export class ChessEngine {
       if (!confirmed) return;
       modal.showProgress();
       try {
-        const buffer = await new Promise<Uint8Array>((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("GET", WASM_URL, true);
-          xhr.responseType = "arraybuffer";
-          if (modal.abortController.signal.aborted) {
-            reject(new Error("aborted"));
-            return;
-          }
-          modal.abortController.signal.addEventListener("abort", () => {
-            xhr.abort();
-            reject(new Error("aborted"));
-          });
-          xhr.onprogress = (e) => {
-            modal.setProgress(e.loaded, e.total || 0);
-          };
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(new Uint8Array(xhr.response));
-            } else {
-              reject(new Error(`HTTP ${xhr.status}`));
-            }
-          };
-          xhr.onerror = () => {
-            reject(new TypeError("network error"));
-          };
-          xhr.send();
-        });
+        const resp = await requestUrl({ url: WASM_URL });
         const adapter = this.plugin.app.vault.adapter;
         const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
-        await adapter.writeBinary(`${baseDir}/${WASM_NAME}`, buffer.buffer);
+        await adapter.writeBinary(`${baseDir}/${WASM_NAME}`, resp.arrayBuffer);
         modal.done();
       } catch (err) {
         const msg = err instanceof TypeError ? t("engine.downloadFailed", 0) : String(err);

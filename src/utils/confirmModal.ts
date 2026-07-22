@@ -162,9 +162,9 @@ export class ConfirmModal extends Modal {
 export class DownloadModal extends Modal {
   private resolvePromise: (value: boolean) => void;
   public promise: Promise<boolean>;
-  private progressBar!: HTMLProgressElement;
   private statusEl!: HTMLElement;
-  public abortController: AbortController = new AbortController();
+  private fileNameSpan!: HTMLSpanElement;
+  private downloadBtn!: HTMLElement;
 
   constructor(
     app: App,
@@ -184,7 +184,7 @@ export class DownloadModal extends Modal {
     const { contentEl } = this;
 
     const fileLine = contentEl.createEl("p");
-    fileLine.createSpan({ text: this.fileName });
+    this.fileNameSpan = fileLine.createSpan({ text: this.fileName });
     fileLine.appendText("（");
     const link = fileLine.createEl("a", {
       text: "GitHub",
@@ -196,12 +196,6 @@ export class DownloadModal extends Modal {
     });
     fileLine.appendText("）");
 
-    this.progressBar = contentEl.createEl("progress", {
-      cls: "download-progress",
-    });
-    this.progressBar.value = 0;
-    this.progressBar.setCssProps({ width: "100%", display: "none" });
-
     this.statusEl = contentEl.createEl("p", {
       cls: "download-status",
       text: "",
@@ -209,11 +203,11 @@ export class DownloadModal extends Modal {
 
     const btnContainer = contentEl.createDiv("modal-button-container");
 
-    const downloadBtn = btnContainer.createEl("button", {
+    this.downloadBtn = btnContainer.createEl("button", {
       text: this.confirmText,
       cls: "mod-cta",
     });
-    downloadBtn.addEventListener("click", () => {
+    this.downloadBtn.addEventListener("click", () => {
       this.resolvePromise(true);
     });
 
@@ -221,40 +215,25 @@ export class DownloadModal extends Modal {
       text: this.cancelText,
     });
     cancelBtn.addEventListener("click", () => {
-      this.abortController.abort();
       this.resolvePromise(false);
       this.close();
     });
   }
 
   showProgress() {
-    this.progressBar.setCssProps({ display: "block" });
-    const downloadBtn = this.contentEl.querySelector("button.mod-cta") as HTMLButtonElement;
-    if (downloadBtn) downloadBtn.disabled = true;
-  }
-
-  setProgress(loaded: number, total: number) {
-    const mb = (n: number) => (n / 1024 / 1024).toFixed(1);
-    if (total > 0) {
-      this.progressBar.value = loaded;
-      this.progressBar.max = total;
-      this.statusEl.textContent = `${mb(loaded)} / ${mb(total)} MB`;
-    } else {
-      this.progressBar.removeAttribute("value");
-      this.statusEl.textContent = `${mb(loaded)} MB`;
-    }
+    this.statusEl.textContent = "⏳";
+    this.downloadBtn.setAttribute("disabled", "");
   }
 
   done() {
-    this.statusEl.textContent = "✓";
-    this.progressBar.value = this.progressBar.max;
+    this.fileNameSpan.textContent = this.fileName + " ✓";
+    this.statusEl.textContent = "";
     window.setTimeout(() => this.close(), 500);
   }
 
   error(msg: string) {
     this.statusEl.textContent = msg;
-    const buttons = this.contentEl.querySelectorAll("button");
-    buttons.forEach((b) => (b.disabled = false));
+    this.downloadBtn.removeAttribute("disabled");
   }
 
   onClose() {
