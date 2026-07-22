@@ -150,6 +150,7 @@
   "engine.downloadBtn": "Download",
   "engine.downloadCancel": "Cancel",
   "engine.downloadFailed": "Download failed, please check network",
+  "engine.retry": "Retry",
   "save.title": "Save",
   "save.saveEval": "Save evaluation scores",
   "save.saveEval.desc": "Include evaluation scores when saving PGN",
