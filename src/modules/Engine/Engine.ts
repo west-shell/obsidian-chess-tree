@@ -53,32 +53,39 @@ export class ChessEngine {
       [WASM_NAME]: WASM_URL,
       [JS_NAME]: JS_URL,
     };
+    const files = missingFiles.map((f) => ({
+      name: f,
+      url: urlMap[f],
+    }));
     const modal = new DownloadModal(
       this.plugin.app,
-      t("engine.downloadFile", 0).replace("{file}", missingFiles.join(", ")),
-      missingFiles.length === 1 ? urlMap[missingFiles[0]] : WASM_URL,
+      t("engine.downloadFile", 0).replace("{file}", missingFiles.join("、")),
+      files,
       t("engine.downloadBtn", 0),
       t("engine.downloadCancel", 0),
     );
     modal.open();
     const doDownload = async (confirmed: boolean) => {
       if (!confirmed) return;
-      modal.showProgress();
-      try {
-        const adapter = this.plugin.app.vault.adapter;
-        const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
-        for (const file of missingFiles) {
+      const adapter = this.plugin.app.vault.adapter;
+      const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
+      for (let i = 0; i < missingFiles.length; i++) {
+        const file = missingFiles[i];
+        const destPath = `${baseDir}/${file}`;
+        modal.showProgress(i);
+        try {
           const resp = await requestUrl({ url: urlMap[file] });
           if (file.endsWith('.wasm')) {
-            await adapter.writeBinary(`${baseDir}/${file}`, resp.arrayBuffer);
+            await adapter.writeBinary(destPath, resp.arrayBuffer);
           } else {
-            await adapter.write(`${baseDir}/${file}`, resp.text);
+            await adapter.write(destPath, resp.text);
           }
+          modal.done(i);
+        } catch (err) {
+          const msg = err instanceof TypeError ? t("engine.downloadFailed", 0) : String(err);
+          modal.error(i, msg);
+          return;
         }
-        modal.done();
-      } catch (err) {
-        const msg = err instanceof TypeError ? t("engine.downloadFailed", 0) : String(err);
-        modal.error(msg);
       }
     };
     void modal.promise.then(doDownload);

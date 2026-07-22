@@ -162,14 +162,18 @@ export class ConfirmModal extends Modal {
 export class DownloadModal extends Modal {
   private resolvePromise: (value: boolean) => void;
   public promise: Promise<boolean>;
-  private statusEl!: HTMLElement;
-  private fileNameSpan!: HTMLSpanElement;
-  private downloadBtn!: HTMLElement;
+  private readonly fileRows: {
+    name: string;
+    url: string;
+    status: HTMLSpanElement;
+    nameSpan: HTMLSpanElement;
+  }[] = [];
+  private downloadBtn!: HTMLButtonElement;
 
   constructor(
     app: App,
-    private readonly fileName: string,
-    private readonly downloadUrl: string,
+    private readonly title: string,
+    private readonly files: { name: string; url: string }[],
     private readonly confirmText: string,
     private readonly cancelText: string,
   ) {
@@ -183,23 +187,32 @@ export class DownloadModal extends Modal {
   onOpen() {
     const { contentEl } = this;
 
-    const fileLine = contentEl.createEl("p");
-    this.fileNameSpan = fileLine.createSpan({ text: this.fileName });
-    fileLine.appendText("（");
-    const link = fileLine.createEl("a", {
-      text: "GitHub",
-      attr: { href: this.downloadUrl, target: "_blank" },
-    });
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      window.open(this.downloadUrl, "_blank");
-    });
-    fileLine.appendText("）");
+    contentEl.createEl("p", { text: this.title });
 
-    this.statusEl = contentEl.createEl("p", {
-      cls: "download-status",
-      text: "",
-    });
+    for (const file of this.files) {
+      const row = contentEl.createEl("p");
+
+      const nameSpan = row.createSpan({ text: file.name });
+      row.appendText("（");
+      const link = row.createEl("a", {
+        text: "GitHub",
+        attr: { href: file.url, target: "_blank" },
+      });
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.open(file.url, "_blank");
+      });
+      row.appendText("）");
+
+      const status = contentEl.createSpan({ cls: "download-status", text: "" });
+
+      this.fileRows.push({
+        name: file.name,
+        url: file.url,
+        status,
+        nameSpan,
+      });
+    }
 
     const btnContainer = contentEl.createDiv("modal-button-container");
 
@@ -220,20 +233,31 @@ export class DownloadModal extends Modal {
     });
   }
 
-  showProgress() {
-    this.statusEl.textContent = "⏳";
-    this.downloadBtn.setAttribute("disabled", "");
+  showProgress(index: number) {
+    const row = this.fileRows[index];
+    if (!row) return;
+    row.status.textContent = "⏳";
+    this.downloadBtn.disabled = true;
   }
 
-  done() {
-    this.fileNameSpan.textContent = this.fileName + " ✓";
-    this.statusEl.textContent = "";
-    window.setTimeout(() => this.close(), 500);
+  done(index: number) {
+    const row = this.fileRows[index];
+    if (!row) return;
+    row.nameSpan.textContent = row.name + " ✓";
+    row.status.textContent = "";
+    const allDone = this.fileRows.every((r) =>
+      r.nameSpan.textContent?.includes("✓"),
+    );
+    if (allDone) {
+      window.setTimeout(() => this.close(), 500);
+    }
   }
 
-  error(msg: string) {
-    this.statusEl.textContent = msg;
-    this.downloadBtn.removeAttribute("disabled");
+  error(index: number, msg: string) {
+    const row = this.fileRows[index];
+    if (!row) return;
+    row.status.textContent = msg;
+    this.downloadBtn.disabled = false;
   }
 
   onClose() {
