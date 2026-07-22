@@ -204,7 +204,7 @@ export class DownloadModal extends Modal {
       });
       row.appendText("）");
 
-      const status = contentEl.createSpan({ cls: "download-status", text: "" });
+      const status = row.createSpan({ cls: "download-status", text: "" });
 
       this.fileRows.push({
         name: file.name,
