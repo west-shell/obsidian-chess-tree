@@ -217,40 +217,6 @@ export class PGNParser {
       return;
     }
 
-    const evalMatch = raw.match(/\[%eval\s+([+-]?#\d+|[+-]?\d+(?:\.\d+)?)\]/);
-    if (evalMatch) {
-      const evalStr = evalMatch[1];
-      if (evalStr.includes("#")) {
-        const isNeg = evalStr.startsWith("-");
-        const mateVal = Number.parseInt(evalStr.replace(/[^0-9]/g, ""));
-        this.currentNode.eval = {
-          score: isNeg ? -mateVal : mateVal,
-          scoreType: 'mate',
-          depth: 0,
-        };
-      } else {
-        this.currentNode.eval = {
-          score: Math.round(Number.parseFloat(evalStr) * 100),
-          scoreType: 'cp',
-          depth: 0,
-        };
-      }
-      const bestmoveMatch = raw.match(/\[%bestmove\s+([a-h][1-8][a-h][1-8][qrbn]?)/);
-      if (bestmoveMatch) {
-        this.currentNode.eval.bestmove = bestmoveMatch[1];
-        const ponderMatch = raw.match(/\[%ponder\s+([a-h][1-8][a-h][1-8][qrbn]?)/);
-        if (ponderMatch) {
-          this.currentNode.eval.ponder = ponderMatch[1];
-        }
-      }
-      const cleaned = raw.replace(/\[%eval\s+[^\]]+\]/, "").replace(/\[%bestmove\s+[^\]]*\]/, "").replace(/\[%ponder\s+[^\]]+\]/, "").trim();
-      if (cleaned) {
-        this.currentNode.comments ??= [];
-        this.currentNode.comments.push(cleaned);
-      }
-      return;
-    }
-
     this.currentNode.comments ??= [];
     this.currentNode.comments.push(raw);
   }
