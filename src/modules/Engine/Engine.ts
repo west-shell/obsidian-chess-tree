@@ -51,11 +51,11 @@ export class ChessEngine {
       t("engine.downloadCancel", 0),
     );
     modal.open();
-    modal.promise.then(async (confirmed) => {
+    const doDownload = async (confirmed: boolean) => {
       if (!confirmed) return;
       modal.showProgress();
       try {
-        const resp = await fetch(WASM_URL, { signal: modal.abortController.signal });
+        const resp = await window.fetch(WASM_URL, { signal: modal.abortController.signal });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const contentLength = Number(resp.headers.get("content-length")) || 0;
         const reader = resp.body?.getReader();
@@ -79,12 +79,13 @@ export class ChessEngine {
         }
         const adapter = this.plugin.app.vault.adapter;
         const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
-        await adapter.writeBinary(`${baseDir}/${WASM_NAME}`, buffer.buffer as ArrayBuffer);
+        await adapter.writeBinary(`${baseDir}/${WASM_NAME}`, buffer.buffer);
         modal.done();
       } catch (err) {
         modal.error(String(err));
       }
-    });
+    };
+    void modal.promise.then(doDownload);
   }
 
   private async initWorker(): Promise<void> {
