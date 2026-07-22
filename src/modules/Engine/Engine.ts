@@ -1,11 +1,13 @@
-import stockfishJs from "./stockfish.txt?raw";
 import type ChessPlugin from "../../main";
 import { DownloadModal } from "../../utils/confirmModal";
 import { requestUrl } from "obsidian";
 import { t } from "../../i18n";
 
-const WASM_NAME = 'stockfish-18-lite-single.wasm';
-const WASM_URL = `https://raw.githubusercontent.com/west-shell/obsidian-chess-tree/main/assets/stockfish/${WASM_NAME}`;
+const WASM_NAME = 'stockfish.wasm';
+const JS_NAME = 'stockfish.js';
+const BASE_GITHUB = 'https://raw.githubusercontent.com/west-shell/obsidian-chess-tree/main/assets/stockfish';
+const WASM_URL = `${BASE_GITHUB}/${WASM_NAME}`;
+const JS_URL = `${BASE_GITHUB}/${JS_NAME}`;
 
 export interface EngineResult {
   bestmove: string;
@@ -40,16 +42,21 @@ export class ChessEngine {
   async checkFileExists(): Promise<string[]> {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
-    const path = `${baseDir}/${WASM_NAME}`;
-    if (await adapter.exists(path)) return [];
-    return [WASM_NAME];
+    const missing: string[] = [];
+    if (!(await adapter.exists(`${baseDir}/${WASM_NAME}`))) missing.push(WASM_NAME);
+    if (!(await adapter.exists(`${baseDir}/${JS_NAME}`))) missing.push(JS_NAME);
+    return missing;
   }
 
   openDownloadModal(missingFiles: string[]): void {
+    const urlMap: Record<string, string> = {
+      [WASM_NAME]: WASM_URL,
+      [JS_NAME]: JS_URL,
+    };
     const modal = new DownloadModal(
       this.plugin.app,
-      t("engine.downloadFile", 0).replace("{file}", missingFiles[0]),
-      WASM_URL,
+      t("engine.downloadFile", 0).replace("{file}", missingFiles.join(", ")),
+      missingFiles.length === 1 ? urlMap[missingFiles[0]] : WASM_URL,
       t("engine.downloadBtn", 0),
       t("engine.downloadCancel", 0),
     );
@@ -58,10 +65,16 @@ export class ChessEngine {
       if (!confirmed) return;
       modal.showProgress();
       try {
-        const resp = await requestUrl({ url: WASM_URL });
         const adapter = this.plugin.app.vault.adapter;
         const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
-        await adapter.writeBinary(`${baseDir}/${WASM_NAME}`, resp.arrayBuffer);
+        for (const file of missingFiles) {
+          const resp = await requestUrl({ url: urlMap[file] });
+          if (file.endsWith('.wasm')) {
+            await adapter.writeBinary(`${baseDir}/${file}`, resp.arrayBuffer);
+          } else {
+            await adapter.write(`${baseDir}/${file}`, resp.text);
+          }
+        }
         modal.done();
       } catch (err) {
         const msg = err instanceof TypeError ? t("engine.downloadFailed", 0) : String(err);
@@ -75,6 +88,7 @@ export class ChessEngine {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
     const wasmBuffer = await adapter.readBinary(`${baseDir}/${WASM_NAME}`);
+    const stockfishJs = await adapter.read(`${baseDir}/${JS_NAME}`);
 
     const workerCode = `
 self.addEventListener('unhandledrejection', function(e) {
