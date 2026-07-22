@@ -10,6 +10,7 @@ function initEngine(host: object) {
 
   let analyzing = false;
   let batchCancelled = false;
+  let engineReady = false;
   let pendingNodeId: string | null = null;
   let lastResult: { bestmove: string; ponder?: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null = null;
 
@@ -49,6 +50,9 @@ function initEngine(host: object) {
   });
 
   eventBus.on("engine-analyze", async () => {
+    if (!engineReady) {
+      try { await engine.ensureReady(); engineReady = true; } catch { return; }
+    }
     const nodeId = h.currentNode.id;
     if (analyzing) {
       pendingNodeId = nodeId;
@@ -59,10 +63,9 @@ function initEngine(host: object) {
     if (!node) return;
     if (node.eval && node.eval.depth >= settings.engineDepth) return;
     analyzing = true;
+    applyOptions();
     eventBus.emit("engine-busy");
     try {
-      await engine.ensureReady();
-      applyOptions();
       const result = await engine.analyze(node.fen, settings.engineDepth);
       if (result && result.score != null) {
         const score = toWhiteView(result.score, result.scoreType, node.fen);
@@ -87,14 +90,10 @@ function initEngine(host: object) {
       }
       eventBus.emit("engine-result", result);
     } catch (err) {
-      console.error("[Engine] analysis failed:", err);
-      if (pendingNodeId) {
-        pendingNodeId = null;
-        analyzing = false;
-        eventBus.emit("engine-analyze");
-        return;
-      }
+      analyzing = false;
+      pendingNodeId = null;
       eventBus.emit("engine-result", null);
+      return;
     } finally {
       analyzing = false;
       if (pendingNodeId) {
@@ -105,13 +104,15 @@ function initEngine(host: object) {
   });
 
   eventBus.on("engine-analyze-batch", async () => {
+    if (!engineReady) {
+      try { await engine.ensureReady(); engineReady = true; } catch { return; }
+    }
     if (analyzing) return;
     analyzing = true;
     batchCancelled = false;
+    applyOptions();
     eventBus.emit("engine-busy");
     try {
-      await engine.ensureReady();
-      applyOptions();
       const queue: string[] = [];
       const nodeMap = h.nodeMap;
       for (const [, node] of nodeMap) {
@@ -150,6 +151,10 @@ function initEngine(host: object) {
       }
       h.eventBus.emit("updateUI");
       h.eventBus.emit("engine-batch-done");
+    } catch {
+      analyzing = false;
+      eventBus.emit("engine-batch-done");
+      return;
     } finally {
       analyzing = false;
     }

@@ -1,5 +1,11 @@
+import { Notice } from "obsidian";
 import stockfishJs from "./stockfish.txt?raw";
 import type ChessPlugin from "../../main";
+import { DownloadModal } from "../../utils/confirmModal";
+import { t } from "../../i18n";
+
+const WASM_NAME = 'stockfish-18-lite-single.wasm';
+const WASM_URL = `https://raw.githubusercontent.com/west-shell/obsidian-chess-tree/main/assets/stockfish/${WASM_NAME}`;
 
 export interface EngineResult {
   bestmove: string;
@@ -31,11 +37,73 @@ export class ChessEngine {
     await this.initWorker();
   }
 
-  private async initWorker(): Promise<void> {
+  private async ensureWasm(): Promise<ArrayBuffer> {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
+    const wasmPath = `${baseDir}/${WASM_NAME}`;
 
-    const wasmBuffer = await adapter.readBinary(`${baseDir}/stockfish-18-lite-single.wasm`);
+    const exists = await adapter.exists(wasmPath);
+    if (exists) {
+      return adapter.readBinary(wasmPath);
+    }
+
+    const modal = new DownloadModal(
+      this.plugin.app,
+      t("engine.downloadFile", 0).replace("{file}", WASM_NAME),
+      WASM_URL,
+      t("engine.downloadBtn", 0),
+      t("engine.downloadCancel", 0),
+      t("engine.downloadManual", 0),
+    );
+    modal.open();
+
+    const confirmed = await modal.promise;
+    if (!confirmed) {
+      modal.close();
+      throw new Error('Engine download cancelled');
+    }
+
+    modal.showProgress();
+
+    try {
+      const resp = await fetch(WASM_URL, { signal: modal.abortController.signal });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const contentLength = Number(resp.headers.get("content-length")) || 0;
+      const reader = resp.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      const chunks: Uint8Array[] = [];
+      let loaded = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+        if (contentLength > 0) {
+          modal.setProgress(loaded, contentLength);
+        }
+      }
+
+      const buffer = new Uint8Array(loaded);
+      let offset = 0;
+      for (const chunk of chunks) {
+        buffer.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      await adapter.writeBinary(wasmPath, buffer.buffer as ArrayBuffer);
+      modal.done();
+    } catch (err) {
+      modal.error(String(err));
+      throw err;
+    }
+
+    return adapter.readBinary(wasmPath);
+  }
+
+  private async initWorker(): Promise<void> {
+    const wasmBuffer = await this.ensureWasm();
 
     const workerCode = `
 self.addEventListener('unhandledrejection', function(e) {

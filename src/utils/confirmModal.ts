@@ -158,3 +158,106 @@ export class ConfirmModal extends Modal {
     contentEl.empty();
   }
 }
+
+export class DownloadModal extends Modal {
+  private resolvePromise: (value: boolean) => void;
+  public promise: Promise<boolean>;
+  private progressBar!: HTMLProgressElement;
+  private statusEl!: HTMLElement;
+  private cancelBtnEl!: HTMLButtonElement;
+  public abortController: AbortController = new AbortController();
+
+  constructor(
+    app: App,
+    private readonly fileName: string,
+    private readonly downloadUrl: string,
+    private readonly confirmText: string,
+    private readonly cancelText: string,
+    private readonly manualText: string,
+  ) {
+    super(app);
+    this.resolvePromise = () => {};
+    this.promise = new Promise((resolve) => {
+      this.resolvePromise = resolve;
+    });
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+
+    contentEl.createEl("p", { text: this.fileName });
+
+    this.progressBar = contentEl.createEl("progress", {
+      cls: "download-progress",
+    });
+    this.progressBar.value = 0;
+    this.progressBar.style.width = "100%";
+    this.progressBar.style.display = "none";
+
+    this.statusEl = contentEl.createEl("p", {
+      cls: "download-status",
+      text: "",
+    });
+
+    const btnContainer = contentEl.createDiv("modal-button-container");
+
+    const downloadBtn = btnContainer.createEl("button", {
+      text: this.confirmText,
+      cls: "mod-cta",
+    });
+    downloadBtn.addEventListener("click", () => {
+      this.resolvePromise(true);
+    });
+
+    this.cancelBtnEl = btnContainer.createEl("button", {
+      text: this.cancelText,
+    });
+    this.cancelBtnEl.addEventListener("click", () => {
+      this.abortController.abort();
+      this.resolvePromise(false);
+      this.close();
+    });
+
+    const manualLink = btnContainer.createEl("a", {
+      text: this.manualText,
+      cls: "download-manual-link",
+      attr: { href: this.downloadUrl, target: "_blank" },
+    });
+    manualLink.style.marginLeft = "12px";
+    manualLink.style.fontSize = "0.85em";
+    manualLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.open(this.downloadUrl, "_blank");
+    });
+  }
+
+  showProgress() {
+    this.progressBar.style.display = "block";
+    const downloadBtn = this.contentEl.querySelector("button.mod-cta") as HTMLButtonElement;
+    if (downloadBtn) downloadBtn.disabled = true;
+  }
+
+  setProgress(loaded: number, total: number) {
+    this.progressBar.value = loaded;
+    this.progressBar.max = total;
+    const mb = (n: number) => (n / 1024 / 1024).toFixed(1);
+    this.statusEl.textContent = `${mb(loaded)} / ${mb(total)} MB`;
+  }
+
+  done() {
+    this.statusEl.textContent = "✓";
+    this.progressBar.value = this.progressBar.max;
+    setTimeout(() => this.close(), 500);
+  }
+
+  error(msg: string) {
+    this.statusEl.textContent = msg;
+    const buttons = this.contentEl.querySelectorAll("button");
+    buttons.forEach((b) => ((b as HTMLButtonElement).disabled = false));
+  }
+
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+}
