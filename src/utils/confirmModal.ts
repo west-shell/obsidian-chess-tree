@@ -234,10 +234,15 @@ export class DownloadModal extends Modal {
   }
 
   setProgress(loaded: number, total: number) {
-    this.progressBar.value = loaded;
-    this.progressBar.max = total;
     const mb = (n: number) => (n / 1024 / 1024).toFixed(1);
-    this.statusEl.textContent = `${mb(loaded)} / ${mb(total)} MB`;
+    if (total > 0) {
+      this.progressBar.value = loaded;
+      this.progressBar.max = total;
+      this.statusEl.textContent = `${mb(loaded)} / ${mb(total)} MB`;
+    } else {
+      this.progressBar.removeAttribute("value");
+      this.statusEl.textContent = `${mb(loaded)} MB`;
+    }
   }
 
   done() {

@@ -57,9 +57,16 @@ export class ChessEngine {
       if (!confirmed) return;
       modal.showProgress();
       try {
+        let contentLength = 0;
+        try {
+          const headResp = await window.fetch(WASM_URL, { method: "HEAD" });
+          contentLength = Number(headResp.headers.get("content-length")) || 0;
+        } catch { /* ignore */ }
         const resp = await window.fetch(WASM_URL, { signal: modal.abortController.signal });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const contentLength = Number(resp.headers.get("content-length")) || 0;
+        if (contentLength === 0) {
+          contentLength = Number(resp.headers.get("content-length")) || 0;
+        }
         const reader = resp.body?.getReader();
         if (!reader) throw new Error("No response body");
         const chunks: Uint8Array[] = [];
@@ -69,9 +76,7 @@ export class ChessEngine {
           if (done) break;
           chunks.push(value);
           loaded += value.length;
-          if (contentLength > 0) {
-            modal.setProgress(loaded, contentLength);
-          }
+          modal.setProgress(loaded, contentLength);
         }
         const buffer = new Uint8Array(loaded);
         let offset = 0;
