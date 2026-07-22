@@ -146,7 +146,7 @@
   "engine.analyzing": "Analyzing…",
   "engine.failed": "Analysis failed",
   "engine.mate": "M",
-  "engine.downloadFile": "Engine file not found: {file}",
+  "engine.downloadFile": "Engine file not found:",
   "engine.downloadBtn": "Download",
   "engine.downloadCancel": "Cancel",
   "engine.downloadFailed": "Download failed, please check network",
