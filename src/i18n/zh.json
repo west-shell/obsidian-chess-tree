@@ -149,7 +149,6 @@
   "engine.downloadFile": "引擎文件不存在：{file}",
   "engine.downloadBtn": "下载",
   "engine.downloadCancel": "取消",
-  "engine.downloadManual": "手动下载",
   "save.title": "保存",
   "save.saveEval": "保存评分",
   "save.saveEval.desc": "保存 PGN 时包含 AI 评分数据",

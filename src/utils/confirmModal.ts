@@ -164,7 +164,6 @@ export class DownloadModal extends Modal {
   public promise: Promise<boolean>;
   private progressBar!: HTMLProgressElement;
   private statusEl!: HTMLElement;
-  private cancelBtnEl!: HTMLButtonElement;
   public abortController: AbortController = new AbortController();
 
   constructor(
@@ -173,7 +172,6 @@ export class DownloadModal extends Modal {
     private readonly downloadUrl: string,
     private readonly confirmText: string,
     private readonly cancelText: string,
-    private readonly manualText: string,
   ) {
     super(app);
     this.resolvePromise = () => {};
@@ -185,7 +183,18 @@ export class DownloadModal extends Modal {
   onOpen() {
     const { contentEl } = this;
 
-    contentEl.createEl("p", { text: this.fileName });
+    const fileLine = contentEl.createEl("p");
+    fileLine.createSpan({ text: this.fileName });
+    fileLine.appendText("（");
+    const link = fileLine.createEl("a", {
+      text: "GitHub",
+      attr: { href: this.downloadUrl, target: "_blank" },
+    });
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.open(this.downloadUrl, "_blank");
+    });
+    fileLine.appendText("）");
 
     this.progressBar = contentEl.createEl("progress", {
       cls: "download-progress",
@@ -209,25 +218,13 @@ export class DownloadModal extends Modal {
       this.resolvePromise(true);
     });
 
-    this.cancelBtnEl = btnContainer.createEl("button", {
+    const cancelBtn = btnContainer.createEl("button", {
       text: this.cancelText,
     });
-    this.cancelBtnEl.addEventListener("click", () => {
+    cancelBtn.addEventListener("click", () => {
       this.abortController.abort();
       this.resolvePromise(false);
       this.close();
-    });
-
-    const manualLink = btnContainer.createEl("a", {
-      text: this.manualText,
-      cls: "download-manual-link",
-      attr: { href: this.downloadUrl, target: "_blank" },
-    });
-    manualLink.style.marginLeft = "12px";
-    manualLink.style.fontSize = "0.85em";
-    manualLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      window.open(this.downloadUrl, "_blank");
     });
   }
 
