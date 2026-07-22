@@ -207,7 +207,7 @@ export class PGNParser {
         };
       } else {
         this.currentNode.eval = {
-          score: Math.round(parseFloat(evalStr) * 100),
+          score: Math.round(Number.parseFloat(evalStr) * 100),
           scoreType: 'cp',
           depth: 0,
         };
@@ -230,7 +230,7 @@ export class PGNParser {
         };
       } else {
         this.currentNode.eval = {
-          score: Math.round(parseFloat(evalStr) * 100),
+          score: Math.round(Number.parseFloat(evalStr) * 100),
           scoreType: 'cp',
           depth: 0,
         };

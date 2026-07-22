@@ -132,7 +132,7 @@ async function promptSaveEval(host: IPGNViewHost): Promise<boolean | null> {
     const cancelBtn = btnContainer.createEl("button", { text: t("confirm.cancel") });
     cancelBtn.addEventListener("click", () => { resolve(null); modal.close(); });
   };
-  modal.onClose = () => { contentEl.empty(); };
+  modal.onClose = () => { (modal as { contentEl: HTMLElement }).contentEl.empty(); };
   modal.open();
   return promise;
 }

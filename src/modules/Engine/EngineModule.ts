@@ -1,5 +1,6 @@
-import type { ITreeHost, IPGNViewHost, NodeEval } from "../../types";
-import { registerTreeModule, registerPGNViewModule } from "../../core/module-system";
+import type { IPGNViewHost, ITreeHost, NodeEval } from "../../types";
+import type { Move } from "../../chess";
+import { registerPGNViewModule, registerTreeModule } from "../../core/module-system";
 import { engine } from "./Engine";
 
 function initEngine(host: object) {
@@ -28,7 +29,7 @@ function initEngine(host: object) {
     return s;
   }
 
-  eventBus.on<import("../../chess").Move>("runmove", (move) => {
+  eventBus.on<Move>("runmove", (move) => {
     if (!move || !lastResult || lastResult.bestmove === '(none)') return;
     const moveUci = move.from + move.to;
     if (moveUci === lastResult.bestmove.slice(0, 4)) {
@@ -87,7 +88,6 @@ function initEngine(host: object) {
     } catch (err) {
       console.error("[Engine] analysis failed:", err);
       if (pendingNodeId) {
-        const next = pendingNodeId;
         pendingNodeId = null;
         analyzing = false;
         eventBus.emit("engine-analyze");
@@ -97,7 +97,6 @@ function initEngine(host: object) {
     } finally {
       analyzing = false;
       if (pendingNodeId) {
-        const next = pendingNodeId;
         pendingNodeId = null;
         eventBus.emit("engine-analyze");
       }

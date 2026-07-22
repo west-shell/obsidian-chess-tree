@@ -124,9 +124,9 @@ self.onmessage = function(e) {
       this.analyzeReject(new Error('Analysis cancelled: new analysis started'));
     }
     if (this.analyzeTimeout !== null) {
-      clearTimeout(this.analyzeTimeout);
+      window.clearTimeout(this.analyzeTimeout);
     }
-
+ 
     return new Promise((resolve, reject) => {
       if (!this.worker || !this.ready) {
         reject(new Error('Engine not ready'));
@@ -166,11 +166,11 @@ self.onmessage = function(e) {
           const parts = msg.split(/\s+/);
           const bestmove = parts[1];
           const ponderIdx = parts.indexOf('ponder');
-          const ponder = ponderIdx >= 0 && parts[ponderIdx + 1] ? parts[ponderIdx + 1] : undefined;
+          const ponder = ponderIdx !== -1 && parts[ponderIdx + 1] ? parts[ponderIdx + 1] : undefined;
           this.msgHandler = null;
           this.analyzeReject = null;
           if (this.analyzeTimeout !== null) {
-            clearTimeout(this.analyzeTimeout);
+            window.clearTimeout(this.analyzeTimeout);
             this.analyzeTimeout = null;
           }
           if (bestmove) {
@@ -204,7 +204,7 @@ self.onmessage = function(e) {
       this.analyzeReject = null;
     }
     if (this.analyzeTimeout !== null) {
-      clearTimeout(this.analyzeTimeout);
+      window.clearTimeout(this.analyzeTimeout);
       this.analyzeTimeout = null;
     }
     if (this.worker) {

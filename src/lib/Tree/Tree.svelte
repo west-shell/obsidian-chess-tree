@@ -343,7 +343,7 @@
   let evalChartMax = $derived.by(() => {
     let max = 0;
     for (const v of evalChartData) {
-      if (v !== null && isFinite(v) && Math.abs(v) > max) max = Math.abs(v);
+      if (v !== null && Number.isFinite(v) && Math.abs(v) > max) max = Math.abs(v);
     }
     return max || 1;
   });
@@ -371,8 +371,8 @@
       const v2 = data[i2]!;
       const x1 = v1 === Infinity ? edgeR : v1 === -Infinity ? edgeL : midX + v1 * scaleX;
       const x2 = v2 === Infinity ? edgeR : v2 === -Infinity ? edgeL : midX + v2 * scaleX;
-      const color = v2 === Infinity || (isFinite(v2) && v2 >= 0) ? "#4CAF50" : "#f44336";
-      const color1 = v1 === Infinity || (isFinite(v1) && v1 >= 0) ? "#4CAF50" : "#f44336";
+      const color = v2 === Infinity || (Number.isFinite(v2) && v2 >= 0) ? "#4CAF50" : "#f44336";
+      const color1 = v1 === Infinity || (Number.isFinite(v1) && v1 >= 0) ? "#4CAF50" : "#f44336";
       if (color1 !== color) {
         segments.push({ x1, y1: i1, x2: midX, y2: i1 + (i2 - i1) * 0.5, color: color1 });
         segments.push({ x1: midX, y1: i1 + (i2 - i1) * 0.5, x2, y2: i2, color });
@@ -769,7 +769,7 @@
               stroke-width="0.5"
               vector-effect="non-scaling-stroke"
             />
-            {#each evalChartSegments.segments as seg}
+            {#each evalChartSegments.segments as seg, i (i)}
               <line
                 x1={seg.x1}
                 y1={seg.y1}
