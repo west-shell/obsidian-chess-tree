@@ -32,9 +32,18 @@
   let autoAnalyze = $state(false);
   let engineBusy = $state(false);
   let batchAnalyzing = $state(false);
+  let pendingBatch = false;
 
   $effect(() => {
-    eventBus.on("engine-busy", () => { engineBusy = true; });
+    eventBus.on("engine-busy", () => {
+      engineBusy = true;
+      if (pendingBatch) {
+        batchAnalyzing = true;
+        pendingBatch = false;
+      } else {
+        autoAnalyze = true;
+      }
+    });
     eventBus.on("engine-result", () => { engineBusy = false; });
     eventBus.on("engine-batch-done", () => { engineBusy = false; batchAnalyzing = false; });
     eventBus.on("engine-stop", () => { batchAnalyzing = false; autoAnalyze = false; engineBusy = false; });
@@ -51,7 +60,7 @@
       autoAnalyze = false;
       eventBus.emit("engine-stop");
     } else {
-      autoAnalyze = true;
+      eventBus.emit("engine-analyze");
     }
   }
 
@@ -183,10 +192,9 @@
     use:useSetIcon={batchAnalyzing ? "circle-stop" : "workflow"}
     onclick={() => {
       if (batchAnalyzing) {
-        batchAnalyzing = false;
         eventBus.emit("engine-stop");
       } else {
-        batchAnalyzing = true;
+        pendingBatch = true;
         eventBus.emit("engine-analyze-batch");
       }
     }}
