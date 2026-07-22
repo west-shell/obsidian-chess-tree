@@ -36,16 +36,18 @@ export class ChessEngine {
     await this.initWorker();
   }
 
-  async checkFileExists(): Promise<boolean> {
+  async checkFileExists(): Promise<string[]> {
     const adapter = this.plugin.app.vault.adapter;
     const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
-    return adapter.exists(`${baseDir}/${WASM_NAME}`);
+    const path = `${baseDir}/${WASM_NAME}`;
+    if (await adapter.exists(path)) return [];
+    return [WASM_NAME];
   }
 
-  openDownloadModal(): void {
+  openDownloadModal(missingFiles: string[]): void {
     const modal = new DownloadModal(
       this.plugin.app,
-      t("engine.downloadFile", 0).replace("{file}", WASM_NAME),
+      t("engine.downloadFile", 0).replace("{file}", missingFiles[0]),
       WASM_URL,
       t("engine.downloadBtn", 0),
       t("engine.downloadCancel", 0),

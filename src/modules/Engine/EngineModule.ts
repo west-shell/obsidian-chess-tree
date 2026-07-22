@@ -52,8 +52,9 @@ function initEngine(host: object) {
 
   eventBus.on("engine-analyze", async () => {
     if (!engineFileExists) {
-      if (!(await engine.checkFileExists())) {
-        engine.openDownloadModal();
+      const missing = await engine.checkFileExists();
+      if (missing.length > 0) {
+        engine.openDownloadModal(missing);
         return;
       }
       engineFileExists = true;
@@ -113,8 +114,9 @@ function initEngine(host: object) {
 
   eventBus.on("engine-analyze-batch", async () => {
     if (!engineFileExists) {
-      if (!(await engine.checkFileExists())) {
-        engine.openDownloadModal();
+      const missing = await engine.checkFileExists();
+      if (missing.length > 0) {
+        engine.openDownloadModal(missing);
         return;
       }
       engineFileExists = true;
