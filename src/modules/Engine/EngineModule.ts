@@ -9,6 +9,7 @@ function initEngine(host: object) {
   const { eventBus, settings } = h;
 
   let analyzing = false;
+  let batchCancelled = false;
   let pendingNodeId: string | null = null;
   let lastResult: { bestmove: string; ponder?: string; score?: number; depth?: number; scoreType?: 'cp' | 'mate' } | null = null;
 
@@ -106,6 +107,7 @@ function initEngine(host: object) {
   eventBus.on("engine-analyze-batch", async () => {
     if (analyzing) return;
     analyzing = true;
+    batchCancelled = false;
     eventBus.emit("engine-busy");
     try {
       await engine.ensureReady();
@@ -118,6 +120,7 @@ function initEngine(host: object) {
         }
       }
       for (const nodeId of queue) {
+        if (batchCancelled) break;
         const node = nodeMap.get(nodeId);
         if (!node) continue;
         try {
@@ -153,6 +156,7 @@ function initEngine(host: object) {
   });
 
   eventBus.on("engine-stop", () => {
+    batchCancelled = true;
     engine.stop();
     analyzing = false;
     pendingNodeId = null;

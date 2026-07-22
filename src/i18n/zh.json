@@ -55,6 +55,7 @@
   "toolbar.analyze": "AI 分析",
   "toolbar.stop": "停止",
   "toolbar.analyzeBatch": "批量分析",
+  "toolbar.cancelBatch": "取消批量",
   "genfen.turn": "先",
   "genfen.empty": "清空棋盘",
   "genfen.full": "满",

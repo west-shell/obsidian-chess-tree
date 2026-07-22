@@ -55,6 +55,7 @@
   "toolbar.analyze": "Analyze",
   "toolbar.stop": "Stop",
   "toolbar.analyzeBatch": "Analyze All",
+  "toolbar.cancelBatch": "Cancel Batch",
   "genfen.turn": "Turn",
   "genfen.empty": "Empty",
   "genfen.full": "Full",

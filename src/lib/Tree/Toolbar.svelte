@@ -31,11 +31,13 @@
 
   let autoAnalyze = $state(false);
   let engineBusy = $state(false);
+  let batchAnalyzing = $state(false);
 
   $effect(() => {
     eventBus.on("engine-busy", () => { engineBusy = true; });
     eventBus.on("engine-result", () => { engineBusy = false; });
-    eventBus.on("engine-batch-done", () => { engineBusy = false; });
+    eventBus.on("engine-batch-done", () => { engineBusy = false; batchAnalyzing = false; });
+    eventBus.on("engine-stop", () => { batchAnalyzing = false; });
   });
 
   $effect(() => {
@@ -173,10 +175,18 @@
 
   <button
     class="toolbar-btn engine-btn"
-    class:analyzing={engineBusy}
-    aria-label={t("toolbar.analyzeBatch", _lv)}
-    use:useSetIcon={"workflow"}
-    onclick={() => eventBus.emit("engine-analyze-batch")}
+    class:analyzing={engineBusy && !batchAnalyzing}
+    class:batch-analyzing={batchAnalyzing}
+    aria-label={batchAnalyzing ? t("toolbar.cancelBatch", _lv) : t("toolbar.analyzeBatch", _lv)}
+    use:useSetIcon={batchAnalyzing ? "circle-stop" : "workflow"}
+    onclick={() => {
+      if (batchAnalyzing) {
+        eventBus.emit("engine-stop");
+      } else {
+        batchAnalyzing = true;
+        eventBus.emit("engine-analyze-batch");
+      }
+    }}
   ></button>
 
   <button
@@ -243,6 +253,12 @@
 
   .engine-btn.analyzing {
     animation: engine-pulse 1.2s ease-in-out infinite;
+  }
+
+  .engine-btn.batch-analyzing {
+    animation: engine-pulse 1.2s ease-in-out infinite;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
   }
 
   .engine-btn.active {
