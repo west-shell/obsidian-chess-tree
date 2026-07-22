@@ -57,33 +57,33 @@ export class ChessEngine {
       if (!confirmed) return;
       modal.showProgress();
       try {
-        let contentLength = 0;
-        try {
-          const headResp = await window.fetch(WASM_URL, { method: "HEAD" });
-          contentLength = Number(headResp.headers.get("content-length")) || 0;
-        } catch { /* ignore */ }
-        const resp = await window.fetch(WASM_URL, { signal: modal.abortController.signal });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        if (contentLength === 0) {
-          contentLength = Number(resp.headers.get("content-length")) || 0;
-        }
-        const reader = resp.body?.getReader();
-        if (!reader) throw new Error("No response body");
-        const chunks: Uint8Array[] = [];
-        let loaded = 0;
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          loaded += value.length;
-          modal.setProgress(loaded, contentLength);
-        }
-        const buffer = new Uint8Array(loaded);
-        let offset = 0;
-        for (const chunk of chunks) {
-          buffer.set(chunk, offset);
-          offset += chunk.length;
-        }
+        const buffer = await new Promise<Uint8Array>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", WASM_URL, true);
+          xhr.responseType = "arraybuffer";
+          if (modal.abortController.signal.aborted) {
+            reject(new Error("aborted"));
+            return;
+          }
+          modal.abortController.signal.addEventListener("abort", () => {
+            xhr.abort();
+            reject(new Error("aborted"));
+          });
+          xhr.onprogress = (e) => {
+            modal.setProgress(e.loaded, e.total || 0);
+          };
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(new Uint8Array(xhr.response));
+            } else {
+              reject(new Error(`HTTP ${xhr.status}`));
+            }
+          };
+          xhr.onerror = () => {
+            reject(new TypeError("network error"));
+          };
+          xhr.send();
+        });
         const adapter = this.plugin.app.vault.adapter;
         const baseDir = `${this.plugin.app.vault.configDir}/plugins/chess-tree`;
         await adapter.writeBinary(`${baseDir}/${WASM_NAME}`, buffer.buffer);
