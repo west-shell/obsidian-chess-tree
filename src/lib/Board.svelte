@@ -48,7 +48,6 @@
 
   // 升变弹窗图标尺寸基于 cellSize 推算（棋盘宽 = cellSize * 8）
   let promoIconSize = $derived(settings.cellSize * 8 * 0.11);
-  // oxlint-disable-next-line no-unassigned-vars
   let boardElement: HTMLDivElement;
   let api: Api | null = null;
   let layoutChangeHandler: (() => void) | null = null;
@@ -92,8 +91,6 @@
     promotingMove = null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function cancelPromotion() {}
   let turnColor: cg.Color = $derived(
     fen.split(" ")[1] === "b" ? "black" : "white",
   );

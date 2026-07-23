@@ -479,7 +479,6 @@
     }
     const node = currentNode;
     commentsText = getRegularComments(node).join("\n");
-    // oxlint-disable-next-line promise/always-return
     tick().then(() => {
       if (textareaEl) adjustTextareaHeight();
       panToNodeIfNeeded(node);

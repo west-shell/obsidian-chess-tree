@@ -81,7 +81,6 @@
       : null,
   ) as "white" | "black" | null;
 
-  // oxlint-disable-next-line no-unassigned-vars
   let treeViewEl: HTMLDivElement;
   let adaptiveBoardWidth = $state(300);
 
