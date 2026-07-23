@@ -108,8 +108,8 @@ const ActionsModule = {
     eventBus.on<{ name: string; payload: unknown }>(
       "btn-click",
       async (payload) => {
-          if (!payload) return;
-          host.markedPos = null;
+        if (!payload) return;
+        host.markedPos = null;
         const { name } = payload;
         const data = payload.payload as string;
         switch (name) {
@@ -287,9 +287,10 @@ function stringifyPGN(root: ChessNode, includeEval = true): string {
     }
     if (includeEval && node.eval) {
       const absScore = Math.abs(node.eval.score);
-      const evalStr = node.eval.scoreType === 'mate'
-        ? `m${node.eval.score >= 0 ? "+" : "-"}${absScore}`
-        : `${node.eval.score >= 0 ? "+" : "-"}${(absScore / 100).toFixed(2)}`;
+      const evalStr =
+        node.eval.scoreType === "mate"
+          ? `m${node.eval.score >= 0 ? "+" : "-"}${absScore}`
+          : `${node.eval.score >= 0 ? "+" : "-"}${(absScore / 100).toFixed(2)}`;
       let annotation = `%e:${evalStr}`;
       if (node.eval.bestmove) {
         annotation += `,${node.eval.bestmove}`;
@@ -320,7 +321,13 @@ function stringifyPGN(root: ChessNode, includeEval = true): string {
 function emitNodeEval(host: ITreeHost) {
   const ev = host.currentNode?.eval;
   if (ev?.bestmove) {
-    host.eventBus.emit("engine-result", { bestmove: ev.bestmove, ponder: ev.ponder, score: ev.score, depth: ev.depth, scoreType: ev.scoreType });
+    host.eventBus.emit("engine-result", {
+      bestmove: ev.bestmove,
+      ponder: ev.ponder,
+      score: ev.score,
+      depth: ev.depth,
+      scoreType: ev.scoreType,
+    });
   } else {
     host.eventBus.emit("clear-engine-bestmove");
   }

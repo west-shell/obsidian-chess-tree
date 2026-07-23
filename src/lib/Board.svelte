@@ -130,15 +130,17 @@
   }
 
   let engineShapes: DrawShape[] = $derived([
-    ...(engineBestMove ? [{ orig: engineBestMove.from, dest: engineBestMove.to, brush: "green" }] : []),
-    ...(enginePonder ? [{ orig: enginePonder.from, dest: enginePonder.to, brush: "yellow" }] : []),
+    ...(engineBestMove
+      ? [{ orig: engineBestMove.from, dest: engineBestMove.to, brush: "green" }]
+      : []),
+    ...(enginePonder
+      ? [{ orig: enginePonder.from, dest: enginePonder.to, brush: "yellow" }]
+      : []),
   ]);
-  let shapes = $derived(
-    [
-      ...(settings.showNextMove ? computeVariationShapes(variations) : []),
-      ...engineShapes,
-    ],
-  );
+  let shapes = $derived([
+    ...(settings.showNextMove ? computeVariationShapes(variations) : []),
+    ...engineShapes,
+  ]);
   let dests = $derived(computeDests(fen));
   let _check: cg.Color | false = $derived(checkColor || false);
   onMount(async () => {

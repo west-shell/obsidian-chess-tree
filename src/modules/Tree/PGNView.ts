@@ -112,7 +112,9 @@ async function promptSaveEval(host: IPGNViewHost): Promise<boolean | null> {
   let includeEval = host.settings.saveEvalByDefault;
   const modal = new Modal(host.plugin.app);
   let resolve: (value: boolean | null) => void;
-  const promise = new Promise<boolean | null>((r) => { resolve = r; });
+  const promise = new Promise<boolean | null>((r) => {
+    resolve = r;
+  });
 
   modal.onOpen = () => {
     const { contentEl } = modal;
@@ -120,7 +122,9 @@ async function promptSaveEval(host: IPGNViewHost): Promise<boolean | null> {
     new Setting(contentEl)
       .setName(t("confirm.saveEval"))
       .addToggle((toggle) => {
-        toggle.setValue(includeEval).onChange((val) => { includeEval = val; });
+        toggle.setValue(includeEval).onChange((val) => {
+          includeEval = val;
+        });
       });
 
     const btnContainer = contentEl.createDiv("modal-button-container");
@@ -128,11 +132,21 @@ async function promptSaveEval(host: IPGNViewHost): Promise<boolean | null> {
       text: t("confirm.saveBtn"),
       cls: "mod-cta",
     });
-    saveBtn.addEventListener("click", () => { resolve(includeEval); modal.close(); });
-    const cancelBtn = btnContainer.createEl("button", { text: t("confirm.cancel") });
-    cancelBtn.addEventListener("click", () => { resolve(null); modal.close(); });
+    saveBtn.addEventListener("click", () => {
+      resolve(includeEval);
+      modal.close();
+    });
+    const cancelBtn = btnContainer.createEl("button", {
+      text: t("confirm.cancel"),
+    });
+    cancelBtn.addEventListener("click", () => {
+      resolve(null);
+      modal.close();
+    });
   };
-  modal.onClose = () => { (modal as { contentEl: HTMLElement }).contentEl.empty(); };
+  modal.onClose = () => {
+    (modal as { contentEl: HTMLElement }).contentEl.empty();
+  };
   modal.open();
   return promise;
 }

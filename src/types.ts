@@ -50,7 +50,7 @@ export type ITurn = "white" | "black";
 
 export type NodeEval = {
   score: number;
-  scoreType: 'cp' | 'mate';
+  scoreType: "cp" | "mate";
   depth: number;
   bestmove?: string;
   ponder?: string;

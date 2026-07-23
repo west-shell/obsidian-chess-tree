@@ -335,7 +335,8 @@
     return currentPath.map((id) => {
       const n = nodeMap.get(id);
       if (!n?.eval) return null;
-      if (n.eval.scoreType === "mate") return n.eval.score >= 0 ? Infinity : -Infinity;
+      if (n.eval.scoreType === "mate")
+        return n.eval.score >= 0 ? Infinity : -Infinity;
       return n.eval.score;
     });
   });
@@ -343,7 +344,8 @@
   let evalChartMax = $derived.by(() => {
     let max = 0;
     for (const v of evalChartData) {
-      if (v !== null && Number.isFinite(v) && Math.abs(v) > max) max = Math.abs(v);
+      if (v !== null && Number.isFinite(v) && Math.abs(v) > max)
+        max = Math.abs(v);
     }
     return max || 1;
   });
@@ -358,7 +360,13 @@
     const scaleX = (w - 2) / 2 / maxAbs;
     const edgeR = w - 1;
     const edgeL = 1;
-    const segments: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
+    const segments: {
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      color: string;
+    }[] = [];
     const validIndices: number[] = [];
     for (let i = 0; i < data.length; i++) {
       if (data[i] === null) continue;
@@ -369,13 +377,33 @@
       const i2 = validIndices[j + 1];
       const v1 = data[i1]!;
       const v2 = data[i2]!;
-      const x1 = v1 === Infinity ? edgeR : v1 === -Infinity ? edgeL : midX + v1 * scaleX;
-      const x2 = v2 === Infinity ? edgeR : v2 === -Infinity ? edgeL : midX + v2 * scaleX;
-      const color = v2 === Infinity || (Number.isFinite(v2) && v2 >= 0) ? "#4CAF50" : "#f44336";
-      const color1 = v1 === Infinity || (Number.isFinite(v1) && v1 >= 0) ? "#4CAF50" : "#f44336";
+      const x1 =
+        v1 === Infinity ? edgeR : v1 === -Infinity ? edgeL : midX + v1 * scaleX;
+      const x2 =
+        v2 === Infinity ? edgeR : v2 === -Infinity ? edgeL : midX + v2 * scaleX;
+      const color =
+        v2 === Infinity || (Number.isFinite(v2) && v2 >= 0)
+          ? "#4CAF50"
+          : "#f44336";
+      const color1 =
+        v1 === Infinity || (Number.isFinite(v1) && v1 >= 0)
+          ? "#4CAF50"
+          : "#f44336";
       if (color1 !== color) {
-        segments.push({ x1, y1: i1, x2: midX, y2: i1 + (i2 - i1) * 0.5, color: color1 });
-        segments.push({ x1: midX, y1: i1 + (i2 - i1) * 0.5, x2, y2: i2, color });
+        segments.push({
+          x1,
+          y1: i1,
+          x2: midX,
+          y2: i1 + (i2 - i1) * 0.5,
+          color: color1,
+        });
+        segments.push({
+          x1: midX,
+          y1: i1 + (i2 - i1) * 0.5,
+          x2,
+          y2: i2,
+          color,
+        });
       } else {
         segments.push({ x1, y1: i1, x2, y2: i2, color });
       }
@@ -400,7 +428,11 @@
   let zoomBTN = $derived([
     { title: t("tree.zoomIn", _lv), icon: "plus", event: zoomIn },
     { title: t("tree.zoomOut", _lv), icon: "minus", event: zoomOut },
-    { title: t("tree.fold", _lv), icon: "chevrons-right-left", event: toggleCurrentFold },
+    {
+      title: t("tree.fold", _lv),
+      icon: "chevrons-right-left",
+      event: toggleCurrentFold,
+    },
     { title: t("tree.resetView", _lv), icon: "rotate-ccw", event: resetView },
   ]);
   let nodeModeTitle = $derived(t("tree.nodeMode", _lv));
@@ -495,22 +527,28 @@
 
 <div class="tree-container">
   <div class="svg-wrapper">
-    {#if nodeMap.get(currentNode?.id ?? '')?.eval}
+    {#if nodeMap.get(currentNode?.id ?? "")?.eval}
       {@const ce = nodeMap.get(currentNode!.id)!.eval!}
-      {@const isPositive = ce.score > 0 || (ce.scoreType === 'mate' && ce.score >= 0)}
+      {@const isPositive =
+        ce.score > 0 || (ce.scoreType === "mate" && ce.score >= 0)}
       {@const evalColor = isPositive
-        ? 'rgba(76, 175, 80, 0.8)'
-        : 'rgba(244, 67, 54, 0.8)'}
-      {@const fillPercent = ce.scoreType === 'mate' ? 50 : Math.min(Math.abs(ce.score) / 300, 1) * 50}
-      {@const evalText = ce.scoreType === 'mate'
-        ? (ce.score >= 0 ? '+' : '-') + 'M'
-        : (ce.score > 0 ? '+' : '') + (ce.score / 100).toFixed(1)}
+        ? "rgba(76, 175, 80, 0.8)"
+        : "rgba(244, 67, 54, 0.8)"}
+      {@const fillPercent =
+        ce.scoreType === "mate"
+          ? 50
+          : Math.min(Math.abs(ce.score) / 300, 1) * 50}
+      {@const evalText =
+        ce.scoreType === "mate"
+          ? (ce.score >= 0 ? "+" : "-") + "M"
+          : (ce.score > 0 ? "+" : "") + (ce.score / 100).toFixed(1)}
       <div class="eval-sidebar">
         <div class="eval-bar">
           {#if isPositive}
             <div
               class="eval-fill"
-              style="height: {fillPercent}%; top: {50 - fillPercent}%; background: {evalColor}"
+              style="height: {fillPercent}%; top: {50 -
+                fillPercent}%; background: {evalColor}"
             ></div>
           {:else}
             <div
@@ -519,7 +557,9 @@
             ></div>
           {/if}
           <div class="eval-center-line"></div>
-          <span class="eval-label" style="background: {evalColor}">{evalText}</span>
+          <span class="eval-label" style="background: {evalColor}"
+            >{evalText}</span
+          >
         </div>
       </div>
     {/if}
@@ -562,8 +602,10 @@
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <g
               transform="translate({node.x! * spacingX +
-                (isLeft ? -nw / 2 : nw / 2)} {node.y! *
-                spacingY}){node.id === currentNode?.id ? ' scale(1.2)' : ''}"
+                (isLeft ? -nw / 2 : nw / 2)} {node.y! * spacingY}){node.id ===
+              currentNode?.id
+                ? ' scale(1.2)'
+                : ''}"
               style="cursor: pointer"
               onclick={(e) => {
                 e.stopPropagation();
@@ -676,12 +718,18 @@
               {/if}
             {/if}
             {#if node.eval}
-              {@const intensity = node.eval.scoreType === 'mate' ? 1 : Math.min(Math.abs(node.eval.score) / 300, 1)}
-              {@const color = node.eval.score > 0 || (node.eval.scoreType === 'mate' && node.eval.score >= 0)
-                ? `rgba(76, 175, 80, ${0.6 + intensity * 0.4})`
-                : node.eval.score < 0 || (node.eval.scoreType === 'mate' && node.eval.score < 0)
-                  ? `rgba(244, 67, 54, ${0.6 + intensity * 0.4})`
-                  : `rgba(136, 136, 136, 0.6)`}
+              {@const intensity =
+                node.eval.scoreType === "mate"
+                  ? 1
+                  : Math.min(Math.abs(node.eval.score) / 300, 1)}
+              {@const color =
+                node.eval.score > 0 ||
+                (node.eval.scoreType === "mate" && node.eval.score >= 0)
+                  ? `rgba(76, 175, 80, ${0.6 + intensity * 0.4})`
+                  : node.eval.score < 0 ||
+                      (node.eval.scoreType === "mate" && node.eval.score < 0)
+                    ? `rgba(244, 67, 54, ${0.6 + intensity * 0.4})`
+                    : `rgba(136, 136, 136, 0.6)`}
               {@const barWidth = 2 + intensity * (nw - 4)}
               <rect
                 x={-barWidth / 2}
@@ -726,7 +774,11 @@
       ></button>
     </div>
 
-    <div class="slider" class:active={sliderMouseDown} class:has-eval={!!evalChartSegments}>
+    <div
+      class="slider"
+      class:active={sliderMouseDown}
+      class:has-eval={!!evalChartSegments}
+    >
       <button
         class="slider-btn slider-to-start"
         aria-label="To start"
@@ -875,7 +927,10 @@
     left: 0;
     right: 0;
     border-radius: 2px;
-    transition: height 0.3s ease, top 0.3s ease, background 0.3s ease;
+    transition:
+      height 0.3s ease,
+      top 0.3s ease,
+      background 0.3s ease;
   }
 
   .eval-center-line {

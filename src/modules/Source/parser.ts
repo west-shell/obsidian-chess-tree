@@ -192,7 +192,9 @@ export class PGNParser {
     const token = this.consume();
     const raw = token.value.replace(/^{|}$/g, "").replace(/^;/, "").trim();
 
-    const newFormatMatch = raw.match(/^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?$/);
+    const newFormatMatch = raw.match(
+      /^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?$/,
+    );
     if (newFormatMatch) {
       const evalStr = newFormatMatch[1];
       if (evalStr.startsWith("m")) {
@@ -201,13 +203,13 @@ export class PGNParser {
         const mateVal = Number.parseInt(mateStr.replace(/[^0-9]/g, ""));
         this.currentNode.eval = {
           score: isNeg ? -mateVal : mateVal,
-          scoreType: 'mate',
+          scoreType: "mate",
           depth: 0,
         };
       } else {
         this.currentNode.eval = {
           score: Math.round(Number.parseFloat(evalStr) * 100),
-          scoreType: 'cp',
+          scoreType: "cp",
           depth: 0,
         };
       }

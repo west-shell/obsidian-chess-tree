@@ -104,7 +104,12 @@ const ActionsModule = {
         host.history.some((n) => n.children.length > 1) ||
         host.PGN.some((n) => n.children.length > 1) ||
         host.root.children.length > 1;
-      const modal = new SaveConfirmModal(host.plugin.app, hasBranches, false, t);
+      const modal = new SaveConfirmModal(
+        host.plugin.app,
+        hasBranches,
+        false,
+        t,
+      );
 
       modal.open();
       const result = await modal.promise;
@@ -200,9 +205,10 @@ function stringifyPGN(root: ChessNode): string {
     }
     if (node.eval) {
       const absScore = Math.abs(node.eval.score);
-      const evalStr = node.eval.scoreType === 'mate'
-        ? `m${node.eval.score >= 0 ? "+" : "-"}${absScore}`
-        : `${node.eval.score >= 0 ? "+" : "-"}${(absScore / 100).toFixed(2)}`;
+      const evalStr =
+        node.eval.scoreType === "mate"
+          ? `m${node.eval.score >= 0 ? "+" : "-"}${absScore}`
+          : `${node.eval.score >= 0 ? "+" : "-"}${(absScore / 100).toFixed(2)}`;
       let annotation = `%e:${evalStr}`;
       if (node.eval.bestmove) {
         annotation += `,${node.eval.bestmove}`;

@@ -55,7 +55,10 @@ export class SaveConfirmModal extends Modal {
         text: this.t("confirm.saveAll"),
       });
       saveAllBtn.addEventListener("click", () => {
-        this.resolvePromise({ action: "saveAll", includeEval: this.includeEval });
+        this.resolvePromise({
+          action: "saveAll",
+          includeEval: this.includeEval,
+        });
         this.close();
       });
 
@@ -63,7 +66,10 @@ export class SaveConfirmModal extends Modal {
         text: this.t("confirm.cancel"),
       });
       cancelBtn.addEventListener("click", () => {
-        this.resolvePromise({ action: "cancel", includeEval: this.includeEval });
+        this.resolvePromise({
+          action: "cancel",
+          includeEval: this.includeEval,
+        });
         this.close();
       });
     } else {
@@ -84,7 +90,10 @@ export class SaveConfirmModal extends Modal {
         text: this.t("confirm.cancel"),
       });
       cancelBtn.addEventListener("click", () => {
-        this.resolvePromise({ action: "cancel", includeEval: this.includeEval });
+        this.resolvePromise({
+          action: "cancel",
+          includeEval: this.includeEval,
+        });
         this.close();
       });
     }

@@ -44,10 +44,22 @@
         autoAnalyze = true;
       }
     });
-    eventBus.on("engine-result", () => { engineBusy = false; });
-    eventBus.on("engine-batch-done", () => { engineBusy = false; batchAnalyzing = false; });
-    eventBus.on("engine-stop", () => { batchAnalyzing = false; autoAnalyze = false; engineBusy = false; });
-    eventBus.on("engine-batch-stop", () => { batchAnalyzing = false; engineBusy = false; });
+    eventBus.on("engine-result", () => {
+      engineBusy = false;
+    });
+    eventBus.on("engine-batch-done", () => {
+      engineBusy = false;
+      batchAnalyzing = false;
+    });
+    eventBus.on("engine-stop", () => {
+      batchAnalyzing = false;
+      autoAnalyze = false;
+      engineBusy = false;
+    });
+    eventBus.on("engine-batch-stop", () => {
+      batchAnalyzing = false;
+      engineBusy = false;
+    });
   });
 
   $effect(() => {
@@ -180,7 +192,9 @@
     class="toolbar-btn engine-btn"
     class:active={autoAnalyze}
     class:busy={engineBusy}
-    aria-label={autoAnalyze ? t("toolbar.stop", _lv) : t("toolbar.analyze", _lv)}
+    aria-label={autoAnalyze
+      ? t("toolbar.stop", _lv)
+      : t("toolbar.analyze", _lv)}
     use:useSetIcon={autoAnalyze ? "circle-stop" : "brain"}
     onclick={toggleAutoAnalyze}
   ></button>
@@ -189,7 +203,9 @@
     class="toolbar-btn engine-btn"
     class:busy={engineBusy && !batchAnalyzing}
     class:batch-analyzing={batchAnalyzing}
-    aria-label={batchAnalyzing ? t("toolbar.cancelBatch", _lv) : t("toolbar.analyzeBatch", _lv)}
+    aria-label={batchAnalyzing
+      ? t("toolbar.cancelBatch", _lv)
+      : t("toolbar.analyzeBatch", _lv)}
     use:useSetIcon={batchAnalyzing ? "circle-stop" : "workflow"}
     onclick={() => {
       if (batchAnalyzing) {
@@ -279,7 +295,12 @@
   }
 
   @keyframes engine-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
   }
 </style>

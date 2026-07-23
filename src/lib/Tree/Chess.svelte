@@ -110,7 +110,12 @@
   });
 
   $effect(() => {
-    eventBus.on<{ bestmove: string; ponder?: string; score?: number; depth?: number } | null>("engine-result", (result) => {
+    eventBus.on<{
+      bestmove: string;
+      ponder?: string;
+      score?: number;
+      depth?: number;
+    } | null>("engine-result", (result) => {
       if (result) {
         const from = result.bestmove.slice(0, 2) as Square;
         const to = result.bestmove.slice(2, 4) as Square;
@@ -163,8 +168,8 @@
     {rotated}
     {variations}
     {userShapes}
-     {engineBestMove}
-     {enginePonder}
+    {engineBestMove}
+    {enginePonder}
   />
   <Toolbar {eventBus} {fen} />
   <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
