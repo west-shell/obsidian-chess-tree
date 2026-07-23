@@ -128,6 +128,8 @@
   let layoutChangeHandler: (() => void) | null = null;
   let handleSliderMouseMove: ((evt: MouseEvent) => void) | null = null;
   let handleSliderMouseUp: (() => void) | null = null;
+  let intersectionObserver: IntersectionObserver | null = null;
+  let needsInitialReset = $state(false);
 
   onDestroy(() => {
     if (saveTimeout) {
@@ -145,6 +147,10 @@
       activeDocument.removeEventListener("mousemove", handleSliderMouseMove);
     if (handleSliderMouseUp)
       activeDocument.removeEventListener("mouseup", handleSliderMouseUp);
+    if (intersectionObserver) {
+      intersectionObserver.disconnect();
+      intersectionObserver = null;
+    }
   });
 
   function handleCommentsBlur() {
@@ -190,6 +196,18 @@
     renderedNodes = calculateTreeLayout(nodeMap, foldedNodes);
   }
 
+  function updateZoomExtent() {
+    if (!svgEl || !zoomBehavior) return;
+    const w = svgEl.clientWidth;
+    const h = svgEl.clientHeight;
+    if (w > 0 && h > 0) {
+      zoomBehavior.extent([
+        [0, 0],
+        [w, h],
+      ]);
+    }
+  }
+
   function toggleFold(node: ChessNode) {
     const cur = foldedNodes.has(node.id);
     if (cur) {
@@ -205,6 +223,7 @@
     updateTreeLayout();
     if (!svgEl || !zoomBehavior) return;
     if (svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
+    updateZoomExtent();
     const padding = 40;
     let minX = Infinity,
       maxX = -Infinity,
@@ -237,7 +256,10 @@
   }
 
   function panToNodeIfNeeded(node: ChessNode) {
-    if (!node || !svgEl || node.x === undefined || node.y === undefined) return;
+    if (!node || !svgEl || !zoomBehavior) return;
+    if (svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
+    if (node.x === undefined || node.y === undefined) return;
+    updateZoomExtent();
     const { x: tx, y: ty, k: sc } = zoomTransform;
     if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc))
       return;
@@ -267,7 +289,9 @@
   }
 
   function zoomAtCenter(factor: number) {
-    if (!svgEl) return;
+    if (!svgEl || !zoomBehavior) return;
+    if (svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
+    updateZoomExtent();
     const { x: tx, y: ty, k: sc } = zoomTransform;
     if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(sc))
       return;
@@ -487,7 +511,19 @@
     activeDocument.addEventListener("mousemove", handleSliderMouseMove);
     activeDocument.addEventListener("mouseup", handleSliderMouseUp);
 
-    layoutChangeHandler = () => resetView();
+    layoutChangeHandler = () => {
+      if (!svgEl || svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
+      if (needsInitialReset) {
+        needsInitialReset = false;
+        if (intersectionObserver) {
+          intersectionObserver.disconnect();
+          intersectionObserver = null;
+        }
+        updateZoomExtent();
+        d3.select(svgEl).call(zoomBehavior);
+      }
+      resetView();
+    };
     activeDocument.body.addEventListener(
       "chess-layout-change",
       layoutChangeHandler,
@@ -496,8 +532,30 @@
     tick()
       .then(() => new Promise(requestAnimationFrame))
       .then(() => {
-        if (!svgEl || svgEl.clientWidth === 0 || svgEl.clientHeight === 0)
+        if (!svgEl) return;
+        if (svgEl.clientWidth === 0 || svgEl.clientHeight === 0) {
+          needsInitialReset = true;
+          intersectionObserver = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (entry.isIntersecting && needsInitialReset) {
+                  needsInitialReset = false;
+                  requestAnimationFrame(() => {
+                    updateZoomExtent();
+                    d3.select(svgEl!).call(zoomBehavior!);
+                    resetView();
+                  });
+                  intersectionObserver!.disconnect();
+                  intersectionObserver = null;
+                }
+              }
+            },
+            { threshold: 0.1 },
+          );
+          intersectionObserver.observe(svgEl);
           return;
+        }
+        updateZoomExtent();
         d3.select(svgEl).call(zoomBehavior);
         resetView();
         return undefined;
