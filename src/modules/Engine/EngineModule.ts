@@ -198,6 +198,13 @@ function initEngine(host: object) {
     lastResult = null;
   });
 
+  eventBus.on("engine-batch-stop", () => {
+    batchCancelled = true;
+    if (analyzing && !pendingNodeId) {
+      engine.stop();
+    }
+  });
+
   eventBus.on("clear-engine-bestmove", () => {
     lastResult = null;
   });
