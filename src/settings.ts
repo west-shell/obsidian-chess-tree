@@ -374,7 +374,10 @@ export class ChessSettingTab extends PluginSettingTab {
               new Notice(
                 t("codeblock.invalidName").replace("{name}", invalid[0]),
               );
+              const input = chessSetting.controlEl.querySelector("input")!;
+              input.value = valid.length ? valid.join(", ") : "chess";
             }
+            if (!valid.length) return;
             settings.codeBlockNames.chess = valid;
             void this.plugin.saveSettings();
           }),
@@ -399,7 +402,10 @@ export class ChessSettingTab extends PluginSettingTab {
               new Notice(
                 t("codeblock.invalidName").replace("{name}", invalid[0]),
               );
+              const input = treeSetting.controlEl.querySelector("input")!;
+              input.value = valid.length ? valid.join(", ") : "tree";
             }
+            if (!valid.length) return;
             settings.codeBlockNames.tree = valid;
             void this.plugin.saveSettings();
           }),
@@ -424,7 +430,10 @@ export class ChessSettingTab extends PluginSettingTab {
               new Notice(
                 t("codeblock.invalidName").replace("{name}", invalid[0]),
               );
+              const input = fenSetting.controlEl.querySelector("input")!;
+              input.value = valid.length ? valid.join(", ") : "fen";
             }
+            if (!valid.length) return;
             settings.codeBlockNames.fen = valid;
             void this.plugin.saveSettings();
           }),
@@ -478,7 +487,10 @@ export class ChessSettingTab extends PluginSettingTab {
               new Notice(
                 t("codeblock.invalidName").replace("{name}", invalid[0]),
               );
+              const input = pgnExtSetting.controlEl.querySelector("input")!;
+              input.value = valid.length ? valid.join(", ") : "pgn";
             }
+            if (!valid.length) return;
             settings.pgnFileExtensions = valid;
             void this.plugin.saveSettings();
           }),
