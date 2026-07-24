@@ -12,7 +12,7 @@ Likes, coins, and feedback are greatly appreciated.
 
 ## Overview
 
-Obsidian plugin for chess rendering and exploration inside notes. Supports PGN file viewing, three code block types (`chess`, `fen`, `tree`), full chess rules via [chess.js](https://github.com/jhlywa/chess.js), interactive board via [chessground](https://github.com/lichess-org/chessground), and variation tree visualization.
+Obsidian plugin for chess rendering and exploration inside notes. Supports PGN file viewing, three code block types (`chess`, `fen`, `tree`), full chess rules via [chess.js](https://github.com/jhlywa/chess.js), interactive board via [chessground](https://github.com/lichess-org/chessground), variation tree visualization, and built-in engine analysis powered by [Stockfish 18](https://stockfishchess.org/) (WASM).
 
 ## PGN File Support
 
@@ -40,7 +40,7 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 > ```
 > ````
 
-![PGN File](./IMAGE/PGN.en.png)
+![PGN File](./IMAGE/PGN.png)
 
 ## Code Blocks
 
@@ -133,6 +133,18 @@ Customize code block aliases in **Settings > Chess > Code Block Names**:
 
 > **Note**: Changes require restarting the plugin or Obsidian to take effect.
 
+### Engine Analysis
+
+- **Engine Depth**: Search depth for Stockfish analysis (1–30, default 18)
+- **Engine Skill Level**: Skill level for engine play (0–20, default 20)
+- **Save Eval by Default**: Automatically include eval data when saving (default off)
+- **Save Eval Prompt**: Show prompt when saving with eval data (default on)
+
+### Save
+
+- **Save Eval by Default**: Whether to include eval annotations when saving PGN (default off)
+- **Save Eval Prompt**: Whether to show a prompt about eval when saving (default on)
+
 ### PGN File View
 
 Enable/disable PGN file view and customize file extensions:
@@ -154,6 +166,12 @@ Enable/disable PGN file view and customize file extensions:
   - Confirmation dialog before saving
 - **i18n**: Supports English and Chinese UI
 - **Board Markers**: Draw arrows and highlights on the board
+- **Engine Analysis**: Built-in Stockfish 18 WASM engine with single position analysis, batch analysis, and auto-analysis
+  - **Best Move Arrow**: Green arrow shows the engine's best move; yellow arrow shows the ponder move
+  - **Eval Bar**: Left sidebar bar showing evaluation (green = white advantage, red = black advantage)
+  - **Eval Trend Chart**: Vertical polyline in the slider background showing evaluation across moves
+  - **Eval Color Bar**: Color bar on tree nodes indicating evaluation (green = white advantage, red = black advantage, gray = equal)
+  - **Eval Persistence**: Engine evaluations saved as `%e:` comments in PGN
 - **Mobile Friendly**: Adjust board size for small screens
 
 ## Usage
@@ -182,6 +200,11 @@ Enable/disable PGN file view and customize file extensions:
 3. Click any node to navigate to that position
 4. Switch between icon mode and text mode for node labels
 5. Click the fold button (triangle) on a node with multiple children to collapse/expand its variations
+6. Use engine analysis:
+   - Click **Analyze** for single position analysis, **Batch** to analyze all nodes, or enable auto-analysis
+   - Green arrow = best move, yellow arrow = ponder move
+   - Eval bar on the left shows position evaluation
+   - Eval color bars on nodes and eval trend chart on the slider show evaluation across the game
 
 ### Optional Parameters
 
