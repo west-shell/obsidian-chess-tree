@@ -16,7 +16,6 @@
 
   let { settings, fen, selectedPiece, eventBus }: Props = $props();
 
-  let position = $derived(settings.position);
   let flipped = $state(false);
 
   function onBtnClick(action: string | { action: string; fen?: string }) {
