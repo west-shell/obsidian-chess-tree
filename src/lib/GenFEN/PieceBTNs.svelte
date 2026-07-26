@@ -6,10 +6,9 @@
   interface Props {
     fen: string;
     eventBus: EventBus;
-    position: string;
     selectedPiece: Piece | null;
   }
-  let { fen, eventBus, position, selectedPiece }: Props = $props();
+  let { fen, eventBus, selectedPiece }: Props = $props();
 
   const PIECES: {
     key: string;
@@ -166,11 +165,11 @@
   }
 </script>
 
-<div class="piece-btn-container {position}">
+<div class="piece-btn-container">
   {#each PIECES as { key, color, icon, piece } (key)}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-      class="piece-btn {position} {color}"
+      class="piece-btn {color}"
       class:empty={count[key] === 0}
       class:active={selectedPiece &&
         selectedPiece.type === piece.type &&
@@ -183,10 +182,17 @@
 
 <style>
   .piece-btn-container {
-    font-size: clamp(10px, calc(var(--xq-cell-size, 50px) * 0.3), 24px);
+    font-size: clamp(10px, calc(var(--chess-cell-size, 50px) * 0.3), 24px);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    height: calc(var(--chess-cell-size, 50px) * 6);
+    width: auto;
+    justify-content: left;
+    container-type: inline-size;
+    container-name: piece-btns;
   }
 
-  /* 共用样式 */
   .piece-btn {
     border-radius: 4px;
     cursor: pointer;
@@ -198,37 +204,23 @@
       box-shadow 0.15s,
       border-color 0.15s;
     color: white;
-  }
-
-  /* 右侧布局 - 使用flex（因为子元素用了flex:1） */
-  .piece-btn-container.right {
-    display: grid;
-    grid-template-rows: repeat(6, 1fr);
-    grid-template-columns: repeat(2, 1fr);
-    height: calc(var(--chess-cell-size, 50px) * 6);
-    width: auto;
-    justify-content: left;
-  }
-
-  .piece-btn.right {
     height: calc(var(--chess-cell-size, 50px) * 8 / 6);
   }
 
-  /* 底部布局 - 使用grid */
-  .piece-btn-container.bottom {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    width: calc(var(--chess-cell-size, 50px) * 6);
-    height: auto;
-    justify-content: left;
+  @container piece-btns (max-width: 300px) {
+    .piece-btn-container {
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      width: calc(var(--chess-cell-size, 50px) * 6);
+      height: auto;
+    }
+
+    .piece-btn {
+      width: calc(var(--chess-cell-size, 50px) * 8 / 6);
+      height: auto;
+    }
   }
 
-  .piece-btn.bottom {
-    width: calc(var(--chess-cell-size, 50px) * 8 / 6);
-  }
-
-  /* 颜色 - 合并color: white */
   .piece-btn.white {
     background-color: var(--chess-piece-white);
     color: black;
@@ -241,7 +233,6 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
 
-  /* 状态样式 */
   .active {
     border-color: #ffd700;
     box-shadow: 0 0 0 2px #ffd700;

@@ -1,0 +1,135 @@
+// ====== 棋盘布局系统 ======
+// 仿照 lila analyse/_layout.scss 的 CSS Grid 响应式布局
+//
+// 自动响应式：
+//   宽容器（>500px）→ 双栏：棋盘 | 工具栏+分支图
+//   窄容器（≤500px）→ 单栏：棋盘 → 工具栏 → 分支图（纵向堆叠）
+//
+// Grid 区域：
+//   board   — 棋盘（Board.svelte）
+//   toolbar — 工具栏（Toolbar.svelte）
+//   tools   — 工具面板（Tree.svelte / List.svelte）
+
+// 布局间距
+$block-gap: 2px;
+
+// 压缩阈值：容器宽度 ≤ 此值时自动切换单栏
+$col1-breakpoint: 500px;
+
+// ====== 主网格容器 ======
+.chess-layout {
+  display: grid;
+  container-type: inline-size;
+  container-name: chess-layout;
+
+  // ------ Grid 子区域 ------
+  &__board {
+    grid-area: board;
+  }
+
+  &__toolbar {
+    grid-area: toolbar;
+  }
+
+  &__tools {
+    grid-area: tools;
+  }
+
+  // ====== 双栏布局（默认，宽容器） ======
+  // 左列棋盘，右列工具栏 + 分支图
+  grid-template-columns: auto $block-gap 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "board . toolbar"
+    "board . tools";
+
+  // 棋盘在双栏中对齐顶部
+  &__board {
+    align-self: start;
+  }
+
+  // ====== 单栏布局（窄容器自动切换） ======
+  // 所有区域纵向堆叠：棋盘 → 工具栏 → 分支图
+  @container chess-layout (max-width: #{$col1-breakpoint}) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "board"
+      "toolbar"
+      "tools";
+
+    // 单栏下棋盘填满宽度
+    & .chess-layout__board :global(.board-wrapper) {
+      --chess-board-width: min(100%, 60vh);
+    }
+  }
+}
+
+// ====== 工具栏方向自适应 ======
+// 双栏：竖向排列（右列顶部）
+// 单栏：横向排列（棋盘下方）
+.chess-layout__toolbar {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+
+  @container chess-layout (max-width: #{$col1-breakpoint}) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+
+    & :global(.toolbar-btn) {
+      flex: 0 1 auto;
+      min-width: 24px;
+      font-size: clamp(12px, 3vw, 16px);
+      padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
+      margin: 0;
+    }
+  }
+
+  & :global(.toolbar-btn) {
+    flex: 0 1 auto;
+    min-height: 24px;
+    font-size: clamp(12px, 3vw, 16px);
+    padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
+    margin: 0;
+  }
+}
+
+// ====== 工具面板（Tree）自适应 ======
+// 双栏：固定高度跟随棋盘
+// 单栏：弹性高度
+.chess-layout__tools {
+  @container chess-layout (max-width: #{$col1-breakpoint}) {
+    min-height: 25%;
+    width: 100%;
+  }
+}
+
+// ====== PGN 文件视图专用 ======
+:global(.view-content.pgn-view) .chess-layout {
+  height: 100%;
+}
+
+:global(.view-content.pgn-view) {
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding-top: var(--chess-board-margin-top, 0px) !important;
+  padding-bottom: var(--chess-board-margin-bottom, 0px) !important;
+}
+
+// ====== tree codeblock 专用 ======
+:global(.tree-codeblock) .chess-layout {
+  margin: 1rem 0;
+}
+
+// ====== PGN 视图棋盘宽度 ======
+:global(.view-content.pgn-view) .chess-layout__board {
+  --chess-board-width: var(--adaptive-board-width, 300px);
+}

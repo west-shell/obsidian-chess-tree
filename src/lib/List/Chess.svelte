@@ -52,37 +52,31 @@
   });
 </script>
 
-<div class="chess-container {settings.position}">
-  <Board
-    {settings}
-    {fen}
-    {lastMove}
-    {checkColor}
-    {selectedSquare}
-    {eventBus}
-    {rotated}
-  />
-  <Toolbar {settings} {eventBus} {modified} {PGN} {isprotected} />
+<div class="chess-layout">
+  <div class="chess-layout__board">
+    <Board
+      {settings}
+      {fen}
+      {lastMove}
+      {checkColor}
+      {selectedSquare}
+      {eventBus}
+      {rotated}
+    />
+  </div>
+  <div class="chess-layout__toolbar">
+    <Toolbar {settings} {eventBus} {modified} {PGN} {isprotected} />
+  </div>
   {#if settings.showMovelist}
-    <List {settings} {currentStep} {moves} {eventBus} />
+    <div class="chess-layout__tools">
+      <List {settings} {currentStep} {moves} {eventBus} />
+    </div>
   {/if}
 </div>
 
 <style>
-  .chess-container {
+  .chess-layout {
     --red: #861818;
     --black: #000080;
-    margin: 1rem 0;
-  }
-
-  .chess-container.right {
-    display: flex;
-    flex-direction: row;
-    gap: 2px;
-  }
-
-  .chess-container.bottom {
-    display: flex;
-    flex-direction: column;
   }
 </style>

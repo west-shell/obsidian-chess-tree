@@ -63,7 +63,6 @@
   let lastMove: [Square, Square] | null = $derived(
     currentNode.move ? [currentNode.move.from, currentNode.move.to] : null,
   );
-  let { position } = $derived(settings);
   let rotated = $state(false);
   let variations = $derived(
     currentNode.children
@@ -87,18 +86,11 @@
   $effect(() => {
     const el = treeViewEl;
     if (!el) return;
-    const pos = position;
     const ro = new ResizeObserver(() => {
       const rect = el.getBoundingClientRect();
-      if (pos === "right") {
-        const availWidth = rect.width * 0.6;
-        const availHeight = rect.height;
-        adaptiveBoardWidth = Math.min(availWidth, availHeight);
-      } else {
-        const availWidth = rect.width;
-        const availHeight = rect.height * 0.65;
-        adaptiveBoardWidth = Math.min(availWidth, availHeight);
-      }
+      const availWidth = rect.width * 0.55;
+      const availHeight = rect.height;
+      adaptiveBoardWidth = Math.min(availWidth, availHeight);
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -155,71 +147,34 @@
 </script>
 
 <div
-  class="tree-view {position}"
+  class="chess-layout"
   bind:this={treeViewEl}
   style="--adaptive-board-width:{adaptiveBoardWidth}px"
 >
-  <Board
-    {settings}
-    {fen}
-    {lastMove}
-    {checkColor}
-    {eventBus}
-    {rotated}
-    {variations}
-    {userShapes}
-    {engineBestMove}
-    {enginePonder}
-  />
-  <Toolbar {eventBus} {fen} />
-  <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
+  <div class="chess-layout__board">
+    <Board
+      {settings}
+      {fen}
+      {lastMove}
+      {checkColor}
+      {eventBus}
+      {rotated}
+      {variations}
+      {userShapes}
+      {engineBestMove}
+      {enginePonder}
+    />
+  </div>
+  <div class="chess-layout__toolbar">
+    <Toolbar {eventBus} {fen} />
+  </div>
+  <div class="chess-layout__tools">
+    <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
+  </div>
 </div>
 
 <style>
-  :global(.tree-codeblock) .tree-view {
-    margin: 1rem 0;
-  }
-  :global(.tree-codeblock) .tree-view.right {
-    justify-content: flex-start;
-  }
-  :global(.tree-codeblock) .tree-view.bottom {
-    align-items: stretch;
-  }
-  :global(.view-content.pgn-view) .tree-view {
-    --chess-board-width: var(--adaptive-board-width, 300px);
-  }
-  :global(.view-content.pgn-view) {
-    overflow: hidden !important;
-    margin: 0 !important;
-    padding-top: var(--chess-board-margin-top, 0px) !important;
-    padding-bottom: var(--chess-board-margin-bottom, 0px) !important;
-  }
-  .tree-view {
-    display: flex;
-    justify-content: center;
-  }
-
-  .tree-view.right {
-    flex-direction: row;
+  .chess-layout {
     height: 100%;
-    gap: 2px;
-  }
-
-  .tree-view.right :global(.tree-container) {
-    flex: 1 1 auto;
-    min-width: 25%;
-    max-width: 50%;
-  }
-
-  .tree-view.bottom {
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-  }
-
-  .tree-view.bottom :global(.tree-container) {
-    flex: 1 1 auto;
-    min-height: 25%;
-    width: 100%;
   }
 </style>

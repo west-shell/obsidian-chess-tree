@@ -59,7 +59,7 @@
   }
 </script>
 
-<div class="toolbar-container {settings.position}">
+<div class="toolbar-container">
   {#each buttons as { title, icon, event } (event)}
     <button
       class="toolbar-btn"
@@ -80,18 +80,7 @@
 </div>
 
 <style>
-  .toolbar-container.bottom {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    gap: 4px;
-  }
-
-  .toolbar-container.right {
+  .toolbar-container {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -100,27 +89,16 @@
     gap: 4px;
   }
 
-  .toolbar-container.bottom .toolbar-btn {
-    flex: 0 1 auto;
-    min-width: 24px;
-    font-size: clamp(12px, 3vw, 16px);
-    padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
-    margin: 0;
-  }
-
-  .toolbar-container.right .toolbar-btn {
-    flex: 0 1 auto;
-    min-height: 24px;
-    font-size: clamp(12px, 3vw, 16px);
-    padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
-    margin: 0;
-  }
-
   .toolbar-btn {
     border: none;
     padding: 6px 10px;
     border-radius: 6px;
     cursor: pointer;
+    flex: 0 1 auto;
+    min-height: 24px;
+    font-size: clamp(12px, 3vw, 16px);
+    padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
+    margin: 0;
     transition:
       background-color 0.2s ease,
       transform 0.1s ease;

@@ -33,31 +33,22 @@
   });
 </script>
 
-<div class="chess-container {position}">
-  <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
-  <div class="editor-sidebar {position}">
-    <PieceBTNs {fen} {eventBus} {position} {selectedPiece} />
-    <Toolbar {eventBus} {position} {fen} />
+<div class="chess-layout">
+  <div class="chess-layout__board">
+    <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
+  </div>
+  <div class="chess-layout__tools">
+    <div class="editor-sidebar">
+      <PieceBTNs {fen} {eventBus} {selectedPiece} />
+      <Toolbar {eventBus} {fen} />
+    </div>
   </div>
 </div>
 
 <style>
-  .chess-container {
+  .chess-layout {
     --red: #861818;
     --black: #000080;
-    margin: 1rem 0;
-  }
-
-  .chess-container.right {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    align-items: flex-start;
-  }
-
-  .chess-container.bottom {
-    display: flex;
-    flex-direction: column;
   }
 
   .editor-sidebar {
@@ -66,15 +57,13 @@
     gap: 8px;
   }
 
-  .editor-sidebar.right {
-    flex: 1;
-    min-width: 200px;
-    max-width: 280px;
-    flex-direction: row;
-    align-items: flex-start;
-  }
-
-  .editor-sidebar.bottom {
-    width: 100%;
+  @container chess-layout (min-width: 501px) {
+    .editor-sidebar {
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+      flex-direction: row;
+      align-items: flex-start;
+    }
   }
 </style>

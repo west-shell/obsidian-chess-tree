@@ -29,8 +29,8 @@
   });
 </script>
 
-<div class="move-container {settings.position}">
-  <ul class="move-list {settings.position}" bind:this={ulRef}>
+<div class="move-container">
+  <ul class="move-list" bind:this={ulRef}>
     <li class="start" bind:this={itemRefs[0]}>
       <span class="roundnum">0</span>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -76,24 +76,30 @@
 </div>
 
 <style>
-  /* ========== 基础容器样式 ========== */
   .move-container {
     font-size: var(--chess-font-size, 12px);
     padding: 0;
     margin: 0;
+    container-type: inline-size;
+    container-name: move-list-container;
   }
 
   .move-list {
     display: flex;
+    flex-direction: column;
+    height: calc(var(--chess-cell-size, 50px) * 8);
     padding: 0;
     margin: 0;
     color: var(--text-normal);
     background-color: var(--background-primary-alt);
     border: 1px solid var(--background-modifier-border);
     border-radius: var(--radius-s);
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-wrap: nowrap;
+    align-items: flex-start;
   }
 
-  /* ========== 共用行样式 ========== */
   .move-list li {
     display: flex;
     flex-wrap: nowrap;
@@ -105,6 +111,7 @@
     margin: 0;
     border-bottom: none;
     white-space: nowrap;
+    width: 100%;
   }
 
   .move-list .roundnum {
@@ -154,32 +161,20 @@
     transform: scale(1.02);
   }
 
-  /* ========== 右侧垂直布局 (right) ========== */
-  .move-list.right {
-    flex-direction: column;
-    height: calc(var(--chess-cell-size, 50px) * 8);
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-  }
+  @container move-list-container (max-width: 500px) {
+    .move-list {
+      flex-direction: column;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      max-height: 11.5em;
+      overflow-x: auto;
+      overflow-y: hidden;
+      gap: 0 0.5em;
+      height: auto;
+    }
 
-  .move-list.right li {
-    width: 100%;
-  }
-
-  /* ========== 底部多列布局 (bottom) ========== */
-  .move-list.bottom {
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    max-height: 11.5em;
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 0 0.5em;
-  }
-
-  .move-list.bottom li {
-    width: fit-content;
+    .move-list li {
+      width: fit-content;
+    }
   }
 </style>
