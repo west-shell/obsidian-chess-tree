@@ -40,9 +40,9 @@ $col1-breakpoint: 500px;
 
   // ====== 双栏布局（默认，宽容器） ======
   // 左列棋盘（宽度由 scale 控制），右列工具栏 + 分支图
-  grid-template-columns: calc(
-      var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85)
-    ) $block-gap 1fr;
+  grid-template-columns:
+    calc(var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85))
+    $block-gap 1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
     "board . toolbar"

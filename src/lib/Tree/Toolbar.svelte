@@ -80,13 +80,6 @@
   let saveBtnClass = $derived(modified ? "unsaved" : "saved");
 
   const buildButtons = (v: number) => [
-    { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
-    { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
-    {
-      title: t("toolbar.promote", v),
-      icon: "arrow-up-wide-narrow",
-      event: "promote",
-    },
     {
       title: t("toolbar.start", v),
       icon: "arrow-left-to-line",
@@ -100,6 +93,13 @@
       title: t("toolbar.annotate", v),
       icon: "tag",
       event: "toggle-annotation-menu",
+    },
+    { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
+    { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
+    {
+      title: t("toolbar.promote", v),
+      icon: "arrow-up-wide-narrow",
+      event: "promote",
     },
   ];
   let buttons = $derived(buildButtons(_lv));
