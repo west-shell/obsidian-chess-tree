@@ -234,6 +234,29 @@
     background-color: hsl(35, 100%, 50%);
   }
 
+  .toolbar-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .toolbar-container :global(.toolbar-btn) {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .toolbar-container :global(.toolbar-btn svg) {
+    width: 18px;
+    height: 18px;
+  }
+
   .engine-btn.active {
     background-color: var(--interactive-accent);
     color: var(--text-on-accent);
