@@ -226,16 +226,6 @@
 </div>
 
 <style>
-  .toolbar-btn {
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition:
-      background-color 0.2s ease,
-      transform 0.1s ease;
-  }
-
   .toolbar-btn.saved {
     background-color: hsl(122, 39%, 49%);
   }
