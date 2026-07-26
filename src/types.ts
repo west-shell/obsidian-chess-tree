@@ -10,10 +10,9 @@ export const DEFAULT_FEN =
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export interface ISettings {
-  position: "bottom" | "right";
   lang: "auto" | "en" | "zh";
   theme: ThemeName;
-  cellSize: number;
+  zoom: number;
   fontSize: number;
   showCoordinateLabels: boolean;
   showLastMove: boolean;

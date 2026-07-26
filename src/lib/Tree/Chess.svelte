@@ -86,11 +86,14 @@
   $effect(() => {
     const el = treeViewEl;
     if (!el) return;
+    const scale = Number.parseFloat(
+      getComputedStyle(document.body).getPropertyValue("--chess-board-scale") ||
+        "0.85",
+    );
     const ro = new ResizeObserver(() => {
       const rect = el.getBoundingClientRect();
-      const availWidth = rect.width * 0.55;
-      const availHeight = rect.height;
-      adaptiveBoardWidth = Math.min(availWidth, availHeight);
+      const maxSize = Math.min(rect.width - 240, rect.height);
+      adaptiveBoardWidth = Math.max(200, maxSize * scale);
     });
     ro.observe(el);
     return () => ro.disconnect();

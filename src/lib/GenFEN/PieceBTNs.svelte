@@ -182,11 +182,15 @@
 
 <style>
   .piece-btn-container {
-    font-size: clamp(10px, calc(var(--chess-cell-size, 50px) * 0.3), 24px);
+    font-size: clamp(
+      10px,
+      calc(var(--chess-board-width, 400px) * 0.0375),
+      24px
+    );
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    height: calc(var(--chess-cell-size, 50px) * 6);
+    height: calc(var(--chess-board-width, 400px) * 0.75);
     width: auto;
     justify-content: left;
     container-type: inline-size;
@@ -204,19 +208,19 @@
       box-shadow 0.15s,
       border-color 0.15s;
     color: white;
-    height: calc(var(--chess-cell-size, 50px) * 8 / 6);
+    height: calc(var(--chess-board-width, 400px) / 6);
   }
 
   @container piece-btns (max-width: 300px) {
     .piece-btn-container {
       grid-template-columns: repeat(6, 1fr);
       grid-template-rows: repeat(2, 1fr);
-      width: calc(var(--chess-cell-size, 50px) * 6);
+      width: calc(var(--chess-board-width, 400px) * 0.75);
       height: auto;
     }
 
     .piece-btn {
-      width: calc(var(--chess-cell-size, 50px) * 8 / 6);
+      width: calc(var(--chess-board-width, 400px) / 6);
       height: auto;
     }
   }

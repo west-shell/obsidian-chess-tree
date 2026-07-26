@@ -87,7 +87,7 @@
   .move-list {
     display: flex;
     flex-direction: column;
-    height: calc(var(--chess-cell-size, 50px) * 8);
+    height: calc(var(--chess-board-width, 400px));
     padding: 0;
     margin: 0;
     color: var(--text-normal);

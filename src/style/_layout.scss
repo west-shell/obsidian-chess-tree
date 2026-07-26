@@ -9,6 +9,9 @@
 //   board   — 棋盘（Board.svelte）
 //   toolbar — 工具栏（Toolbar.svelte）
 //   tools   — 工具面板（Tree.svelte / List.svelte）
+//
+// 棋盘大小由 --chess-board-scale 控制（0.25~1.0），
+// 对应 zoom 0~100，公式：scale = (zoom/100) * 0.75 + 0.25
 
 // 布局间距
 $block-gap: 2px;
@@ -36,8 +39,10 @@ $col1-breakpoint: 500px;
   }
 
   // ====== 双栏布局（默认，宽容器） ======
-  // 左列棋盘，右列工具栏 + 分支图
-  grid-template-columns: auto $block-gap 1fr;
+  // 左列棋盘（宽度由 scale 控制），右列工具栏 + 分支图
+  grid-template-columns: calc(
+      var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85)
+    ) $block-gap 1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
     "board . toolbar"
@@ -57,11 +62,6 @@ $col1-breakpoint: 500px;
       "board"
       "toolbar"
       "tools";
-
-    // 单栏下棋盘填满宽度
-    & .chess-layout__board :global(.board-wrapper) {
-      --chess-board-width: min(100%, 60vh);
-    }
   }
 }
 
@@ -108,9 +108,7 @@ $col1-breakpoint: 500px;
   }
 }
 
-// ====== 工具面板（Tree）自适应 ======
-// 双栏：固定高度跟随棋盘
-// 单栏：弹性高度
+// ====== 工具面板自适应 ======
 .chess-layout__tools {
   @container chess-layout (max-width: #{$col1-breakpoint}) {
     min-height: 25%;

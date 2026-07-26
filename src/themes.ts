@@ -15,14 +15,15 @@ export const THEME_KEYS = Object.keys(themes);
 export function applyThemes(settings: ISettings) {
   const {
     theme,
-    cellSize,
+    zoom,
     boardMarginTop,
     boardMarginBottom,
     showCoordinateLabels,
   } = settings;
   const t = themes[theme] ?? themes.wood;
 
-  activeDocument.body.style.setProperty("--chess-cell-size", `${cellSize}px`);
+  const boardScale = (zoom / 100) * 0.75 + 0.25;
+  activeDocument.body.style.setProperty("--chess-board-scale", `${boardScale}`);
   activeDocument.body.style.setProperty(
     "--chess-font-size",
     `${settings.fontSize}px`,
