@@ -116,6 +116,54 @@ $col1-breakpoint: 500px;
   }
 }
 
+// ====== GenFEN 编辑器专用 ======
+// board | piecebtn | toolbtn 三列同行，压缩时竖排
+.genfen-layout {
+  grid-template-columns:
+    calc(var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85))
+    auto 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "board toolbar tools";
+
+  .chess-layout__board {
+    align-self: stretch;
+  }
+
+  .chess-layout__toolbar {
+    align-self: stretch;
+  }
+
+  .chess-layout__tools {
+    align-self: start;
+  }
+
+  // 棋子按钮：右侧时竖排填满高度，底部时横排填满宽度
+  .chess-layout__toolbar {
+    .piece-btn-container {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      height: 100%;
+      width: auto;
+    }
+  }
+
+  @container chess-layout (max-width: #{$col1-breakpoint}) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "board"
+      "toolbar"
+      "tools";
+
+    .chess-layout__toolbar .piece-btn-container {
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      width: 100%;
+      height: auto;
+    }
+  }
+}
+
 // ====== PGN 文件视图专用 ======
 :global(.view-content.pgn-view) .chess-layout {
   height: 100%;

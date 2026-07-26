@@ -190,11 +190,9 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    height: calc(var(--chess-board-width, 400px) * 0.75);
+    height: 100%;
     width: auto;
     justify-content: left;
-    container-type: inline-size;
-    container-name: piece-btns;
   }
 
   .piece-btn {
@@ -208,21 +206,6 @@
       box-shadow 0.15s,
       border-color 0.15s;
     color: white;
-    height: calc(var(--chess-board-width, 400px) / 6);
-  }
-
-  @container piece-btns (max-width: 300px) {
-    .piece-btn-container {
-      grid-template-columns: repeat(6, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      width: calc(var(--chess-board-width, 400px) * 0.75);
-      height: auto;
-    }
-
-    .piece-btn {
-      width: calc(var(--chess-board-width, 400px) / 6);
-      height: auto;
-    }
   }
 
   .piece-btn.white {

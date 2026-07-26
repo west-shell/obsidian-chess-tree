@@ -32,15 +32,15 @@
   });
 </script>
 
-<div class="chess-layout">
+<div class="chess-layout genfen-layout">
   <div class="chess-layout__board">
     <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
   </div>
+  <div class="chess-layout__toolbar">
+    <PieceBTNs {fen} {eventBus} {selectedPiece} />
+  </div>
   <div class="chess-layout__tools">
-    <div class="editor-sidebar">
-      <PieceBTNs {fen} {eventBus} {selectedPiece} />
-      <Toolbar {eventBus} {fen} />
-    </div>
+    <Toolbar {eventBus} {fen} />
   </div>
 </div>
 
@@ -48,21 +48,5 @@
   .chess-layout {
     --red: #861818;
     --black: #000080;
-  }
-
-  .editor-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  @container chess-layout (min-width: 501px) {
-    .editor-sidebar {
-      flex: 1;
-      min-width: 200px;
-      max-width: 280px;
-      flex-direction: row;
-      align-items: flex-start;
-    }
   }
 </style>

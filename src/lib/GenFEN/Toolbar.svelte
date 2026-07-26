@@ -304,20 +304,8 @@
     flex-direction: column;
     gap: 10px;
     padding: 8px;
-    container-type: inline-size;
-    container-name: fen-tools;
   }
 
-  @container fen-tools (max-width: 300px) {
-    .fen-editor-tools {
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-    .tool-buttons {
-      flex-direction: row;
-    }
-  }
   .tool-section {
     display: flex;
     flex-direction: column;
@@ -402,7 +390,7 @@
   }
   .tool-buttons {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: nowrap;
     gap: 4px;
   }
