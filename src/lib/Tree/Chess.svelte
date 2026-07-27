@@ -94,14 +94,20 @@
   $effect(() => {
     const el = treeViewEl;
     if (!el) return;
-    const scale = Number.parseFloat(
-      getComputedStyle(document.body).getPropertyValue("--chess-board-scale") ||
-        "0.85",
-    );
     const ro = new ResizeObserver(() => {
       const rect = el.getBoundingClientRect();
-      const maxSize = Math.min(rect.width - 240, rect.height);
-      adaptiveBoardWidth = Math.max(200, maxSize * scale);
+      if (isPGNView) {
+        const maxSize = Math.min(rect.width - 240, rect.height);
+        adaptiveBoardWidth = Math.max(200, maxSize);
+      } else {
+        const scale = Number.parseFloat(
+          getComputedStyle(document.body).getPropertyValue(
+            "--chess-board-scale",
+          ) || "0.85",
+        );
+        const maxSize = Math.min(rect.width - 240, rect.height);
+        adaptiveBoardWidth = Math.max(200, maxSize * scale);
+      }
     });
     ro.observe(el);
     return () => ro.disconnect();
