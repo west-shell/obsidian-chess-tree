@@ -32,14 +32,14 @@
   });
 </script>
 
-<div class="chess-layout genfen-layout">
+<div class="chess-layout chess-layout--genfen">
   <div class="chess-layout__board">
     <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
   </div>
-  <div class="chess-layout__toolbar">
+  <div class="chess-layout__piecebtns">
     <PieceBTNs {fen} {eventBus} {selectedPiece} />
   </div>
-  <div class="chess-layout__tools">
+  <div class="chess-layout__toolbar">
     <Toolbar {eventBus} {fen} />
   </div>
 </div>

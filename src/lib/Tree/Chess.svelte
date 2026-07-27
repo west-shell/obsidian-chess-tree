@@ -80,25 +80,6 @@
       : null,
   ) as "white" | "black" | null;
 
-  let treeViewEl: HTMLDivElement;
-  let adaptiveBoardWidth = $state(300);
-
-  $effect(() => {
-    const el = treeViewEl;
-    if (!el) return;
-    const scale = Number.parseFloat(
-      getComputedStyle(document.body).getPropertyValue("--chess-board-scale") ||
-        "0.85",
-    );
-    const ro = new ResizeObserver(() => {
-      const rect = el.getBoundingClientRect();
-      const maxSize = Math.min(rect.width - 240, rect.height);
-      adaptiveBoardWidth = Math.max(200, maxSize * scale);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  });
-
   onMount(async () => {
     await tick();
     eventBus.emit("ready");
@@ -149,11 +130,7 @@
   });
 </script>
 
-<div
-  class="chess-layout"
-  bind:this={treeViewEl}
-  style="--adaptive-board-width:{adaptiveBoardWidth}px"
->
+<div class="chess-layout">
   <div class="chess-layout__board">
     <Board
       {settings}
@@ -175,9 +152,3 @@
     <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
   </div>
 </div>
-
-<style>
-  .chess-layout {
-    height: 100%;
-  }
-</style>

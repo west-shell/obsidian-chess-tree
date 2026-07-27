@@ -1,0 +1,241 @@
+@use "scss/functions" as *;
+@use "scss/variables" as *;
+@use "scss/media-queries" as *;
+@use "scss/uniboard" as *;
+@use "scss/layout-base" as *;
+
+// ====== 棋盘布局系统 ======
+// 仿照 lila analyse/_layout.scss 的 CSS Grid 响应式布局
+//
+// 三种布局模式：
+//   col1  — 单栏（竖屏窄容器）：棋盘 → 工具栏 → 工具面板
+//   col2  — 双栏（宽容器/横屏）：棋盘 | 工具栏 + 工具面板
+//   col2-squeeze — 双栏挤压（横屏窄容器）：棋盘 | 窄工具面板
+//
+// 断点逻辑（与 lila 一致）：
+//   col1:  max-width: 799.29px AND portrait
+//   col2:  min-width: 799.3px OR landscape
+//   col2-squeeze: max-width: 799.29px AND landscape
+//
+// 同时使用 @container 查询作为 Obsidian code block 内的
+// 容器宽度适配（code block 可能位于侧边栏等窄区域）
+
+$local-block-gap: 2px;
+$local-col1-breakpoint: 500px;
+
+// ====== 主网格容器 ======
+
+.chess-layout {
+  display: grid;
+  container-type: inline-size;
+  container-name: chess-layout;
+  gap: $local-block-gap;
+  height: 100%;
+  transition: grid-template-columns 0.2s ease;
+
+  &__board {
+    grid-area: board;
+    --chess-board-width: 100%;
+    align-self: start;
+    transition: width 0.2s ease;
+  }
+
+  &__toolbar {
+    grid-area: toolbar;
+  }
+
+  &__tools {
+    grid-area: tools;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__piecebtns {
+    grid-area: piecebtns;
+  }
+
+  // ====== col1：单栏（默认，窄容器 / 竖屏） ======
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "board"
+    "toolbar"
+    "tools";
+
+  &__tools {
+    min-height: 25%;
+  }
+
+  // ====== col2：双栏（宽容器） ======
+  @container chess-layout (min-width: #{$local-col1-breakpoint + 1px}) {
+    grid-template-columns:
+      calc(var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85))
+      1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "board toolbar"
+      "board tools";
+
+    &__board {
+      align-self: start;
+    }
+
+    &__tools {
+      min-height: 0;
+    }
+  }
+}
+
+// ====== viewport 级响应式覆盖 ======
+
+// col2：宽屏或横屏
+@media (min-width: at-least($small)), (orientation: landscape) {
+  .chess-layout {
+    grid-template-columns:
+      var(---col2-uniboard-width)
+      minmax(#{$uniboard-table-min}, 400px);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "board toolbar"
+      "board tools";
+
+    &__board {
+      align-self: start;
+    }
+
+    &__tools {
+      min-height: 0;
+    }
+  }
+}
+
+// col2-squeeze：横屏 + 窄屏
+@media (max-width: at-most($small)) and (orientation: landscape) {
+  .chess-layout {
+    grid-template-columns: $col2-uniboard-squeeze-width $col2-uniboard-squeeze-table;
+    grid-template-rows: 1fr;
+    grid-template-areas: "board tools";
+
+    &__toolbar {
+      display: none;
+    }
+  }
+}
+
+// ====== 工具栏方向自适应 ======
+.chess-layout__toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+
+  @container chess-layout (min-width: #{$local-col1-breakpoint + 1px}) {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+}
+
+// ====== 工具栏按钮基础样式 ======
+:global(.toolbar-btn) {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 0 1 auto;
+  min-height: 24px;
+  font-size: clamp(12px, 3vw, 16px);
+  padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
+  margin: 0;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+
+  @container chess-layout (min-width: #{$local-col1-breakpoint + 1px}) {
+    .chess-layout__toolbar & {
+      min-width: 24px;
+    }
+  }
+}
+
+// ====== GenFEN 编辑器专用 ======
+.chess-layout--genfen {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    "board"
+    "piecebtns"
+    "toolbar";
+
+  @container chess-layout (min-width: #{$local-col1-breakpoint + 1px}) {
+    grid-template-columns:
+      calc(var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85))
+      minmax(#{$uniboard-table-min}, 400px);
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "board piecebtns"
+      "board toolbar";
+  }
+
+  .chess-layout__piecebtns .piece-btn-container {
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    width: 100%;
+    height: auto;
+
+    @container chess-layout (min-width: #{$local-col1-breakpoint + 1px}) {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      height: 100%;
+      width: auto;
+    }
+  }
+}
+
+// GenFEN viewport 级覆盖
+@media (min-width: at-least($small)), (orientation: landscape) {
+  .chess-layout--genfen {
+    grid-template-columns:
+      var(---col2-uniboard-width)
+      minmax(#{$uniboard-table-min}, 400px);
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "board piecebtns"
+      "board toolbar";
+
+    .chess-layout__piecebtns .piece-btn-container {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      height: 100%;
+      width: auto;
+    }
+  }
+}
+
+@media (max-width: at-most($small)) and (orientation: landscape) {
+  .chess-layout--genfen {
+    grid-template-columns: $col2-uniboard-squeeze-width $col2-uniboard-squeeze-table;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "board piecebtns"
+      "board toolbar";
+  }
+}
+
+// ====== PGN 文件视图专用 ======
+:global(.view-content.pgn-view) .chess-layout {
+  height: 100%;
+}
+
+:global(.view-content.pgn-view) {
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding-top: var(--chess-board-margin-top, 0px) !important;
+  padding-bottom: var(--chess-board-margin-bottom, 0px) !important;
+}
+
+// ====== tree codeblock 专用 ======
+:global(.tree-codeblock) .chess-layout {
+  margin: 1rem 0;
+}

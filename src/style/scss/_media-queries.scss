@@ -1,0 +1,26 @@
+@use "functions" as *;
+@use "variables" as *;
+
+@mixin mq-is-col1 {
+  @media (max-width: at-most($small)) and (orientation: portrait) {
+    @content;
+  }
+}
+
+@mixin mq-at-least-col2 {
+  @media (min-width: at-least($small)), (orientation: landscape) {
+    @content;
+  }
+}
+
+@mixin mq-is-col2-squeeze {
+  @media (max-width: at-most($small)) and (orientation: landscape) {
+    @content;
+  }
+}
+
+@mixin mq-zoom-enabled {
+  @media (min-width: at-least($small)) and (min-height: at-least($short)) {
+    @content;
+  }
+}
