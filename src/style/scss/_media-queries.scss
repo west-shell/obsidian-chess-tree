@@ -12,9 +12,3 @@
     @content;
   }
 }
-
-@mixin mq-is-col2-squeeze {
-  @media (max-width: at-most($small)) and (orientation: landscape) {
-    @content;
-  }
-}

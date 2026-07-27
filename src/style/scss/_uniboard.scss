@@ -21,10 +21,4 @@ $col2-uniboard-width: calc(
   #{$col2-uniboard-max-size} * var(--chess-board-scale, 0.85)
 );
 
-$col2-uniboard-squeeze-table: minmax(200px, 240px);
-$col2-uniboard-squeeze-width: minmax(
-  calc(55vmin),
-  calc(100vh - #{$site-header-outer-height} - #{$block-gap})
-);
-
 $col1-uniboard-controls: 5rem;
