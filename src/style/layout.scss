@@ -17,8 +17,12 @@
 //   col2:  min-width: 799.3px OR landscape
 //   col2-squeeze: max-width: 799.29px AND landscape
 //
-// 同时使用 @container 查询作为 Obsidian code block 内的
-// 容器宽度适配（code block 可能位于侧边栏等窄区域）
+// 关键设计（与 lila 一致）：
+//   - col1 下 grid 行全部 auto，不使用 1fr，避免棋盘下方留空白
+//   - col1 下棋盘最大宽度 = 视口高度 - header，确保棋盘不超高
+//   - viewport @media 只用于 PGN 全屏视图
+//   - @container 查询用于 Obsidian code block 内的容器宽度适配
+//   - chessground 内置 ResizeObserver 自动处理棋盘重绘
 
 $local-block-gap: 2px;
 $local-col1-breakpoint: 500px;
@@ -30,7 +34,7 @@ $local-col1-breakpoint: 500px;
   container-type: inline-size;
   container-name: chess-layout;
   gap: $local-block-gap;
-  height: 100%;
+
   &__board {
     grid-area: board;
     --chess-board-width: 100%;
@@ -52,18 +56,22 @@ $local-col1-breakpoint: 500px;
   }
 
   // ====== col1：单栏（默认，窄容器 / 竖屏） ======
+  // 关键：行全部 auto，不使用 1fr，避免棋盘下方留空白
+  // col1 下棋盘最大宽度 = 视口高度 - header，确保棋盘不超高
   grid-template-columns: 1fr;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto;
   grid-template-areas:
     "board"
     "toolbar"
     "tools";
 
-  &__tools {
-    min-height: 25%;
+  &__board {
+    max-width: calc(
+      100vh - var(--chess-header-height, 0px) - var(--chess-block-gap, 4px)
+    );
   }
 
-  // ====== col2：双栏（宽容器） ======
+  // ====== col2：双栏（@container 宽容器） ======
   @container chess-layout (min-width: #{$local-col1-breakpoint + 1px}) {
     grid-template-columns:
       calc(var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85))
@@ -73,21 +81,20 @@ $local-col1-breakpoint: 500px;
       "board toolbar"
       "board tools";
 
-    &__board {
-      align-self: start;
-    }
-
     &__tools {
       min-height: 0;
     }
   }
 }
 
-// ====== viewport 级响应式覆盖 ======
+// ====== PGN 全屏视图：viewport 级响应式 ======
+// 只对 PGN 全屏视图使用 viewport @media，code block 用 @container 即可
 
-// col2：宽屏或横屏
-@media (min-width: at-least($small)), (orientation: landscape) {
-  .chess-layout {
+:global(.view-content.pgn-view) .chess-layout {
+  height: 100%;
+
+  // PGN col2：宽屏或横屏
+  @media (min-width: at-least($small)), (orientation: landscape) {
     grid-template-columns:
       var(---col2-uniboard-width)
       minmax(#{$uniboard-table-min}, 400px);
@@ -95,28 +102,25 @@ $local-col1-breakpoint: 500px;
     grid-template-areas:
       "board toolbar"
       "board tools";
-
-    &__board {
-      align-self: start;
-    }
-
-    &__tools {
-      min-height: 0;
-    }
   }
-}
 
-// col2-squeeze：横屏 + 窄屏
-@media (max-width: at-most($small)) and (orientation: landscape) {
-  .chess-layout {
+  // PGN col2-squeeze：横屏 + 窄屏
+  @media (max-width: at-most($small)) and (orientation: landscape) {
     grid-template-columns: $col2-uniboard-squeeze-width $col2-uniboard-squeeze-table;
     grid-template-rows: 1fr;
     grid-template-areas: "board tools";
 
-    &__toolbar {
+    .chess-layout__toolbar {
       display: none;
     }
   }
+}
+
+:global(.view-content.pgn-view) {
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding-top: var(--chess-board-margin-top, 0px) !important;
+  padding-bottom: var(--chess-board-margin-bottom, 0px) !important;
 }
 
 // ====== 工具栏方向自适应 ======
@@ -190,9 +194,9 @@ $local-col1-breakpoint: 500px;
   }
 }
 
-// GenFEN viewport 级覆盖
-@media (min-width: at-least($small)), (orientation: landscape) {
-  .chess-layout--genfen {
+// GenFEN PGN 全屏视图 viewport 级覆盖
+:global(.view-content.pgn-view) .chess-layout--genfen {
+  @media (min-width: at-least($small)), (orientation: landscape) {
     grid-template-columns:
       var(---col2-uniboard-width)
       minmax(#{$uniboard-table-min}, 400px);
@@ -208,28 +212,14 @@ $local-col1-breakpoint: 500px;
       width: auto;
     }
   }
-}
 
-@media (max-width: at-most($small)) and (orientation: landscape) {
-  .chess-layout--genfen {
+  @media (max-width: at-most($small)) and (orientation: landscape) {
     grid-template-columns: $col2-uniboard-squeeze-width $col2-uniboard-squeeze-table;
     grid-template-rows: 1fr auto;
     grid-template-areas:
       "board piecebtns"
       "board toolbar";
   }
-}
-
-// ====== PGN 文件视图专用 ======
-:global(.view-content.pgn-view) .chess-layout {
-  height: 100%;
-}
-
-:global(.view-content.pgn-view) {
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding-top: var(--chess-board-margin-top, 0px) !important;
-  padding-bottom: var(--chess-board-margin-bottom, 0px) !important;
 }
 
 // ====== tree codeblock 专用 ======
