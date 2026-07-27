@@ -27,6 +27,7 @@
     userShapes?: DrawShape[];
     engineBestMove?: { from: Square; to: Square } | null;
     enginePonder?: { from: Square; to: Square } | null;
+    disableResize?: boolean;
   }
 
   let {
@@ -42,6 +43,7 @@
     userShapes = [],
     engineBestMove = null,
     enginePonder = null,
+    disableResize = false,
   }: Props = $props();
 
   import { iconSvg } from "../utils/icon";
@@ -372,13 +374,15 @@
       </div>
     </div>
   {/if}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    class="board-resize"
-    onmousedown={startResize}
-    ontouchstart={startResize}
-  ></div>
+  {#if !disableResize}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div
+      class="board-resize"
+      onmousedown={startResize}
+      ontouchstart={startResize}
+    ></div>
+  {/if}
 </div>
 
 <style>

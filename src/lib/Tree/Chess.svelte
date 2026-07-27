@@ -55,10 +55,18 @@
     nodeMap: NodeMap;
     currentNode: ChessNode;
     currentPath: string[];
+    isPGNView?: boolean;
   }
 
-  let { settings, fen, eventBus, nodeMap, currentNode, currentPath }: Props =
-    $props();
+  let {
+    settings,
+    fen,
+    eventBus,
+    nodeMap,
+    currentNode,
+    currentPath,
+    isPGNView = false,
+  }: Props = $props();
 
   let lastMove: [Square, Square] | null = $derived(
     currentNode.move ? [currentNode.move.from, currentNode.move.to] : null,
@@ -166,6 +174,7 @@
       {userShapes}
       {engineBestMove}
       {enginePonder}
+      disableResize={isPGNView}
     />
   </div>
   <div class="chess-layout__toolbar">
