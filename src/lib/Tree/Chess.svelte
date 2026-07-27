@@ -55,18 +55,10 @@
     nodeMap: NodeMap;
     currentNode: ChessNode;
     currentPath: string[];
-    isPGNView?: boolean;
   }
 
-  let {
-    settings,
-    fen,
-    eventBus,
-    nodeMap,
-    currentNode,
-    currentPath,
-    isPGNView = false,
-  }: Props = $props();
+  let { settings, fen, eventBus, nodeMap, currentNode, currentPath }: Props =
+    $props();
 
   let lastMove: [Square, Square] | null = $derived(
     currentNode.move ? [currentNode.move.from, currentNode.move.to] : null,
@@ -94,20 +86,14 @@
   $effect(() => {
     const el = treeViewEl;
     if (!el) return;
+    const scale = Number.parseFloat(
+      getComputedStyle(document.body).getPropertyValue("--chess-board-scale") ||
+        "0.85",
+    );
     const ro = new ResizeObserver(() => {
       const rect = el.getBoundingClientRect();
-      if (isPGNView) {
-        const maxSize = Math.min(rect.width - 240, rect.height);
-        adaptiveBoardWidth = Math.max(200, maxSize);
-      } else {
-        const scale = Number.parseFloat(
-          getComputedStyle(document.body).getPropertyValue(
-            "--chess-board-scale",
-          ) || "0.85",
-        );
-        const maxSize = Math.min(rect.width - 240, rect.height);
-        adaptiveBoardWidth = Math.max(200, maxSize * scale);
-      }
+      const maxSize = Math.min(rect.width - 240, rect.height);
+      adaptiveBoardWidth = Math.max(200, maxSize * scale);
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -180,7 +166,6 @@
       {userShapes}
       {engineBestMove}
       {enginePonder}
-      disableResize={isPGNView}
     />
   </div>
   <div class="chess-layout__toolbar">

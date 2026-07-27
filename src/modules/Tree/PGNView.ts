@@ -41,7 +41,6 @@ const TreeViewModule = {
           eventBus: host.eventBus,
           currentNode: host.currentNode,
           currentPath: host.currentPath,
-          isPGNView: true,
         },
       });
     });
