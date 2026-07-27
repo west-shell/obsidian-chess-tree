@@ -29,65 +29,59 @@
   });
 </script>
 
-<div class="move-container">
-  <ul class="move-list" bind:this={ulRef}>
-    <li class="start" bind:this={itemRefs[0]}>
-      <span class="roundnum">0</span>
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <span
-        class="move start"
-        class:active={currentStep === 0}
-        onclick={() => eventBus.emit("clickstep", 0)}
-      >
-        {settings.showMovelistText ? "= Start =" : "Start"}
-      </span>
-    </li>
-    {#each moves as move, i (i)}
-      {#if i % 2 === 0}
-        <li class="round" bind:this={itemRefs[i / 2 + 1]}>
-          <span class="roundnum">{i / 2 + 1}</span>
+<ul class="move-list" bind:this={ulRef}>
+  <li class="start" bind:this={itemRefs[0]}>
+    <span class="roundnum">0</span>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <span
+      class="move start"
+      class:active={currentStep === 0}
+      onclick={() => eventBus.emit("clickstep", 0)}
+    >
+      {settings.showMovelistText ? "= Start =" : "Start"}
+    </span>
+  </li>
+  {#each moves as move, i (i)}
+    {#if i % 2 === 0}
+      <li class="round" bind:this={itemRefs[i / 2 + 1]}>
+        <span class="roundnum">{i / 2 + 1}</span>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <span
+          class="move white"
+          class:active={currentStep === i + 1}
+          onclick={() => eventBus.emit("clickstep", i + 1)}
+        >
+          {settings.showMovelistText ? (move.move?.san ?? "...") : "W"}
+        </span>
+        {#if moves[i + 1]}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
-            class="move white"
-            class:active={currentStep === i + 1}
-            onclick={() => eventBus.emit("clickstep", i + 1)}
+            class="move black"
+            class:active={currentStep === i + 2}
+            onclick={() => eventBus.emit("clickstep", i + 2)}
           >
-            {settings.showMovelistText ? (move.move?.san ?? "...") : "W"}
+            {settings.showMovelistText
+              ? (moves[i + 1].move?.san ?? "...")
+              : "B"}
           </span>
-          {#if moves[i + 1]}
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span
-              class="move black"
-              class:active={currentStep === i + 2}
-              onclick={() => eventBus.emit("clickstep", i + 2)}
-            >
-              {settings.showMovelistText
-                ? (moves[i + 1].move?.san ?? "...")
-                : "B"}
-            </span>
-          {/if}
-        </li>
-      {/if}
-    {/each}
-  </ul>
-</div>
+        {/if}
+      </li>
+    {/if}
+  {/each}
+</ul>
 
 <style>
-  .move-container {
-    font-size: var(--chess-font-size, 12px);
-    padding: 0;
-    margin: 0;
-    container-type: inline-size;
-    container-name: move-list-container;
-  }
-
   .move-list {
     display: flex;
     flex-direction: column;
-    height: calc(var(--chess-board-width, 400px));
+    height: 100%;
+    font-size: var(--chess-font-size, 12px);
+    container-type: inline-size;
+    container-name: move-list-container;
+    overflow-y: auto;
     padding: 0;
     margin: 0;
     color: var(--text-normal);

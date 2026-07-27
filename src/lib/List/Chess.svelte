@@ -39,6 +39,18 @@
   let isprotected = $derived(options.protected || false);
   // svelte-ignore state_referenced_locally
   let rotated = $state(options.rotated || false);
+  let boardEl: HTMLDivElement;
+  let boardHeight = $state(0);
+
+  $effect(() => {
+    const el = boardEl;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      boardHeight = el.offsetHeight;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  });
 
   onMount(async () => {
     await tick();
@@ -52,8 +64,8 @@
   });
 </script>
 
-<div class="chess-layout">
-  <div class="chess-layout__board">
+<div class="chess-layout" style="--chess-board-height:{boardHeight}px">
+  <div class="chess-layout__board" bind:this={boardEl}>
     <Board
       {settings}
       {fen}
@@ -76,7 +88,7 @@
 
 <style>
   .chess-layout {
-    height: 100%;
+    height: var(--chess-board-height, 100%);
     --red: #861818;
     --black: #000080;
   }

@@ -110,6 +110,9 @@ $col1-breakpoint: 500px;
 
 // ====== 工具面板自适应 ======
 .chess-layout__tools {
+  min-height: 0;
+  overflow: hidden;
+
   @container chess-layout (max-width: #{$col1-breakpoint}) {
     min-height: 25%;
     width: 100%;
