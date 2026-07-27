@@ -49,7 +49,7 @@
   // 升变弹窗图标尺寸基于 cellSize 推算（棋盘宽 = cellSize * 8）
   let promoIconSize = $derived(settings.cellSize * 8 * 0.11);
   let boardElement: HTMLDivElement;
-  let api: Api | null = null;
+  let api: Api | null = $state(null);
   let layoutChangeHandler: (() => void) | null = null;
 
   function handleWheel(e: WheelEvent) {
