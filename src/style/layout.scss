@@ -31,13 +31,10 @@ $local-col1-breakpoint: 500px;
   container-name: chess-layout;
   gap: $local-block-gap;
   height: 100%;
-  transition: grid-template-columns 0.2s ease;
-
   &__board {
     grid-area: board;
     --chess-board-width: 100%;
     align-self: start;
-    transition: width 0.2s ease;
   }
 
   &__toolbar {

@@ -6,11 +6,6 @@
 body {
   --chess-header-height: 0px;
   --chess-block-gap: 4px;
-  --chess-board-scale: 1;
-
-  @include mq-zoom-enabled {
-    --chess-board-scale: calc((var(--chess-zoom, 80) / 100) * 0.75 + 0.25);
-  }
 }
 
 .view-content.pgn-view {

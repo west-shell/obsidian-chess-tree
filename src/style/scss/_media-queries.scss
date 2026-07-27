@@ -18,9 +18,3 @@
     @content;
   }
 }
-
-@mixin mq-zoom-enabled {
-  @media (min-width: at-least($small)) and (min-height: at-least($short)) {
-    @content;
-  }
-}
