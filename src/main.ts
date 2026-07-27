@@ -101,6 +101,11 @@ export default class ChessPlugin extends Plugin {
         applyThemes(this.settings);
       }),
     );
+
+    this.registerDomEvent(activeDocument.body, "chess-zoom-changed", (e) => {
+      this.settings.zoom = (e as CustomEvent).detail;
+      void this.saveSettings();
+    });
   }
 
   refresh() {

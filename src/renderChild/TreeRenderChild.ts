@@ -36,10 +36,6 @@ export class TreeRenderChild extends MarkdownRenderChild {
     this.plugin.instances.add(this);
     this.eventBus.emit("load", "tree");
     this.eventBus.emit("creatUI");
-    this.eventBus.on<number>("zoom-changed", (zoom) => {
-      this.settings.zoom = zoom;
-      void this.plugin.saveSettings();
-    });
   }
 
   refresh(): void {

@@ -342,6 +342,9 @@
         activeDocument.removeEventListener(moveEvent, resize);
         activeDocument.body.classList.remove("resizing");
         void eventBus.emit("zoom-changed", zoom);
+        activeDocument.body.dispatchEvent(
+          new CustomEvent("chess-zoom-changed", { detail: zoom }),
+        );
       },
       { once: true },
     );
