@@ -166,7 +166,6 @@
       flex-direction: column;
       flex-wrap: wrap;
       align-items: flex-start;
-      max-height: 11.5em;
       overflow-x: auto;
       overflow-y: hidden;
       gap: 0 0.5em;

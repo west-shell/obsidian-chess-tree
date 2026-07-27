@@ -65,7 +65,7 @@
     />
   </div>
   <div class="chess-layout__toolbar">
-    <Toolbar {settings} {eventBus} {modified} {PGN} {isprotected} />
+    <Toolbar {eventBus} {modified} {PGN} {isprotected} />
   </div>
   {#if settings.showMovelist}
     <div class="chess-layout__tools">
@@ -76,6 +76,7 @@
 
 <style>
   .chess-layout {
+    height: 100%;
     --red: #861818;
     --black: #000080;
   }
