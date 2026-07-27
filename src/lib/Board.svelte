@@ -51,8 +51,6 @@
   );
   let boardElement: HTMLDivElement;
   let api: Api | null = $state(null);
-  let layoutChangeHandler: (() => void) | null = null;
-  let boardResizeRo: ResizeObserver | null = null;
 
   function handleWheel(e: WheelEvent) {
     if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
@@ -212,14 +210,6 @@
     }
     api = Chessground(boardElement, config);
 
-    boardResizeRo = new ResizeObserver(() => {
-      if (api && boardElement.offsetWidth) {
-        api.state.dom.bounds.clear();
-        api.state.dom.redraw();
-      }
-    });
-    boardResizeRo.observe(boardElement);
-
     eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>(
       "promote",
       (payload) => {
@@ -228,30 +218,9 @@
         promotingColor = payload.color;
       },
     );
-
-    layoutChangeHandler = () => {
-      if (api && boardElement.offsetWidth) {
-        api.state.dom.bounds.clear();
-        api.state.dom.redraw();
-      }
-    };
-    activeDocument.body.addEventListener(
-      "chess-layout-change",
-      layoutChangeHandler,
-    );
   });
 
   onDestroy(() => {
-    if (boardResizeRo) {
-      boardResizeRo.disconnect();
-      boardResizeRo = null;
-    }
-    if (layoutChangeHandler) {
-      activeDocument.body.removeEventListener(
-        "chess-layout-change",
-        layoutChangeHandler,
-      );
-    }
     if (api) {
       api.destroy();
     }
