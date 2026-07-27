@@ -57,17 +57,23 @@ $local-block-gap: 2px;
 
   // ====== col2：双栏（宽屏或横屏） ======
   @include mq-at-least-col2 {
-    grid-template-columns:
-      var(---col2-uniboard-width)
-      $local-block-gap
-      minmax(#{$uniboard-table-min}, 400px);
+    grid-template-columns: var(---col2-uniboard-width) min-content minmax(
+        #{$uniboard-table-min},
+        400px
+      );
     grid-template-rows: auto 1fr;
     grid-template-areas:
-      "board . toolbar"
-      "board . tools";
+      "board toolbar tools"
+      "board toolbar tools";
 
     &__board {
       max-width: none;
+    }
+
+    &__toolbar {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: center;
     }
 
     &__tools {
@@ -77,8 +83,7 @@ $local-block-gap: 2px;
 }
 
 // ====== 工具栏方向自适应 ======
-// col1：横向（棋盘下方）
-// col2：竖向（右列顶部）
+// col1：横向（棋盘下方），col2 由 grid 内联设置竖向
 .chess-layout__toolbar {
   display: flex;
   flex-direction: row;
@@ -86,12 +91,6 @@ $local-block-gap: 2px;
   justify-content: flex-start;
   align-items: center;
   gap: 2px;
-
-  @include mq-at-least-col2 {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: center;
-  }
 }
 
 // ====== 工具栏按钮基础样式 ======
@@ -125,14 +124,15 @@ $local-block-gap: 2px;
     "toolbar";
 
   @include mq-at-least-col2 {
-    grid-template-columns:
-      var(---col2-uniboard-width)
-      $local-block-gap
-      minmax(#{$uniboard-table-min}, 400px);
-    grid-template-rows: 1fr auto;
-    grid-template-areas:
-      "board . piecebtns"
-      "board . toolbar";
+    grid-template-columns: var(---col2-uniboard-width) min-content min-content;
+    grid-template-rows: 1fr;
+    grid-template-areas: "board piecebtns toolbar";
+
+    .chess-layout__toolbar {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
   }
 
   .chess-layout__piecebtns .piece-btn-container {
@@ -142,10 +142,14 @@ $local-block-gap: 2px;
     height: auto;
 
     @include mq-at-least-col2 {
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      height: 100%;
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(12, 1fr);
       width: auto;
+
+      &:has(.piece-btn:nth-child(7)) {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(6, 1fr);
+      }
     }
   }
 }
