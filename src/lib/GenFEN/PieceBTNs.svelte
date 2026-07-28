@@ -182,11 +182,6 @@
 
 <style>
   .piece-btn-container {
-    font-size: clamp(
-      10px,
-      calc(var(--chess-board-width, 400px) * 0.0375),
-      24px
-    );
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(6, 1fr);
@@ -196,6 +191,10 @@
   }
 
   .piece-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -206,6 +205,11 @@
       box-shadow 0.15s,
       border-color 0.15s;
     color: white;
+  }
+
+  .piece-btn :global(svg) {
+    width: 18px;
+    height: 18px;
   }
 
   .piece-btn.white {
