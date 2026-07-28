@@ -114,6 +114,7 @@ export default class ChessPlugin extends Plugin {
   }
 
   refresh() {
+    applyThemes(this.settings);
     this.instances.forEach((instance) => {
       instance.refresh();
     });
