@@ -130,16 +130,15 @@ $local-block-gap: 2px;
     "toolbar";
 
   @include mq-at-least-col2 {
-    height: var(---col2-uniboard-width);
+    height: auto;
     grid-template-columns: var(---col2-uniboard-width) min-content min-content;
-    grid-template-rows: 1fr;
+    grid-template-rows: auto;
     grid-template-areas: "board piecebtns toolbar";
 
     .chess-layout__toolbar {
       flex-direction: column;
       flex-wrap: nowrap;
       align-items: center;
-      overflow: auto;
     }
   }
 
