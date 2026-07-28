@@ -34,7 +34,7 @@ $local-block-gap: 2px;
   &__tools {
     grid-area: tools;
     min-height: 0;
-    overflow: hidden;
+    overflow: auto;
   }
 
   &__piecebtns {
@@ -58,10 +58,7 @@ $local-block-gap: 2px;
   // ====== col2：双栏（宽屏或横屏） ======
   @include mq-at-least-col2 {
     height: var(---col2-uniboard-width);
-    grid-template-columns: var(---col2-uniboard-width) auto minmax(
-        #{$uniboard-table-min},
-        400px
-      );
+    grid-template-columns: var(---col2-uniboard-width) auto 1fr;
     grid-template-rows: var(---col2-uniboard-width) 1fr;
     grid-template-areas:
       "board toolbar tools"
