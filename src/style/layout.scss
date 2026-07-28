@@ -130,6 +130,7 @@ $local-block-gap: 2px;
     "toolbar";
 
   @include mq-at-least-col2 {
+    height: var(---col2-uniboard-width);
     grid-template-columns: var(---col2-uniboard-width) min-content min-content;
     grid-template-rows: 1fr;
     grid-template-areas: "board piecebtns toolbar";
@@ -138,6 +139,7 @@ $local-block-gap: 2px;
       flex-direction: column;
       flex-wrap: nowrap;
       align-items: center;
+      overflow: auto;
     }
   }
 
