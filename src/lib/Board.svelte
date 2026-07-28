@@ -46,11 +46,11 @@
 
   import { iconSvg } from "../utils/icon";
 
+  let boardElement!: HTMLDivElement;
+  let api: Api | null = $state(null);
   let promoIconSize = $derived(
     boardElement?.offsetWidth ? boardElement.offsetWidth * 0.11 : 30,
   );
-  let boardElement: HTMLDivElement;
-  let api: Api | null = $state(null);
   let layoutChangeHandler: (() => void) | null = null;
 
   function handleWheel(e: WheelEvent) {
