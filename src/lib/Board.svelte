@@ -51,8 +51,6 @@
   let promoIconSize = $derived(
     boardElement?.offsetWidth ? boardElement.offsetWidth * 0.11 : 30,
   );
-  let layoutChangeHandler: (() => void) | null = null;
-
   function handleWheel(e: WheelEvent) {
     if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
     e.preventDefault();
@@ -355,7 +353,6 @@
       </div>
     </div>
   {/if}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="board-resize"
