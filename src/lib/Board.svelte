@@ -332,7 +332,7 @@
   }
 </script>
 
-<div class="board-wrapper" onwheel={handleWheel}>
+<div class="board-wrapper chess-layout__board" onwheel={handleWheel}>
   <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->

@@ -29,7 +29,7 @@
   });
 </script>
 
-<ul class="move-list" bind:this={ulRef}>
+<ul class="move-list chess-layout__tools" bind:this={ulRef}>
   <li class="start" bind:this={itemRefs[0]}>
     <span class="roundnum">0</span>
     <!-- svelte-ignore a11y_click_events_have_key_events -->

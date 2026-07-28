@@ -583,7 +583,7 @@
   });
 </script>
 
-<div class="tree-container">
+<div class="tree-container chess-layout__tools">
   <div class="svg-wrapper">
     {#if nodeMap.get(currentNode?.id ?? "")?.eval}
       {@const ce = nodeMap.get(currentNode!.id)!.eval!}

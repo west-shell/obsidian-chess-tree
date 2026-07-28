@@ -165,7 +165,7 @@
   }
 </script>
 
-<div class="piece-btn-container">
+<div class="piece-btn-container chess-layout__piecebtns">
   {#each PIECES as { key, color, icon, piece } (key)}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button

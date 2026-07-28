@@ -131,24 +131,18 @@
 </script>
 
 <div class="chess-layout">
-  <div class="chess-layout__board">
-    <Board
-      {settings}
-      {fen}
-      {lastMove}
-      {checkColor}
-      {eventBus}
-      {rotated}
-      {variations}
-      {userShapes}
-      {engineBestMove}
-      {enginePonder}
-    />
-  </div>
-  <div class="chess-layout__toolbar">
-    <Toolbar {eventBus} {fen} />
-  </div>
-  <div class="chess-layout__tools">
-    <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
-  </div>
+  <Board
+    {settings}
+    {fen}
+    {lastMove}
+    {checkColor}
+    {eventBus}
+    {rotated}
+    {variations}
+    {userShapes}
+    {engineBestMove}
+    {enginePonder}
+  />
+  <Toolbar {eventBus} {fen} />
+  <Tree {nodeMap} {eventBus} {currentNode} {currentPath} />
 </div>

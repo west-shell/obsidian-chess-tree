@@ -33,15 +33,9 @@
 </script>
 
 <div class="chess-layout chess-layout--genfen">
-  <div class="chess-layout__board">
-    <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
-  </div>
-  <div class="chess-layout__piecebtns">
-    <PieceBTNs {fen} {eventBus} {selectedPiece} />
-  </div>
-  <div class="chess-layout__toolbar">
-    <Toolbar {eventBus} {fen} />
-  </div>
+  <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
+  <PieceBTNs {fen} {eventBus} {selectedPiece} />
+  <Toolbar {eventBus} {fen} />
 </div>
 
 <style>

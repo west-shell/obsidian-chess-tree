@@ -190,7 +190,7 @@
   });
 </script>
 
-<div class="fen-editor-tools">
+<div class="fen-editor-tools chess-layout__toolbar">
   <div class="tool-group-fen-meta">
     <div class="tool-section turn-row">
       <button class="turn-toggle" onclick={toggleTurn}

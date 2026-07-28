@@ -58,7 +58,7 @@
   }
 </script>
 
-<div class="toolbar-container">
+<div class="toolbar-container chess-layout__toolbar">
   {#each buttons as { title, icon, event } (event)}
     <button
       class="toolbar-btn"

@@ -53,24 +53,18 @@
 </script>
 
 <div class="chess-layout">
-  <div class="chess-layout__board">
-    <Board
-      {settings}
-      {fen}
-      {lastMove}
-      {checkColor}
-      {selectedSquare}
-      {eventBus}
-      {rotated}
-    />
-  </div>
-  <div class="chess-layout__toolbar">
-    <Toolbar {eventBus} {modified} {PGN} {isprotected} />
-  </div>
+  <Board
+    {settings}
+    {fen}
+    {lastMove}
+    {checkColor}
+    {selectedSquare}
+    {eventBus}
+    {rotated}
+  />
+  <Toolbar {eventBus} {modified} {PGN} {isprotected} />
   {#if settings.showMovelist}
-    <div class="chess-layout__tools">
-      <List {settings} {currentStep} {moves} {eventBus} />
-    </div>
+    <List {settings} {currentStep} {moves} {eventBus} />
   {/if}
 </div>
 
