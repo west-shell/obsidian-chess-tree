@@ -156,9 +156,15 @@ export default class ChessPlugin extends Plugin {
   async loadSettings() {
     const savedData = (await this.loadData()) as Record<string, unknown> | null;
     if (savedData) {
+      const picked: Record<string, unknown> = {};
+      for (const key of Object.keys(DEFAULT_SETTINGS)) {
+        if (key in savedData) {
+          picked[key] = savedData[key];
+        }
+      }
       this.settings = {
         ...DEFAULT_SETTINGS,
-        ...(savedData as Partial<ISettings>),
+        ...(picked as Partial<ISettings>),
       };
     }
   }
