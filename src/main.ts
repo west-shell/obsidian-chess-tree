@@ -153,6 +153,10 @@ export default class ChessPlugin extends Plugin {
     });
   }
 
+  onunload() {
+    void this.saveSettings();
+  }
+
   async loadSettings() {
     const savedData = (await this.loadData()) as Record<string, unknown> | null;
     if (savedData) {
