@@ -45,6 +45,7 @@
     "obsidian": "^1.13.1",
     "prettier": "^3.9.4",
     "prettier-plugin-svelte": "^4.1.1",
+    "sass": "^1.102.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "svelte-eslint-parser": "^1.8.0",

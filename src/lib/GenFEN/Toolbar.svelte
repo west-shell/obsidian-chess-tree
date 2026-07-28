@@ -5,10 +5,9 @@
 
   interface Props {
     eventBus: EventBus;
-    position: string;
     fen: string;
   }
-  let { eventBus, position, fen }: Props = $props();
+  let { eventBus, fen }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
@@ -191,7 +190,7 @@
   });
 </script>
 
-<div class="fen-editor-tools {position}">
+<div class="fen-editor-tools">
   <div class="tool-group-fen-meta">
     <div class="tool-section turn-row">
       <button class="turn-toggle" onclick={toggleTurn}
@@ -306,11 +305,7 @@
     gap: 10px;
     padding: 8px;
   }
-  .fen-editor-tools.bottom {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
+
   .tool-section {
     display: flex;
     flex-direction: column;
@@ -395,11 +390,9 @@
   }
   .tool-buttons {
     display: flex;
+    flex-direction: column;
     flex-wrap: nowrap;
     gap: 4px;
-  }
-  .tool-buttons.bottom {
-    flex-direction: row;
   }
   .fen-btn {
     padding: 6px 12px;

@@ -29,71 +29,71 @@
   });
 </script>
 
-<div class="move-container {settings.position}">
-  <ul class="move-list {settings.position}" bind:this={ulRef}>
-    <li class="start" bind:this={itemRefs[0]}>
-      <span class="roundnum">0</span>
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <span
-        class="move start"
-        class:active={currentStep === 0}
-        onclick={() => eventBus.emit("clickstep", 0)}
-      >
-        {settings.showMovelistText ? "= Start =" : "Start"}
-      </span>
-    </li>
-    {#each moves as move, i (i)}
-      {#if i % 2 === 0}
-        <li class="round" bind:this={itemRefs[i / 2 + 1]}>
-          <span class="roundnum">{i / 2 + 1}</span>
+<ul class="move-list" bind:this={ulRef}>
+  <li class="start" bind:this={itemRefs[0]}>
+    <span class="roundnum">0</span>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <span
+      class="move start"
+      class:active={currentStep === 0}
+      onclick={() => eventBus.emit("clickstep", 0)}
+    >
+      {settings.showMovelistText ? "= Start =" : "Start"}
+    </span>
+  </li>
+  {#each moves as move, i (i)}
+    {#if i % 2 === 0}
+      <li class="round" bind:this={itemRefs[i / 2 + 1]}>
+        <span class="roundnum">{i / 2 + 1}</span>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <span
+          class="move white"
+          class:active={currentStep === i + 1}
+          onclick={() => eventBus.emit("clickstep", i + 1)}
+        >
+          {settings.showMovelistText ? (move.move?.san ?? "...") : "W"}
+        </span>
+        {#if moves[i + 1]}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
-            class="move white"
-            class:active={currentStep === i + 1}
-            onclick={() => eventBus.emit("clickstep", i + 1)}
+            class="move black"
+            class:active={currentStep === i + 2}
+            onclick={() => eventBus.emit("clickstep", i + 2)}
           >
-            {settings.showMovelistText ? (move.move?.san ?? "...") : "W"}
+            {settings.showMovelistText
+              ? (moves[i + 1].move?.san ?? "...")
+              : "B"}
           </span>
-          {#if moves[i + 1]}
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span
-              class="move black"
-              class:active={currentStep === i + 2}
-              onclick={() => eventBus.emit("clickstep", i + 2)}
-            >
-              {settings.showMovelistText
-                ? (moves[i + 1].move?.san ?? "...")
-                : "B"}
-            </span>
-          {/if}
-        </li>
-      {/if}
-    {/each}
-  </ul>
-</div>
+        {/if}
+      </li>
+    {/if}
+  {/each}
+</ul>
 
 <style>
-  /* ========== 基础容器样式 ========== */
-  .move-container {
-    font-size: var(--chess-font-size, 12px);
-    padding: 0;
-    margin: 0;
-  }
-
   .move-list {
     display: flex;
+    flex-direction: column;
+    height: 100%;
+    font-size: var(--chess-font-size, 12px);
+    container-type: inline-size;
+    container-name: move-list-container;
+    overflow-y: auto;
     padding: 0;
     margin: 0;
     color: var(--text-normal);
     background-color: var(--background-primary-alt);
     border: 1px solid var(--background-modifier-border);
     border-radius: var(--radius-s);
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-wrap: nowrap;
+    align-items: flex-start;
   }
 
-  /* ========== 共用行样式 ========== */
   .move-list li {
     display: flex;
     flex-wrap: nowrap;
@@ -105,6 +105,7 @@
     margin: 0;
     border-bottom: none;
     white-space: nowrap;
+    width: 100%;
   }
 
   .move-list .roundnum {
@@ -154,32 +155,19 @@
     transform: scale(1.02);
   }
 
-  /* ========== 右侧垂直布局 (right) ========== */
-  .move-list.right {
-    flex-direction: column;
-    height: calc(var(--chess-cell-size, 50px) * 8);
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-  }
+  @container move-list-container (max-width: 500px) {
+    .move-list {
+      flex-direction: column;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      overflow-x: auto;
+      overflow-y: hidden;
+      gap: 0 0.5em;
+      height: auto;
+    }
 
-  .move-list.right li {
-    width: 100%;
-  }
-
-  /* ========== 底部多列布局 (bottom) ========== */
-  .move-list.bottom {
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    max-height: 11.5em;
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 0 0.5em;
-  }
-
-  .move-list.bottom li {
-    width: fit-content;
+    .move-list li {
+      width: fit-content;
+    }
   }
 </style>

@@ -46,8 +46,9 @@
 
   import { iconSvg } from "../utils/icon";
 
-  // 升变弹窗图标尺寸基于 cellSize 推算（棋盘宽 = cellSize * 8）
-  let promoIconSize = $derived(settings.cellSize * 8 * 0.11);
+  let promoIconSize = $derived(
+    boardElement?.offsetWidth ? boardElement.offsetWidth * 0.11 : 30,
+  );
   let boardElement: HTMLDivElement;
   let api: Api | null = $state(null);
   let layoutChangeHandler: (() => void) | null = null;
@@ -218,26 +219,9 @@
         promotingColor = payload.color;
       },
     );
-
-    layoutChangeHandler = () => {
-      if (api && boardElement.offsetWidth) {
-        api.state.dom.bounds.clear();
-        api.state.dom.redraw();
-      }
-    };
-    activeDocument.body.addEventListener(
-      "chess-layout-change",
-      layoutChangeHandler,
-    );
   });
 
   onDestroy(() => {
-    if (layoutChangeHandler) {
-      activeDocument.body.removeEventListener(
-        "chess-layout-change",
-        layoutChangeHandler,
-      );
-    }
     if (api) {
       api.destroy();
     }
@@ -300,6 +284,54 @@
     }
     api.set(cfg);
   });
+
+  function eventPosition(e: Event): [number, number] | undefined {
+    const me = e as MouseEvent;
+    if (me.clientX || me.clientX === 0) return [me.clientX, me.clientY];
+    const te = e as TouchEvent;
+    if (te.targetTouches?.[0])
+      return [te.targetTouches[0].clientX, te.targetTouches[0].clientY];
+    return undefined;
+  }
+
+  function startResize(start: Event) {
+    start.preventDefault();
+    const moveEvent = start.type === "touchstart" ? "touchmove" : "mousemove";
+    const upEvent = start.type === "touchstart" ? "touchend" : "mouseup";
+    const startPos = eventPosition(start);
+    if (!startPos) return;
+    const initialZoom = settings.zoom;
+    let zoom = initialZoom;
+
+    const resize = (move: Event) => {
+      const pos = eventPosition(move);
+      if (!pos) return;
+      const delta = pos[0] - startPos[0] + pos[1] - startPos[1];
+      zoom = Math.round(Math.min(100, Math.max(0, initialZoom + delta / 5)));
+      settings.zoom = zoom;
+      const boardScale = (zoom / 100) * 0.75 + 0.25;
+      activeDocument.body.style.setProperty(
+        "--chess-board-scale",
+        `${boardScale}`,
+      );
+      activeDocument.body.dispatchEvent(new Event("chessground.resize"));
+    };
+
+    activeDocument.body.classList.add("resizing");
+    activeDocument.addEventListener(moveEvent, resize);
+    activeDocument.addEventListener(
+      upEvent,
+      () => {
+        activeDocument.removeEventListener(moveEvent, resize);
+        activeDocument.body.classList.remove("resizing");
+        void eventBus.emit("zoom-changed", zoom);
+        activeDocument.body.dispatchEvent(
+          new CustomEvent("chess-zoom-changed", { detail: zoom }),
+        );
+      },
+      { once: true },
+    );
+  }
 </script>
 
 <div class="board-wrapper" onwheel={handleWheel}>
@@ -323,6 +355,13 @@
       </div>
     </div>
   {/if}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="board-resize"
+    onmousedown={startResize}
+    ontouchstart={startResize}
+  ></div>
 </div>
 
 <style>
@@ -398,7 +437,13 @@
   }
 
   .board-wrapper {
-    --bw: var(--chess-board-width, calc(var(--chess-cell-size, 50px) * 8));
+    --bw: var(
+      --chess-board-width,
+      min(
+        var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85),
+        100%
+      )
+    );
     width: var(--bw);
     position: relative;
   }
@@ -436,5 +481,44 @@
   .promotion-btn:hover {
     background: var(--background-modifier-hover);
     border-color: var(--color-accent);
+  }
+
+  .board-resize {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 18px;
+    height: 18px;
+    cursor: nwse-resize;
+    z-index: 5;
+
+    &::before,
+    &::after {
+      background: var(--text-muted);
+      content: "";
+      position: absolute;
+      height: 1px;
+      left: 0;
+    }
+
+    &::before {
+      width: 5px;
+      transform: translate(7px, 8px) rotate(-45deg);
+    }
+
+    &::after {
+      width: 10px;
+      transform: translate(1px, 6px) rotate(-45deg);
+    }
+
+    &:hover {
+      border-radius: 50%;
+      background: var(--interactive-accent);
+    }
+  }
+
+  :global(body.resizing) {
+    user-select: none;
+    -webkit-user-select: none;
   }
 </style>

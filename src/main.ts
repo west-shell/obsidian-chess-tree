@@ -1,6 +1,7 @@
 import "chessground/assets/chessground.base.css";
 import "chessground/assets/chessground.brown.css";
 import "chessground/assets/chessground.cburnett.css";
+import "./style/layout.scss";
 import "./style/settings.css";
 
 import { MarkdownView, Plugin, TFile } from "obsidian";
@@ -100,9 +101,20 @@ export default class ChessPlugin extends Plugin {
         applyThemes(this.settings);
       }),
     );
+
+    this.registerDomEvent(
+      activeDocument.body,
+      "chess-zoom-changed",
+      (e: Event) => {
+        const zoom = (e as CustomEvent<number>).detail;
+        this.settings.zoom = zoom;
+        void this.saveSettings();
+      },
+    );
   }
 
   refresh() {
+    applyThemes(this.settings);
     this.instances.forEach((instance) => {
       instance.refresh();
     });
@@ -141,12 +153,22 @@ export default class ChessPlugin extends Plugin {
     });
   }
 
+  onunload() {
+    void this.saveSettings();
+  }
+
   async loadSettings() {
     const savedData = (await this.loadData()) as Record<string, unknown> | null;
     if (savedData) {
+      const picked: Record<string, unknown> = {};
+      for (const key of Object.keys(DEFAULT_SETTINGS)) {
+        if (key in savedData) {
+          picked[key] = savedData[key];
+        }
+      }
       this.settings = {
         ...DEFAULT_SETTINGS,
-        ...(savedData as Partial<ISettings>),
+        ...(picked as Partial<ISettings>),
       };
     }
   }

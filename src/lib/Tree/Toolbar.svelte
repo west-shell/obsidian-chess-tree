@@ -80,13 +80,6 @@
   let saveBtnClass = $derived(modified ? "unsaved" : "saved");
 
   const buildButtons = (v: number) => [
-    { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
-    { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
-    {
-      title: t("toolbar.promote", v),
-      icon: "arrow-up-wide-narrow",
-      event: "promote",
-    },
     {
       title: t("toolbar.start", v),
       icon: "arrow-left-to-line",
@@ -100,6 +93,13 @@
       title: t("toolbar.annotate", v),
       icon: "tag",
       event: "toggle-annotation-menu",
+    },
+    { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
+    { title: t("toolbar.delete", v), icon: "circle-x", event: "remove" },
+    {
+      title: t("toolbar.promote", v),
+      icon: "arrow-up-wide-narrow",
+      event: "promote",
     },
   ];
   let buttons = $derived(buildButtons(_lv));
@@ -226,57 +226,35 @@
 </div>
 
 <style>
-  :global(.tree-view.right) .toolbar-container {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 2px;
-  }
-
-  :global(.tree-view.bottom) .toolbar-container {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  :global(.tree-view.bottom) .toolbar-container .toolbar-btn {
-    flex: 0 1 auto;
-    min-width: 24px;
-    font-size: clamp(12px, 3vw, 16px);
-    padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
-    margin: 0;
-  }
-
-  :global(.tree-view.right) .toolbar-container .toolbar-btn {
-    flex: 0 1 auto;
-    min-height: 24px;
-    font-size: clamp(12px, 3vw, 16px);
-    padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
-    margin: 0;
-  }
-
-  .toolbar-btn {
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition:
-      background-color 0.2s ease,
-      transform 0.1s ease;
-  }
-
   .toolbar-btn.saved {
     background-color: hsl(122, 39%, 49%);
   }
 
   .toolbar-btn.unsaved {
     background-color: hsl(35, 100%, 50%);
+  }
+
+  .toolbar-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .toolbar-container :global(.toolbar-btn) {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .toolbar-container :global(.toolbar-btn svg) {
+    width: 18px;
+    height: 18px;
   }
 
   .engine-btn.active {
