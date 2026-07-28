@@ -29,12 +29,11 @@ $local-block-gap: 2px;
 
   &__toolbar {
     grid-area: toolbar;
+    align-self: start;
   }
 
   &__tools {
     grid-area: tools;
-    min-height: 0;
-    overflow: auto;
   }
 
   &__piecebtns {
@@ -58,13 +57,14 @@ $local-block-gap: 2px;
   // ====== col2：双栏（宽屏或横屏） ======
   @include mq-at-least-col2 {
     height: var(---col2-uniboard-width);
-    grid-template-columns: var(---col2-uniboard-width) auto 1fr;
+    grid-template-columns: var(---col2-uniboard-width) auto $uniboard-table;
     grid-template-rows: var(---col2-uniboard-width) 1fr;
     grid-template-areas:
       "board toolbar tools"
       "board toolbar tools";
 
     &__board {
+      // flex: 1 1 auto;
       max-width: none;
     }
 
@@ -80,7 +80,9 @@ $local-block-gap: 2px;
     }
 
     &__tools {
+      // height: var(---cg-height, 100%);
       min-height: 0;
+      min-width: 160px;
     }
   }
 }
