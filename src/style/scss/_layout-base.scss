@@ -19,7 +19,7 @@ body {
     ---display-columns: 1;
   }
 
-  @include mq-at-least-col2 {
+  @include mq-is-col2 {
     ---display-columns: 2;
   }
 }

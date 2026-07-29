@@ -7,7 +7,7 @@
   }
 }
 
-@mixin mq-at-least-col2 {
+@mixin mq-is-col2 {
   @media (min-width: at-least($small)), (orientation: landscape) {
     @content;
   }
