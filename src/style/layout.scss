@@ -59,6 +59,10 @@ $local-block-gap: 2px;
     }
   }
 
+  &__tools {
+    max-height: 40vh;
+  }
+
   // ====== col2：双栏（宽屏或横屏） ======
   @include mq-is-col2 {
     height: var(---col2-uniboard-width);
@@ -83,6 +87,7 @@ $local-block-gap: 2px;
     }
 
     &__tools {
+      max-height: none;
       // height: var(---cg-height, 100%);
       min-height: 0;
       min-width: 160px;
