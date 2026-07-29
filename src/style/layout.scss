@@ -49,6 +49,7 @@ $local-block-gap: 2px;
     "tools";
 
   &__board {
+    --chess-board-scale: 1;
     max-width: calc(
       100vh - var(--chess-header-height, 0px) - var(--chess-block-gap, 4px)
     );
@@ -66,6 +67,12 @@ $local-block-gap: 2px;
     grid-template-areas:
       "board toolbar tools"
       "board toolbar tools";
+
+    &__board {
+      .board-resize {
+        display: block;
+      }
+    }
 
     .chess-layout__toolbar.toolbar-container {
       flex-direction: column;
