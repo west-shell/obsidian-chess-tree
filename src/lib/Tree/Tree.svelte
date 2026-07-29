@@ -128,6 +128,8 @@
   let layoutChangeHandler: (() => void) | null = null;
   let handleSliderMouseMove: ((evt: MouseEvent) => void) | null = null;
   let handleSliderMouseUp: (() => void) | null = null;
+  let handleSliderTouchMove: ((evt: TouchEvent) => void) | null = null;
+  let handleSliderTouchEnd: (() => void) | null = null;
   let intersectionObserver: IntersectionObserver | null = null;
   let needsInitialReset = $state(false);
 
@@ -147,6 +149,10 @@
       activeDocument.removeEventListener("mousemove", handleSliderMouseMove);
     if (handleSliderMouseUp)
       activeDocument.removeEventListener("mouseup", handleSliderMouseUp);
+    if (handleSliderTouchMove)
+      activeDocument.removeEventListener("touchmove", handleSliderTouchMove);
+    if (handleSliderTouchEnd)
+      activeDocument.removeEventListener("touchend", handleSliderTouchEnd);
     if (intersectionObserver) {
       intersectionObserver.disconnect();
       intersectionObserver = null;
@@ -321,13 +327,18 @@
     zoomAtCenter(1 / ZOOM_STEP);
   }
 
-  let sliderMouseDown = $state(false);
+  let sliderDragging = $state(false);
   let sliderInnerEl: HTMLDivElement | undefined = $state();
 
   function handleSliderAreaMouseDown(evt: MouseEvent) {
     if (evt.button !== 0) return;
-    sliderMouseDown = true;
+    sliderDragging = true;
     navigateFromSliderY(evt.clientY);
+  }
+
+  function handleSliderLabelTouchStart(evt: TouchEvent) {
+    evt.preventDefault();
+    sliderDragging = true;
   }
 
   function navigateFromSliderY(clientY: number) {
@@ -502,14 +513,27 @@
     });
 
     handleSliderMouseMove = (evt: MouseEvent) => {
-      if (!sliderMouseDown) return;
+      if (!sliderDragging) return;
       navigateFromSliderY(evt.clientY);
     };
     handleSliderMouseUp = () => {
-      sliderMouseDown = false;
+      sliderDragging = false;
     };
     activeDocument.addEventListener("mousemove", handleSliderMouseMove);
     activeDocument.addEventListener("mouseup", handleSliderMouseUp);
+
+    handleSliderTouchMove = (evt: TouchEvent) => {
+      if (!sliderDragging) return;
+      evt.preventDefault();
+      navigateFromSliderY(evt.touches[0].clientY);
+    };
+    handleSliderTouchEnd = () => {
+      sliderDragging = false;
+    };
+    activeDocument.addEventListener("touchmove", handleSliderTouchMove, {
+      passive: false,
+    });
+    activeDocument.addEventListener("touchend", handleSliderTouchEnd);
 
     layoutChangeHandler = () => {
       if (!svgEl || svgEl.clientWidth === 0 || svgEl.clientHeight === 0) return;
@@ -838,7 +862,7 @@
 
     <div
       class="slider"
-      class:active={sliderMouseDown}
+      class:active={sliderDragging}
       class:has-eval={!!evalChartSegments}
     >
       <button
@@ -901,7 +925,8 @@
           <span
             class="slider-label"
             style="top: {sliderPercent}%"
-            onmousedown={handleSliderAreaMouseDown}>{sliderText}</span
+            onmousedown={handleSliderAreaMouseDown}
+            ontouchstart={handleSliderLabelTouchStart}>{sliderText}</span
           >
         {/if}
       </div>
