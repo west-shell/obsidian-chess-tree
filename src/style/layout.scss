@@ -63,14 +63,11 @@ $local-block-gap: 2px;
       "board toolbar tools"
       "board toolbar tools";
 
-    .toolbar-container {
+    .chess-layout__toolbar.toolbar-container {
       flex-direction: column;
       flex-wrap: wrap;
       max-height: var(---col2-uniboard-width);
       column-gap: 2px;
-    }
-
-    &__toolbar {
       grid-row: 1;
     }
 
@@ -136,7 +133,7 @@ $local-block-gap: 2px;
     }
   }
 
-  .chess-layout__piecebtns .piece-btn-container {
+  .chess-layout__piecebtns.piece-btn-container {
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
     width: 100%;
