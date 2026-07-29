@@ -52,6 +52,10 @@ $local-block-gap: 2px;
     max-width: calc(
       100vh - var(--chess-header-height, 0px) - var(--chess-block-gap, 4px)
     );
+
+    .board-resize {
+      display: none;
+    }
   }
 
   // ====== col2：双栏（宽屏或横屏） ======
