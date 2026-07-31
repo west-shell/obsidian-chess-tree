@@ -188,6 +188,7 @@ $local-block-gap: 2px;
   &__tools {
     flex: 1 1 0;
     min-height: 0;
+    max-height: none;
   }
 
   @include mq-is-col2 {
