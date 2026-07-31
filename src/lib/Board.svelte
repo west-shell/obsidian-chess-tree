@@ -347,7 +347,6 @@
       if (!pos) return;
       const delta = pos[0] - startPos[0] + pos[1] - startPos[1];
       zoom = Math.round(Math.min(100, Math.max(0, initialZoom + delta / 5)));
-      settings.zoom = zoom;
       const boardScale = (zoom / 100) * 0.75 + 0.25;
       activeDocument.body.style.setProperty(
         "--chess-board-scale",
@@ -363,7 +362,6 @@
       () => {
         activeDocument.removeEventListener(moveEvent, resize);
         activeDocument.body.classList.remove("resizing");
-        void eventBus.emit("zoom-changed", zoom);
         activeDocument.body.dispatchEvent(
           new CustomEvent("chess-zoom-changed", { detail: zoom }),
         );
