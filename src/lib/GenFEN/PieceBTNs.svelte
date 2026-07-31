@@ -191,8 +191,6 @@
   }
 
   .piece-btn {
-    width: 28px;
-    height: 28px;
     padding: 0;
     margin: 0;
     border-radius: 4px;

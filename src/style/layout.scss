@@ -148,19 +148,23 @@ $local-block-gap: 2px;
   }
 
   .chess-layout__piecebtns.piece-btn-container {
+    container-type: size;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
     width: 100%;
-    height: auto;
-
+    height: 56px;
+    .piece-btn {
+      width: 16.6667cqw;
+      height: 28px;
+    }
     @include mq-is-col2 {
-      grid-template-columns: repeat(1, 1fr);
-      grid-template-rows: repeat(12, 1fr);
-      width: auto;
-
-      &:has(.piece-btn:nth-child(7)) {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(6, 1fr);
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      width: 56px;
+      height: 100%;
+      .piece-btn {
+        width: 28px;
+        height: 16.6667cqh;
       }
     }
   }
