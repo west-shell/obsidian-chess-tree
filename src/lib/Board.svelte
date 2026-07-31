@@ -48,6 +48,9 @@
 
   let boardElement!: HTMLDivElement;
   let api: Api | null = $state(null);
+  let layoutChangeHandler: (() => void) | null = null;
+  let boardResizeRo: ResizeObserver | null = null;
+  let resizeTimer: ReturnType<typeof setTimeout> | null = null;
   let promoIconSize = $derived(
     boardElement?.offsetWidth ? boardElement.offsetWidth * 0.11 : 30,
   );
@@ -209,6 +212,19 @@
     }
     api = Chessground(boardElement, config);
 
+    boardResizeRo = new ResizeObserver(() => {
+      if (!api || !boardElement.offsetWidth) return;
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        resizeTimer = null;
+        if (api && boardElement.offsetWidth) {
+          api.state.dom.bounds.clear();
+          api.state.dom.redraw();
+        }
+      }, 100);
+    });
+    boardResizeRo.observe(boardElement);
+
     eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>(
       "promote",
       (payload) => {
@@ -217,9 +233,34 @@
         promotingColor = payload.color;
       },
     );
+
+    layoutChangeHandler = () => {
+      if (api && boardElement.offsetWidth) {
+        api.state.dom.bounds.clear();
+        api.state.dom.redraw();
+      }
+    };
+    activeDocument.body.addEventListener(
+      "chess-layout-change",
+      layoutChangeHandler,
+    );
   });
 
   onDestroy(() => {
+    if (boardResizeRo) {
+      boardResizeRo.disconnect();
+      boardResizeRo = null;
+    }
+    if (resizeTimer) {
+      clearTimeout(resizeTimer);
+      resizeTimer = null;
+    }
+    if (layoutChangeHandler) {
+      activeDocument.body.removeEventListener(
+        "chess-layout-change",
+        layoutChangeHandler,
+      );
+    }
     if (api) {
       api.destroy();
     }
