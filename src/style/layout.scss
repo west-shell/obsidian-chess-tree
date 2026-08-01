@@ -180,6 +180,7 @@ $local-block-gap: 2px;
 
   &__board {
     --chess-board-width: min(100cqw, 50cqh);
+    max-width: none;
     .board-resize {
       display: none;
     }
