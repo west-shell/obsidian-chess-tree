@@ -963,7 +963,7 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    --chess-board-background: var(--background-primary-alt);
+    --chess-board-background: transparent;
     --chess-board-line: var(--text-normal);
     --piece-red: var(--chess-piece-white, var(--color-red));
     --piece-black: var(--chess-piece-black, var(--color-blue));
@@ -1039,7 +1039,7 @@
 
   .toolbar {
     position: absolute;
-    top: 0.5rem;
+    bottom: 0.5rem;
     left: 0.5rem;
     display: flex;
     gap: 0;
