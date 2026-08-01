@@ -50,9 +50,7 @@ $local-block-gap: 2px;
 
   &__board {
     --chess-board-scale: 1;
-    max-width: calc(
-      100vh - var(--chess-header-height, 0px) - var(--chess-block-gap, 4px)
-    );
+    max-width: 100vh;
 
     .board-resize {
       display: none;
@@ -180,7 +178,6 @@ $local-block-gap: 2px;
 
   &__board {
     --chess-board-width: min(100cqw, 50cqh);
-    max-width: none;
     .board-resize {
       display: none;
     }
