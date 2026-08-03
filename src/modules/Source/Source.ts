@@ -69,12 +69,14 @@ const SourceModule = {
       switch (renderChild) {
         case "tree": {
           const treeHost = host as ITreeHost;
-          const parser = new PGNParser(treeHost.source);
+          const { cleaned, options: opts } = prepareSource(host.source);
+          const parser = new PGNParser(cleaned);
           treeHost.parser = parser;
           treeHost.haveFEN = parser.haveFEN;
           treeHost.root = parser.getRoot();
           treeHost.nodeMap = parser.getMap();
           treeHost.tags = parser.getTags();
+          treeHost.options = opts;
           treeHost.currentNode = treeHost.nodeMap.get("node-root")!;
           treeHost.fen = treeHost.currentNode.fen;
           treeHost.currentTurn =
