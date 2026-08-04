@@ -10,98 +10,40 @@
   }
   let { fen, eventBus, selectedPiece }: Props = $props();
 
+  const PIECE_DEFS: {
+    key: string;
+    color: "white" | "black";
+    icon: string;
+    maxCount: number;
+  }[] = [
+    { key: "k", color: "black", icon: "chess-king", maxCount: 1 },
+    { key: "q", color: "black", icon: "chess-queen", maxCount: 1 },
+    { key: "r", color: "black", icon: "chess-rook", maxCount: 2 },
+    { key: "b", color: "black", icon: "chess-bishop", maxCount: 2 },
+    { key: "n", color: "black", icon: "chess-knight", maxCount: 2 },
+    { key: "p", color: "black", icon: "chess-pawn", maxCount: 8 },
+    { key: "K", color: "white", icon: "chess-king", maxCount: 1 },
+    { key: "Q", color: "white", icon: "chess-queen", maxCount: 1 },
+    { key: "R", color: "white", icon: "chess-rook", maxCount: 2 },
+    { key: "B", color: "white", icon: "chess-bishop", maxCount: 2 },
+    { key: "N", color: "white", icon: "chess-knight", maxCount: 2 },
+    { key: "P", color: "white", icon: "chess-pawn", maxCount: 8 },
+  ];
+
   const PIECES: {
     key: string;
     piece: Piece;
     color: "white" | "black";
     icon: string;
     maxCount: number;
-  }[] = [
-    {
-      key: "k",
-      color: "black",
-      piece: { type: "k", color: "b" },
-      icon: "chess-king",
-      maxCount: 1,
+  }[] = PIECE_DEFS.map((def) => ({
+    ...def,
+    piece: {
+      type: def.key.toLowerCase() as Piece["type"],
+      color:
+        def.key === def.key.toUpperCase() ? ("w" as const) : ("b" as const),
     },
-    {
-      key: "q",
-      color: "black",
-      piece: { type: "q", color: "b" },
-      icon: "chess-queen",
-      maxCount: 1,
-    },
-    {
-      key: "r",
-      color: "black",
-      piece: { type: "r", color: "b" },
-      icon: "chess-rook",
-      maxCount: 2,
-    },
-    {
-      key: "b",
-      color: "black",
-      piece: { type: "b", color: "b" },
-      icon: "chess-bishop",
-      maxCount: 2,
-    },
-    {
-      key: "n",
-      color: "black",
-      piece: { type: "n", color: "b" },
-      icon: "chess-knight",
-      maxCount: 2,
-    },
-    {
-      key: "p",
-      color: "black",
-      piece: { type: "p", color: "b" },
-      icon: "chess-pawn",
-      maxCount: 8,
-    },
-    {
-      key: "K",
-      color: "white",
-      piece: { type: "k", color: "w" },
-      icon: "chess-king",
-      maxCount: 1,
-    },
-    {
-      key: "Q",
-      color: "white",
-      piece: { type: "q", color: "w" },
-      icon: "chess-queen",
-      maxCount: 1,
-    },
-    {
-      key: "R",
-      color: "white",
-      piece: { type: "r", color: "w" },
-      icon: "chess-rook",
-      maxCount: 2,
-    },
-    {
-      key: "B",
-      color: "white",
-      piece: { type: "b", color: "w" },
-      icon: "chess-bishop",
-      maxCount: 2,
-    },
-    {
-      key: "N",
-      color: "white",
-      piece: { type: "n", color: "w" },
-      icon: "chess-knight",
-      maxCount: 2,
-    },
-    {
-      key: "P",
-      color: "white",
-      piece: { type: "p", color: "w" },
-      icon: "chess-pawn",
-      maxCount: 8,
-    },
-  ];
+  }));
 
   let pieceCount = $derived(
     fen
