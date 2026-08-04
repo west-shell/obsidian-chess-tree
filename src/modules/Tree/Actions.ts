@@ -94,6 +94,14 @@ const ActionsModule = {
       host.eventBus.emit("updateUI");
     });
 
+    eventBus.on<number>("clickstep", (step) => {
+      if (step === undefined) return;
+      const nodeId = step === 0 ? host.currentPath[0] : host.currentPath[step];
+      if (nodeId) {
+        eventBus.emit("node-click", nodeId);
+      }
+    });
+
     eventBus.on<string>("slider-navigate", (id) => {
       if (!id) return;
       const node = host.nodeMap.get(id);
