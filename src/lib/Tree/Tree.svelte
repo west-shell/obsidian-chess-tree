@@ -486,6 +486,7 @@
   let listVisible = $state(true);
   function toggleListVisible() {
     listVisible = !listVisible;
+    tick().then(() => resetView());
   }
 
   let _lv = $state(0);
