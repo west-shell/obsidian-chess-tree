@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
           compatibility: {
             componentApi: 4,
           },
+          cssHash: ({ hash, css }: { hash: (str: string) => string; css: string }) => `svelte-${hash(css)}`,
         },
       }) as PluginOption,
     ],
