@@ -3,6 +3,7 @@ import {
   validateFen as chessValidateFen,
   type Color,
   type Move,
+  type Piece,
   type PieceSymbol,
   type Square,
 } from "../chess";
@@ -113,9 +114,7 @@ export function getTurn(fen: string): Color {
  * Extract PieceSymbol and Color from a piece character in FEN.
  * e.g. 'K' → { type: 'k', color: 'w' }, 'n' → { type: 'n', color: 'b' }
  */
-export function parsePiece(
-  pieceChar: string,
-): { type: PieceSymbol; color: Color } | null {
+export function parsePiece(pieceChar: string): Piece | null {
   if (!pieceChar || !/[a-zA-Z]/.test(pieceChar)) return null;
   const lower = pieceChar.toLowerCase() as PieceSymbol;
   const color: Color = pieceChar === pieceChar.toUpperCase() ? "w" : "b";
