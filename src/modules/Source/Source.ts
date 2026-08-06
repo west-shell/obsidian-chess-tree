@@ -104,8 +104,3 @@ const SourceModule = {
 
 registerGenFENModule("source", SourceModule);
 registerTreeModule("source", SourceModule);
-
-/** Read turn from fen string */
-function getTurnFromFen(fen: string): "white" | "black" {
-  return fen.split(" ")[1] === "b" ? "black" : "white";
-}
