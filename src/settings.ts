@@ -48,17 +48,14 @@ export const DEFAULT_SETTINGS: ISettings = {
   autoJump: "auto",
   enableSpeech: true,
   showMovelist: true,
-  showMovelistText: true,
   boardMarginTop: 20,
   boardMarginBottom: 20,
   viewOnly: false,
   rotated: false,
   codeBlockNames: {
-    chess: ["chess"],
+    tree: ["chess", "tree"],
     fen: ["fen"],
-    tree: ["tree"],
   },
-  genfenSaveType: "chess",
   enablePGNView: true,
   pgnFileExtensions: ["pgn"],
   engineDepth: 18,
@@ -193,11 +190,6 @@ export class ChessSettingTab extends PluginSettingTab {
             control: { type: "toggle", key: "showMovelist" },
           },
           {
-            name: t("movelist.text"),
-            desc: t("movelist.text.desc"),
-            control: { type: "toggle", key: "showMovelistText" },
-          },
-          {
             name: t("movelist.fontSize"),
             desc: t("movelist.fontSize.desc"),
             control: {
@@ -303,71 +295,49 @@ export class ChessSettingTab extends PluginSettingTab {
         heading: t("settings.restartRequired.title"),
         desc: t("settings.restartRequired.desc"),
         items: [
-          ...(["chess", "fen", "tree"] as const).flatMap(
-            (mode): SettingGroupItem[] => {
-              const i18nKey =
-                mode === "chess"
-                  ? "chessAliases"
-                  : mode === "fen"
-                    ? "fenAliases"
-                    : "treeAliases";
-              return [
-                {
-                  name: t(`codeblock.${i18nKey}`),
-                  desc: t(`codeblock.${i18nKey}.desc`),
-                  render: (setting: Setting) => {
-                    setting.addText((text) =>
-                      text
-                        .setValue(
-                          (settings.codeBlockNames[mode] ?? []).join(", "),
-                        )
-                        .setPlaceholder(mode)
-                        .onChange((value) => {
-                          const { valid, invalid } =
-                            parseAndValidateNames(value);
-                          if (invalid.length) {
-                            new Notice(
-                              t("codeblock.invalidName").replace(
-                                "{name}",
-                                invalid[0],
-                              ),
-                            );
-                            const input =
-                              setting.controlEl.querySelector("input")!;
-                            input.value = valid.length
-                              ? valid.join(", ")
-                              : mode;
-                          }
-                          if (!valid.length) return;
-                          settings.codeBlockNames[mode] = valid;
-                          void this.plugin.saveSettings();
-                        }),
-                    );
-                    setting.addButton((button) =>
-                      button.setIcon("rotate-ccw").onClick(() => {
-                        settings.codeBlockNames[mode] = [mode];
-                        const input = setting.controlEl.querySelector("input")!;
-                        input.value = mode;
+          ...(["tree", "fen"] as const).flatMap((mode): SettingGroupItem[] => {
+            const i18nKey = mode === "tree" ? "treeAliases" : "fenAliases";
+            return [
+              {
+                name: t(`codeblock.${i18nKey}`),
+                desc: t(`codeblock.${i18nKey}.desc`),
+                render: (setting: Setting) => {
+                  setting.addText((text) =>
+                    text
+                      .setValue(
+                        (settings.codeBlockNames[mode] ?? []).join(", "),
+                      )
+                      .setPlaceholder(mode)
+                      .onChange((value) => {
+                        const { valid, invalid } = parseAndValidateNames(value);
+                        if (invalid.length) {
+                          new Notice(
+                            t("codeblock.invalidName").replace(
+                              "{name}",
+                              invalid[0],
+                            ),
+                          );
+                          const input =
+                            setting.controlEl.querySelector("input")!;
+                          input.value = valid.length ? valid.join(", ") : mode;
+                        }
+                        if (!valid.length) return;
+                        settings.codeBlockNames[mode] = valid;
                         void this.plugin.saveSettings();
                       }),
-                    );
-                  },
+                  );
+                  setting.addButton((button) =>
+                    button.setIcon("rotate-ccw").onClick(() => {
+                      settings.codeBlockNames[mode] = [mode];
+                      const input = setting.controlEl.querySelector("input")!;
+                      input.value = mode;
+                      void this.plugin.saveSettings();
+                    }),
+                  );
                 },
-              ];
-            },
-          ),
-          {
-            name: t("codeblock.genfenSaveType"),
-            desc: t("codeblock.genfenSaveType.desc"),
-            control: {
-              type: "dropdown",
-              key: "genfenSaveType",
-              options: {
-                chess: t("codeblock.modeList"),
-                tree: t("codeblock.modeBranch"),
               },
-            },
-          },
+            ];
+          }),
         ],
       },
       {
@@ -430,7 +400,6 @@ export class ChessSettingTab extends PluginSettingTab {
         "showNextMove",
         "showTurnBorder",
         "showMovelist",
-        "showMovelistText",
         "fontSize",
         "boardMarginTop",
         "boardMarginBottom",
@@ -548,17 +517,6 @@ export class ChessSettingTab extends PluginSettingTab {
         toggle.setValue(settings.showMovelist).onChange((value) => {
           settings.showMovelist = value;
           this.plugin.refresh();
-        }),
-      );
-
-    new Setting(containerEl)
-      .setName(t("movelist.text"))
-      .setDesc(t("movelist.text.desc"))
-      .addToggle((toggle) =>
-        toggle.setValue(settings.showMovelistText).onChange((value) => {
-          settings.showMovelistText = value;
-          this.plugin.refresh();
-          this.display();
         }),
       );
 
@@ -681,37 +639,9 @@ export class ChessSettingTab extends PluginSettingTab {
     // ---- 代码块名称 ----
     new Setting(containerEl).setName(t("codeblock.title")).setHeading();
 
-    const chessSetting = new Setting(containerEl)
-      .setName(t("codeblock.chessAliases"))
-      .setDesc(t("codeblock.chessAliases.desc") + " (默认: chess)")
-      .addText((text) =>
-        text
-          .setValue(settings.codeBlockNames.chess.join(", "))
-          .onChange((value) => {
-            const { valid, invalid } = parseAndValidateNames(value);
-            if (invalid.length) {
-              new Notice(
-                t("codeblock.invalidName").replace("{name}", invalid[0]),
-              );
-              const input = chessSetting.controlEl.querySelector("input")!;
-              input.value = valid.length ? valid.join(", ") : "chess";
-            }
-            if (!valid.length) return;
-            settings.codeBlockNames.chess = valid;
-            void this.plugin.saveSettings();
-          }),
-      )
-      .addButton((button) =>
-        button.setIcon("rotate-ccw").onClick(() => {
-          settings.codeBlockNames.chess = ["chess"];
-          chessSetting.controlEl.querySelector("input")!.value = "chess";
-          void this.plugin.saveSettings();
-        }),
-      );
-
     const treeSetting = new Setting(containerEl)
       .setName(t("codeblock.treeAliases"))
-      .setDesc(t("codeblock.treeAliases.desc") + " (默认: tree)")
+      .setDesc(t("codeblock.treeAliases.desc") + " (默认: chess, tree)")
       .addText((text) =>
         text
           .setValue(settings.codeBlockNames.tree.join(", "))
@@ -722,7 +652,7 @@ export class ChessSettingTab extends PluginSettingTab {
                 t("codeblock.invalidName").replace("{name}", invalid[0]),
               );
               const input = treeSetting.controlEl.querySelector("input")!;
-              input.value = valid.length ? valid.join(", ") : "tree";
+              input.value = valid.length ? valid.join(", ") : "chess";
             }
             if (!valid.length) return;
             settings.codeBlockNames.tree = valid;
@@ -731,8 +661,8 @@ export class ChessSettingTab extends PluginSettingTab {
       )
       .addButton((button) =>
         button.setIcon("rotate-ccw").onClick(() => {
-          settings.codeBlockNames.tree = ["tree"];
-          treeSetting.controlEl.querySelector("input")!.value = "tree";
+          settings.codeBlockNames.tree = ["chess", "tree"];
+          treeSetting.controlEl.querySelector("input")!.value = "chess, tree";
           void this.plugin.saveSettings();
         }),
       );
@@ -763,22 +693,6 @@ export class ChessSettingTab extends PluginSettingTab {
           fenSetting.controlEl.querySelector("input")!.value = "fen";
           void this.plugin.saveSettings();
         }),
-      );
-
-    new Setting(containerEl)
-      .setName(t("codeblock.genfenSaveType"))
-      .setDesc(t("codeblock.genfenSaveType.desc"))
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions({
-            chess: t("codeblock.modeList"),
-            tree: t("codeblock.modeBranch"),
-          })
-          .setValue(settings.genfenSaveType)
-          .onChange((value) => {
-            settings.genfenSaveType = value as "chess" | "tree";
-            void this.plugin.saveSettings();
-          }),
       );
 
     // ---- PGN 文件视图 ----

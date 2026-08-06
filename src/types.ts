@@ -21,17 +21,14 @@ export interface ISettings {
   autoJump: "never" | "always" | "auto";
   enableSpeech: boolean;
   showMovelist: boolean;
-  showMovelistText: boolean;
   boardMarginTop: number;
   boardMarginBottom: number;
   viewOnly?: boolean;
   rotated?: boolean;
   codeBlockNames: {
-    chess: string[];
-    fen: string[];
     tree: string[];
+    fen: string[];
   };
-  genfenSaveType: "chess" | "tree";
   enablePGNView: boolean;
   pgnFileExtensions: string[];
   engineDepth: number;
@@ -91,24 +88,6 @@ export interface IGenFENHost extends IHost {
   selectedPiece: Piece | null;
   markedPos: Square | null;
   Chess: SvelteComponent | null;
-}
-
-export interface IListHost extends IGenFENHost {
-  fen: string;
-  initFEN: string;
-  history: ChessNode[];
-  PGN: ChessNode[];
-  currentTurn: ITurn;
-  currentStep: number;
-  modified: boolean;
-  modifiedStep: number | null;
-  haveFEN: boolean;
-  options: IOptions;
-  Chess: SvelteComponent | null;
-  nodeMap: NodeMap;
-  root: ChessNode;
-  stringifyPGN?: (root: ChessNode) => string;
-  tags?: Map<string, string>;
 }
 
 export interface ITreeHost extends IGenFENHost {

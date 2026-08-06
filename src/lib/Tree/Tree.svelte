@@ -483,7 +483,8 @@
     nodeMode = (nodeMode + 1) % 2;
   }
 
-  let listVisible = $state(true);
+  // svelte-ignore state_referenced_locally
+  let listVisible = $state(settings?.showMovelist ?? true);
   function toggleListVisible() {
     listVisible = !listVisible;
     tick().then(() => resetView());
@@ -1000,7 +1001,7 @@
             class:active={listCurrentStep === 0}
             onclick={() => onClickStep(0)}
           >
-            {settings?.showMovelistText ? "= Start =" : "Start"}
+            = Start =
           </span>
         </li>
         {#each listMoves as move, i (i)}
@@ -1014,7 +1015,7 @@
                 class:active={listCurrentStep === i + 1}
                 onclick={() => onClickStep(i + 1)}
               >
-                {settings?.showMovelistText ? (move.move?.san ?? "...") : "W"}
+                {move.move?.san ?? "..."}
               </span>
               {#if listMoves[i + 1]}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -1024,9 +1025,7 @@
                   class:active={listCurrentStep === i + 2}
                   onclick={() => onClickStep(i + 2)}
                 >
-                  {settings?.showMovelistText
-                    ? (listMoves[i + 1].move?.san ?? "...")
-                    : "B"}
+                  {listMoves[i + 1].move?.san ?? "..."}
                 </span>
               {/if}
             </li>

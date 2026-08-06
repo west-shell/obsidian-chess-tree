@@ -46,20 +46,6 @@ function createModuleSystem() {
   };
 }
 
-const ListModules = createModuleSystem();
-
-export function registerListModule(name: string, module: ChessModule) {
-  ListModules.register(name, module);
-}
-
-export function createListModuleRegistry(host: object) {
-  return ListModules.createRegistry(host);
-}
-
-export function destroyListModuleRegistry(host: object) {
-  ListModules.destroyRegistry(host);
-}
-
 // 实例化 GenFEN 模块系统
 const GenFENModules = createModuleSystem();
 

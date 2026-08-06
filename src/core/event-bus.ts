@@ -1,6 +1,5 @@
 import {
   registerGenFENModule,
-  registerListModule,
   registerPGNViewModule,
   registerTreeModule,
 } from "./module-system";
@@ -99,7 +98,6 @@ export class EventBus {
 }
 
 // 注册模块
-registerListModule("eventBus", EventBus);
 registerGenFENModule("eventBus", EventBus);
 registerPGNViewModule("eventBus", EventBus);
 registerTreeModule("eventBus", EventBus);

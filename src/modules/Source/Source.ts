@@ -1,14 +1,8 @@
 import {
   registerGenFENModule,
-  registerListModule,
   registerTreeModule,
 } from "../../core/module-system";
-import {
-  DEFAULT_FEN,
-  type IGenFENHost,
-  type IListHost,
-  type ITreeHost,
-} from "../../types";
+import { DEFAULT_FEN, type IGenFENHost, type ITreeHost } from "../../types";
 import { parseOption } from "../../utils/parse";
 
 import { PGNParser } from "./parser";
@@ -95,41 +89,6 @@ const SourceModule = {
           }
           break;
         }
-        case "list": {
-          const listHost = host as IListHost;
-
-          // Prepare source and use PGNParser to build tree
-          const { cleaned, options: opts } = prepareSource(host.source);
-          const parser = new PGNParser(cleaned);
-          const mainLine = parser.getMainLine();
-
-          listHost.root = parser.getRoot();
-          listHost.nodeMap = parser.getMap();
-          listHost.haveFEN = parser.haveFEN;
-          listHost.initFEN = parser.getRoot().fen;
-          listHost.PGN = mainLine;
-          listHost.history = [...mainLine];
-          listHost.currentTurn = getTurnFromFen(parser.getRoot().fen);
-          listHost.options = opts;
-          listHost.tags = new Map(parser.tags);
-
-          // 根据 autoJump 设置决定初始步数和棋盘局面
-          const shouldJump =
-            host.settings.autoJump === "always" ||
-            (host.settings.autoJump === "auto" && !listHost.haveFEN);
-          if (shouldJump) {
-            listHost.currentStep = mainLine.length;
-            listHost.fen =
-              mainLine.length > 0
-                ? mainLine[mainLine.length - 1].fen
-                : parser.getRoot().fen;
-          } else {
-            listHost.currentStep = 0;
-            listHost.fen = parser.getRoot().fen;
-          }
-          break;
-        }
-
         case "fen": {
           host.fen = extractFEN(host.source);
           break;
@@ -144,7 +103,6 @@ const SourceModule = {
 };
 
 registerGenFENModule("source", SourceModule);
-registerListModule("source", SourceModule);
 registerTreeModule("source", SourceModule);
 
 /** Read turn from fen string */
