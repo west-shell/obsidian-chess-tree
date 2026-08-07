@@ -464,6 +464,10 @@
     background-color: var(--chess-board-bg, #f0d9b5);
   }
 
+  .cg-wrap :global(piece) {
+    touch-action: none;
+  }
+
   .cg-wrap :global(cg-board square.oc.move-dest) {
     background: radial-gradient(
       transparent 0%,
@@ -482,7 +486,6 @@
     );
     width: var(--bw);
     position: relative;
-    touch-action: none;
   }
 
   .promotion-overlay {
