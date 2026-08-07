@@ -423,10 +423,10 @@ export class ChessSettingTab extends PluginSettingTab {
     void this.plugin.saveSettings();
     if (key === "lang") {
       initI18n(value as string);
+      this.update();
     }
     if (
       [
-        "lang",
         "theme",
         "zoom",
         "showLastMove",
