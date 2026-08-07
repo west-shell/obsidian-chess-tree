@@ -177,6 +177,19 @@ export class ChessSettingTab extends PluginSettingTab {
             control: { type: "toggle", key: "enableSpeech" },
             visible: () => !!window.speechSynthesis,
           },
+          {
+            name: t("movelist.autoJump"),
+            desc: t("movelist.autoJump.desc"),
+            control: {
+              type: "dropdown",
+              key: "autoJump",
+              options: {
+                never: t("movelist.autoJump.never"),
+                always: t("movelist.autoJump.always"),
+                auto: t("movelist.autoJump.auto"),
+              },
+            },
+          },
         ],
       },
       {
@@ -198,19 +211,6 @@ export class ChessSettingTab extends PluginSettingTab {
               max: 25,
               step: 1,
               displayFormat: (v) => `${v}px`,
-            },
-          },
-          {
-            name: t("movelist.autoJump"),
-            desc: t("movelist.autoJump.desc"),
-            control: {
-              type: "dropdown",
-              key: "autoJump",
-              options: {
-                never: t("movelist.autoJump.never"),
-                always: t("movelist.autoJump.always"),
-                auto: t("movelist.autoJump.auto"),
-              },
             },
           },
         ],
@@ -518,6 +518,22 @@ export class ChessSettingTab extends PluginSettingTab {
         );
     }
 
+    new Setting(containerEl)
+      .setName(t("movelist.autoJump"))
+      .setDesc(t("movelist.autoJump.desc"))
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOptions({
+            never: t("movelist.autoJump.never"),
+            always: t("movelist.autoJump.always"),
+            auto: t("movelist.autoJump.auto"),
+          })
+          .setValue(settings.autoJump)
+          .onChange(async (value) => {
+            settings.autoJump = value as "never" | "always" | "auto";
+          });
+      });
+
     // ==================== 着法列表 ====================
     new Setting(containerEl).setName(t("movelist.title")).setHeading();
 
@@ -543,22 +559,6 @@ export class ChessSettingTab extends PluginSettingTab {
         this.plugin.refresh();
       },
     );
-
-    new Setting(containerEl)
-      .setName(t("movelist.autoJump"))
-      .setDesc(t("movelist.autoJump.desc"))
-      .addDropdown((dropdown) => {
-        dropdown
-          .addOptions({
-            never: t("movelist.autoJump.never"),
-            always: t("movelist.autoJump.always"),
-            auto: t("movelist.autoJump.auto"),
-          })
-          .setValue(settings.autoJump)
-          .onChange(async (value) => {
-            settings.autoJump = value as "never" | "always" | "auto";
-          });
-      });
 
     // ---- 引擎 ----
     new Setting(containerEl).setName(t("engine.title")).setHeading();
