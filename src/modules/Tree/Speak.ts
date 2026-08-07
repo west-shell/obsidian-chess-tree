@@ -54,13 +54,13 @@ function speak(move: Move) {
       /=([QRBN])/g,
       (_, piece) => ` ${t("speech.promotesTo")} ${t("speech.piece" + piece)}`,
     )
+    .replace(/x/g, ` ${t("speech.captures")} `)
     .replace(/\+/g, ` ${t("speech.check")}`)
     .replace(/#/g, ` ${t("speech.checkmate")}`);
 
   if (!window.speechSynthesis) return;
   const utter = new SpeechSynthesisUtterance(finalSpeech);
   utter.lang = isZh ? "zh-CN" : "en-US";
-  console.log("[chess-tree] speak:", finalSpeech);
   if (!isZh) {
     const voices = loadVoices();
     const enVoice =

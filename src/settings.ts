@@ -302,12 +302,6 @@ export class ChessSettingTab extends PluginSettingTab {
                 fallback: "chess, tree",
                 defaults: ["chess", "tree"] as const,
               },
-              {
-                key: "fenBlockNames" as const,
-                i18n: "fenAliases",
-                fallback: "fen",
-                defaults: ["fen"] as const,
-              },
             ] as const
           ).flatMap((cfg): SettingGroupItem[] => {
             return [
@@ -351,22 +345,6 @@ export class ChessSettingTab extends PluginSettingTab {
               },
             ];
           }),
-          {
-            name: t("codeblock.fenSaveBlockName"),
-            desc: t("codeblock.fenSaveBlockName.desc"),
-            render: (setting: Setting) => {
-              setting.addDropdown((dropdown) => {
-                for (const name of settings.treeBlockNames) {
-                  dropdown.addOption(name, name);
-                }
-                dropdown.setValue(settings.fenSaveBlockName);
-                dropdown.onChange((value) => {
-                  settings.fenSaveBlockName = value;
-                  void this.plugin.saveSettings();
-                });
-              });
-            },
-          },
         ],
       },
       {
@@ -694,32 +672,6 @@ export class ChessSettingTab extends PluginSettingTab {
         button.setIcon("rotate-ccw").onClick(() => {
           settings.treeBlockNames = ["chess", "tree"];
           treeSetting.controlEl.querySelector("input")!.value = "chess, tree";
-          void this.plugin.saveSettings();
-        }),
-      );
-
-    const fenSetting = new Setting(containerEl)
-      .setName(t("codeblock.fenAliases"))
-      .setDesc(t("codeblock.fenAliases.desc") + " (默认: fen)")
-      .addText((text) =>
-        text.setValue(settings.fenBlockNames.join(", ")).onChange((value) => {
-          const { valid, invalid } = parseAndValidateNames(value);
-          if (invalid.length) {
-            new Notice(
-              t("codeblock.invalidName").replace("{name}", invalid[0]),
-            );
-            const input = fenSetting.controlEl.querySelector("input")!;
-            input.value = valid.length ? valid.join(", ") : "fen";
-          }
-          if (!valid.length) return;
-          settings.fenBlockNames = valid;
-          void this.plugin.saveSettings();
-        }),
-      )
-      .addButton((button) =>
-        button.setIcon("rotate-ccw").onClick(() => {
-          settings.fenBlockNames = ["fen"];
-          fenSetting.controlEl.querySelector("input")!.value = "fen";
           void this.plugin.saveSettings();
         }),
       );
