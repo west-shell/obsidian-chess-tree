@@ -118,6 +118,8 @@
   "codeblock.title": "代码块名称",
   "codeblock.fenAliases": "FEN 生成模式",
   "codeblock.fenAliases.desc": "自定义 FEN 生成代码块别名，逗号分隔",
+  "codeblock.fenSaveBlockName": "FEN 保存为",
+  "codeblock.fenSaveBlockName.desc": "FEN 编辑器保存时使用的代码块名称，从树模式代码块名称中选择",
   "codeblock.treeAliases": "树模式",
   "codeblock.treeAliases.desc": "自定义树模式代码块别名，逗号分隔",
   "codeblock.apply": "应用代码块名称",
