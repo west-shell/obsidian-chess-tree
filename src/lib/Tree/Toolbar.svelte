@@ -100,6 +100,11 @@
     { title: t("toolbar.end", v), icon: "arrow-right-to-line", event: "toEnd" },
     { title: t("toolbar.flip", v), icon: "flip-vertical", event: "rotate" },
     {
+      title: t("toolbar.editBoard", v),
+      icon: "pencil",
+      event: "edit-board",
+    },
+    {
       title: t("toolbar.annotate", v),
       icon: "tag",
       event: "toggle-annotation-menu",

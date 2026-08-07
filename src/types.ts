@@ -99,8 +99,10 @@ export interface ITreeHost extends IGenFENHost {
   currentTurn: ITurn;
   currentNode: ChessNode;
   currentPath: string[];
+  modified: boolean;
   haveFEN: boolean;
   options: IOptions;
+  editing: boolean;
   stringifyPGN: (root: ChessNode, includeEval?: boolean) => string;
 }
 

@@ -1,10 +1,11 @@
-import { type Move } from "../../chess";
+import { type Move, type Piece } from "../../chess";
 import {
   registerPGNViewModule,
   registerTreeModule,
 } from "../../core/module-system";
 import { t } from "../../i18n";
 import type { ChessNode, ITreeHost } from "../../types";
+import { DEFAULT_FEN } from "../../types";
 import { ConfirmModal } from "../../utils/confirmModal";
 
 const ActionsModule = {
@@ -245,16 +246,117 @@ const ActionsModule = {
             host.fen = host.currentNode.fen;
             break;
           }
+          case "edit-board": {
+            const modal = new ConfirmModal(
+              host.plugin.app,
+              t("confirm.editBoardTitle"),
+              t("confirm.editBoardMsg"),
+              t("confirm.yes"),
+              t("confirm.cancel"),
+            );
+            modal.open();
+            if (await modal.promise) {
+              host.editing = true;
+              host.selectedPiece = null;
+              host.markedPos = null;
+              eventBus.emit("updateUI");
+            }
+            break;
+          }
           case "reset": {
             eventBus.emit("reset");
             break;
           }
           case "save": {
+            if (host.editing) {
+              const boardPart = host.fen.split(" ")[0];
+              const fullFen = `${boardPart} w KQkq - 0 1`;
+              host.currentNode.children = [];
+              host.nodeMap.clear();
+              host.currentNode = { ...host.currentNode, fen: fullFen };
+              host.nodeMap.set(host.currentNode.id, host.currentNode);
+              host.fen = fullFen;
+              host.editing = false;
+              host.selectedPiece = null;
+              host.markedPos = null;
+              eventBus.emit("updateMainPath");
+              eventBus.emit("modified", null);
+              eventBus.emit("updateUI");
+              break;
+            }
             eventBus.emit("save");
+            break;
+          }
+          case "empty": {
+            if (!host.editing) break;
+            host.fen = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
+            host.selectedPiece = null;
+            break;
+          }
+          case "full":
+          case "start": {
+            if (!host.editing) break;
+            host.fen = DEFAULT_FEN;
+            host.selectedPiece = null;
+            break;
+          }
+          case "turn": {
+            if (!host.editing) break;
+            const parts = host.fen.split(" ");
+            while (parts.length < 2) parts.push("w");
+            parts[1] = parts[1] === "w" ? "b" : "w";
+            host.fen = parts.join(" ");
+            break;
+          }
+          case "flip": {
+            eventBus.emit("rotate");
             break;
           }
         }
         emitNodeEval(host);
+        eventBus.emit("updateUI");
+      },
+    );
+
+    eventBus.on<Piece>("clickPieceBTN", (piece) => {
+      if (!piece) return;
+      if (!host.editing) return;
+      if (
+        host.selectedPiece &&
+        host.selectedPiece.type === piece.type &&
+        host.selectedPiece.color === piece.color
+      ) {
+        host.selectedPiece = null;
+      } else {
+        host.selectedPiece = piece;
+      }
+      eventBus.emit("updateUI");
+    });
+
+    eventBus.on("exit-edit", () => {
+      host.editing = false;
+      host.selectedPiece = null;
+      host.markedPos = null;
+      eventBus.emit("updateUI");
+    });
+
+    eventBus.on<{ turn: string; castling: string; enPassant: string }>(
+      "saveFen",
+      (meta) => {
+        if (!meta || !host.editing) return;
+        const boardPart = host.fen.split(" ")[0];
+        const fullFen = `${boardPart} ${meta.turn} ${meta.castling} ${meta.enPassant} 0 1`;
+
+        host.currentNode.children = [];
+        host.nodeMap.clear();
+        host.currentNode = { ...host.currentNode, fen: fullFen };
+        host.nodeMap.set(host.currentNode.id, host.currentNode);
+        host.fen = fullFen;
+        host.editing = false;
+        host.selectedPiece = null;
+        host.markedPos = null;
+        eventBus.emit("updateMainPath");
+        eventBus.emit("modified", null);
         eventBus.emit("updateUI");
       },
     );

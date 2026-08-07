@@ -46,22 +46,6 @@ function createModuleSystem() {
   };
 }
 
-// 实例化 GenFEN 模块系统
-const GenFENModules = createModuleSystem();
-
-// 导出 GenFEN 模块相关函数
-export function registerGenFENModule(name: string, module: ChessModule) {
-  GenFENModules.register(name, module);
-}
-
-export function createGenFENModuleRegistry(host: object) {
-  return GenFENModules.createRegistry(host);
-}
-
-export function destroyGenFENModuleRegistry(host: object) {
-  GenFENModules.destroyRegistry(host);
-}
-
 // 导出 PGNView 模块系统
 const PGNViewModules = createModuleSystem();
 export function registerPGNViewModule(name: string, module: ChessModule) {

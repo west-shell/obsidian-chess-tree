@@ -36,9 +36,12 @@ const BoardModule = {
         settings: { ...host.settings },
         nodeMap: new Map(host.nodeMap),
         fen: host.currentNode?.fen ?? "",
+        eventBus: host.eventBus,
         currentNode: host.currentNode,
         currentPath: host.currentPath,
         options: { ...host.options },
+        editing: host.editing,
+        selectedPiece: host.selectedPiece,
       });
     });
 

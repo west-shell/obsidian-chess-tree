@@ -1,8 +1,5 @@
-import {
-  registerGenFENModule,
-  registerTreeModule,
-} from "../../core/module-system";
-import { DEFAULT_FEN, type IGenFENHost, type ITreeHost } from "../../types";
+import { registerTreeModule } from "../../core/module-system";
+import { DEFAULT_FEN, type ITreeHost } from "../../types";
 import { parseOption } from "../../utils/parse";
 
 import { PGNParser } from "./parser";
@@ -57,40 +54,49 @@ function extractFEN(source: string): string {
 }
 
 const SourceModule = {
-  init(host: IGenFENHost) {
+  init(host: ITreeHost) {
     const eventBus = host.eventBus;
     eventBus.on<string>("load", (renderChild) => {
       switch (renderChild) {
         case "tree": {
-          const treeHost = host as ITreeHost;
           const { cleaned, options: opts } = prepareSource(host.source);
           const parser = new PGNParser(cleaned);
-          treeHost.parser = parser;
-          treeHost.haveFEN = parser.haveFEN;
-          treeHost.root = parser.getRoot();
-          treeHost.nodeMap = parser.getMap();
-          treeHost.tags = parser.getTags();
-          treeHost.options = opts;
-          treeHost.currentNode = treeHost.nodeMap.get("node-root")!;
-          treeHost.fen = treeHost.currentNode.fen;
-          treeHost.currentTurn =
-            treeHost.currentNode.move?.color === "b" ? "white" : "black";
+          host.parser = parser;
+          host.haveFEN = parser.haveFEN;
+          host.root = parser.getRoot();
+          host.nodeMap = parser.getMap();
+          host.tags = parser.getTags();
+          host.options = opts;
+          host.currentNode = host.nodeMap.get("node-root")!;
+          host.fen = host.currentNode.fen;
+          host.currentTurn =
+            host.currentNode.move?.color === "b" ? "white" : "black";
           eventBus.emit("updateMainPath");
 
-          // 根据 autoJump 设置决定初始节点位置
           const shouldJump =
             host.settings.autoJump === "always" ||
-            (host.settings.autoJump === "auto" && !treeHost.haveFEN);
-          if (shouldJump && treeHost.currentPath.length > 0) {
-            treeHost.currentNode = treeHost.nodeMap.get(
-              treeHost.currentPath[treeHost.currentPath.length - 1],
+            (host.settings.autoJump === "auto" && !host.haveFEN);
+          if (shouldJump && host.currentPath.length > 0) {
+            host.currentNode = host.nodeMap.get(
+              host.currentPath[host.currentPath.length - 1],
             )!;
-            treeHost.fen = treeHost.currentNode.fen;
+            host.fen = host.currentNode.fen;
           }
           break;
         }
         case "fen": {
-          host.fen = extractFEN(host.source);
+          const fen = extractFEN(host.source);
+          host.fen = fen;
+          host.editing = true;
+          host.parser = new PGNParser("");
+          host.root = host.parser.getRoot();
+          host.nodeMap = host.parser.getMap();
+          host.currentNode = host.nodeMap.get("node-root")!;
+          host.currentNode.fen = fen;
+          host.currentTurn = fen.includes(" b ") ? "black" : "white";
+          host.tags = "";
+          host.options = {};
+          eventBus.emit("updateMainPath");
           break;
         }
       }
@@ -102,5 +108,4 @@ const SourceModule = {
   },
 };
 
-registerGenFENModule("source", SourceModule);
 registerTreeModule("source", SourceModule);

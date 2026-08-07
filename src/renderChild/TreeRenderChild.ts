@@ -2,7 +2,6 @@ import "../core/event-bus";
 import "../modules/Source/Source";
 import "../modules/BoardClick";
 import "../modules/Tree/ChessBoard";
-// import '../modules/Tree/TreeView';
 import "../modules/Tree/Actions";
 import "../modules/Engine/EngineModule";
 
@@ -27,14 +26,22 @@ export class TreeRenderChild extends MarkdownRenderChild {
   ) {
     super(containerEl);
     this.settings = this.plugin.settings;
-    // this.contentEl = containerEl;
     containerEl.classList.add("tree-codeblock");
     createTreeModuleRegistry(this);
   }
 
   onload(): void {
     this.plugin.instances.add(this);
-    this.eventBus.emit("load", "tree");
+    const section = this.ctx.getSectionInfo(this.containerEl);
+    let isFenBlock = false;
+    if (section) {
+      const line = section.text.split("\n")[section.lineStart];
+      const match = line?.match(/^```(\S+)/);
+      if (match) {
+        isFenBlock = this.plugin.settings.fenBlockNames.includes(match[1]);
+      }
+    }
+    this.eventBus.emit("load", isFenBlock ? "fen" : "tree");
     this.eventBus.emit("creatUI");
   }
 
@@ -45,6 +52,5 @@ export class TreeRenderChild extends MarkdownRenderChild {
   onunload(): void {
     this.plugin.instances.delete(this);
     this.eventBus.emit("unload");
-    // destroyTreeModuleRegistry(this);
   }
 }
