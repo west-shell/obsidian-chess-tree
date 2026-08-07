@@ -271,11 +271,12 @@ const ActionsModule = {
             if (host.editing) {
               const boardPart = host.fen.split(" ")[0];
               const fullFen = `${boardPart} w KQkq - 0 1`;
-              host.currentNode.children = [];
-              host.currentNode.comments = [];
+              host.root.children = [];
+              host.root.comments = [];
+              host.root.fen = fullFen;
               host.nodeMap.clear();
-              host.currentNode = { ...host.currentNode, fen: fullFen };
-              host.nodeMap.set(host.currentNode.id, host.currentNode);
+              host.nodeMap.set(host.root.id, host.root);
+              host.currentNode = host.root;
               host.fen = fullFen;
               host.tags = updateFenTag(host.tags, fullFen);
               host.editing = false;
@@ -349,11 +350,12 @@ const ActionsModule = {
         const boardPart = host.fen.split(" ")[0];
         const fullFen = `${boardPart} ${meta.turn} ${meta.castling} ${meta.enPassant} 0 1`;
 
-        host.currentNode.children = [];
-        host.currentNode.comments = [];
+        host.root.children = [];
+        host.root.comments = [];
+        host.root.fen = fullFen;
         host.nodeMap.clear();
-        host.currentNode = { ...host.currentNode, fen: fullFen };
-        host.nodeMap.set(host.currentNode.id, host.currentNode);
+        host.nodeMap.set(host.root.id, host.root);
+        host.currentNode = host.root;
         host.fen = fullFen;
         host.tags = updateFenTag(host.tags, fullFen);
         host.editing = false;
