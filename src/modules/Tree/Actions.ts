@@ -446,6 +446,43 @@ const ActionsModule = {
 
     host.stringifyPGN = (root: ChessNode, includeEval = true) =>
       stringifyPGN(root, includeEval);
+
+    eventBus.on("set-depth", () => {
+      const depthModal = new Modal(host.plugin.app);
+      let depthValue = host.settings.engineDepth;
+      depthModal.onOpen = () => {
+        const { contentEl } = depthModal;
+        contentEl.createEl("h3", { text: t("engine.depth") });
+        const input = contentEl.createEl("input", {
+          type: "number",
+          value: String(depthValue),
+        });
+        input.setAttribute("min", "1");
+        input.setAttribute("max", "30");
+        input.addEventListener("input", () => {
+          depthValue = Number.parseInt(input.value) || 18;
+        });
+        const btnContainer = contentEl.createDiv("modal-button-container");
+        const okBtn = btnContainer.createEl("button", {
+          text: t("confirm.yes"),
+          cls: "mod-cta",
+        });
+        okBtn.addEventListener("click", () => {
+          if (depthValue >= 1 && depthValue <= 30) {
+            host.settings.engineDepth = depthValue;
+          }
+          depthModal.close();
+        });
+        const cancelBtn = btnContainer.createEl("button", {
+          text: t("confirm.cancel"),
+        });
+        cancelBtn.addEventListener("click", () => depthModal.close());
+      };
+      depthModal.onClose = () => {
+        (depthModal as { contentEl: HTMLElement }).contentEl.empty();
+      };
+      depthModal.open();
+    });
   },
 };
 
