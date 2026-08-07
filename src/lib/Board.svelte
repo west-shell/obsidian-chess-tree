@@ -482,6 +482,7 @@
     );
     width: var(--bw);
     position: relative;
+    touch-action: none;
   }
 
   .promotion-overlay {

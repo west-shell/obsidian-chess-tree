@@ -1347,6 +1347,7 @@
     border-radius: 3px;
     white-space: nowrap;
     cursor: pointer;
+    touch-action: none;
     transition: top 0.2s;
   }
   .slider.active .slider-label {
