@@ -41,6 +41,9 @@ const TreeViewModule = {
           eventBus: host.eventBus,
           currentNode: host.currentNode,
           currentPath: host.currentPath,
+          options: host.options || {},
+          editing: host.editing,
+          selectedPiece: host.selectedPiece,
         },
       });
     });
@@ -49,9 +52,12 @@ const TreeViewModule = {
       host.Chess?.$set?.({
         settings: { ...host.settings },
         nodeMap: new Map(host.nodeMap),
-        fen: host.currentNode?.fen ?? "",
+        fen: host.editing ? host.fen : (host.currentNode?.fen ?? ""),
         currentNode: host.currentNode,
         currentPath: host.currentPath,
+        options: { ...host.options },
+        editing: host.editing,
+        selectedPiece: host.selectedPiece,
       });
     });
 

@@ -58,6 +58,7 @@
   "genfen.empty": "Empty",
   "genfen.full": "Full",
   "genfen.save": "Save",
+  "genfen.back": "Back",
   "genfen.castling": "Castling",
   "genfen.castling_short": "O-O",
   "genfen.castling_long": "O-O-O",

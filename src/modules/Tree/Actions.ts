@@ -272,16 +272,18 @@ const ActionsModule = {
               const boardPart = host.fen.split(" ")[0];
               const fullFen = `${boardPart} w KQkq - 0 1`;
               host.currentNode.children = [];
+              host.currentNode.comments = [];
               host.nodeMap.clear();
               host.currentNode = { ...host.currentNode, fen: fullFen };
               host.nodeMap.set(host.currentNode.id, host.currentNode);
               host.fen = fullFen;
+              host.tags = updateFenTag(host.tags, fullFen);
               host.editing = false;
               host.selectedPiece = null;
               host.markedPos = null;
               eventBus.emit("updateMainPath");
-              eventBus.emit("modified", null);
               eventBus.emit("updateUI");
+              eventBus.emit("save");
               break;
             }
             eventBus.emit("save");
@@ -348,16 +350,18 @@ const ActionsModule = {
         const fullFen = `${boardPart} ${meta.turn} ${meta.castling} ${meta.enPassant} 0 1`;
 
         host.currentNode.children = [];
+        host.currentNode.comments = [];
         host.nodeMap.clear();
         host.currentNode = { ...host.currentNode, fen: fullFen };
         host.nodeMap.set(host.currentNode.id, host.currentNode);
         host.fen = fullFen;
+        host.tags = updateFenTag(host.tags, fullFen);
         host.editing = false;
         host.selectedPiece = null;
         host.markedPos = null;
         eventBus.emit("updateMainPath");
-        eventBus.emit("modified", null);
         eventBus.emit("updateUI");
+        eventBus.emit("save");
       },
     );
 
@@ -368,6 +372,13 @@ const ActionsModule = {
 
 registerPGNViewModule("actions", ActionsModule);
 registerTreeModule("actions", ActionsModule);
+
+function updateFenTag(tags: string, newFen: string): string {
+  if (tags.includes('[FEN "')) {
+    return tags.replace(/\[FEN "[^"]*"\]/, `[FEN "${newFen}"]`);
+  }
+  return `[FEN "${newFen}"]\n${tags}`;
+}
 
 function stringifyPGN(root: ChessNode, includeEval = true): string {
   const nodeBrothers = genNodeBrothers(root);

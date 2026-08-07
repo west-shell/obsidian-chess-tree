@@ -81,7 +81,7 @@
       });
       return;
     }
-    eventBus.emit("btn-click", action);
+    eventBus.emit("btn-click", { name: action });
   }
 
   const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -294,6 +294,12 @@
     </button>
     <button class="fen-btn fen-btn-save" onclick={() => buttonClick("save")}>
       {t("genfen.save", _lv)}
+    </button>
+    <button
+      class="fen-btn fen-btn-back"
+      onclick={() => eventBus.emit("exit-edit")}
+    >
+      {t("genfen.back", _lv)}
     </button>
   </div>
 </div>

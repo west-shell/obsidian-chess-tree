@@ -59,6 +59,7 @@
   "genfen.empty": "清空棋盘",
   "genfen.full": "满",
   "genfen.save": "保存局面",
+  "genfen.back": "返回",
   "genfen.castling": "王车易位",
   "genfen.castling_short": "O-O",
   "genfen.castling_long": "O-O-O",

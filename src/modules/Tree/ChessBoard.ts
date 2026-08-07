@@ -35,7 +35,7 @@ const BoardModule = {
       host.Chess?.$set?.({
         settings: { ...host.settings },
         nodeMap: new Map(host.nodeMap),
-        fen: host.currentNode?.fen ?? "",
+        fen: host.editing ? host.fen : (host.currentNode?.fen ?? ""),
         eventBus: host.eventBus,
         currentNode: host.currentNode,
         currentPath: host.currentPath,
