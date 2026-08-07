@@ -105,6 +105,11 @@
       event: "edit-board",
     },
     {
+      title: t("toolbar.editTags", v),
+      icon: "file-text",
+      event: "edit-tags",
+    },
+    {
       title: t("toolbar.annotate", v),
       icon: "tag",
       event: "toggle-annotation-menu",

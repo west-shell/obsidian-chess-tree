@@ -7,6 +7,7 @@ import { t } from "../../i18n";
 import type { ChessNode, ITreeHost } from "../../types";
 import { DEFAULT_FEN } from "../../types";
 import { ConfirmModal } from "../../utils/confirmModal";
+import { Modal, Setting } from "obsidian";
 
 const ActionsModule = {
   init(host: ITreeHost) {
@@ -259,6 +260,82 @@ const ActionsModule = {
               host.editing = true;
               host.selectedPiece = null;
               host.markedPos = null;
+              eventBus.emit("updateUI");
+            }
+            break;
+          }
+          case "edit-tags": {
+            const tagPairs: { key: string; value: string }[] = [];
+            const tagRe = /\[(\w+)\s+"([^"]*)"\]/g;
+            let m: RegExpExecArray | null;
+            while ((m = tagRe.exec(host.tags ?? "")) !== null) {
+              if (m[1] === "FEN") continue;
+              tagPairs.push({ key: m[1], value: m[2] });
+            }
+            const standardKeys = [
+              "Event",
+              "Site",
+              "Date",
+              "Round",
+              "White",
+              "Black",
+              "Result",
+            ];
+            for (const key of standardKeys) {
+              if (!tagPairs.some((p) => p.key === key)) {
+                tagPairs.push({ key, value: "" });
+              }
+            }
+            const tagsModal = new Modal(host.plugin.app);
+            let resolve: (value: boolean) => void;
+            const tagsPromise = new Promise<boolean>((r) => {
+              resolve = r;
+            });
+            tagsModal.onOpen = () => {
+              const { contentEl } = tagsModal;
+              new Setting(contentEl)
+                .setName(t("confirm.editTagsTitle", 0))
+                .setHeading();
+              for (const pair of tagPairs) {
+                new Setting(contentEl)
+                  .setName(t(`tag.${pair.key}`, 0) || pair.key)
+                  .addText((text) => {
+                    text.setValue(pair.value).onChange((v) => {
+                      pair.value = v;
+                    });
+                  });
+              }
+              const btnContainer = contentEl.createDiv(
+                "modal-button-container",
+              );
+              const okBtn = btnContainer.createEl("button", {
+                text: t("confirm.yes"),
+                cls: "mod-cta",
+              });
+              okBtn.addEventListener("click", () => {
+                resolve(true);
+                tagsModal.close();
+              });
+              const cancelBtn = btnContainer.createEl("button", {
+                text: t("confirm.cancel"),
+              });
+              cancelBtn.addEventListener("click", () => {
+                resolve(false);
+                tagsModal.close();
+              });
+            };
+            tagsModal.onClose = () => {
+              (tagsModal as { contentEl: HTMLElement }).contentEl.empty();
+            };
+            tagsModal.open();
+            if (await tagsPromise) {
+              const fenTag = (host.tags ?? "").match(/\[FEN\s+"[^"]*"\]/)?.[0];
+              const edited = tagPairs
+                .filter((p) => p.value)
+                .map((p) => `[${p.key} "${p.value}"]`)
+                .join("\n");
+              host.tags = fenTag ? `${edited}\n${fenTag}` : edited;
+              eventBus.emit("modified", null);
               eventBus.emit("updateUI");
             }
             break;
