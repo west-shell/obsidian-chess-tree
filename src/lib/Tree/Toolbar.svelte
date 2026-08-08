@@ -80,6 +80,16 @@
     }
   }
 
+  let analyzeBtnClass = $derived(
+    autoAnalyze && engineBusy
+      ? " engine-active engine-busy"
+      : autoAnalyze
+        ? " engine-active"
+        : batchAnalyzing
+          ? " engine-active engine-busy"
+          : "",
+  );
+
   let isprotected = $derived(options?.protected || false);
   let saveBtnClass = $derived(modified ? "unsaved" : "saved");
 
@@ -103,11 +113,6 @@
       title: t("toolbar.nodeMenu", v),
       icon: "scan-line",
       event: "toggle-node-menu",
-    },
-    {
-      title: t("toolbar.analyzeMenu", v),
-      icon: "brain",
-      event: "toggle-analyze-menu",
     },
   ];
   let buttons = $derived(buildButtons(_lv));
@@ -266,8 +271,6 @@
           handleEditMenu(e);
         } else if (event === "toggle-node-menu") {
           handleNodeMenu(e);
-        } else if (event === "toggle-analyze-menu") {
-          handleAnalyzeMenu(e);
         } else if (event === "rotate") {
           eventBus.emit("rotate");
         } else {
@@ -276,6 +279,13 @@
       }}
     ></button>
   {/each}
+
+  <button
+    class="toolbar-btn{analyzeBtnClass}"
+    aria-label={t("toolbar.analyzeMenu", _lv)}
+    use:useSetIcon={"brain"}
+    onclick={(e) => handleAnalyzeMenu(e)}
+  ></button>
 
   <button
     class="toolbar-btn {saveBtnClass}"
@@ -318,18 +328,12 @@
     height: 18px;
   }
 
-  .engine-btn.active {
+  .engine-active {
     background-color: var(--interactive-accent);
     color: var(--text-on-accent);
   }
 
-  .engine-btn.active.busy {
-    animation: engine-pulse 1.2s ease-in-out infinite;
-  }
-
-  .engine-btn.batch-analyzing {
-    background-color: var(--interactive-accent);
-    color: var(--text-on-accent);
+  .engine-busy {
     animation: engine-pulse 1.2s ease-in-out infinite;
   }
 
