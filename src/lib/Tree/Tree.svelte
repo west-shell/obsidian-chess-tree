@@ -607,6 +607,7 @@
                     updateZoomExtent();
                     d3.select(svgEl!).call(zoomBehavior!);
                     resetView();
+                    if (textareaEl) adjustTextareaHeight();
                   });
                   intersectionObserver!.disconnect();
                   intersectionObserver = null;
