@@ -310,6 +310,7 @@
     flex-direction: column;
     gap: 10px;
     padding: 8px;
+    max-height: 100%;
   }
 
   .tool-section {
@@ -397,8 +398,9 @@
   .tool-buttons {
     display: flex;
     flex-direction: column;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 4px;
+    align-content: start;
   }
   .fen-btn {
     padding: 6px 12px;

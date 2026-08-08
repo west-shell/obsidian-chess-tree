@@ -59,7 +59,7 @@ $local-block-gap: 2px;
   }
 
   &__tools {
-    max-height: 40vh;
+    min-height: 45vh;
   }
 
   // ====== col2：双栏（宽屏或横屏） ======
@@ -212,6 +212,10 @@ $local-block-gap: 2px;
       max-height: none;
       align-self: center;
       height: auto;
+    }
+
+    .chess-layout--genfen &__toolbar {
+      align-self: stretch;
     }
 
     &__tools {
