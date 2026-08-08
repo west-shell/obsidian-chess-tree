@@ -57,7 +57,7 @@
   "toolbar.analyzeMenu": "分析",
   "toolbar.analyzeDepth": "设置深度",
   "toolbar.autoAnalyze": "自动分析",
-  "toolbar.analyze": "AI 分析",
+  "toolbar.analyze": "单次分析",
   "toolbar.stop": "停止",
   "toolbar.analyzeBatch": "批量分析",
   "toolbar.cancelBatch": "取消批量",

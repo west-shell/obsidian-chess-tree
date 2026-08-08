@@ -56,7 +56,7 @@
   "toolbar.analyzeMenu": "Analyze",
   "toolbar.analyzeDepth": "Set Depth",
   "toolbar.autoAnalyze": "Auto Analyze",
-  "toolbar.analyze": "Analyze",
+  "toolbar.analyze": "Analyze Once",
   "toolbar.stop": "Stop",
   "toolbar.analyzeBatch": "Analyze All",
   "toolbar.cancelBatch": "Cancel Batch",
