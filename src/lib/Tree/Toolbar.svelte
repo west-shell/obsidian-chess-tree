@@ -324,8 +324,8 @@
   }
 
   .toolbar-container :global(.toolbar-btn) {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     margin: 0;
     display: flex;
@@ -335,8 +335,8 @@
   }
 
   .toolbar-container :global(.toolbar-btn svg) {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
   .engine-active {
