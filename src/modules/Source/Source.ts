@@ -59,6 +59,7 @@ const SourceModule = {
     eventBus.on<string>("load", (renderChild) => {
       switch (renderChild) {
         case "tree": {
+          host.isFenMode = false;
           const { cleaned, options: opts } = prepareSource(host.source);
           const parser = new PGNParser(cleaned);
           host.parser = parser;
@@ -85,6 +86,7 @@ const SourceModule = {
           break;
         }
         case "fen": {
+          host.isFenMode = true;
           const fen = extractFEN(host.source);
           host.fen = fen;
           host.editing = true;

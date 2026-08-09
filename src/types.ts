@@ -103,6 +103,7 @@ export interface ITreeHost extends IGenFENHost {
   haveFEN: boolean;
   options: IOptions;
   editing: boolean;
+  isFenMode: boolean;
   stringifyPGN: (root: ChessNode, includeEval?: boolean) => string;
 }
 

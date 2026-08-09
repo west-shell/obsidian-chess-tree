@@ -60,6 +60,7 @@
     options: IOptions;
     editing?: boolean;
     selectedPiece?: Piece | null;
+    isFenMode?: boolean;
   }
 
   let {
@@ -72,6 +73,7 @@
     options,
     editing = false,
     selectedPiece = null,
+    isFenMode = false,
   }: Props = $props();
 
   let lastMove: [Square, Square] | null = $derived(
@@ -148,7 +150,7 @@
   <div class="chess-layout chess-layout--genfen">
     <Board {settings} {fen} {eventBus} {rotated} freeMode={true} />
     <PieceBTNs {fen} {eventBus} {selectedPiece} />
-    <GenFENToolbar {eventBus} {fen} />
+    <GenFENToolbar {eventBus} {fen} {isFenMode} />
   </div>
 {:else}
   <div class="chess-layout">

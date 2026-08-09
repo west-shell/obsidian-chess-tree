@@ -345,6 +345,17 @@ export class ChessSettingTab extends PluginSettingTab {
               },
             ];
           }),
+          {
+            name: t("codeblock.fenSaveBlockName"),
+            desc: t("codeblock.fenSaveBlockName.desc"),
+            control: {
+              type: "dropdown",
+              key: "fenSaveBlockName",
+              options: Object.fromEntries(
+                settings.treeBlockNames.map((n) => [n, n]),
+              ),
+            },
+          },
         ],
       },
       {
@@ -675,6 +686,20 @@ export class ChessSettingTab extends PluginSettingTab {
           void this.plugin.saveSettings();
         }),
       );
+
+    const fenSaveSetting = new Setting(containerEl)
+      .setName(t("codeblock.fenSaveBlockName"))
+      .setDesc(t("codeblock.fenSaveBlockName.desc"))
+      .addDropdown((dropdown) => {
+        for (const name of settings.treeBlockNames) {
+          dropdown.addOption(name, name);
+        }
+        dropdown.setValue(settings.fenSaveBlockName);
+        dropdown.onChange((value) => {
+          settings.fenSaveBlockName = value;
+          void this.plugin.saveSettings();
+        });
+      });
 
     // ---- PGN 文件视图 ----
     new Setting(containerEl).setName(t("pgn.title")).setHeading();

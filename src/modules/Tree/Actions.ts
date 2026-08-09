@@ -346,6 +346,27 @@ const ActionsModule = {
           }
           case "save": {
             if (host.editing) {
+              if (host.isFenMode) {
+                const boardPart = host.fen.split(" ")[0];
+                const parts = host.fen.split(" ");
+                const turn = parts[1] || "w";
+                const castling = parts[2] || "-";
+                const enPassant = parts[3] || "-";
+                const fullFen = `${boardPart} ${turn} ${castling} ${enPassant} 0 1`;
+                host.root.children = [];
+                host.root.comments = [];
+                host.root.fen = fullFen;
+                host.nodeMap.clear();
+                host.nodeMap.set(host.root.id, host.root);
+                host.currentNode = host.root;
+                host.fen = fullFen;
+                host.tags = updateFenTag(host.tags, fullFen);
+                host.selectedPiece = null;
+                host.markedPos = null;
+                eventBus.emit("updateUI");
+                eventBus.emit("save");
+                break;
+              }
               const boardPart = host.fen.split(" ")[0];
               const fullFen = `${boardPart} w KQkq - 0 1`;
               host.root.children = [];
@@ -414,6 +435,7 @@ const ActionsModule = {
     });
 
     eventBus.on("exit-edit", () => {
+      if (host.isFenMode) return;
       host.editing = false;
       host.selectedPiece = null;
       host.markedPos = null;
@@ -435,10 +457,12 @@ const ActionsModule = {
         host.currentNode = host.root;
         host.fen = fullFen;
         host.tags = updateFenTag(host.tags, fullFen);
-        host.editing = false;
         host.selectedPiece = null;
         host.markedPos = null;
-        eventBus.emit("updateMainPath");
+        if (!host.isFenMode) {
+          host.editing = false;
+          eventBus.emit("updateMainPath");
+        }
         eventBus.emit("updateUI");
         eventBus.emit("save");
       },

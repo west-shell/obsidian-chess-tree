@@ -6,8 +6,9 @@
   interface Props {
     eventBus: EventBus;
     fen: string;
+    isFenMode?: boolean;
   }
-  let { eventBus, fen }: Props = $props();
+  let { eventBus, fen, isFenMode = false }: Props = $props();
 
   let _lv = $state(0);
   onLangChange(() => _lv++);
@@ -295,12 +296,14 @@
     <button class="fen-btn fen-btn-save" onclick={() => buttonClick("save")}>
       {t("genfen.save", _lv)}
     </button>
-    <button
-      class="fen-btn fen-btn-back"
-      onclick={() => eventBus.emit("exit-edit")}
-    >
-      {t("genfen.back", _lv)}
-    </button>
+    {#if !isFenMode}
+      <button
+        class="fen-btn fen-btn-back"
+        onclick={() => eventBus.emit("exit-edit")}
+      >
+        {t("genfen.back", _lv)}
+      </button>
+    {/if}
   </div>
 </div>
 
