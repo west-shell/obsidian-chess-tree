@@ -798,7 +798,9 @@
                     : node.side === "black"
                       ? "#333"
                       : "green"}
-                  stroke="var(--chess-board-line)"
+                  stroke={node.id === currentNode?.id
+                    ? "var(--interactive-accent)"
+                    : "var(--chess-board-line)"}
                 />
                 <g
                   transform="translate(-4, -4)"
@@ -820,7 +822,9 @@
                     : node.side === "black"
                       ? "#333"
                       : "green"}
-                  stroke="var(--chess-board-line)"
+                  stroke={node.id === currentNode?.id
+                    ? "var(--interactive-accent)"
+                    : "var(--chess-board-line)"}
                 />
                 {#if nodeMode === 0 && !node.move}
                   <g transform="translate(-4, -4)" color="#fff">
