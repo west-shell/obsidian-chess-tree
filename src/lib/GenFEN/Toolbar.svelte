@@ -29,8 +29,6 @@
   let _castling = $state(initial.castling);
   let _enPassant = $state(initial.enPassant);
 
-  let turnLabel = $derived(_turn === "b" ? "black" : "white");
-
   let validCastling = $derived(computeValidCastlingRights(boardPart(fen)));
 
   let hasCastling = $derived({
