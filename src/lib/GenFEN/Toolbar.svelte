@@ -68,9 +68,7 @@
   }
 
   function toggleTurn() {
-    _turn = _turn === "w" ? "b" : "w";
-    enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn);
-    validateEnPassant();
+    eventBus.emit("btn-click", { name: "turn" });
   }
 
   function buttonClick(action: string) {
@@ -184,6 +182,8 @@
     eventBus.on<string>("updateUI", (fenStr) => {
       const currentFen = fenStr || fen;
       const currentBp = boardPart(currentFen);
+      const parsed = parseFen(currentFen);
+      _turn = parsed.turn;
       syncCastlingFromBoard(currentBp);
       enPassantFiles = computeEnPassantFilesFor(currentBp, _turn);
       validateEnPassant();
@@ -194,8 +194,10 @@
 <div class="fen-editor-tools chess-layout__toolbar">
   <div class="tool-group-fen-meta">
     <div class="tool-section turn-row">
-      <button class="turn-toggle" onclick={toggleTurn}
-        >{turnLabel === "black"
+      <button
+        class="turn-toggle {_turn === 'b' ? 'black' : 'white'}"
+        onclick={toggleTurn}
+        >{_turn === "b"
           ? t("genfen.black_turn", _lv)
           : t("genfen.white_turn", _lv)}</button
       >
@@ -335,17 +337,27 @@
   }
   .turn-toggle {
     padding: 2px 12px;
-    border: 1px solid var(--background-modifier-border, #ccc);
+    border: 1.5px solid rgba(0, 0, 0, 0.35);
     border-radius: 4px;
     cursor: pointer;
-    background: var(--background-secondary, #f0f0f0);
-    color: var(--text-normal, #000);
     font-size: 0.85em;
-    transition: background 0.15s;
+    transition:
+      box-shadow 0.15s,
+      border-color 0.15s;
     white-space: nowrap;
   }
+  .turn-toggle.white {
+    background-color: var(--chess-piece-white);
+    color: black;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  .turn-toggle.black {
+    background-color: var(--chess-piece-black);
+    color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
   .turn-toggle:hover {
-    background: var(--background-modifier-hover, #e0e0e0);
+    filter: brightness(1.1);
   }
   .fen-select {
     padding: 4px 8px;
