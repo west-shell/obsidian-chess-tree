@@ -498,7 +498,7 @@
     toggleFold(currentNode);
   }
 
-  let canFold = $derived(currentNode?.children?.length > 1);
+  let canFold = $derived((currentNode?.children?.length ?? 0) > 1);
   let zoomBTN = $derived([
     { title: t("tree.zoomIn", _lv), icon: "plus", event: zoomIn },
     { title: t("tree.zoomOut", _lv), icon: "minus", event: zoomOut },

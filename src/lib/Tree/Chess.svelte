@@ -164,7 +164,7 @@
       {engineBestMove}
       {enginePonder}
     />
-    <Toolbar {eventBus} {fen} {options} {settings} />
+    <Toolbar {eventBus} {fen} {options} />
     <Tree {nodeMap} {eventBus} {currentNode} {currentPath} {settings} />
   </div>
 {/if}
