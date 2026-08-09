@@ -12,7 +12,7 @@ Likes, coins, and feedback are greatly appreciated.
 
 ## Overview
 
-Obsidian plugin for chess rendering and exploration inside notes. Supports PGN file viewing, three code block types (`chess`, `fen`, `tree`), full chess rules via [chess.js](https://github.com/jhlywa/chess.js), interactive board via [chessground](https://github.com/lichess-org/chessground), variation tree visualization, and built-in engine analysis powered by [Stockfish 18](https://stockfishchess.org/) (WASM).
+Obsidian plugin for chess rendering and exploration inside notes. Supports PGN file viewing, two code block types (`fen`, `tree`), full chess rules via [chess.js](https://github.com/jhlywa/chess.js), interactive board via [chessground](https://github.com/lichess-org/chessground), variation tree visualization, and built-in engine analysis powered by [Stockfish 18](https://stockfishchess.org/) (WASM).
 
 ## PGN File Support
 
@@ -44,11 +44,11 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 
 ## Code Blocks
 
-Three code block types — all code block names are customizable.
+Two code block types — all code block names are customizable.
 
 ---
 
-`chess`: Display and explore chess games in Markdown
+`chess`: Display and explore chess games with variation tree
 
 ````markdown
 ```chess
@@ -58,11 +58,11 @@ Three code block types — all code block names are customizable.
 ```
 ````
 
-![Move List](./IMAGE/List.png)
+![Branch Diagram](./IMAGE/Tree.png)
 
 ---
 
-`fen`: Visual board editor — generates a `chess` block with FEN
+`fen`: Visual board editor — set up a position and save as a `chess` code block
 
 ````markdown
 ```fen
@@ -71,20 +71,6 @@ Three code block types — all code block names are customizable.
 ````
 
 ![FEN Editor](./IMAGE/fen.en.png)
-
----
-
-`tree`: Branch diagram — display game variations as a tree graph
-
-````markdown
-```tree
-1. e4 e5
-2. Nf3 Nc6
-3. Bb5 a6
-```
-````
-
-![Branch Diagram](./IMAGE/Tree.png)
 
 ---
 
@@ -126,10 +112,8 @@ For the best experience on mobile devices, it's recommended to install the Full 
 
 Customize code block aliases in **Settings > Chess > Code Block Names**:
 
-- **List mode** (chess): Default `chess`, add custom aliases separated by commas
-- **FEN generation mode** (fen): Default `fen`, add custom aliases
-- **Branch diagram mode** (tree): Default `tree`, add custom aliases
-- **FEN save type**: Choose which code block type to save as (List mode / Branch diagram mode)
+- **Code block names**: Default `chess, tree` — both names render the tree view with variation tree and engine analysis. Add custom aliases separated by commas
+- **FEN save as**: Choose which code block name to use when saving from the FEN editor (default `tree`)
 
 > **Note**: Changes require restarting the plugin or Obsidian to take effect.
 
@@ -160,7 +144,7 @@ Enable/disable PGN file view and customize file extensions:
 - **Board Rendering**: High-quality chessboard via chessground with drag-and-drop moves
 - **Move List**: Full move record with click-to-navigate
 - **Variation Tree**: Tree graph with icon/SAN display modes for node labels
-- **Visual FEN Editor**: Drag/click to place pieces, clear/fill board, toggle side to move
+- **Visual FEN Editor**: Drag/click to place pieces, clear/fill board, toggle side to move, set castling and en passant
 - **PGN Saving**:
   - Button colors — **gray** (empty), **green** (saved), **orange** (modified)
   - Confirmation dialog before saving
@@ -180,26 +164,22 @@ Enable/disable PGN file view and customize file extensions:
 
 1. Add a `fen` code block to start the editor
 2. Drag pieces or click piece buttons to set up the position
-3. Use clear/fill/turn buttons as needed
-4. Click Save to generate a `chess` code block with the FEN
+3. Set turn, castling rights, and en passant as needed
+4. Click Save — the `fen` code block is replaced with a `chess` code block containing the FEN, ready for play
 
 ### `chess` Code Block
 
 1. Write your game inside a `chess` code block (optionally with FEN and SAN moves)
 2. FEN is optional — defaults to the standard starting position
 3. Controls:
-   - When no manual moves are made, the move list shows the original PGN
-   - After making moves, the list shows your modified sequence
-   - Click **Reset** to revert to before manual edits
+   - The variation tree displays all branches graphically
+   - Click any node to navigate to that position
 4. Click **Save** to overwrite the original PGN
-
-### `tree` Code Block
-
-1. Write your game inside a `tree` code block (same format as `chess`)
-2. The variation tree displays all branches graphically
-3. Click any node to navigate to that position
-4. Switch between icon mode and text mode for node labels
-5. Click the fold button (triangle) on a node with multiple children to collapse/expand its variations
+5. Click **Edit board** in the Edit menu to switch to position editor mode
+   - Modify the position by dragging/clicking pieces
+   - Set turn, castling rights, and en passant
+   - Click Save to apply the new position (existing moves will be discarded)
+   - Click Cancel to return to tree view
 6. Use engine analysis:
    - Click **Analyze** for single position analysis, **Batch** to analyze all nodes, or enable auto-analysis
    - Green arrow = best move, yellow arrow = ponder move
