@@ -371,7 +371,10 @@
   }
 </script>
 
-<div class="board-wrapper chess-layout__board" onwheel={handleWheel}>
+<div
+  class="board-wrapper chess-layout__board {turnClass}"
+  onwheel={handleWheel}
+>
   <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
   {#if promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -406,14 +409,6 @@
     flex-shrink: 0;
     aspect-ratio: 1;
     border-radius: 2px;
-  }
-
-  :global(.cg-wrap.turn-white) {
-    box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.7);
-  }
-
-  :global(.cg-wrap.turn-black) {
-    box-shadow: 0 0 12px 3px rgba(0, 0, 0, 0.7);
   }
 
   :global(cg-container) {
@@ -486,6 +481,17 @@
     );
     width: var(--bw);
     position: relative;
+    border-radius: 2px;
+  }
+
+  .board-wrapper.turn-white {
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.7);
+  }
+
+  .board-wrapper.turn-black {
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 12px 3px rgba(0, 0, 0, 0.7);
   }
 
   .promotion-overlay {
