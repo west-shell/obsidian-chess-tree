@@ -687,7 +687,7 @@ export class ChessSettingTab extends PluginSettingTab {
         }),
       );
 
-    const fenSaveSetting = new Setting(containerEl)
+    new Setting(containerEl)
       .setName(t("codeblock.fenSaveBlockName"))
       .setDesc(t("codeblock.fenSaveBlockName.desc"))
       .addDropdown((dropdown) => {
