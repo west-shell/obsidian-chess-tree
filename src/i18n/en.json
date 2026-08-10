@@ -54,7 +54,7 @@
   "toolbar.editMenu": "Edit",
   "toolbar.nodeMenu": "Node",
   "toolbar.analyzeMenu": "Analyze",
-  "toolbar.analyzeDepth": "Set Depth",
+  "toolbar.engineSettings": "Settings",
   "toolbar.autoAnalyze": "Auto Analyze",
   "toolbar.analyze": "Analyze Once",
   "toolbar.stop": "Stop",
