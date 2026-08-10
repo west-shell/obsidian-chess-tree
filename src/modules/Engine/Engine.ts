@@ -7,28 +7,25 @@ const WASM_NAME = "stockfish.wasm";
 const JS_NAME = "stockfish.js";
 const BASE_GITHUB =
   "https://raw.githubusercontent.com/west-shell/obsidian-chess-tree/main/assets/stockfish";
-const BASE_GITEE =
-  "https://gitee.com/wesnell/obsidian-chess-tree/raw/main/assets/stockfish";
+const BASE_GITEE_RELEASE =
+  "https://gitee.com/wesnell/obsidian-chess-tree/releases/download/stockfish";
 
 interface DownloadSource {
   key: string;
   label: string;
-  wasmUrl: string;
-  jsUrl: string;
+  getUrl: (file: string) => string;
 }
 
 const DOWNLOAD_SOURCES: DownloadSource[] = [
   {
     key: "github",
     label: "GitHub",
-    wasmUrl: `${BASE_GITHUB}/${WASM_NAME}`,
-    jsUrl: `${BASE_GITHUB}/${JS_NAME}`,
+    getUrl: (file) => `${BASE_GITHUB}/${file}`,
   },
   {
     key: "gitee",
     label: "Gitee",
-    wasmUrl: `${BASE_GITEE}/${WASM_NAME}`,
-    jsUrl: `${BASE_GITEE}/${JS_NAME}`,
+    getUrl: (file) => `${BASE_GITEE_RELEASE}/${file}`,
   },
 ];
 
@@ -78,7 +75,7 @@ export class ChessEngine {
       sources: DOWNLOAD_SOURCES.map((s) => ({
         key: s.key,
         label: s.label,
-        url: f === WASM_NAME ? s.wasmUrl : s.jsUrl,
+        url: s.getUrl(f),
       })),
     }));
     const modal = new DownloadModal(
@@ -101,7 +98,7 @@ export class ChessEngine {
           for (let i = 0; i < missingFiles.length; i++) {
             const file = missingFiles[i];
             const destPath = `${baseDir}/${file}`;
-            const url = file === WASM_NAME ? source.wasmUrl : source.jsUrl;
+            const url = source.getUrl(file);
             modal.showProgress(i);
             try {
               const resp = await requestUrl({ url });
