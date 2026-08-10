@@ -1,8 +1,5 @@
 import type ChessPlugin from "../../main";
-import {
-  type DownloadFileSource,
-  DownloadModal,
-} from "../../utils/confirmModal";
+import { DownloadModal } from "../../utils/confirmModal";
 import { requestUrl } from "obsidian";
 import { t } from "../../i18n";
 
