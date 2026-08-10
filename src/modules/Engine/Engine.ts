@@ -53,6 +53,10 @@ export class ChessEngine {
     this.plugin = plugin;
   }
 
+  isReady(): boolean {
+    return this.worker !== null && this.ready;
+  }
+
   async ensureReady(): Promise<void> {
     if (this.worker && this.ready) return;
     this.terminate();
