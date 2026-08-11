@@ -767,8 +767,8 @@
           {/each}
 
           {#each renderedNodes as node (node.id)}
-            {@const primaryAnnotation = getPrimaryAnnotation(node)}
             {@const nw = getNodeWidth(node)}
+            {@const primaryAnnotation = getPrimaryAnnotation(node)}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <g
@@ -784,69 +784,70 @@
               stroke-width={node.id === currentNode?.id ? 1 : 0.5}
               onclick={() => eventBus.emit("node-click", node.id)}
             >
-              {#if primaryAnnotation}
-                {@const def = ANNOTATION_DEFINITIONS[primaryAnnotation]}
-                <rect
-                  x={-nw / 2}
-                  y={-nodeHeight / 2}
-                  width={nw}
-                  height={nodeHeight}
-                  rx="2.5"
-                  ry="2.5"
-                  fill={node.side === "white"
-                    ? "#fff"
-                    : node.side === "black"
-                      ? "#333"
-                      : "green"}
-                  stroke={node.id === currentNode?.id
-                    ? "var(--interactive-accent)"
-                    : "var(--chess-board-line)"}
-                />
+              <rect
+                x={-nw / 2}
+                y={-nodeHeight / 2}
+                width={nw}
+                height={nodeHeight}
+                rx="2.5"
+                ry="2.5"
+                fill={node.side === "white"
+                  ? "#fff"
+                  : node.side === "black"
+                    ? "#333"
+                    : "green"}
+                stroke={node.id === currentNode?.id
+                  ? "var(--interactive-accent)"
+                  : "var(--chess-board-line)"}
+              />
+              {#if nodeMode === 0 && !node.move}
+                <g transform="translate(-4, -4)" color="#fff">
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                  {@html iconSvg("house", 8, 1.5)}
+                </g>
+              {:else if nodeMode === 0 && getPieceIcon(node)}
                 <g
                   transform="translate(-4, -4)"
                   color={node.side === "white" ? "#333" : "#fff"}
                 >
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html iconSvg(def.icon, 8, 1.5)}
+                  {@html iconSvg(getPieceIcon(node)!, 8, 1.5)}
                 </g>
               {:else}
-                <rect
-                  x={-nw / 2}
-                  y={-nodeHeight / 2}
-                  width={nw}
-                  height={nodeHeight}
-                  rx="2.5"
-                  ry="2.5"
-                  fill={node.side === "white"
-                    ? "#fff"
-                    : node.side === "black"
-                      ? "#333"
-                      : "green"}
-                  stroke={node.id === currentNode?.id
-                    ? "var(--interactive-accent)"
-                    : "var(--chess-board-line)"}
-                />
-                {#if nodeMode === 0 && !node.move}
-                  <g transform="translate(-4, -4)" color="#fff">
-                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                    {@html iconSvg("house", 8, 1.5)}
-                  </g>
-                {:else if nodeMode === 0 && getPieceIcon(node)}
-                  <g
-                    transform="translate(-4, -4)"
-                    color={node.side === "white" ? "#333" : "#fff"}
-                  >
-                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                    {@html iconSvg(getPieceIcon(node)!, 8, 1.5)}
-                  </g>
-                {:else}
+                <text
+                  dominant-baseline="central"
+                  text-anchor="middle"
+                  fill={node.side === "white" ? "#333" : "#fff"}
+                  font-size={nodeFontSize()}>{nodeLabel(node)}</text
+                >
+              {/if}
+              {#if primaryAnnotation}
+                {@const def = ANNOTATION_DEFINITIONS[primaryAnnotation]}
+                <g
+                  transform="translate({-nw / 2 + 0.5} {nodeHeight / 2 - 1})"
+                  style="pointer-events: none"
+                >
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                  {@html iconSvg(def.icon, 6, 1, def.color)}
+                </g>
+              {/if}
+              {#if node.glyph}
+                <g
+                  transform="translate({nw / 2 - 7} {nodeHeight / 2 - 1})"
+                  style="pointer-events: none"
+                >
+                  <circle cx="3" cy="3" r="3" fill={node.glyph.color} />
                   <text
-                    dominant-baseline="central"
+                    x="3"
+                    y="3.5"
                     text-anchor="middle"
-                    fill={node.side === "white" ? "#333" : "#fff"}
-                    font-size={nodeFontSize()}>{nodeLabel(node)}</text
+                    dominant-baseline="central"
+                    fill="#fff"
+                    font-size="4"
+                    font-weight="bold"
+                    font-family="sans-serif">{node.glyph.symbol}</text
                   >
-                {/if}
+                </g>
               {/if}
               {#if node.eval}
                 {@const intensity =

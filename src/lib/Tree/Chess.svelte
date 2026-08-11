@@ -8,6 +8,7 @@
   import type { EventBus } from "../../core/event-bus";
   import type { cg, DrawShape, Move, Piece, Square } from "../../chess";
   import { onMount, tick } from "svelte";
+  import { annotationShapes } from "../../utils/glyphs";
 
   const SHAPES_RE = /^([a-h][1-8])([a-h][1-8])?:([gryb])$/;
   const BRUSH_MAP: Record<string, string> = {
@@ -88,6 +89,21 @@
   let userShapes = $derived(loadShapes(currentNode));
   let engineBestMove: { from: Square; to: Square } | null = $state(null);
   let enginePonder: { from: Square; to: Square } | null = $state(null);
+  let glyphShapes = $derived.by(() => {
+    if (!settings.showMoveAnnotations) return [];
+    const node = currentNode;
+    if (!node.glyph || !node.move) return [];
+    const dest = node.move.san?.startsWith("O-O")
+      ? node.move.color === "w"
+        ? node.move.san.startsWith("O-O-O")
+          ? "c1"
+          : "g1"
+        : node.move.san.startsWith("O-O-O")
+          ? "c8"
+          : "g8"
+      : node.move.to;
+    return annotationShapes(dest, node.glyph);
+  });
   let checkColor = $derived(
     currentNode.move && /\+|#/.test(currentNode.move.san)
       ? currentNode.move.color === "w"
@@ -165,6 +181,7 @@
       {userShapes}
       {engineBestMove}
       {enginePonder}
+      {glyphShapes}
     />
     <Toolbar {eventBus} {fen} {options} />
     <Tree {nodeMap} {eventBus} {currentNode} {currentPath} {settings} />

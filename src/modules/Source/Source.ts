@@ -1,6 +1,7 @@
 import { registerTreeModule } from "../../core/module-system";
 import { DEFAULT_FEN, type ITreeHost } from "../../types";
 import { parseOption } from "../../utils/parse";
+import { computeGlyph } from "../../utils/winningChances";
 
 import { PGNParser } from "./parser";
 
@@ -68,6 +69,7 @@ const SourceModule = {
           host.nodeMap = parser.getMap();
           host.tags = parser.getTags();
           host.options = opts;
+          computeAllGlyphs(host);
           host.currentNode = host.nodeMap.get("node-root")!;
           host.fen = host.currentNode.fen;
           host.currentTurn =
@@ -111,3 +113,11 @@ const SourceModule = {
 };
 
 registerTreeModule("source", SourceModule);
+
+function computeAllGlyphs(host: ITreeHost) {
+  for (const [, node] of host.nodeMap) {
+    if (!node.eval || !node.parentID) continue;
+    const parent = host.nodeMap.get(node.parentID);
+    node.glyph = computeGlyph(parent?.eval, node.eval, node.side);
+  }
+}
