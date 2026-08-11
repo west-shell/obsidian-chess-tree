@@ -1,16 +1,16 @@
 import { type Move, type Piece } from "../../chess";
 import {
-  registerPGNViewModule,
-  registerTreeModule,
+  registerBlockModule,
+  registerFileModule,
 } from "../../core/module-system";
 import { t } from "../../i18n";
-import type { ChessNode, ITreeHost } from "../../types";
+import type { ChessNode, IHost } from "../../types";
 import { DEFAULT_FEN } from "../../types";
 import { ConfirmModal } from "../../utils/confirmModal";
 import { Modal, Notice, Setting } from "obsidian";
 
 const ActionsModule = {
-  init(host: ITreeHost) {
+  init(host: IHost) {
     const eventBus = host.eventBus;
 
     eventBus.on("updateMainPath", () => {
@@ -583,8 +583,8 @@ const ActionsModule = {
   },
 };
 
-registerPGNViewModule("actions", ActionsModule);
-registerTreeModule("actions", ActionsModule);
+registerFileModule("actions", ActionsModule);
+registerBlockModule("actions", ActionsModule);
 
 function updateFenTag(tags: string, newFen: string): string {
   if (tags.includes('[FEN "')) {
@@ -652,7 +652,7 @@ function stringifyPGN(root: ChessNode, includeEval = true): string {
   return walk(root, 0);
 }
 
-function emitNodeEval(host: ITreeHost) {
+function emitNodeEval(host: IHost) {
   const ev = host.currentNode?.eval;
   if (ev?.bestmove) {
     host.eventBus.emit("engine-result", {

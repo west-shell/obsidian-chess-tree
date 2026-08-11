@@ -1,10 +1,10 @@
 import {
-  registerPGNViewModule,
-  registerTreeModule,
+  registerBlockModule,
+  registerFileModule,
 } from "../../core/module-system";
 import { getLang, t } from "../../i18n";
 import type { Move } from "../../chess";
-import type { ITreeHost } from "../../types";
+import type { IHost } from "../../types";
 
 const PIECE_SPEECH_KEYS: Record<string, string> = {
   K: "speech.pieceK",
@@ -73,7 +73,7 @@ function speak(move: Move) {
 }
 
 const SpeakerModule = {
-  init(host: ITreeHost) {
+  init(host: IHost) {
     const eventBus = host.eventBus;
     let lastSpokenNodeId: string | null = null;
 
@@ -91,5 +91,5 @@ const SpeakerModule = {
   },
 };
 
-registerPGNViewModule("speech", SpeakerModule);
-registerTreeModule("speech", SpeakerModule);
+registerFileModule("speech", SpeakerModule);
+registerBlockModule("speech", SpeakerModule);

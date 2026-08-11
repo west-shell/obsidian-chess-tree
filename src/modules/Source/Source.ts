@@ -1,5 +1,5 @@
-import { registerTreeModule } from "../../core/module-system";
-import { DEFAULT_FEN, type ITreeHost } from "../../types";
+import { registerBlockModule } from "../../core/module-system";
+import { DEFAULT_FEN, type IBlockHost } from "../../types";
 import { parseOption } from "../../utils/parse";
 import { computeGlyph } from "../../utils/winningChances";
 
@@ -55,7 +55,7 @@ function extractFEN(source: string): string {
 }
 
 const SourceModule = {
-  init(host: ITreeHost) {
+  init(host: IBlockHost) {
     const eventBus = host.eventBus;
     eventBus.on<string>("load", (renderChild) => {
       switch (renderChild) {
@@ -112,9 +112,9 @@ const SourceModule = {
   },
 };
 
-registerTreeModule("source", SourceModule);
+registerBlockModule("source", SourceModule);
 
-function computeAllGlyphs(host: ITreeHost) {
+function computeAllGlyphs(host: IBlockHost) {
   for (const [, node] of host.nodeMap) {
     if (!node.eval || !node.parentID) continue;
     const parent = host.nodeMap.get(node.parentID);

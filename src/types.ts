@@ -1,4 +1,8 @@
-import type { MarkdownPostProcessorContext } from "obsidian";
+import type {
+  MarkdownPostProcessorContext,
+  MarkdownRenderChild,
+  TextFileView,
+} from "obsidian";
 
 import type { Move, Piece, Square } from "./chess";
 import type { EventBus } from "./core/event-bus";
@@ -81,30 +85,23 @@ export type ChessNode = {
 
 export type NodeMap = Map<string, ChessNode>;
 
+type SvelteComponent = {
+  $set?(props: Partial<Record<string, unknown>>): void;
+  $destroy?(): void;
+};
+
 export interface IHost {
-  containerEl: HTMLElement;
-  ctx: MarkdownPostProcessorContext;
   plugin: ChessPlugin;
   eventBus: EventBus;
   settings: ISettings;
-  source: string;
-}
-
-export type SvelteComponent = {
-  $set?(props: Partial<Record<string, unknown>>): void;
-};
-
-export interface IGenFENHost extends IHost {
   fen: string;
-  modified: boolean;
   selectedPiece: Piece | null;
   markedPos: Square | null;
   Chess: SvelteComponent | null;
-}
-
-export interface ITreeHost extends IGenFENHost {
+  editing: boolean;
+  isFenMode: boolean;
+  modified: boolean;
   parser: PGNParser;
-  fen: string;
   tags: string;
   root: ChessNode;
   nodeMap: NodeMap;
@@ -112,16 +109,18 @@ export interface ITreeHost extends IGenFENHost {
   currentTurn: ITurn;
   currentNode: ChessNode;
   currentPath: string[];
-  modified: boolean;
   haveFEN: boolean;
   options: IOptions;
-  editing: boolean;
-  isFenMode: boolean;
   stringifyPGN: (root: ChessNode, includeEval?: boolean) => string;
 }
 
-export interface IPGNViewHost extends ITreeHost {
-  data: string;
-  contentEl: HTMLElement;
-  saveFile: () => void;
-}
+export type IBlockHost = IHost &
+  MarkdownRenderChild & {
+    ctx: MarkdownPostProcessorContext;
+    source: string;
+  };
+
+export type IFileHost = IHost &
+  TextFileView & {
+    saveFile: () => void;
+  };

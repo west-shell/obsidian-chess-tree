@@ -1,13 +1,13 @@
 import { MarkdownView, Modal, Notice, Setting } from "obsidian";
 import { mount, unmount } from "svelte";
 
-import { registerTreeModule } from "../../core/module-system";
+import { registerBlockModule } from "../../core/module-system";
 import Chess from "../../lib/Tree/Chess.svelte";
-import type { ChessNode, ITreeHost } from "../../types";
+import type { ChessNode, IBlockHost } from "../../types";
 import { t } from "../../i18n";
 
 const BoardModule = {
-  init(host: ITreeHost) {
+  init(host: IBlockHost) {
     const eventBus = host.eventBus;
 
     eventBus.on("creatUI", () => {
@@ -124,7 +124,7 @@ const BoardModule = {
   },
 };
 
-registerTreeModule("board", BoardModule);
+registerBlockModule("board", BoardModule);
 
 function hasEvalInTree(root: ChessNode): boolean {
   const stack: ChessNode[] = [root];
@@ -136,7 +136,7 @@ function hasEvalInTree(root: ChessNode): boolean {
   return false;
 }
 
-async function promptSaveEval(host: ITreeHost): Promise<boolean | null> {
+async function promptSaveEval(host: IBlockHost): Promise<boolean | null> {
   if (!hasEvalInTree(host.root)) return true;
 
   if (!host.settings.saveEvalPrompt) {
