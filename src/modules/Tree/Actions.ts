@@ -492,6 +492,7 @@ const ActionsModule = {
       let skillValue = host.settings.engineSkillLevel;
       let showBestMove = host.settings.showEngineBestMove;
       let showPonder = host.settings.showEnginePonder;
+      let showAnnotations = host.settings.showMoveAnnotations;
 
       engineModal.onOpen = () => {
         const { contentEl } = engineModal;
@@ -549,6 +550,17 @@ const ActionsModule = {
           showPonder = ponderToggle.checked;
         });
 
+        // Show move annotations
+        const annContainer = contentEl.createDiv("engine-setting-toggle");
+        const annToggle = annContainer.createEl("input", { type: "checkbox" });
+        annToggle.checked = showAnnotations;
+        annContainer.createEl("label", {
+          text: t("engine.showMoveAnnotations"),
+        });
+        annToggle.addEventListener("change", () => {
+          showAnnotations = annToggle.checked;
+        });
+
         // Buttons
         const btnContainer = contentEl.createDiv("modal-button-container");
         const okBtn = btnContainer.createEl("button", {
@@ -564,6 +576,7 @@ const ActionsModule = {
           }
           host.settings.showEngineBestMove = showBestMove;
           host.settings.showEnginePonder = showPonder;
+          host.settings.showMoveAnnotations = showAnnotations;
           void host.plugin.saveSettings();
           host.plugin.refresh();
           engineModal.close();
