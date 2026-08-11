@@ -2,7 +2,7 @@ import type { DrawShape } from "../chess";
 import type { MoveGlyph } from "../utils/winningChances";
 
 const composeGlyph = (fill: string, path: string) =>
-  `<defs><filter id="a"><feDropShadow dx="4" dy="7" flood-opacity=".5" stdDeviation="5"/></filter></defs><g transform="matrix(.4 0 0 .4 71 -12)"><circle cx="50" cy="50" r="50" fill="${fill}" filter="url(#a)"/>${path}</g>`;
+  `<g transform="matrix(.4 0 0 .4 71 -12)"><circle cx="50" cy="50" r="50" fill="${fill}"/>${path}</g>`;
 
 const GLYPH_SVGS: Record<string, string> = {
   "?!": composeGlyph(

@@ -89,19 +89,19 @@
       symbol: "White +",
       color: "#fff",
       icon: "thumbs-up",
-      bgColor: "#aaa",
+      bgColor: "#22ac38",
     },
     "B+": {
       symbol: "Black +",
       color: "#fff",
       icon: "thumbs-down",
-      bgColor: "#444",
+      bgColor: "#df5353",
     },
     "=": {
       symbol: "Equal",
       color: "#fff",
       icon: "handshake",
-      bgColor: "#4caf50",
+      bgColor: "#82c2ef",
     },
     "?": { symbol: "Key", color: "#fff", icon: "bookmark", bgColor: "#e69f00" },
     "!": {
@@ -110,13 +110,13 @@
       icon: "star",
       bgColor: "#22ac38",
     },
-    "1-0": { symbol: "1-0", color: "#333", icon: "thumbs-up", bgColor: "#eee" },
+    "1-0": { symbol: "1-0", color: "#fff", icon: "thumbs-up", bgColor: "#bbb" },
     "0-1": { symbol: "0-1", color: "#fff", icon: "thumbs-up", bgColor: "#333" },
     "1/2-1/2": {
       symbol: "Draw",
       color: "#fff",
       icon: "handshake",
-      bgColor: "#888",
+      bgColor: "#6e7781",
     },
   };
 
@@ -163,8 +163,7 @@
     if (!paths) return "";
     return paths
       .map(
-        (d) =>
-          `<path fill="none" stroke="${fill}" stroke-width="2" d="${d}" transform="translate(14,14) scale(3)"/>`,
+        (d) => `<path fill="none" stroke="${fill}" stroke-width="2" d="${d}"/>`,
       )
       .join("");
   }
@@ -921,8 +920,10 @@
                   style="pointer-events: none"
                 >
                   <circle cx="50" cy="50" r="50" fill={def.bgColor} />
-                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html annotationIconSvg(def.icon, def.color)}
+                  <g transform="translate(14,14) scale(3)">
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html annotationIconSvg(def.icon, def.color)}
+                  </g>
                 </g>
               {/if}
               {#if node.glyph}
