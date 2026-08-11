@@ -295,7 +295,7 @@
       {enginePonder}
       {glyphShapes}
     />
-    <Toolbar {eventBus} {fen} {options} />
+    <Toolbar {eventBus} {options} />
     <Tree {nodeMap} {eventBus} {currentNode} {currentPath} {settings} />
   </div>
 {/if}
