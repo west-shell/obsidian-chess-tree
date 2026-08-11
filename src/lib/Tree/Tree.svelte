@@ -83,20 +83,41 @@
 
   const ANNOTATION_DEFINITIONS: Record<
     string,
-    { symbol: string; color: string; icon: string }
+    { symbol: string; color: string; icon: string; bgColor: string }
   > = {
-    "W+": { symbol: "White +", color: "var(--piece-red)", icon: "thumbs-up" },
+    "W+": {
+      symbol: "White +",
+      color: "#fff",
+      icon: "thumbs-up",
+      bgColor: "#aaa",
+    },
     "B+": {
       symbol: "Black +",
-      color: "var(--piece-black)",
+      color: "#fff",
       icon: "thumbs-down",
+      bgColor: "#444",
     },
-    "=": { symbol: "Equal", color: "green", icon: "handshake" },
-    "?": { symbol: "Key", color: "var(--text-warning)", icon: "bookmark" },
-    "!": { symbol: "Brilliant", color: "var(--color-yellow)", icon: "star" },
-    "1-0": { symbol: "1-0", color: "white", icon: "thumbs-up" },
-    "0-1": { symbol: "0-1", color: "black", icon: "thumbs-up" },
-    "1/2-1/2": { symbol: "Draw", color: "gray", icon: "handshake" },
+    "=": {
+      symbol: "Equal",
+      color: "#fff",
+      icon: "handshake",
+      bgColor: "#4caf50",
+    },
+    "?": { symbol: "Key", color: "#fff", icon: "bookmark", bgColor: "#e69f00" },
+    "!": {
+      symbol: "Brilliant",
+      color: "#fff",
+      icon: "star",
+      bgColor: "#22ac38",
+    },
+    "1-0": { symbol: "1-0", color: "#333", icon: "thumbs-up", bgColor: "#eee" },
+    "0-1": { symbol: "0-1", color: "#fff", icon: "thumbs-up", bgColor: "#333" },
+    "1/2-1/2": {
+      symbol: "Draw",
+      color: "#fff",
+      icon: "handshake",
+      bgColor: "#888",
+    },
   };
 
   const ALL_ANNOTATION_KEYS = Object.keys(ANNOTATION_DEFINITIONS);
@@ -112,6 +133,40 @@
 
   function glyphPath(symbol: string): string {
     return GLYPH_PATHS[symbol] ?? "";
+  }
+
+  function annotationIconSvg(icon: string, fill: string): string {
+    const icons: Record<string, string[]> = {
+      "thumbs-up": [
+        "M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z",
+        "M7 10v12",
+      ],
+      "thumbs-down": [
+        "M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z",
+        "M17 14V2",
+      ],
+      handshake: [
+        "m11 17 2 2a1 1 0 1 0 3-3",
+        "m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4",
+        "m21 3 1 11h-2",
+        "M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3",
+        "M3 4h8",
+      ],
+      bookmark: [
+        "M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z",
+      ],
+      star: [
+        "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+      ],
+    };
+    const paths = icons[icon];
+    if (!paths) return "";
+    return paths
+      .map(
+        (d) =>
+          `<path fill="none" stroke="${fill}" stroke-width="2" d="${d}" transform="translate(14,14) scale(3)"/>`,
+      )
+      .join("");
   }
 
   // Chess piece icon name lookup
@@ -861,11 +916,13 @@
               {#if primaryAnnotation}
                 {@const def = ANNOTATION_DEFINITIONS[primaryAnnotation]}
                 <g
-                  transform="translate({-nw / 2 + 0.5} {nodeHeight / 2 - 1})"
+                  transform="translate({-nw / 2 - 3} {nodeHeight / 2 -
+                    3}) scale(0.06)"
                   style="pointer-events: none"
                 >
+                  <circle cx="50" cy="50" r="50" fill={def.bgColor} />
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html iconSvg(def.icon, 6, 1, def.color)}
+                  {@html annotationIconSvg(def.icon, def.color)}
                 </g>
               {/if}
               {#if node.glyph}
