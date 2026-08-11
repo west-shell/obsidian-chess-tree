@@ -74,6 +74,7 @@ const ActionsModule = {
         children: [],
         mainID: null,
         comments: [],
+        isCheckmate: move.san?.endsWith("#") ?? false,
       };
       host.nodeMap.set(newNode.id, newNode);
       host.currentNode.children.push(newNode);

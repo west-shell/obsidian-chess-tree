@@ -76,6 +76,7 @@ export type ChessNode = {
   comments?: string[];
   eval?: NodeEval;
   glyph?: MoveGlyph | null;
+  isCheckmate?: boolean;
 };
 
 export type NodeMap = Map<string, ChessNode>;

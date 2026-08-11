@@ -89,8 +89,8 @@ export class PGNParser {
       side,
       parentID: this.currentNode.id,
       children: [],
-      mainID: null,
       comments: [],
+      isCheckmate: move.san?.endsWith("#") ?? false,
     };
     this.nodeMap.set(node.id, node);
     return node;

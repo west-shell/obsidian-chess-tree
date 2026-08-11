@@ -130,12 +130,20 @@
       "M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3",
       "M3 4h8",
     ],
+    bookmark: [
+      "M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z",
+    ],
+    star: [
+      "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+    ],
   };
 
   const ANNOTATION_ICON_MAP: Record<string, string> = {
     "W+": "thumbs-up",
     "B+": "thumbs-down",
     "=": "handshake",
+    "?": "bookmark",
+    "!": "star",
     "1-0": "thumbs-up",
     "0-1": "thumbs-up",
     "1/2-1/2": "handshake",
@@ -191,6 +199,20 @@
           customSvg: { html: svg },
         });
       }
+    }
+    if (node.isCheckmate && dest) {
+      const crownPaths = ["M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"];
+      const inner = crownPaths
+        .map(
+          (d) => `<path fill="none" stroke="#fff" stroke-width="2" d="${d}"/>`,
+        )
+        .join("");
+      const svg = `<g transform="matrix(.4 0 0 .4 -12 -12)"><circle cx="50" cy="50" r="50" fill="#df5353"/><g transform="translate(14,14) scale(3)">${inner}</g></g>`;
+      shapes.push({
+        orig: dest as DrawShape["orig"],
+        brush: "",
+        customSvg: { html: svg },
+      });
     }
     return shapes;
   });

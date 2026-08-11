@@ -110,8 +110,13 @@
       icon: "star",
       bgColor: "#22ac38",
     },
-    "1-0": { symbol: "1-0", color: "#fff", icon: "thumbs-up", bgColor: "#bbb" },
-    "0-1": { symbol: "0-1", color: "#fff", icon: "thumbs-up", bgColor: "#333" },
+    "1-0": { symbol: "1-0", color: "#333", icon: "thumbs-up", bgColor: "#eee" },
+    "0-1": {
+      symbol: "0-1",
+      color: "#fff",
+      icon: "thumbs-down",
+      bgColor: "#333",
+    },
     "1/2-1/2": {
       symbol: "Draw",
       color: "#fff",
@@ -158,6 +163,7 @@
       star: [
         "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
       ],
+      crown: ["M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"],
     };
     const paths = icons[icon];
     if (!paths) return "";
@@ -923,6 +929,19 @@
                   <g transform="translate(14,14) scale(3)">
                     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                     {@html annotationIconSvg(def.icon, def.color)}
+                  </g>
+                </g>
+              {/if}
+              {#if node.isCheckmate}
+                <g
+                  transform="translate({-nw / 2 - 3} {-nodeHeight / 2 -
+                    3}) scale(0.06)"
+                  style="pointer-events: none"
+                >
+                  <circle cx="50" cy="50" r="50" fill="#df5353" />
+                  <g transform="translate(14,14) scale(3)">
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html annotationIconSvg("crown", "#fff")}
                   </g>
                 </g>
               {/if}
