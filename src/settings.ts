@@ -431,7 +431,7 @@ export class ChessSettingTab extends PluginSettingTab {
     void this.plugin.saveSettings();
     if (key === "lang" && typeof value === "string") {
       initI18n(value);
-      // this.update?.();
+      this.update();
     }
     if (
       [
