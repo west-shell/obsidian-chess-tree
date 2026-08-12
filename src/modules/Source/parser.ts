@@ -192,7 +192,7 @@ export class PGNParser {
     const raw = token.value.replace(/^{|}$/g, "").replace(/^;/, "").trim();
 
     const newFormatMatch = raw.match(
-      /^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?$/,
+      /^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,(!\?|\?!|\?\?|[?!]|!!))?$/,
     );
     if (newFormatMatch) {
       const evalStr = newFormatMatch[1];
@@ -214,6 +214,21 @@ export class PGNParser {
       }
       if (newFormatMatch[2]) this.currentNode.eval.bestmove = newFormatMatch[2];
       if (newFormatMatch[3]) this.currentNode.eval.ponder = newFormatMatch[3];
+      if (newFormatMatch[4]) {
+        const GLYPH_DEFS: Record<
+          string,
+          { symbol: string; name: string; color: string }
+        > = {
+          "?!": { symbol: "?!", name: "Inaccuracy", color: "#56b4e9" },
+          "?": { symbol: "?", name: "Mistake", color: "#e69f00" },
+          "??": { symbol: "??", name: "Blunder", color: "#df5353" },
+          "!": { symbol: "!", name: "Good move", color: "#22ac38" },
+          "!!": { symbol: "!!", name: "Brilliant", color: "#168226" },
+          "!?": { symbol: "!?", name: "Interesting", color: "#ea45d8" },
+        };
+        const glyphDef = GLYPH_DEFS[newFormatMatch[4]];
+        if (glyphDef) this.currentNode.glyph = glyphDef;
+      }
       return;
     }
 
