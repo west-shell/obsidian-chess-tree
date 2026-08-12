@@ -7,6 +7,7 @@
   import type { ChessNode, IOptions, ISettings, NodeMap } from "../../types";
   import type { EventBus } from "../../core/event-bus";
   import type { cg, DrawShape, Move, Piece, Square } from "../../chess";
+  import type ChessPlugin from "../../main";
   import { onMount, tick } from "svelte";
   import { annotationShapes } from "../../utils/glyphs";
 
@@ -62,6 +63,7 @@
     editing?: boolean;
     selectedPiece?: Piece | null;
     isFenMode?: boolean;
+    plugin?: ChessPlugin;
   }
 
   let {
@@ -75,14 +77,21 @@
     editing = false,
     selectedPiece = null,
     isFenMode = false,
+    plugin,
   }: Props = $props();
 
   let lastMove: [Square, Square] | null = $derived(
     currentNode.move ? [currentNode.move.from, currentNode.move.to] : null,
   );
   let rotated = $state((() => options.rotated ?? false)());
-  let variations = $derived(
+  let mainVariation = $derived(
+    currentNode.children.length > 0 && currentNode.children[0].move
+      ? [currentNode.children[0].move]
+      : [],
+  );
+  let otherVariations = $derived(
     currentNode.children
+      .slice(1)
       .map((child) => child.move)
       .filter((m): m is Move => m != null) ?? [],
   );
@@ -276,7 +285,15 @@
 
 {#if editing}
   <div class="chess-layout chess-layout--genfen">
-    <Board {settings} {fen} {eventBus} {rotated} freeMode={true} />
+    <Board
+      {settings}
+      {fen}
+      {eventBus}
+      {rotated}
+      freeMode={true}
+      {mainVariation}
+      {otherVariations}
+    />
     <PieceBTNs {fen} {eventBus} {selectedPiece} />
     <GenFENToolbar {eventBus} {fen} {isFenMode} />
   </div>
@@ -289,13 +306,14 @@
       {checkColor}
       {eventBus}
       {rotated}
-      {variations}
+      {mainVariation}
+      {otherVariations}
       {userShapes}
       {engineBestMove}
       {enginePonder}
       {glyphShapes}
     />
-    <Toolbar {eventBus} {options} />
+    <Toolbar {eventBus} {options} {settings} {plugin} {rotated} />
     <Tree {nodeMap} {eventBus} {currentNode} {currentPath} {settings} />
   </div>
 {/if}

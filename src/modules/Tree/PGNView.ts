@@ -44,6 +44,7 @@ const TreeViewModule = {
           options: host.options || {},
           editing: host.editing,
           selectedPiece: host.selectedPiece,
+          plugin: host.plugin,
         },
       });
     });
@@ -58,6 +59,7 @@ const TreeViewModule = {
         options: { ...host.options },
         editing: host.editing,
         selectedPiece: host.selectedPiece,
+        plugin: host.plugin,
       });
     });
 

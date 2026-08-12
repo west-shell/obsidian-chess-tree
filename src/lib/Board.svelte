@@ -22,7 +22,8 @@
     eventBus: EventBus;
     rotated: boolean;
     checkColor?: cg.Color | null;
-    variations?: Move[];
+    mainVariation?: Move[];
+    otherVariations?: Move[];
     freeMode?: boolean;
     userShapes?: DrawShape[];
     engineBestMove?: { from: Square; to: Square } | null;
@@ -38,7 +39,8 @@
     eventBus,
     rotated,
     checkColor = null,
-    variations = [],
+    mainVariation = [],
+    otherVariations = [],
     freeMode = false,
     userShapes = [],
     engineBestMove = null,
@@ -142,7 +144,12 @@
       : []),
   ]);
   let shapes = $derived([
-    ...(settings.showNextMove ? computeVariationShapes(variations) : []),
+    ...(settings.showNextMove
+      ? computeVariationShapes(mainVariation ?? [])
+      : []),
+    ...(settings.showOtherVariations && settings.showNextMove
+      ? computeVariationShapes(otherVariations ?? [])
+      : []),
     ...engineShapes,
     ...glyphShapes,
   ]);

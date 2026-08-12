@@ -21,6 +21,7 @@ export interface ISettings {
   showCoordinateLabels: boolean;
   showLastMove: boolean;
   showNextMove: boolean;
+  showOtherVariations: boolean;
   showTurnBorder: boolean;
   autoJump: "never" | "always" | "auto";
   enableSpeech: boolean;
