@@ -558,6 +558,7 @@ export class ExportModal extends Modal {
         .writeText(value)
         .then(() => {
           new Notice(t("notice.fenCopied"));
+          return undefined;
         })
         .catch(() => {});
     });
