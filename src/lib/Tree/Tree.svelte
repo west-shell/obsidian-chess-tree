@@ -952,6 +952,7 @@
                   style="pointer-events: none"
                 >
                   <circle cx="50" cy="50" r="50" fill={node.glyph.color} />
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                   {@html glyphPath(node.glyph.symbol)}
                 </g>
               {/if}
