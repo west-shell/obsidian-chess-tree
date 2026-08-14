@@ -94,10 +94,6 @@
   let userShapes = $derived(loadShapes(currentNode));
   let engineBestMove: { from: Square; to: Square } | null = $state(null);
   let enginePonder: { from: Square; to: Square } | null = $state(null);
-  function getPrimaryAnnotation(node: ChessNode): string | undefined {
-    return node.annotation;
-  }
-
   let glyphShapes = $derived.by(() => {
     if (!settings.showMoveAnnotations) return [];
     const node = currentNode;
@@ -117,7 +113,7 @@
       const engineShapes = annotationShapes(dest, node.glyph);
       shapes.push(...engineShapes);
     }
-    const ann = getPrimaryAnnotation(node);
+    const ann = node.annotation;
     if (ann && dest) {
       const svg = badgeBoardSvg(ann, shapes.filter((s) => s.customSvg).length);
       if (svg) {

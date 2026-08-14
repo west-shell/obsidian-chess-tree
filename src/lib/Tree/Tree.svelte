@@ -111,15 +111,6 @@
     return PIECE_ICONS[node.move.piece] ?? null;
   }
 
-  // ---- 工具函数 ----
-  function getPrimaryAnnotation(node: ChessNode): string | undefined {
-    return node.annotation;
-  }
-
-  function getRegularComments(node: ChessNode): string[] {
-    return node.comments ?? [];
-  }
-
   // ---- 自动保存逻辑 ----
   let saveTimeout: number | undefined;
 
@@ -602,7 +593,7 @@
       return;
     }
     const node = currentNode;
-    commentsText = getRegularComments(node).join("\n");
+    commentsText = (node.comments ?? []).join("\n");
     tick().then(() => {
       if (textareaEl) adjustTextareaHeight();
       panToNodeIfNeeded(node);
@@ -738,7 +729,7 @@
 
           {#each sortedRenderedNodes as node (node.id)}
             {@const nw = getNodeWidth(node)}
-            {@const primaryAnnotation = getPrimaryAnnotation(node)}
+            {@const primaryAnnotation = node.annotation}
             {@const isCurrent = node.id === currentNode?.id}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -843,7 +834,7 @@
                   {@html badgeSvg(`glyph:${node.glyph.symbol}`)}
                 </g>
               {/if}
-              {#if getRegularComments(node).length > 0}
+              {#if (node.comments ?? []).length > 0}
                 <g
                   transform="translate({0.3 * nw} {-0.65 * nodeHeight})"
                   style="pointer-events: none"
