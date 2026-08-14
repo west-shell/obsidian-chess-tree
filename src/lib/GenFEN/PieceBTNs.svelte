@@ -16,18 +16,18 @@
     icon: string;
     maxCount: number;
   }[] = [
-    { key: "k", color: "black", icon: "chess-king", maxCount: 1 },
-    { key: "q", color: "black", icon: "chess-queen", maxCount: 1 },
-    { key: "r", color: "black", icon: "chess-rook", maxCount: 2 },
-    { key: "b", color: "black", icon: "chess-bishop", maxCount: 2 },
-    { key: "n", color: "black", icon: "chess-knight", maxCount: 2 },
-    { key: "p", color: "black", icon: "chess-pawn", maxCount: 8 },
-    { key: "K", color: "white", icon: "chess-king", maxCount: 1 },
-    { key: "Q", color: "white", icon: "chess-queen", maxCount: 1 },
-    { key: "R", color: "white", icon: "chess-rook", maxCount: 2 },
-    { key: "B", color: "white", icon: "chess-bishop", maxCount: 2 },
-    { key: "N", color: "white", icon: "chess-knight", maxCount: 2 },
-    { key: "P", color: "white", icon: "chess-pawn", maxCount: 8 },
+    { key: "k", color: "black", icon: "chess_king", maxCount: 1 },
+    { key: "q", color: "black", icon: "chess_queen", maxCount: 1 },
+    { key: "r", color: "black", icon: "chess_rook", maxCount: 2 },
+    { key: "b", color: "black", icon: "chess_bishop", maxCount: 2 },
+    { key: "n", color: "black", icon: "chess_knight", maxCount: 2 },
+    { key: "p", color: "black", icon: "chess_pawn", maxCount: 8 },
+    { key: "K", color: "white", icon: "chess_king", maxCount: 1 },
+    { key: "Q", color: "white", icon: "chess_queen", maxCount: 1 },
+    { key: "R", color: "white", icon: "chess_rook", maxCount: 2 },
+    { key: "B", color: "white", icon: "chess_bishop", maxCount: 2 },
+    { key: "N", color: "white", icon: "chess_knight", maxCount: 2 },
+    { key: "P", color: "white", icon: "chess_pawn", maxCount: 8 },
   ];
 
   const PIECES: {

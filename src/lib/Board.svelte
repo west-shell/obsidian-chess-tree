@@ -73,10 +73,10 @@
   let promotingColor: "w" | "b" = $state("w");
 
   const PROMOTION_PIECES: { type: "q" | "r" | "b" | "n"; icon: string }[] = [
-    { type: "q", icon: "chess-queen" },
-    { type: "r", icon: "chess-rook" },
-    { type: "b", icon: "chess-bishop" },
-    { type: "n", icon: "chess-knight" },
+    { type: "q", icon: "chess_queen" },
+    { type: "r", icon: "chess_rook" },
+    { type: "b", icon: "chess_bishop" },
+    { type: "n", icon: "chess_knight" },
   ];
 
   function completePromotion(pieceType: "q" | "r" | "b" | "n") {

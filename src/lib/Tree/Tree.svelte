@@ -95,19 +95,19 @@
 
   // Chess piece icon name lookup
   const PIECE_ICONS: Record<string, string> = {
-    k: "chess-king",
-    q: "chess-queen",
-    r: "chess-rook",
-    b: "chess-bishop",
-    n: "chess-knight",
-    p: "chess-pawn",
+    k: "chess_king",
+    q: "chess_queen",
+    r: "chess_rook",
+    b: "chess_bishop",
+    n: "chess_knight",
+    p: "chess_pawn",
   };
 
   function getPieceIcon(node: ChessNode): string | null {
     if (!node.move) return null;
     if (node.move.isKingsideCastle() || node.move.isQueensideCastle())
       return "castle";
-    if (node.move.promotion) return "chevrons-up";
+    if (node.move.promotion) return "chevrons_up";
     return PIECE_ICONS[node.move.piece] ?? null;
   }
 
@@ -831,7 +831,7 @@
                   style="pointer-events: none"
                 >
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html badgeSvg(`glyph:${node.glyph.symbol}`)}
+                  {@html badgeSvg(`glyph_${node.glyph.symbol}`)}
                 </g>
               {/if}
               {#if (node.comments ?? []).length > 0}
@@ -840,7 +840,7 @@
                   style="pointer-events: none"
                 >
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html iconSvg("message-square-text", 7, 1.5, "royalblue")}
+                  {@html iconSvg("message_square_text", 7, 1.5, "royalblue")}
                 </g>
               {/if}
             </g>
