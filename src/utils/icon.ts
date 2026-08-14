@@ -230,21 +230,11 @@ const BADGE_DEFS: Record<
 };
 
 export const ANNOTATION_KEYS = ["++", "--", "==", "bm", "st"];
-
-const OLD_KEY_MAP: Record<string, string> = {
-  "W+": "++",
-  "B+": "--",
-  "=": "==",
-  "?": "bm",
-  "!": "st",
-};
-
-export function normalizeAnnotationKey(key: string): string {
-  return OLD_KEY_MAP[key] ?? key;
-}
+export const ANNOTATION_PREFIX = "#a:";
+export const SHAPES_PREFIX = "&s:";
 
 export function isAnnotationKey(key: string): boolean {
-  return ANNOTATION_KEYS.includes(key) || key in OLD_KEY_MAP;
+  return ANNOTATION_KEYS.includes(key);
 }
 
 export function isBadgeKey(key: string): boolean {
@@ -252,7 +242,7 @@ export function isBadgeKey(key: string): boolean {
 }
 
 export function badgeSvg(key: string, size: number = 6): string {
-  const def = BADGE_DEFS[normalizeAnnotationKey(key)];
+  const def = BADGE_DEFS[key];
   if (!def) return "";
   const r = size / 2;
   let inner = "";
@@ -279,7 +269,7 @@ export function badgeSvg(key: string, size: number = 6): string {
 }
 
 export function badgeBoardSvg(key: string, stack: number = 0): string {
-  const def = BADGE_DEFS[normalizeAnnotationKey(key)];
+  const def = BADGE_DEFS[key];
   if (!def) return "";
   const x = -12;
   const y = stack > 0 ? 68 : -12;
