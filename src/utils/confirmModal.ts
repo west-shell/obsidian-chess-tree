@@ -511,6 +511,7 @@ export class ExportModal extends Modal {
   private includeEval = true;
   private allPgnArea!: HTMLTextAreaElement;
   private branchPgnArea!: HTMLTextAreaElement;
+  private allGamesArea: HTMLTextAreaElement | null = null;
 
   constructor(
     app: App,
@@ -557,6 +558,16 @@ export class ExportModal extends Modal {
       host.tags + "\n\n" + host.stringifyPGN(host.root, this.includeEval);
     this.addExportSection(contentEl, t("export.allPgn"), allPgn, "allPgn");
 
+    if (host.games && host.games.length > 1) {
+      const allGamesPgn = this.getAllGamesPGN();
+      this.addExportSection(
+        contentEl,
+        t("export.allGames"),
+        allGamesPgn,
+        "allGames",
+      );
+    }
+
     const branchPgn = this.getCurrentBranchPGN(
       this.includeComments,
       this.includeEval,
@@ -575,11 +586,29 @@ export class ExportModal extends Modal {
     closeBtn.addEventListener("click", () => this.close());
   }
 
+  private getAllGamesPGN(): string {
+    const host = this.host;
+    const parts: string[] = [];
+    for (const slot of host.games) {
+      if (slot.parsed) {
+        const pgn = host.stringifyPGN(slot.parsed.root, this.includeEval);
+        const content = [slot.parsed.tags?.trim(), pgn]
+          .filter(Boolean)
+          .join("\n");
+        parts.push(content);
+      } else {
+        parts.push(slot.raw.trim());
+      }
+    }
+    return parts.join("\n\n");
+  }
+
   private refreshPgn() {
     const host = this.host;
     const allPgn =
       host.tags + "\n\n" + host.stringifyPGN(host.root, this.includeEval);
     if (this.allPgnArea) this.allPgnArea.value = allPgn;
+    if (this.allGamesArea) this.allGamesArea.value = this.getAllGamesPGN();
     const branchPgn = this.getCurrentBranchPGN(
       this.includeComments,
       this.includeEval,
@@ -591,7 +620,7 @@ export class ExportModal extends Modal {
     container: HTMLElement,
     label: string,
     value: string,
-    areaKey: "allPgn" | "branchPgn" | null,
+    areaKey: "allPgn" | "branchPgn" | "allGames" | null,
   ) {
     new Setting(container).setName(label);
     const area = container.createEl("textarea", {
@@ -605,6 +634,7 @@ export class ExportModal extends Modal {
 
     if (areaKey === "allPgn") this.allPgnArea = area;
     else if (areaKey === "branchPgn") this.branchPgnArea = area;
+    else if (areaKey === "allGames") this.allGamesArea = area;
 
     const copyBtn = container.createEl("button", {
       text: t("export.copy"),

@@ -4,7 +4,7 @@ import { mount, unmount } from "svelte";
 import { registerFileModule } from "../../core/module-system";
 import Chess from "../../lib/Tree/Chess.svelte";
 import type { ChessNode, IFileHost } from "../../types";
-import { PGNParser } from "../Source/parser";
+import { activateGame, splitPGN } from "../../utils/parse";
 import { t } from "../../i18n";
 
 const TreeViewModule = {
@@ -13,16 +13,11 @@ const TreeViewModule = {
 
     eventBus.on("setViewData", () => {
       host.markedPos = null;
-      const parser = new PGNParser(host.data);
-      host.parser = parser;
-      host.haveFEN = parser.haveFEN;
-      host.root = parser.getRoot();
-      host.nodeMap = parser.getMap();
-      host.tags = parser.getTags();
-      host.currentNode = host.nodeMap.get("node-root")!;
-      host.fen = host.currentNode.fen;
+      const slots = splitPGN(host.data);
+      host.games = slots;
+      host.currentGameIndex = 0;
+      activateGame(host, 0);
       host.currentTurn = "white";
-      eventBus.emit("updateMainPath");
     });
 
     eventBus.on("createUI", () => {
@@ -45,6 +40,8 @@ const TreeViewModule = {
           editing: host.editing,
           selectedPiece: host.selectedPiece,
           plugin: host.plugin,
+          games: host.games,
+          currentGameIndex: host.currentGameIndex,
         },
       });
     });
@@ -60,6 +57,8 @@ const TreeViewModule = {
         editing: host.editing,
         selectedPiece: host.selectedPiece,
         plugin: host.plugin,
+        games: host.games,
+        currentGameIndex: host.currentGameIndex,
       });
     });
 
@@ -86,9 +85,19 @@ const TreeViewModule = {
       const includeEval = await promptSaveEval(host);
       if (includeEval === null) return;
 
-      const pgn = host.stringifyPGN(host.root, includeEval);
-      const content = [host.tags?.trim(), pgn].filter(Boolean).join("\n");
-      host.data = content;
+      const parts: string[] = [];
+      for (const slot of host.games) {
+        if (slot.parsed) {
+          const pgn = host.stringifyPGN(slot.parsed.root, includeEval);
+          const content = [slot.parsed.tags?.trim(), pgn]
+            .filter(Boolean)
+            .join("\n");
+          parts.push(content);
+        } else {
+          parts.push(slot.raw.trim());
+        }
+      }
+      host.data = parts.join("\n\n");
       host.saveFile();
     });
 

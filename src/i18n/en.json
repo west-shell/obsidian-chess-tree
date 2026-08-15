@@ -117,6 +117,7 @@
   "export.rootFen": "Root FEN",
   "export.currentFen": "Current FEN",
   "export.allPgn": "All PGN",
+  "export.allGames": "All Games PGN",
   "export.currentBranchPgn": "Current Branch PGN",
   "export.includeComments": "Include comments",
   "export.includeEval": "Include evaluation",
@@ -217,5 +218,8 @@
   "save.saveEval": "Save evaluation scores",
   "save.saveEval.desc": "Include evaluation scores when saving PGN",
   "save.saveEvalPrompt": "Ask before saving",
-  "save.saveEvalPrompt.desc": "Show a confirmation dialog before saving evaluation scores"
+  "save.saveEvalPrompt.desc": "Show a confirmation dialog before saving evaluation scores",
+  "game.prev": "Previous game",
+  "game.next": "Next game",
+  "game.label": "Game {current}/{total}"
 }

@@ -16,6 +16,7 @@ import {
   ExportModal,
   ImportModal,
 } from "../../utils/confirmModal";
+import { activateGame } from "../../utils/parse";
 import { Modal, Setting } from "obsidian";
 
 const ActionsModule = {
@@ -122,6 +123,13 @@ const ActionsModule = {
       host.fen = node.fen;
       emitNodeEval(host);
       host.eventBus.emit("updateUI");
+    });
+
+    eventBus.on<number>("switch-game", (index) => {
+      if (index === undefined || index < 0 || index >= host.games.length)
+        return;
+      activateGame(host, index);
+      host.eventBus.emit("clear-engine-bestmove");
     });
 
     eventBus.on<{ name: string; payload: unknown }>(

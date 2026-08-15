@@ -1,5 +1,5 @@
 import { registerBlockModule } from "../../core/module-system";
-import { DEFAULT_FEN, type IBlockHost } from "../../types";
+import { DEFAULT_FEN, type IBlockHost, type ParsedGame } from "../../types";
 import { parseOption } from "../../utils/parse";
 import { computeGlyph } from "../../utils/winningChances";
 
@@ -69,6 +69,15 @@ const SourceModule = {
           host.nodeMap = parser.getMap();
           host.tags = parser.getTags();
           host.options = opts;
+          const game: ParsedGame = {
+            root: host.root,
+            nodeMap: host.nodeMap,
+            tags: host.tags,
+            haveFEN: host.haveFEN,
+            parser,
+          };
+          host.games = [{ raw: cleaned, headers: new Map(), parsed: game }];
+          host.currentGameIndex = 0;
           computeAllGlyphs(host);
           host.currentNode = host.nodeMap.get("node-root")!;
           host.fen = host.currentNode.fen;
@@ -100,6 +109,8 @@ const SourceModule = {
           host.currentTurn = fen.includes(" b ") ? "black" : "white";
           host.tags = "";
           host.options = {};
+          host.games = [];
+          host.currentGameIndex = 0;
           eventBus.emit("updateMainPath");
           break;
         }

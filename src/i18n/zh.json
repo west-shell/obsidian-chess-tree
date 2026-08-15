@@ -118,6 +118,7 @@
   "export.rootFen": "根节点 FEN",
   "export.currentFen": "当前节点 FEN",
   "export.allPgn": "全部 PGN",
+  "export.allGames": "全部棋谱 PGN",
   "export.currentBranchPgn": "当前分支 PGN",
   "export.includeComments": "包含评论标注",
   "export.includeEval": "包含引擎评分",
@@ -218,5 +219,8 @@
   "save.saveEval": "保存评分",
   "save.saveEval.desc": "保存 PGN 时包含 AI 评分数据",
   "save.saveEvalPrompt": "保存前询问",
-  "save.saveEvalPrompt.desc": "保存评分前显示确认对话框"
+  "save.saveEvalPrompt.desc": "保存评分前显示确认对话框",
+  "game.prev": "上一局",
+  "game.next": "下一局",
+  "game.label": "第 {current}/{total} 局"
 }
