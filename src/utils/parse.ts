@@ -8,8 +8,6 @@ import {
   type ITurn,
   type ParsedGame,
 } from "../types";
-import { computeGlyph } from "./winningChances";
-
 export function parseSource(source: string): {
   haveFEN: boolean;
   fen: string;
@@ -183,7 +181,6 @@ export function activateGame(host: IHost, index: number): void {
       haveFEN: parser.haveFEN,
       parser,
     };
-    computeAllGlyphsForGame(game);
     slot.parsed = game;
   }
 
@@ -197,13 +194,16 @@ export function activateGame(host: IHost, index: number): void {
   host.fen = game.root.fen;
   host.currentGameIndex = index;
   host.eventBus.emit("updateMainPath");
-  host.eventBus.emit("updateUI");
-}
 
-function computeAllGlyphsForGame(game: ParsedGame): void {
-  for (const [, node] of game.nodeMap) {
-    if (!node.eval || !node.parentID) continue;
-    const parent = game.nodeMap.get(node.parentID);
-    node.glyph = computeGlyph(parent?.eval, node.eval, node.side);
+  const shouldJump =
+    host.settings.autoJump === "always" ||
+    (host.settings.autoJump === "auto" && !host.haveFEN);
+  if (shouldJump && host.currentPath.length > 0) {
+    host.currentNode = host.nodeMap.get(
+      host.currentPath[host.currentPath.length - 1],
+    )!;
+    host.fen = host.currentNode.fen;
   }
+
+  host.eventBus.emit("updateUI");
 }

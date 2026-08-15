@@ -227,15 +227,15 @@
       {enginePonder}
       {glyphShapes}
     />
-    <Toolbar
+    <Toolbar {eventBus} {options} {settings} {plugin} {rotated} />
+    <Tree
+      {nodeMap}
       {eventBus}
-      {options}
+      {currentNode}
+      {currentPath}
       {settings}
-      {plugin}
-      {rotated}
       {games}
       {currentGameIndex}
     />
-    <Tree {nodeMap} {eventBus} {currentNode} {currentPath} {settings} />
   </div>
 {/if}

@@ -222,5 +222,6 @@
   "save.saveEvalPrompt.desc": "保存评分前显示确认对话框",
   "game.prev": "上一局",
   "game.next": "下一局",
-  "game.label": "第 {current}/{total} 局"
+  "game.label": "第 {current}/{total} 局",
+  "game.select": "选择对局"
 }

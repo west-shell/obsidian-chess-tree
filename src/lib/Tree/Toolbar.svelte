@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Menu, setIcon } from "obsidian";
   import type { EventBus } from "../../core/event-bus";
-  import type { GameSlot, IOptions, ISettings } from "../../types";
+  import type { IOptions, ISettings } from "../../types";
   import type ChessPlugin from "../../main";
   import { onLangChange, t } from "../../i18n";
 
@@ -11,8 +11,6 @@
     settings?: ISettings;
     plugin?: ChessPlugin;
     rotated?: boolean;
-    games?: GameSlot[];
-    currentGameIndex?: number;
   }
   let {
     eventBus,
@@ -20,8 +18,6 @@
     settings,
     plugin,
     rotated = false,
-    games = [],
-    currentGameIndex = 0,
   }: Props = $props();
 
   let _lv = $state(0);
@@ -92,34 +88,6 @@
 
   let isprotected = $derived(options?.protected || false);
   let saveBtnClass = $derived(modified ? "unsaved" : "saved");
-  let showGameNav = $derived(games && games.length > 1);
-  let gameLabel = $derived(
-    showGameNav
-      ? t("game.label", _lv)
-          .replace("{current}", String((currentGameIndex ?? 0) + 1))
-          .replace("{total}", String(games!.length))
-      : "",
-  );
-  let gameTitle = $derived.by(() => {
-    if (!showGameNav) return "";
-    const slot = games![currentGameIndex ?? 0];
-    if (!slot) return "";
-    const h = slot.headers;
-    const white = h.get("White") || "?";
-    const black = h.get("Black") || "?";
-    const event = h.get("Event") || "";
-    const date = h.get("Date") || "";
-    return `${white} - ${black}${event ? ", " + event : ""}${date ? " " + date : ""}`;
-  });
-
-  function prevGame() {
-    const idx = (currentGameIndex ?? 0) - 1;
-    if (idx >= 0) eventBus.emit("switch-game", idx);
-  }
-  function nextGame() {
-    const idx = (currentGameIndex ?? 0) + 1;
-    if (games && idx < games.length) eventBus.emit("switch-game", idx);
-  }
 
   const buildButtons = (v: number) => [
     { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
@@ -426,24 +394,6 @@
     ></button>
   {/each}
 
-  {#if showGameNav}
-    <div class="game-nav">
-      <button
-        class="toolbar-btn"
-        aria-label={t("game.prev", _lv)}
-        disabled={currentGameIndex <= 0}
-        onclick={prevGame}>◀</button
-      >
-      <span class="game-nav-label" title={gameTitle}>{gameLabel}</span>
-      <button
-        class="toolbar-btn"
-        aria-label={t("game.next", _lv)}
-        disabled={!games || currentGameIndex >= games.length - 1}
-        onclick={nextGame}>▶</button
-      >
-    </div>
-  {/if}
-
   <button
     class="toolbar-btn{analyzeBtnClass}"
     aria-label={t("toolbar.analyzeMenu", _lv)}
@@ -499,21 +449,6 @@
 
   .engine-busy {
     animation: engine-pulse 1.2s ease-in-out infinite;
-  }
-
-  .game-nav {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
-
-  .game-nav-label {
-    font-size: 11px;
-    white-space: nowrap;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text-muted);
   }
 
   @keyframes engine-pulse {

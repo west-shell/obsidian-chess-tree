@@ -221,5 +221,6 @@
   "save.saveEvalPrompt.desc": "Show a confirmation dialog before saving evaluation scores",
   "game.prev": "Previous game",
   "game.next": "Next game",
-  "game.label": "Game {current}/{total}"
+  "game.label": "Game {current}/{total}",
+  "game.select": "Select game"
 }

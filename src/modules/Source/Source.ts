@@ -1,7 +1,6 @@
 import { registerBlockModule } from "../../core/module-system";
 import { DEFAULT_FEN, type IBlockHost, type ParsedGame } from "../../types";
 import { parseOption } from "../../utils/parse";
-import { computeGlyph } from "../../utils/winningChances";
 
 import { PGNParser } from "./parser";
 
@@ -78,7 +77,6 @@ const SourceModule = {
           };
           host.games = [{ raw: cleaned, headers: new Map(), parsed: game }];
           host.currentGameIndex = 0;
-          computeAllGlyphs(host);
           host.currentNode = host.nodeMap.get("node-root")!;
           host.fen = host.currentNode.fen;
           host.currentTurn =
@@ -124,11 +122,3 @@ const SourceModule = {
 };
 
 registerBlockModule("source", SourceModule);
-
-function computeAllGlyphs(host: IBlockHost) {
-  for (const [, node] of host.nodeMap) {
-    if (!node.eval || !node.parentID) continue;
-    const parent = host.nodeMap.get(node.parentID);
-    node.glyph = computeGlyph(parent?.eval, node.eval, node.side);
-  }
-}
