@@ -671,6 +671,8 @@ function stringifyPGN(root: ChessNode, includeEval = true): string {
       result += ` ${walk(next, nextStepNum)}`;
     } else if (node.result) {
       result += ` ${node.result}`;
+    } else {
+      result += " *";
     }
     return result;
   }
