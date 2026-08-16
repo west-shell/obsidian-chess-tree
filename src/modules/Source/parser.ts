@@ -160,7 +160,11 @@ export class PGNParser {
       } else if (this.match("left-paren")) {
         this.parseVariation();
       } else if (this.match("result")) {
-        this.consume();
+        const token = this.consume();
+        const validResults = ["1-0", "0-1", "1/2-1/2", "*"];
+        if (validResults.includes(token.value)) {
+          this.currentNode.result = token.value;
+        }
         break;
       } else {
         this.consume();
@@ -266,6 +270,7 @@ export class PGNParser {
     const token = this.consume();
     const validResults = ["1-0", "0-1", "1/2-1/2", "*"];
     if (validResults.includes(token.value)) {
+      this.currentNode.result = token.value;
       this.tags.set("Result", token.value);
     }
   }
