@@ -225,5 +225,7 @@
   "game.select": "Select game",
   "game.win": "Win",
   "game.loss": "Loss",
-  "game.draw": "Draw"
+  "game.draw": "Draw",
+  "confirm.switchGameTitle": "Unsaved Changes",
+  "confirm.switchGameMsg": "Current game has unsaved changes. Switch anyway?"
 }
