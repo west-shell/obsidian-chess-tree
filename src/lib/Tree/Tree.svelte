@@ -534,7 +534,6 @@
       const label = `${i + 1}. ${white} ${result} ${black}${event ? ", " + event : ""}${date ? " " + date : ""}`;
       menu.addItem((mi) => {
         mi.setTitle(label)
-          .setIcon("grip-vertical")
           .setChecked(i === (currentGameIndex ?? 0))
           .onClick(() => eventBus.emit("switch-game", i));
       });
