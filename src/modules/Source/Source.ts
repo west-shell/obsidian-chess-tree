@@ -1,6 +1,6 @@
 import { registerBlockModule } from "../../core/module-system";
 import { DEFAULT_FEN, type IBlockHost, type ParsedGame } from "../../types";
-import { parseOption } from "../../utils/parse";
+import { hasFenTag, parseOption } from "../../utils/parse";
 
 import { PGNParser } from "./parser";
 
@@ -63,7 +63,6 @@ const SourceModule = {
           const { cleaned, options: opts } = prepareSource(host.source);
           const parser = new PGNParser(cleaned);
           host.parser = parser;
-          host.haveFEN = parser.haveFEN;
           host.root = parser.getRoot();
           host.nodeMap = parser.getMap();
           host.tags = parser.getTags();
@@ -72,7 +71,6 @@ const SourceModule = {
             root: host.root,
             nodeMap: host.nodeMap,
             tags: host.tags,
-            haveFEN: host.haveFEN,
             parser,
           };
           host.games = [{ raw: cleaned, headers: new Map(), parsed: game }];
@@ -85,7 +83,7 @@ const SourceModule = {
 
           const shouldJump =
             host.settings.autoJump === "always" ||
-            (host.settings.autoJump === "auto" && !host.haveFEN);
+            (host.settings.autoJump === "auto" && !hasFenTag(host.tags));
           if (shouldJump && host.currentPath.length > 0) {
             host.currentNode = host.nodeMap.get(
               host.currentPath[host.currentPath.length - 1],

@@ -490,7 +490,6 @@ const ActionsModule = {
                 host.currentNode = host.root;
                 host.fen = fullFen;
                 host.tags = updateFenTag(host.tags, fullFen);
-                host.haveFEN = fullFen !== DEFAULT_FEN;
                 host.selectedPiece = null;
                 host.markedPos = null;
                 eventBus.emit("updateUI");
@@ -507,7 +506,6 @@ const ActionsModule = {
               host.currentNode = host.root;
               host.fen = fullFen;
               host.tags = updateFenTag(host.tags, fullFen);
-              host.haveFEN = fullFen !== DEFAULT_FEN;
               host.editing = false;
               host.selectedPiece = null;
               host.markedPos = null;
@@ -588,7 +586,6 @@ const ActionsModule = {
         host.currentNode = host.root;
         host.fen = fullFen;
         host.tags = updateFenTag(host.tags, fullFen);
-        host.haveFEN = fullFen !== DEFAULT_FEN;
         host.selectedPiece = null;
         host.markedPos = null;
         if (!host.isFenMode) {
