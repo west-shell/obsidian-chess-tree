@@ -62,6 +62,7 @@ const ActionsModule = {
         plugin: host.plugin,
         games: host.games,
         currentGameIndex: host.currentGameIndex,
+        isBlockMode: !isFileHost(host),
       };
     }
 
@@ -219,6 +220,7 @@ const ActionsModule = {
     });
 
     eventBus.on("create-game", () => {
+      if (!isFileHost(host)) return;
       const newSlot: GameSlot = {
         raw: "",
         headers: new Map(),
@@ -230,6 +232,7 @@ const ActionsModule = {
     });
 
     eventBus.on("delete-game", async () => {
+      if (!isFileHost(host)) return;
       if (host.games.length <= 1) return;
       const modal = new ConfirmModal(
         host.plugin.app,
@@ -249,6 +252,7 @@ const ActionsModule = {
     });
 
     eventBus.on<number>("move-game", (direction) => {
+      if (!isFileHost(host)) return;
       if (!direction) return;
       const idx = host.currentGameIndex;
       const targetIdx = idx + direction;
@@ -601,7 +605,7 @@ const ActionsModule = {
       stringifyPGN(root, includeEval);
 
     eventBus.on("import", () => {
-      const modal = new ImportModal(host.plugin.app, host);
+      const modal = new ImportModal(host.plugin.app, host, !isFileHost(host));
       modal.open();
     });
 

@@ -63,6 +63,7 @@
     plugin?: ChessPlugin;
     games?: GameSlot[];
     currentGameIndex?: number;
+    isBlockMode?: boolean;
   }
 
   let {
@@ -79,6 +80,7 @@
     plugin,
     games = [],
     currentGameIndex = 0,
+    isBlockMode = false,
   }: Props = $props();
 
   let lastMove: [Square, Square] | null = $derived(
@@ -236,6 +238,7 @@
       {settings}
       {games}
       {currentGameIndex}
+      {isBlockMode}
     />
   </div>
 {/if}
