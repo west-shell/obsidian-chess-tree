@@ -26,19 +26,7 @@ Open `.pgn` files directly in Obsidian — the plugin registers a dedicated `.pg
 - **Custom File Types**: Set specific file types as PGN files
 - **Context Menu**: Right-click PGN files to switch between PGN view and Markdown view
 
-> **Note**: `.pgn` files only support single games. For multi-game PGN files, use AI to add code block markers and convert to Markdown format:
->
-> ````markdown
-> ```chess
-> [Event "Game 1"]
-> 1. e4 e5 2. Nf3 Nc6 1-0
-> ```
->
-> ```chess
-> [Event "Game 2"]
-> 1. d4 d5 2. c4 e6 1/2-1/2
-> ```
-> ````
+- **Multi-Game Support**: Navigate between multiple games within a single `.pgn` file using the game navigation bar; create, delete, and reorder games
 
 ![PGN File](./IMAGE/PGN.png)
 
