@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { EventBus } from "../../core/event-bus";
   import { onLangChange, t } from "../../i18n";
+  import { buildFullFen, HAS_CASTLING, HAS_EN_PASSANT } from "../../chess";
   import { onMount } from "svelte";
 
   interface Props {
@@ -13,7 +14,6 @@
   let _lv = $state(0);
   onLangChange(() => _lv++);
 
-  // 从完整 FEN 解析一次作为本地状态初始值
   function parseFen(fen: string) {
     const parts = fen.split(" ");
     return {
@@ -23,13 +23,15 @@
     };
   }
 
-  // svelte-ignore state_referenced_locally
-  const initial = parseFen(fen);
-  let _turn = $state(initial.turn);
-  let _castling = $state(initial.castling);
-  let _enPassant = $state(initial.enPassant);
+  let _turn = $state("w");
+  let _castling = $state("-");
+  let _enPassant = $state("-");
 
-  let validCastling = $derived(computeValidCastlingRights(boardPart(fen)));
+  let validCastling = $derived(
+    HAS_CASTLING
+      ? computeValidCastlingRights(boardPart(fen))
+      : { K: false, Q: false, k: false, q: false },
+  );
 
   let hasCastling = $derived({
     K: _castling.includes("K") && validCastling.K,
@@ -71,11 +73,9 @@
 
   function buttonClick(action: string) {
     if (action === "save") {
-      eventBus.emit("saveFen", {
-        turn: _turn,
-        castling: _castling,
-        enPassant: _enPassant,
-      });
+      const bp = boardPart(fen);
+      const fullFen = buildFullFen(bp, _turn, _castling, _enPassant);
+      eventBus.emit("btn-click", { name: "save", payload: fullFen });
       return;
     }
     eventBus.emit("btn-click", { name: action });
@@ -173,18 +173,26 @@
   }
 
   onMount(() => {
+    const parsed = parseFen(fen);
+    _turn = parsed.turn;
+    _castling = parsed.castling;
+    _enPassant = parsed.enPassant;
     const bp = boardPart(fen);
-    syncCastlingFromBoard(bp);
-    enPassantFiles = computeEnPassantFilesFor(bp, _turn);
-    validateEnPassant();
+    if (HAS_CASTLING) syncCastlingFromBoard(bp);
+    if (HAS_EN_PASSANT) {
+      enPassantFiles = computeEnPassantFilesFor(bp, _turn);
+      validateEnPassant();
+    }
     eventBus.on<string>("updateUI", (fenStr) => {
       const currentFen = fenStr || fen;
       const currentBp = boardPart(currentFen);
       const parsed = parseFen(currentFen);
       _turn = parsed.turn;
-      syncCastlingFromBoard(currentBp);
-      enPassantFiles = computeEnPassantFilesFor(currentBp, _turn);
-      validateEnPassant();
+      if (HAS_CASTLING) syncCastlingFromBoard(currentBp);
+      if (HAS_EN_PASSANT) {
+        enPassantFiles = computeEnPassantFilesFor(currentBp, _turn);
+        validateEnPassant();
+      }
     });
   });
 </script>
@@ -201,86 +209,90 @@
       >
     </div>
 
-    <div class="tool-section">
-      <span class="section-label">{t("genfen.castling", _lv)}</span>
-      <div class="castling-row">
-        <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
-        <label
-          class="castling-checkbox"
-          class:active={hasCastling.q}
-          class:invalid={!validCastling.q}
-        >
-          <input
-            type="checkbox"
-            checked={hasCastling.q}
-            disabled={!validCastling.q}
-            onchange={() => toggleCastling("q")}
-          />
-          <span>q</span>
-        </label>
-        <label
-          class="castling-checkbox"
-          class:active={hasCastling.k}
-          class:invalid={!validCastling.k}
-        >
-          <input
-            type="checkbox"
-            checked={hasCastling.k}
-            disabled={!validCastling.k}
-            onchange={() => toggleCastling("k")}
-          />
-          <span>k</span>
-        </label>
+    {#if HAS_CASTLING}
+      <div class="tool-section">
+        <span class="section-label">{t("genfen.castling", _lv)}</span>
+        <div class="castling-row">
+          <span class="castling-color">{t("genfen.castling_black", _lv)}</span>
+          <label
+            class="castling-checkbox"
+            class:active={hasCastling.q}
+            class:invalid={!validCastling.q}
+          >
+            <input
+              type="checkbox"
+              checked={hasCastling.q}
+              disabled={!validCastling.q}
+              onchange={() => toggleCastling("q")}
+            />
+            <span>q</span>
+          </label>
+          <label
+            class="castling-checkbox"
+            class:active={hasCastling.k}
+            class:invalid={!validCastling.k}
+          >
+            <input
+              type="checkbox"
+              checked={hasCastling.k}
+              disabled={!validCastling.k}
+              onchange={() => toggleCastling("k")}
+            />
+            <span>k</span>
+          </label>
+        </div>
+        <div class="castling-row">
+          <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
+          <label
+            class="castling-checkbox"
+            class:active={hasCastling.Q}
+            class:invalid={!validCastling.Q}
+          >
+            <input
+              type="checkbox"
+              checked={hasCastling.Q}
+              disabled={!validCastling.Q}
+              onchange={() => toggleCastling("Q")}
+            />
+            <span>Q</span>
+          </label>
+          <label
+            class="castling-checkbox"
+            class:active={hasCastling.K}
+            class:invalid={!validCastling.K}
+          >
+            <input
+              type="checkbox"
+              checked={hasCastling.K}
+              disabled={!validCastling.K}
+              onchange={() => toggleCastling("K")}
+            />
+            <span>K</span>
+          </label>
+        </div>
       </div>
-      <div class="castling-row">
-        <span class="castling-color">{t("genfen.castling_white", _lv)}</span>
-        <label
-          class="castling-checkbox"
-          class:active={hasCastling.Q}
-          class:invalid={!validCastling.Q}
-        >
-          <input
-            type="checkbox"
-            checked={hasCastling.Q}
-            disabled={!validCastling.Q}
-            onchange={() => toggleCastling("Q")}
-          />
-          <span>Q</span>
-        </label>
-        <label
-          class="castling-checkbox"
-          class:active={hasCastling.K}
-          class:invalid={!validCastling.K}
-        >
-          <input
-            type="checkbox"
-            checked={hasCastling.K}
-            disabled={!validCastling.K}
-            onchange={() => toggleCastling("K")}
-          />
-          <span>K</span>
-        </label>
-      </div>
-    </div>
+    {/if}
 
-    <div class="tool-section">
-      <label class="section-label" for="genfen-ep"
-        >{t("genfen.enpassant", _lv)}</label
-      >
-      <select
-        id="genfen-ep"
-        class="fen-select"
-        value={_enPassant === "-" ? "-" : _enPassant[0]}
-        onfocus={() =>
-          (enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn))}
-        onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
-      >
-        <option value="-">{t("genfen.enpassant_off", _lv)}</option>
-        {#each enPassantFiles as f (f)}
-          <option value={f}>{f}{_turn === "w" ? "6" : "3"}</option>
-        {/each}
-      </select>
-    </div>
+    {#if HAS_EN_PASSANT}
+      <div class="tool-section">
+        <label class="section-label" for="genfen-ep"
+          >{t("genfen.enpassant", _lv)}</label
+        >
+        <select
+          id="genfen-ep"
+          class="fen-select"
+          value={_enPassant === "-" ? "-" : _enPassant[0]}
+          onfocus={() =>
+            (enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn))}
+          onchange={(e) => setEnPassant((e.target as HTMLSelectElement).value)}
+        >
+          <option value="-">{t("genfen.enpassant_off", _lv)}</option>
+          {#each enPassantFiles as f (f)}
+            <option value={f}>{f}{_turn === "w" ? "6" : "3"}</option>
+          {/each}
+        </select>
+      </div>
+    {/if}
   </div>
 
   <div class="tool-section tool-buttons">

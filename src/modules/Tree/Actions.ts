@@ -1,5 +1,14 @@
 import { type Move, type Piece } from "../../chess";
 import {
+  buildDefaultEditFen,
+  DEFAULT_FEN,
+  EMPTY_FEN,
+  getSaveNotation,
+  isMoveCheckmate,
+  matchMove,
+  PRIMARY_PLAYER_KEY,
+} from "../../chess";
+import {
   ANNOTATION_PREFIX,
   isAnnotationKey,
   SHAPES_PREFIX,
@@ -16,7 +25,6 @@ import type {
   IFileHost,
   IHost,
 } from "../../types";
-import { DEFAULT_FEN } from "../../types";
 import {
   ConfirmModal,
   ExportModal,
@@ -106,9 +114,8 @@ const ActionsModule = {
         return;
       }
 
-      // 先向上遍历收集祖先节点（包括当前节点）
       const ancestors: string[] = [];
-      let node: ChessNode | null = currentNode; // 明确允许 null
+      let node: ChessNode | null = currentNode;
       while (node) {
         ancestors.push(node.id);
         if (node.parentID) {
@@ -118,9 +125,8 @@ const ActionsModule = {
           node = null;
         }
       }
-      ancestors.reverse(); // 反转为根到当前节点顺序
+      ancestors.reverse();
 
-      // 向下遍历主线子节点（跳过当前节点）
       const descendants: string[] = [];
       node = currentNode.children?.[0] || null;
       while (node) {
@@ -128,20 +134,13 @@ const ActionsModule = {
         node = node.children?.[0] || null;
       }
 
-      // 合并路径
       host.currentPath = [...ancestors, ...descendants];
     });
     eventBus.on<Move>("runmove", (move) => {
       if (!move) return;
-      const { from, to } = move;
       const currentNode = host.currentNode;
       for (let node of currentNode.children) {
-        if (
-          node.move &&
-          node.move.from === from &&
-          node.move.to === to &&
-          node.move.promotion === move.promotion
-        ) {
+        if (node.move && matchMove(node.move, move)) {
           host.currentNode = node;
           host.fen = node.fen;
           emitNodeEval(host);
@@ -155,11 +154,11 @@ const ActionsModule = {
         fen: move.after,
         move,
         step: host.currentStep,
-        side: move.color === "b" ? "black" : "white",
+        side: move.color === "w" ? "black" : "white",
         parentID: host.currentNode.id,
         children: [],
         comments: [],
-        isCheckmate: move.san?.endsWith("#") ?? false,
+        isCheckmate: isMoveCheckmate(move),
       };
       host.nodeMap.set(newNode.id, newNode);
       host.currentNode.children.push(newNode);
@@ -416,7 +415,7 @@ const ActionsModule = {
               "Site",
               "Date",
               "Round",
-              "White",
+              PRIMARY_PLAYER_KEY,
               "Black",
               "Result",
             ];
@@ -485,41 +484,25 @@ const ActionsModule = {
           }
           case "save": {
             if (host.editing) {
-              if (host.isFenMode) {
-                const boardPart = host.fen.split(" ")[0];
-                const parts = host.fen.split(" ");
-                const turn = parts[1] || "w";
-                const castling = parts[2] || "-";
-                const enPassant = parts[3] || "-";
-                const fullFen = `${boardPart} ${turn} ${castling} ${enPassant} 0 1`;
-                host.root.children = [];
-                host.root.comments = [];
-                host.root.fen = fullFen;
-                host.nodeMap.clear();
-                host.nodeMap.set(host.root.id, host.root);
-                host.currentNode = host.root;
-                host.fen = fullFen;
-                host.tags = updateFenTag(host.tags, fullFen);
-                host.selectedPiece = null;
-                host.markedPos = null;
-                eventBus.emit("updateUI");
-                eventBus.emit("save");
-                break;
-              }
-              const boardPart = host.fen.split(" ")[0];
-              const fullFen = `${boardPart} w KQkq - 0 1`;
+              const fen = data
+                ? data
+                : host.isFenMode
+                  ? host.fen
+                  : buildDefaultEditFen(host.fen.split(" ")[0]);
               host.root.children = [];
               host.root.comments = [];
-              host.root.fen = fullFen;
+              host.root.fen = fen;
               host.nodeMap.clear();
               host.nodeMap.set(host.root.id, host.root);
               host.currentNode = host.root;
-              host.fen = fullFen;
-              host.tags = updateFenTag(host.tags, fullFen);
-              host.editing = false;
+              host.fen = fen;
+              host.tags = updateFenTag(host.tags, fen);
+              if (!host.isFenMode) {
+                host.editing = false;
+                eventBus.emit("updateMainPath");
+              }
               host.selectedPiece = null;
               host.markedPos = null;
-              eventBus.emit("updateMainPath");
               eventBus.emit("updateUI");
               eventBus.emit("save");
               break;
@@ -529,7 +512,7 @@ const ActionsModule = {
           }
           case "empty": {
             if (!host.editing) break;
-            host.fen = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
+            host.fen = EMPTY_FEN;
             host.selectedPiece = null;
             break;
           }
@@ -581,32 +564,6 @@ const ActionsModule = {
       eventBus.emit("updateUI");
     });
 
-    eventBus.on<{ turn: string; castling: string; enPassant: string }>(
-      "saveFen",
-      (meta) => {
-        if (!meta || !host.editing) return;
-        const boardPart = host.fen.split(" ")[0];
-        const fullFen = `${boardPart} ${meta.turn} ${meta.castling} ${meta.enPassant} 0 1`;
-
-        host.root.children = [];
-        host.root.comments = [];
-        host.root.fen = fullFen;
-        host.nodeMap.clear();
-        host.nodeMap.set(host.root.id, host.root);
-        host.currentNode = host.root;
-        host.fen = fullFen;
-        host.tags = updateFenTag(host.tags, fullFen);
-        host.selectedPiece = null;
-        host.markedPos = null;
-        if (!host.isFenMode) {
-          host.editing = false;
-          eventBus.emit("updateMainPath");
-        }
-        eventBus.emit("updateUI");
-        eventBus.emit("save");
-      },
-    );
-
     host.stringifyPGN = (root: ChessNode, includeEval = true) =>
       stringifyPGN(root, includeEval);
 
@@ -637,7 +594,6 @@ const ActionsModule = {
         const { contentEl } = engineModal;
         contentEl.createEl("h3", { text: t("engine.title") });
 
-        // Depth
         contentEl.createEl("label", { text: t("engine.depth") });
         const depthSlider = contentEl.createEl("input", { type: "range" });
         depthSlider.setAttribute("min", "1");
@@ -653,7 +609,6 @@ const ActionsModule = {
           depthLabel.textContent = String(depthValue);
         });
 
-        // Skill Level
         contentEl.createEl("label", { text: t("engine.skillLevel") });
         const skillSlider = contentEl.createEl("input", { type: "range" });
         skillSlider.setAttribute("min", "0");
@@ -669,7 +624,6 @@ const ActionsModule = {
           skillLabel.textContent = String(skillValue);
         });
 
-        // Show best move
         const bmContainer = contentEl.createDiv("engine-setting-toggle");
         const bmToggle = bmContainer.createEl("input", { type: "checkbox" });
         bmToggle.checked = showBestMove;
@@ -678,7 +632,6 @@ const ActionsModule = {
           showBestMove = bmToggle.checked;
         });
 
-        // Show ponder
         const ponderContainer = contentEl.createDiv("engine-setting-toggle");
         const ponderToggle = ponderContainer.createEl("input", {
           type: "checkbox",
@@ -689,7 +642,6 @@ const ActionsModule = {
           showPonder = ponderToggle.checked;
         });
 
-        // Show move annotations
         const annContainer = contentEl.createDiv("engine-setting-toggle");
         const annToggle = annContainer.createEl("input", { type: "checkbox" });
         annToggle.checked = showAnnotations;
@@ -700,7 +652,6 @@ const ActionsModule = {
           showAnnotations = annToggle.checked;
         });
 
-        // Buttons
         const btnContainer = contentEl.createDiv("modal-button-container");
         const okBtn = btnContainer.createEl("button", {
           text: t("confirm.yes"),
@@ -761,10 +712,11 @@ function stringifyPGN(root: ChessNode, includeEval = true): string {
 
   function walk(node: ChessNode, stepNum: number): string {
     let result = "";
+    const notation = getSaveNotation(node.move!);
     if (node.side === "white") {
-      result += `${stepNum}. ${node.move!.san}`;
+      result += `${stepNum}. ${notation}`;
     } else if (node.side === "black") {
-      result += `${node.move!.san}`;
+      result += `${notation}`;
     }
     if (node.comments?.length) {
       for (const c of node.comments) result += `{${c}}`;
@@ -853,13 +805,14 @@ function stringifyCurrentBranchPGN(
   let stepNum = 1;
   for (let i = 1; i < pathIds.length; i++) {
     const node = host.nodeMap.get(pathIds[i])!;
+    const notation = getSaveNotation(node.move!);
     if (node.side === "white") {
-      result += `${stepNum}. ${node.move!.san}`;
+      result += `${stepNum}. ${notation}`;
     } else if (node.side === "black") {
       if (i === 1) {
-        result += `${stepNum}... ${node.move!.san}`;
+        result += `${stepNum}... ${notation}`;
       } else {
-        result += ` ${node.move!.san}`;
+        result += ` ${notation}`;
       }
       stepNum++;
     }

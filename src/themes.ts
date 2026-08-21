@@ -1,6 +1,7 @@
 import type { ISettings } from "./types";
+import { applyThemeCSSVars, type ThemeData } from "./chess";
 
-const themes: Record<string, { bg: string; white: string; black: string }> = {
+const themes: Record<string, ThemeData> = {
   wood: { bg: "#f0d9b5", white: "#fff", black: "#b58863" },
   green: { bg: "#769656", white: "#eee", black: "#425232" },
   blue: { bg: "#6a9fb5", white: "#f5f5f5", black: "#3a6b8c" },
@@ -13,34 +14,6 @@ export type ThemeName = keyof typeof themes;
 export const THEME_KEYS = Object.keys(themes);
 
 export function applyThemes(settings: ISettings) {
-  const {
-    theme,
-    zoom,
-    boardMarginTop,
-    boardMarginBottom,
-    showCoordinateLabels,
-  } = settings;
-  const t = themes[theme] ?? themes.wood;
-
-  const boardScale = (zoom / 100) * 0.75 + 0.25;
-  activeDocument.body.style.setProperty("--chess-board-scale", `${boardScale}`);
-  activeDocument.body.style.setProperty(
-    "--chess-font-size",
-    `${settings.fontSize}px`,
-  );
-  activeDocument.body.style.setProperty("--chess-board-bg", t.bg);
-  activeDocument.body.style.setProperty("--chess-piece-white", t.white);
-  activeDocument.body.style.setProperty("--chess-piece-black", t.black);
-  activeDocument.body.style.setProperty(
-    "--chess-board-margin-top",
-    `${boardMarginTop}px`,
-  );
-  activeDocument.body.style.setProperty(
-    "--chess-board-margin-bottom",
-    `${boardMarginBottom}px`,
-  );
-  activeDocument.body.style.setProperty(
-    "--chess-coords-display",
-    showCoordinateLabels ? "flex" : "none",
-  );
+  const t = themes[settings.theme] ?? themes.wood;
+  applyThemeCSSVars(settings, t);
 }

@@ -6,6 +6,7 @@
   import Toolbar from "./Toolbar.svelte";
   import { onDestroy, onMount } from "svelte";
   import type { Piece } from "../../chess";
+  import { LAYOUT_CLASS, LAYOUT_CLASS_GENFEN } from "../../chess";
 
   interface Props {
     settings: ISettings;
@@ -18,8 +19,9 @@
 
   let flipped = $state(false);
 
-  function onBtnClick(action: string | { action: string; fen?: string }) {
-    if (typeof action === "string" && action === "flip") {
+  function onBtnClick(action: { name: string; payload?: unknown } | null) {
+    if (!action) return;
+    if (action.name === "flip") {
       flipped = !flipped;
     }
   }
@@ -32,7 +34,7 @@
   });
 </script>
 
-<div class="chess-layout chess-layout--genfen">
+<div class="{LAYOUT_CLASS} {LAYOUT_CLASS_GENFEN}">
   <Board {settings} {fen} {eventBus} rotated={flipped} freeMode={true} />
   <PieceBTNs {fen} {eventBus} {selectedPiece} />
   <Toolbar {eventBus} {fen} />

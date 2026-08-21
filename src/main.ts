@@ -1,8 +1,4 @@
-import "chessground/assets/chessground.base.css";
-import "chessground/assets/chessground.brown.css";
-import "chessground/assets/chessground.cburnett.css";
-import "./style/layout.scss";
-import "./style/settings.css";
+import "./css-imports";
 
 import { MarkdownView, Plugin, TFile } from "obsidian";
 
@@ -12,6 +8,12 @@ import { ChessSettingTab, DEFAULT_SETTINGS } from "./settings";
 import { applyThemes } from "./themes";
 import type { ISettings } from "./types";
 import { PGNView } from "./view/PGNView";
+import {
+  DEFAULT_FILENAME,
+  LAYOUT_CHANGE_EVENT,
+  RIBBON_ICON,
+  ZOOM_CHANGE_EVENT,
+} from "./chess";
 
 export default class ChessPlugin extends Plugin {
   settings: ISettings = DEFAULT_SETTINGS;
@@ -34,8 +36,8 @@ export default class ChessPlugin extends Plugin {
         PGNView.VIEW_TYPE,
       );
 
-      this.addRibbonIcon("chess-knight", t("pgn.newFile"), async () => {
-        let baseFileName = "Untitled";
+      this.addRibbonIcon(RIBBON_ICON, t("pgn.newFile"), async () => {
+        let baseFileName = DEFAULT_FILENAME;
         let fileExtension = `.${this.settings.pgnFileExtensions[0] ?? "pgn"}`;
         let fileName = baseFileName + fileExtension;
         let counter = 0;
@@ -78,7 +80,7 @@ export default class ChessPlugin extends Plugin {
             menu.addItem((item) =>
               item
                 .setTitle(t("menu.pgn"))
-                .setIcon("chess-knight")
+                .setIcon(RIBBON_ICON)
                 .onClick(() => this.changeView(file, PGNView.VIEW_TYPE)),
             );
           }
@@ -88,9 +90,7 @@ export default class ChessPlugin extends Plugin {
 
     this.registerEvent(
       this.app.workspace.on("resize", () => {
-        activeDocument.body.dispatchEvent(
-          new CustomEvent("chess-layout-change"),
-        );
+        activeDocument.body.dispatchEvent(new CustomEvent(LAYOUT_CHANGE_EVENT));
       }),
     );
 
@@ -104,12 +104,9 @@ export default class ChessPlugin extends Plugin {
       this.settings.zoom = (e as CustomEvent<number>).detail;
       void this.saveSettings();
     };
-    activeDocument.body.addEventListener("chess-zoom-changed", onZoomChanged);
+    activeDocument.body.addEventListener(ZOOM_CHANGE_EVENT, onZoomChanged);
     this.register(() => {
-      activeDocument.body.removeEventListener(
-        "chess-zoom-changed",
-        onZoomChanged,
-      );
+      activeDocument.body.removeEventListener(ZOOM_CHANGE_EVENT, onZoomChanged);
     });
   }
 

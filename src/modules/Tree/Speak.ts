@@ -4,6 +4,7 @@ import {
 } from "../../core/module-system";
 import { getLang, t } from "../../i18n";
 import type { Move } from "../../chess";
+import { getMoveNotation } from "../../chess";
 import type { IHost } from "../../types";
 
 const PIECE_SPEECH_KEYS: Record<string, string> = {
@@ -40,7 +41,7 @@ const FILE_SPEECH: Record<string, string> = {
 };
 
 function speak(move: Move) {
-  const { san } = move;
+  const san = getMoveNotation(move);
   if (!san) return;
   const isZh = getLang() === "zh";
   const preprocessed = isZh

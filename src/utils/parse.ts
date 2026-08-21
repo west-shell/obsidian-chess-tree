@@ -1,7 +1,7 @@
 import { Chess, type Move } from "../chess";
+import { DEFAULT_FEN, FEN_REGEX, parseExternalUrl } from "../chess";
 import { PGNParser } from "../modules/Source/parser";
 import {
-  DEFAULT_FEN,
   type GameSlot,
   type IHost,
   type IOptions,
@@ -19,18 +19,14 @@ export function parseSource(source: string): {
   firstTurn: ITurn;
   options: IOptions;
 } {
-  const options = parseOption(source);
+  const resolved = parseExternalUrl(source) ?? source;
+  const options = parseOption(resolved);
 
-  // try to find FEN in source
-  let fen =
-    source.match(
-      /([rnbqkpRNBQKP1-8]+\/){7}[rnbqkpRNBQKP1-8]+(?:\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)/,
-    )?.[0] ?? DEFAULT_FEN;
+  let fen = resolved.match(FEN_REGEX)?.[0] ?? DEFAULT_FEN;
 
   const firstTurn: ITurn = fen.split(" ")[1] === "b" ? "black" : "white";
 
-  // parse SAN moves from source using chess.js
-  const sanStrings = extractSANMoves(source);
+  const sanStrings = extractSANMoves(resolved);
   const chess = new Chess(fen);
   const PGN: Move[] = [];
 
@@ -52,25 +48,18 @@ export function parseSource(source: string): {
   };
 }
 
-// --- SAN move extraction ---
-
 function extractSANMoves(source: string): string[] {
-  // Remove FEN and options lines
   const clean = source
     .replace(/[rnbqkpRNBQKP1-8/]+\s+[wb].*/g, "")
     .replace(/^[pr]\s*[:：].*/gim, "");
 
-  // Match SAN moves: O-O, O-O-O, Nf3, exd5, e8=Q, etc.
   const movePattern =
     /\b(O-O(?:-O)?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)\b/g;
   const matches = clean.match(movePattern);
   if (!matches) return [];
 
-  // Filter move numbers like "1." "2."
   return matches.filter((m) => !/^\d+\.?$/.test(m));
 }
-
-// --- options parsing ---
 
 export function parseOption(source: string): IOptions {
   const options: IOptions = {};

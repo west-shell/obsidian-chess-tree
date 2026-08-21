@@ -9,6 +9,7 @@ import {
   // type SettingGroupItem,
 } from "obsidian";
 
+import { DEFAULT_FEN_BLOCK_NAMES, DEFAULT_TREE_BLOCK_NAMES } from "./chess";
 import { initI18n, t } from "./i18n";
 import type ChessPlugin from "./main";
 import { THEME_KEYS } from "./themes";
@@ -53,8 +54,8 @@ export const DEFAULT_SETTINGS: ISettings = {
   boardMarginBottom: 20,
   viewOnly: false,
   rotated: false,
-  treeBlockNames: ["chess", "tree"],
-  fenBlockNames: ["fen"],
+  treeBlockNames: DEFAULT_TREE_BLOCK_NAMES,
+  fenBlockNames: DEFAULT_FEN_BLOCK_NAMES,
   fenSaveBlockName: "tree",
   enablePGNView: true,
   pgnFileExtensions: ["pgn"],

@@ -13,6 +13,7 @@ import {
   destroyFileModuleRegistry,
 } from "../core/module-system";
 import type ChessPlugin from "../main";
+import { RIBBON_ICON } from "../chess";
 import type { ISettings } from "../types";
 
 export class PGNView extends TextFileView {
@@ -101,7 +102,7 @@ export class PGNView extends TextFileView {
   }
 
   getIcon() {
-    return "chess-knight";
+    return RIBBON_ICON;
   }
 
   clear(): void {

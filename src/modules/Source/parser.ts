@@ -1,5 +1,14 @@
 import { Chess, type Move } from "../../chess";
-import { type ChessNode, DEFAULT_FEN, type NodeShape } from "../../types";
+import {
+  DEFAULT_FEN,
+  EVAL_REGEX,
+  isMoveCheckmate,
+  type MoveTokenType,
+  parseMoveInGame,
+  PRIMARY_MOVE_TOKEN_TYPES,
+  SHAPE_PART_REGEX,
+} from "../../chess";
+import { type ChessNode, type NodeShape } from "../../types";
 import {
   ANNOTATION_PREFIX,
   isAnnotationKey,
@@ -48,8 +57,11 @@ export class PGNParser {
     while (!this.match("eof")) {
       if (this.match("tag")) {
         this.parseTag();
-      } else if (this.match("san-move")) {
-        this.processSAN(this.consume().value);
+      } else if (this.isMoveToken()) {
+        this.processMove(
+          this.consume().value,
+          this.tokens[this.currentIndex - 1].type as MoveTokenType,
+        );
       } else if (this.match("left-paren")) {
         this.parseVariation();
       } else if (this.match("comment")) {
@@ -60,6 +72,11 @@ export class PGNParser {
         this.consume();
       }
     }
+  }
+
+  isMoveToken(): boolean {
+    const type = this.peek().type;
+    return (PRIMARY_MOVE_TOKEN_TYPES as readonly string[]).includes(type);
   }
 
   parseTag() {
@@ -78,7 +95,7 @@ export class PGNParser {
         this.rootNode.fen = tagValue;
         this.haveFEN = true;
       } catch {
-        // skip invalid moves  // invalid FEN, ignore — rootNode.fen stays DEFAULT_FEN, haveFEN stays false
+        // invalid FEN, keep default
       }
     }
   }
@@ -94,7 +111,7 @@ export class PGNParser {
       parentID: this.currentNode.id,
       children: [],
       comments: [],
-      isCheckmate: move.san?.endsWith("#") ?? false,
+      isCheckmate: isMoveCheckmate(move),
     };
     this.nodeMap.set(node.id, node);
     return node;
@@ -112,11 +129,11 @@ export class PGNParser {
     return this.peek().type === type;
   }
 
-  processSAN(san: string) {
+  processMove(token: string, tokenType: MoveTokenType) {
     const fen = this.currentNode.fen;
     this.chess.load(fen);
     try {
-      const move = this.chess.move(san);
+      const move = parseMoveInGame(this.chess, token, tokenType);
       if (!move) return;
 
       const newNode = this.createNode(move, this.chess.fen());
@@ -125,16 +142,15 @@ export class PGNParser {
       this.currentStep++;
       this.currentSide = move.color === "w" ? "white" : "black";
     } catch {
-      // skip invalid moves
+      // invalid move, skip
     }
   }
 
   parseVariation() {
-    this.consume(); // consume '('
+    this.consume();
 
     const variationParentID = this.currentNode.parentID;
     if (!variationParentID) {
-      // skip
       while (!this.match("right-paren") && !this.match("eof")) {
         this.consume();
       }
@@ -153,8 +169,11 @@ export class PGNParser {
     this.currentSide = variationBase.side;
 
     while (!this.match("right-paren") && !this.match("eof")) {
-      if (this.match("san-move")) {
-        this.processSANVariation(this.consume().value);
+      if (this.isMoveToken()) {
+        this.processMove(
+          this.consume().value,
+          this.tokens[this.currentIndex - 1].type as MoveTokenType,
+        );
       } else if (this.match("comment")) {
         this.parseComment();
       } else if (this.match("left-paren")) {
@@ -180,50 +199,29 @@ export class PGNParser {
     this.currentSide = prevState.side;
   }
 
-  processSANVariation(san: string) {
-    const fen = this.currentNode.fen;
-    this.chess.load(fen);
-    try {
-      const move = this.chess.move(san);
-      if (!move) return;
-
-      const newNode = this.createNode(move, this.chess.fen());
-      this.currentNode.children.push(newNode);
-      this.currentNode = newNode;
-      this.currentStep++;
-    } catch {
-      // skip invalid moves
-    }
-  }
-
   parseComment() {
     const token = this.consume();
     const raw = token.value.replace(/^{|}$/g, "").replace(/^;/, "").trim();
 
-    const newFormatMatch = raw.match(
-      /^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,(!\?|\?!|\?\?|[?!]|!!))?$/,
-    );
-    if (newFormatMatch) {
-      const evalStr = newFormatMatch[1];
+    const evalMatch = raw.match(EVAL_REGEX);
+    if (evalMatch) {
+      const evalStr = evalMatch[1];
+      const bestmove = evalMatch[2] || undefined;
+      const ponder = evalMatch[3] || undefined;
+      const glyphSymbol = evalMatch[4] || undefined;
+      let scoreType: "cp" | "mate" = "cp";
+      let score: number;
       if (evalStr.startsWith("m")) {
+        scoreType = "mate";
         const mateStr = evalStr.slice(1);
         const isNeg = mateStr.startsWith("-");
         const mateVal = Number.parseInt(mateStr.replace(/[^0-9]/g, ""));
-        this.currentNode.eval = {
-          score: isNeg ? -mateVal : mateVal,
-          scoreType: "mate",
-          depth: 0,
-        };
+        score = isNeg ? -mateVal : mateVal;
       } else {
-        this.currentNode.eval = {
-          score: Math.round(Number.parseFloat(evalStr) * 100),
-          scoreType: "cp",
-          depth: 0,
-        };
+        score = Math.round(Number.parseFloat(evalStr) * 100);
       }
-      if (newFormatMatch[2]) this.currentNode.eval.bestmove = newFormatMatch[2];
-      if (newFormatMatch[3]) this.currentNode.eval.ponder = newFormatMatch[3];
-      if (newFormatMatch[4]) {
+      this.currentNode.eval = { score, scoreType, depth: 0, bestmove, ponder };
+      if (glyphSymbol) {
         const GLYPH_DEFS: Record<
           string,
           { symbol: string; name: string; color: string }
@@ -235,7 +233,7 @@ export class PGNParser {
           "!!": { symbol: "!!", name: "Brilliant", color: "#168226" },
           "!?": { symbol: "!?", name: "Interesting", color: "#ea45d8" },
         };
-        const glyphDef = GLYPH_DEFS[newFormatMatch[4]];
+        const glyphDef = GLYPH_DEFS[glyphSymbol];
         if (glyphDef) this.currentNode.glyph = glyphDef;
       }
       return;
@@ -253,7 +251,7 @@ export class PGNParser {
       const shapesStr = raw.slice(SHAPES_PREFIX.length);
       const shapes: NodeShape[] = [];
       for (const part of shapesStr.split(",")) {
-        const m = part.match(/^([a-h][1-8])([a-h][1-8])?:([gryb])$/);
+        const m = part.match(SHAPE_PART_REGEX);
         if (m) shapes.push({ orig: m[1], dest: m[2], brush: m[3] });
       }
       if (shapes.length > 0) {

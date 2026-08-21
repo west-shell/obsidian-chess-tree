@@ -1,38 +1,33 @@
 import { registerBlockModule } from "../../core/module-system";
-import { DEFAULT_FEN, type IBlockHost, type ParsedGame } from "../../types";
+import {
+  DEFAULT_FEN,
+  FEN_REGEX,
+  getTurnFromFen,
+  parseExternalUrl,
+} from "../../chess";
+import { type IBlockHost, type ParsedGame } from "../../types";
 import { hasFenTag, parseOption } from "../../utils/parse";
 
 import { PGNParser } from "./parser";
 
-/**
- * Prepare source for PGNParser:
- * 1. Extract options (p/protected, r/rotated)
- * 2. Remove option lines from source
- * 3. Ensure FEN is in [FEN "..."] tag format
- * 4. Return cleaned source + options
- */
 function prepareSource(raw: string): {
   cleaned: string;
   options: ReturnType<typeof parseOption>;
 } {
-  const options = parseOption(raw);
+  const source = parseExternalUrl(raw) ?? raw;
+  const options = parseOption(source);
 
-  // Remove option lines (e.g. "p: true", "protected: true", "r: false")
-  let cleaned = raw.replace(
+  let cleaned = source.replace(
     /^(protected|P|rotated|R|r)\s*[:：]\s*(true|false)\s*$/gim,
     "",
   );
 
-  // If raw FEN exists without [FEN "..."] tag, wrap it
-  const fenMatch = cleaned.match(
-    /([rnbqkpRNBQKP1-8]+\/){7}[rnbqkpRNBQKP1-8]+(?:\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)/,
-  );
+  const fenMatch = cleaned.match(FEN_REGEX);
   const hasFENTag = /\[FEN\s+"/.test(cleaned);
   if (fenMatch && !hasFENTag) {
     cleaned = cleaned.replace(fenMatch[0], `[FEN "${fenMatch[0]}"]`);
   }
 
-  // Inject Protected/Rotated PGN tags if present in source
   const tags: string[] = [];
   if (options.protected !== undefined)
     tags.push(`[Protected "${options.protected}"]`);
@@ -45,11 +40,8 @@ function prepareSource(raw: string): {
   return { cleaned, options };
 }
 
-/** Extract fen string from source */
 function extractFEN(source: string): string {
-  const fen = source.match(
-    /([rnbqkpRNBQKP1-8]+\/){7}[rnbqkpRNBQKP1-8]+(?:\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)/,
-  )?.[0];
+  const fen = source.match(FEN_REGEX)?.[0];
   return fen ?? DEFAULT_FEN;
 }
 
@@ -77,8 +69,7 @@ const SourceModule = {
           host.currentGameIndex = 0;
           host.currentNode = host.nodeMap.get("node-root")!;
           host.fen = host.currentNode.fen;
-          host.currentTurn =
-            host.currentNode.move?.color === "b" ? "white" : "black";
+          host.currentTurn = getTurnFromFen(host.currentNode.fen);
           eventBus.emit("updateMainPath");
 
           const shouldJump =
@@ -102,7 +93,7 @@ const SourceModule = {
           host.nodeMap = host.parser.getMap();
           host.currentNode = host.nodeMap.get("node-root")!;
           host.currentNode.fen = fen;
-          host.currentTurn = fen.includes(" b ") ? "black" : "white";
+          host.currentTurn = getTurnFromFen(fen);
           host.tags = "";
           host.options = {};
           host.games = [];

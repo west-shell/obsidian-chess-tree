@@ -13,7 +13,17 @@
     NodeShape,
   } from "../../types";
   import type { EventBus } from "../../core/event-bus";
-  import type { cg, DrawShape, Move, Piece, Square } from "../../chess";
+  import {
+    type cg,
+    type DrawShape,
+    getMoveDest,
+    isMoveCheck,
+    LAYOUT_CLASS,
+    LAYOUT_CLASS_GENFEN,
+    type Move,
+    type Piece,
+    type Square,
+  } from "../../chess";
   import type ChessPlugin from "../../main";
   import { onMount, tick } from "svelte";
   import { annotationShapes } from "../../utils/glyphs";
@@ -86,7 +96,7 @@
   let lastMove: [Square, Square] | null = $derived(
     currentNode.move ? [currentNode.move.from, currentNode.move.to] : null,
   );
-  let rotated = $state((() => options.rotated ?? false)());
+  let rotated = $state((() => options?.rotated ?? false)());
   let mainVariation = $derived(
     currentNode.children.length > 0 && currentNode.children[0].move
       ? [currentNode.children[0].move]
@@ -105,17 +115,7 @@
     if (!settings.showMoveAnnotations) return [];
     const node = currentNode;
     const shapes: DrawShape[] = [];
-    const dest = node.move
-      ? node.move.san?.startsWith("O-O")
-        ? node.move.color === "w"
-          ? node.move.san.startsWith("O-O-O")
-            ? "c1"
-            : "g1"
-          : node.move.san.startsWith("O-O-O")
-            ? "c8"
-            : "g8"
-        : node.move.to
-      : undefined;
+    const dest = node.move ? getMoveDest(node.move) : undefined;
     if (node.glyph && dest) {
       const engineShapes = annotationShapes(dest, node.glyph);
       shapes.push(...engineShapes);
@@ -142,7 +142,7 @@
     return shapes;
   });
   let checkColor = $derived(
-    currentNode.move && /\+|#/.test(currentNode.move.san)
+    currentNode.move && isMoveCheck(currentNode.move)
       ? currentNode.move.color === "w"
         ? "black"
         : "white"
@@ -200,7 +200,7 @@
 </script>
 
 {#if editing}
-  <div class="chess-layout chess-layout--genfen">
+  <div class="{LAYOUT_CLASS} {LAYOUT_CLASS_GENFEN}">
     <Board
       {settings}
       {fen}
@@ -214,7 +214,7 @@
     <GenFENToolbar {eventBus} {fen} {isFenMode} />
   </div>
 {:else}
-  <div class="chess-layout">
+  <div class={LAYOUT_CLASS}>
     <Board
       {settings}
       {fen}

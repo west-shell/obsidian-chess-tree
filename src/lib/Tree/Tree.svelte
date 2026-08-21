@@ -8,6 +8,18 @@
     type ISettings,
     type NodeMap,
   } from "../../types";
+  import {
+    getMoveListSideClass,
+    getMoveNotation,
+    getNodeDisplay,
+    getNodeFill,
+    getNodeLabel,
+    getNodeTextColor,
+    getNodeWidth,
+    getStartLabel,
+    LAYOUT_CHANGE_EVENT,
+    PRIMARY_PLAYER_KEY,
+  } from "../../chess";
   import { Menu, setIcon } from "obsidian";
   import { onLangChange, t } from "../../i18n";
   import { calculateTreeLayout } from "./layout";
@@ -117,24 +129,6 @@
   const spacingY = 15;
   const nodeHeight = 11;
 
-  // Chess piece icon name lookup
-  const PIECE_ICONS: Record<string, string> = {
-    k: "chess_king",
-    q: "chess_queen",
-    r: "chess_rook",
-    b: "chess_bishop",
-    n: "chess_knight",
-    p: "chess_pawn",
-  };
-
-  function getPieceIcon(node: ChessNode): string | null {
-    if (!node.move) return null;
-    if (node.move.isKingsideCastle() || node.move.isQueensideCastle())
-      return "castle";
-    if (node.move.promotion) return "chevrons_up";
-    return PIECE_ICONS[node.move.piece] ?? null;
-  }
-
   // ---- 自动保存逻辑 ----
   let saveTimeout: number | undefined;
 
@@ -163,7 +157,7 @@
     }
     if (layoutChangeHandler) {
       activeDocument.body.removeEventListener(
-        "chess-layout-change",
+        LAYOUT_CHANGE_EVENT,
         layoutChangeHandler,
       );
       layoutChangeHandler = null;
@@ -492,7 +486,7 @@
     const slot = games![currentGameIndex ?? 0];
     if (!slot) return "";
     const h = slot.headers;
-    const white = h.get("White") || "?";
+    const white = h.get(PRIMARY_PLAYER_KEY) || "?";
     const black = h.get("Black") || "?";
     const event = h.get("Event") || "";
     const date = h.get("Date") || "";
@@ -522,7 +516,7 @@
     const menu = new Menu();
     games.forEach((slot, i) => {
       const h = slot.headers;
-      const white = h.get("White") || "?";
+      const white = h.get(PRIMARY_PLAYER_KEY) || "?";
       const black = h.get("Black") || "?";
       const event = h.get("Event") || "";
       const date = h.get("Date") || "";
@@ -580,8 +574,7 @@
   let nodeModeTitle = $derived(t("tree.nodeMode", _lv));
 
   function nodeLabel(node: ChessNode): string {
-    if (nodeMode === 1) return node.move?.san ?? "start";
-    return "";
+    return getNodeLabel(node.move, nodeMode);
   }
   function nodeFontSize(): string {
     if (nodeMode === 1) return "6px";
@@ -594,10 +587,9 @@
     ctx.font = `${fontSize} sans-serif`;
     return ctx.measureText(text).width;
   }
-  function getNodeWidth(node: ChessNode): number {
+  function localGetNodeWidth(node: ChessNode): number {
     if (nodeMode === 0) return 13;
-    const san = node.move?.san ?? "start";
-    return Math.max(13, Math.ceil(measureTextWidth(san, nodeFontSize())) + 4);
+    return getNodeWidth(node.move, nodeMode, measureTextWidth);
   }
   let modeIcon = $derived(MODE_ICONS[nodeMode]);
   function useSetIcon(el: HTMLElement, icon: string) {
@@ -720,7 +712,10 @@
   });
 </script>
 
-<div class="tree-container chess-layout__tools">
+<div
+  class="tree-container chess-layout__tools"
+  style="--chess-board-line: var(--chess-board-line, var(--text-muted));"
+>
   {#if showGameInfo}
     <div class="game-nav-bar">
       <div
@@ -838,7 +833,7 @@
           {#each renderedNodes as node (node.id)}
             {#if node.children.length > 1}
               {@const isLeft = (node.y ?? 0) % 2 === 0}
-              {@const nw = getNodeWidth(node)}
+              {@const nw = localGetNodeWidth(node)}
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <g
@@ -881,7 +876,7 @@
           {/each}
 
           {#each sortedRenderedNodes as node (node.id)}
-            {@const nw = getNodeWidth(node)}
+            {@const nw = localGetNodeWidth(node)}
             {@const primaryAnnotation = node.annotation}
             {@const isCurrent = node.id === currentNode?.id}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -906,11 +901,7 @@
                 height={nodeHeight}
                 rx="2.5"
                 ry="2.5"
-                fill={node.side === "white"
-                  ? "#fff"
-                  : node.side === "black"
-                    ? "#333"
-                    : "green"}
+                fill={getNodeFill(node.side)}
                 stroke={isCurrent
                   ? "var(--interactive-accent)"
                   : "var(--chess-board-line)"}
@@ -920,19 +911,37 @@
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                   {@html iconSvg("house", 8, 1.5)}
                 </g>
-              {:else if nodeMode === 0 && getPieceIcon(node)}
-                <g
-                  transform="translate(-4, -4)"
-                  color={node.side === "white" ? "#333" : "#fff"}
-                >
-                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                  {@html iconSvg(getPieceIcon(node)!, 8, 1.5)}
-                </g>
+              {:else if nodeMode === 0 && node.move}
+                {@const display = getNodeDisplay(node.move)}
+                {#if display && display.type === "icon"}
+                  <g
+                    transform="translate(-4, -4)"
+                    color={getNodeTextColor(node.side)}
+                  >
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html iconSvg(display.value, 8, 1.5)}
+                  </g>
+                {:else if display && display.type === "char"}
+                  <text
+                    dominant-baseline="central"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="9px"
+                    dy="3.5">{display.value}</text
+                  >
+                {:else}
+                  <text
+                    dominant-baseline="central"
+                    text-anchor="middle"
+                    fill={getNodeTextColor(node.side)}
+                    font-size={nodeFontSize()}>{nodeLabel(node)}</text
+                  >
+                {/if}
               {:else}
                 <text
                   dominant-baseline="central"
                   text-anchor="middle"
-                  fill={node.side === "white" ? "#333" : "#fff"}
+                  fill={getNodeTextColor(node.side)}
                   font-size={nodeFontSize()}>{nodeLabel(node)}</text
                 >
               {/if}
@@ -1131,7 +1140,7 @@
             class:active={listCurrentStep === 0}
             onclick={() => onClickStep(0)}
           >
-            = Start =
+            {getStartLabel()}
           </span>
         </li>
         {#each listMoves as move, i (i)}
@@ -1141,21 +1150,24 @@
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <span
-                class="move white"
+                class="move {getMoveListSideClass(move.side)}"
                 class:active={listCurrentStep === i + 1}
                 onclick={() => onClickStep(i + 1)}
               >
-                {move.move?.san ?? "..."}
+                {move.move ? getMoveNotation(move.move) : "..."}
               </span>
               {#if listMoves[i + 1]}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <span
-                  class="move black"
+                  class="move {getMoveListSideClass(listMoves[i + 1].side)}"
                   class:active={listCurrentStep === i + 2}
                   onclick={() => onClickStep(i + 2)}
                 >
-                  {listMoves[i + 1].move?.san ?? "..."}
+                  {(() => {
+                    const m = listMoves[i + 1].move;
+                    return m ? getMoveNotation(m) : "...";
+                  })()}
                 </span>
               {/if}
             </li>

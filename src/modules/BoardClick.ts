@@ -1,12 +1,8 @@
-import { Chess, type Square } from "../chess";
+import { Chess, HAS_PROMOTION, isPromotionRank, type Square } from "../chess";
 import { registerBlockModule, registerFileModule } from "../core/module-system";
 import type { IHost } from "../types";
 
 type TryMovePayload = { from: Square; to: Square };
-
-function isPromotionRank(to: string, color: "w" | "b"): boolean {
-  return (color === "w" && to[1] === "8") || (color === "b" && to[1] === "1");
-}
 
 function tryMove(chess: Chess, host: IHost, from: Square, to: Square): void {
   const eventBus = host.eventBus;
@@ -14,9 +10,14 @@ function tryMove(chess: Chess, host: IHost, from: Square, to: Square): void {
     chess.load(host.fen);
     const piece = chess.get(from);
     const color = piece?.color;
-    if (piece?.type === "p" && color && isPromotionRank(to, color)) {
+    if (
+      HAS_PROMOTION &&
+      piece?.type === "p" &&
+      color &&
+      isPromotionRank(to, color)
+    ) {
       const moves = chess.moves({ square: from, verbose: true });
-      const promoMoves = moves.filter((m) => m.to === to && m.promotion);
+      const promoMoves = moves.filter((m) => m.to === to && "promotion" in m);
       if (promoMoves.length > 0) {
         host.markedPos = null;
         eventBus.emit("promote", { from, to, color });

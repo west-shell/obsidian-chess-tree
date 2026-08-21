@@ -1,5 +1,12 @@
+import {
+  FEN_REGEX,
+  getMoveTokenType,
+  MOVE_REGEX,
+  type MoveTokenType,
+} from "../../chess";
+
 export type TokenType =
-  | "san-move"
+  | MoveTokenType
   | "left-paren"
   | "right-paren"
   | "comment"
@@ -46,33 +53,27 @@ export function tokenize(pgn: string): Token[] {
     const rest = pgn.slice(pos);
     const char = rest[0];
 
-    // Skip whitespace
     if (/^\s/.test(rest)) {
       advance(1);
       continue;
     }
 
-    // Skip move numbers
     const step = matchAndConsume(/^\d+\.(\s*\.\.\.)?/);
     if (step) {
       continue;
     }
 
-    // SAN move: O-O, O-O-O, exd5, Nf3, e8=Q, etc.
-    const san = matchAndConsume(
-      /^(O-O(?:-O)?[+#]?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)\b/,
-    );
-    if (san) {
+    const move = matchAndConsume(MOVE_REGEX);
+    if (move) {
       tokens.push({
-        type: "san-move",
-        value: san,
+        type: getMoveTokenType(move),
+        value: move,
         line: startLine,
         column: startCol,
       });
       continue;
     }
 
-    // Comment { ... }
     if (char === "{") {
       let depth = 1;
       let end = pos + 1;
@@ -92,7 +93,6 @@ export function tokenize(pgn: string): Token[] {
       continue;
     }
 
-    // Tag [ ... ]
     const tag = matchAndConsume(/^\[[^\]]*\]/);
     if (tag) {
       tokens.push({
@@ -104,7 +104,6 @@ export function tokenize(pgn: string): Token[] {
       continue;
     }
 
-    // Result
     const result = matchAndConsume(/^(1-0|0-1|1\/2-1\/2|\*)/);
     if (result) {
       tokens.push({
@@ -116,7 +115,6 @@ export function tokenize(pgn: string): Token[] {
       continue;
     }
 
-    // Left paren
     if (char === "(") {
       advance(1);
       tokens.push({
@@ -128,7 +126,6 @@ export function tokenize(pgn: string): Token[] {
       continue;
     }
 
-    // Right paren
     if (char === ")") {
       advance(1);
       tokens.push({
@@ -140,10 +137,7 @@ export function tokenize(pgn: string): Token[] {
       continue;
     }
 
-    // FEN string (standard chess)
-    const fen = matchAndConsume(
-      /^[rnbqkpRNBQKP1-8]+(\/[rnbqkpRNBQKP1-8]+){7}(\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)?/,
-    );
+    const fen = matchAndConsume(FEN_REGEX);
     if (fen) {
       tokens.push({
         type: "tag",
@@ -154,7 +148,6 @@ export function tokenize(pgn: string): Token[] {
       continue;
     }
 
-    // Unrecognized character - skip
     advance(1);
   }
 

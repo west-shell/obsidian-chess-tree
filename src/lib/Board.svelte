@@ -8,11 +8,26 @@
     Chessground,
     type Config,
     type DrawShape,
+    GRID_SVG,
+    HAS_PROMOTION,
+    LAYOUT_CHANGE_EVENT,
     type Move,
+    PROMOTION_PIECES,
+    RESIZE_EVENT,
     type Square,
+    WRAP_CLASS,
+    ZOOM_CHANGE_EVENT,
   } from "../chess";
   import type { EventBus } from "../core/event-bus";
+  import { iconSvg } from "../utils/icon";
   import type { ISettings } from "../types";
+
+  function injectGridSVG(boardEl: HTMLElement): void {
+    if (!GRID_SVG) return;
+    const boardElInner = boardEl.querySelector("cg-board, xq-board");
+    if (!boardElInner || boardElInner.querySelector("svg.xq-grid")) return;
+    boardElInner.insertAdjacentHTML("afterbegin", GRID_SVG);
+  }
 
   interface Props {
     settings: ISettings;
@@ -48,8 +63,6 @@
     glyphShapes = [],
   }: Props = $props();
 
-  import { iconSvg } from "../utils/icon";
-
   let boardElement!: HTMLDivElement;
   let api: Api | null = $state(null);
   let layoutChangeHandler: (() => void) | null = null;
@@ -68,31 +81,25 @@
     }
   }
 
-  // Promotion state (driven by promote event from BoardClick)
   let promotingMove: { from: Square; to: Square } | null = $state(null);
   let promotingColor: "w" | "b" = $state("w");
-
-  const PROMOTION_PIECES: { type: "q" | "r" | "b" | "n"; icon: string }[] = [
-    { type: "q", icon: "chess_queen" },
-    { type: "r", icon: "chess_rook" },
-    { type: "b", icon: "chess_bishop" },
-    { type: "n", icon: "chess_knight" },
-  ];
 
   function completePromotion(pieceType: "q" | "r" | "b" | "n") {
     if (!promotingMove) return;
     try {
       chess.load(fen);
-      const move = chess.move({
+      const moveArgs: { from: string; to: string; promotion?: string } = {
         from: promotingMove.from,
         to: promotingMove.to,
-        promotion: pieceType,
-      });
+      };
+      if (HAS_PROMOTION) moveArgs.promotion = pieceType;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const move = chess.move(moveArgs as any);
       if (move) {
         eventBus.emit("runmove", move);
       }
     } catch {
-      /* ignore */
+      // ignore invalid move
     }
     promotingMove = null;
   }
@@ -158,7 +165,9 @@
   onMount(async () => {
     const events: Config["events"] = freeMode
       ? {
-          change: () => {},
+          change: () => {
+            if (api) eventBus.emit("fen-updated", api.getFen());
+          },
           select: (key) => {
             eventBus.emit("click", key);
           },
@@ -208,7 +217,6 @@
       ...(selectedSquare ? { selected: selectedSquare } : {}),
     };
 
-    // 等待容器布局完成，避免 bounds 为 0 时 renderCircle 产生 NaN
     if (!boardElement.offsetWidth) {
       await new Promise<void>((resolve) => {
         const ro = new ResizeObserver(() => {
@@ -221,6 +229,7 @@
       });
     }
     api = Chessground(boardElement, config);
+    injectGridSVG(boardElement);
 
     boardResizeRo = new ResizeObserver(() => {
       if (!api || !boardElement.offsetWidth) return;
@@ -235,14 +244,16 @@
     });
     boardResizeRo.observe(boardElement);
 
-    eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>(
-      "promote",
-      (payload) => {
-        if (!payload) return;
-        promotingMove = { from: payload.from, to: payload.to };
-        promotingColor = payload.color;
-      },
-    );
+    if (HAS_PROMOTION) {
+      eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>(
+        "promote",
+        (payload) => {
+          if (!payload) return;
+          promotingMove = { from: payload.from, to: payload.to };
+          promotingColor = payload.color;
+        },
+      );
+    }
 
     layoutChangeHandler = () => {
       if (api && boardElement.offsetWidth) {
@@ -251,7 +262,7 @@
       }
     };
     activeDocument.body.addEventListener(
-      "chess-layout-change",
+      LAYOUT_CHANGE_EVENT,
       layoutChangeHandler,
     );
   });
@@ -267,7 +278,7 @@
     }
     if (layoutChangeHandler) {
       activeDocument.body.removeEventListener(
-        "chess-layout-change",
+        LAYOUT_CHANGE_EVENT,
         layoutChangeHandler,
       );
     }
@@ -277,7 +288,7 @@
   });
 
   $effect(() => {
-    if (!api || promotingMove) return;
+    if (!api || (HAS_PROMOTION && promotingMove)) return;
     if (freeMode) {
       api.set({ fen, turnColor, check: _check });
     } else {
@@ -294,6 +305,7 @@
   $effect(() => {
     if (!api) return;
     api.set({ orientation: rotated ? "black" : "white" });
+    injectGridSVG(boardElement);
   });
 
   $effect(() => {
@@ -362,7 +374,7 @@
         "--chess-board-scale",
         `${boardScale}`,
       );
-      activeDocument.body.dispatchEvent(new Event("chessground.resize"));
+      activeDocument.body.dispatchEvent(new Event(RESIZE_EVENT));
     };
 
     activeDocument.body.classList.add("resizing");
@@ -373,7 +385,7 @@
         activeDocument.removeEventListener(moveEvent, resize);
         activeDocument.body.classList.remove("resizing");
         activeDocument.body.dispatchEvent(
-          new CustomEvent("chess-zoom-changed", { detail: zoom }),
+          new CustomEvent(ZOOM_CHANGE_EVENT, { detail: zoom }),
         );
       },
       { once: true },
@@ -385,8 +397,8 @@
   class="board-wrapper chess-layout__board {turnClass}"
   onwheel={handleWheel}
 >
-  <div bind:this={boardElement} class="cg-wrap {turnClass}"></div>
-  {#if promotingMove}
+  <div bind:this={boardElement} class="{WRAP_CLASS} {turnClass}"></div>
+  {#if HAS_PROMOTION && promotingMove}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="promotion-overlay">
@@ -396,7 +408,7 @@
         class="promotion-choices {promotingColor}"
         onclick={(e) => e.stopPropagation()}
       >
-        {#each PROMOTION_PIECES as { type, icon } (type)}
+        {#each PROMOTION_PIECES ?? [] as { type, icon } (type)}
           <button class="promotion-btn" onclick={() => completePromotion(type)}>
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
             {@html iconSvg(icon, promoIconSize, 1.2)}
@@ -414,7 +426,8 @@
 </div>
 
 <style>
-  :global(.cg-wrap) {
+  :global(.cg-wrap),
+  :global(.xq-wrap) {
     container-type: inline-size;
     flex-shrink: 0;
     aspect-ratio: 1;
@@ -428,12 +441,12 @@
     margin: auto;
   }
 
-  .cg-wrap :global(coords) {
+  :global(.cg-wrap) :global(coords) {
     display: var(--chess-coords-display, flex);
     font-size: clamp(7px, 2.5cqw, 14px);
   }
 
-  .cg-wrap :global(coords.ranks) {
+  :global(.cg-wrap) :global(coords.ranks) {
     left: 0;
     top: 0;
     width: 12.5%;
@@ -441,7 +454,7 @@
     justify-content: flex-start;
   }
 
-  .cg-wrap :global(coords.files) {
+  :global(.cg-wrap) :global(coords.files) {
     bottom: 0;
     left: 0;
     height: 12.5%;
@@ -449,31 +462,43 @@
     justify-content: flex-end;
   }
 
-  .cg-wrap :global(coords coord) {
+  :global(.cg-wrap) :global(coords coord) {
     line-height: 1;
   }
 
-  .cg-wrap :global(coords.ranks coord) {
+  :global(.cg-wrap) :global(coords.ranks coord) {
     transform: none;
     padding-left: 2%;
     padding-top: 2%;
   }
 
-  .cg-wrap :global(coords.files coord) {
+  :global(.cg-wrap) :global(coords.files coord) {
     padding-right: 0%;
     padding-bottom: 0%;
     text-align: right;
   }
 
-  .cg-wrap :global(cg-board) {
+  :global(.cg-wrap) :global(cg-board) {
     background-color: var(--chess-board-bg, #f0d9b5);
   }
 
-  .cg-wrap :global(piece) {
+  :global(.xq-wrap) :global(xq-board) {
+    background:
+      var(--chess-board-texture, none) center / cover no-repeat,
+      var(--chess-board-bg, #d0b899);
+  }
+
+  :global(.cg-wrap) :global(piece),
+  :global(.xq-wrap) :global(piece) {
     touch-action: none;
   }
 
-  .cg-wrap :global(cg-board square.oc.move-dest) {
+  :global(.xq-wrap) {
+    --piece-red: var(--chess-piece-red, var(--color-red));
+    --piece-black: var(--chess-piece-black, var(--color-blue));
+  }
+
+  :global(.cg-wrap) :global(cg-board square.oc.move-dest) {
     background: radial-gradient(
       transparent 0%,
       transparent 75%,
