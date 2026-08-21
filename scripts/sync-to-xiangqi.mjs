@@ -17,6 +17,7 @@ const EXCLUDED_FILES = new Set([
   "confirmModal.ts",
   "parser.test.ts",
   "parse.test.ts",
+  "declarations.d.ts",
 ]);
 
 const EXCLUDED_DIRS = new Set([
