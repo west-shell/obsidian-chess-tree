@@ -31,15 +31,12 @@ export const DEFAULT_TREE_BLOCK_NAMES = ["chess", "tree"];
 export const DEFAULT_FEN_BLOCK_NAMES = ["fen"];
 export const RIBBON_ICON = "chess-knight";
 export const DEFAULT_FILENAME = "Untitled";
-export const PIECE_CHARS: Record<string, string> | null = null;
 export const GRID_SVG: string | null = null;
 export const TREE_LAYOUT_SPACING = 0.2;
 export const DEFAULT_LANG = "en";
 
 // ========== Flags ==========
 export const HAS_PROMOTION = true;
-export const HAS_CASTLING = true;
-export const HAS_EN_PASSANT = true;
 export const PRIMARY_PLAYER_KEY = "White";
 
 // ========== Move Functions ==========
@@ -164,15 +161,6 @@ export function getStartLabel(): string {
 }
 
 // ========== FEN Build Functions ==========
-export function buildFullFen(
-  boardPart: string,
-  turn: string,
-  castling: string,
-  enPassant: string,
-): string {
-  return `${boardPart} ${turn} ${castling} ${enPassant} 0 1`;
-}
-
 export function buildDefaultEditFen(boardPart: string): string {
   return `${boardPart} w KQkq - 0 1`;
 }

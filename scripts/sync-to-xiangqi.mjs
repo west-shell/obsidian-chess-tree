@@ -20,6 +20,11 @@ const EXCLUDED_FILES = new Set([
   "declarations.d.ts",
 ]);
 
+const EXCLUDED_PATHS = new Set([
+  "lib/GenFEN/PieceBTNs.svelte",
+  "lib/GenFEN/Toolbar.svelte",
+]);
+
 const EXCLUDED_DIRS = new Set([
   "Engine",
   "assets",
@@ -52,6 +57,11 @@ function syncDir(srcDir, destDir, relPrefix) {
 
     if (EXCLUDED_FILES.has(entry)) {
       console.log(`  SKIP file: src/${rel}`);
+      continue;
+    }
+
+    if (EXCLUDED_PATHS.has(rel)) {
+      console.log(`  SKIP path: src/${rel}`);
       continue;
     }
 
