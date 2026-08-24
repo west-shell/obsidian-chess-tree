@@ -18,6 +18,7 @@ const EXCLUDED_FILES = new Set([
   "parser.test.ts",
   "parse.test.ts",
   "declarations.d.ts",
+  "coords.css",
 ]);
 
 const EXCLUDED_PATHS = new Set([

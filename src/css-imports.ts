@@ -3,3 +3,4 @@ import "chessground/assets/chessground.brown.css";
 import "chessground/assets/chessground.cburnett.css";
 import "./style/layout.scss";
 import "./style/settings.css";
+import "./style/coords.css";
