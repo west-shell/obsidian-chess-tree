@@ -56,6 +56,12 @@ const themes: Record<string, ThemeData & { white: string; black: string }> = {
 export type ThemeName = keyof typeof themes;
 export const THEME_KEYS = Object.keys(themes);
 
+export function getThemeDisplayName(key: string, lang: string): string {
+  const def = themes[key];
+  if (!def) return key;
+  return lang === "zh" ? def.nameZh : def.name;
+}
+
 export function applyThemes(settings: ISettings, _app?: App) {
   const t = themes[settings.theme] ?? themes.wood;
   applyThemeCSSVars(settings, t, _app);
