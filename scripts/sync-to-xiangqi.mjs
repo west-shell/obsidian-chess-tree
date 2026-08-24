@@ -21,10 +21,10 @@ const EXCLUDED_FILES = new Set([
 const EXCLUDED_PATHS = new Set([
   "lib/GenFEN/PieceBTNs.svelte",
   "lib/GenFEN/Toolbar.svelte",
+  "modules/Engine/Engine.ts",
 ]);
 
 const EXCLUDED_DIRS = new Set([
-  "Engine",
   "assets",
 ]);
 
