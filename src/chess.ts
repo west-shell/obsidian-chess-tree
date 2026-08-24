@@ -32,7 +32,9 @@ export const DEFAULT_FEN_BLOCK_NAMES = ["fen"];
 export const RIBBON_ICON = "chess-knight";
 export const DEFAULT_FILENAME = "Untitled";
 export const GRID_SVG: string | null = null;
-export const TREE_LAYOUT_SPACING = 0.2;
+export const TREE_LAYOUT_SPACING = 0.3;
+export const TREE_SPACING_X = 18;
+export const NODE_CHAR_DY = 3.5;
 export const DEFAULT_LANG = "en";
 
 // ========== Flags ==========
