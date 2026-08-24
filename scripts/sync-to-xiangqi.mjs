@@ -15,8 +15,6 @@ const EXCLUDED_FILES = new Set([
   "themes.ts",
   "icon.ts",
   "confirmModal.ts",
-  "parser.test.ts",
-  "parse.test.ts",
   "declarations.d.ts",
 ]);
 
