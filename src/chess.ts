@@ -206,11 +206,12 @@ export function getTurnFromFen(fen: string): "white" | "black" {
 
 // ========== Theme CSS Vars ==========
 export interface ThemeData {
+  name: string;
+  nameZh: string;
   bg: string;
-  white: string;
-  black: string;
   texture?: string;
   grid?: "dark" | "light" | "none";
+  bgImage?: { path: string; base64: string };
 }
 
 export function applyThemeCSSVars(
@@ -222,25 +223,34 @@ export function applyThemeCSSVars(
     showCoordinateLabels: boolean;
   },
   themeData: ThemeData,
+  app?: {
+    vault: {
+      adapter: { getResourcePath: (p: string) => string };
+      configDir: string;
+    };
+  },
 ): void {
   const boardScale = (settings.zoom / 100) * 0.75 + 0.25;
   const body = activeDocument.body.style;
   body.setProperty("--chess-board-scale", `${boardScale}`);
   body.setProperty("--chess-font-size", `${settings.fontSize}px`);
-  body.setProperty("--chess-board-bg", themeData.bg);
-  body.setProperty("--chess-piece-white", themeData.white);
-  body.setProperty("--chess-piece-black", themeData.black);
-  body.setProperty("--chess-board-margin-top", `${settings.boardMarginTop}px`);
-  body.setProperty(
-    "--chess-board-margin-bottom",
-    `${settings.boardMarginBottom}px`,
-  );
-  body.setProperty(
-    "--chess-coords-display",
-    settings.showCoordinateLabels ? "flex" : "none",
-  );
+
+  let bg = themeData.bg;
+  if (app && /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(bg)) {
+    bg = `url('${app.vault.adapter.getResourcePath(app.vault.configDir + "/" + bg)}') center / cover no-repeat`;
+    body.setProperty("--chess-board-bg-color", "#333");
+  } else {
+    body.setProperty("--chess-board-bg-color", bg);
+    body.removeProperty("--chess-board-bg-image");
+  }
+  if (bg.startsWith("url(")) {
+    body.setProperty("--chess-board-bg-image", bg);
+  }
+
   if (themeData.texture) {
     body.setProperty("--chess-board-texture", themeData.texture);
+  } else {
+    body.removeProperty("--chess-board-texture");
   }
   if (themeData.grid) {
     body.setProperty(
@@ -251,7 +261,18 @@ export function applyThemeCSSVars(
           ? "#ccc"
           : "transparent",
     );
+  } else {
+    body.removeProperty("--chess-grid-color");
   }
+  body.setProperty("--chess-board-margin-top", `${settings.boardMarginTop}px`);
+  body.setProperty(
+    "--chess-board-margin-bottom",
+    `${settings.boardMarginBottom}px`,
+  );
+  body.setProperty(
+    "--chess-coords-display",
+    settings.showCoordinateLabels ? "flex" : "none",
+  );
 }
 
 // ========== Other ==========
