@@ -144,18 +144,18 @@ export function getNodeWidth(
   return Math.max(13, notation.length * 5.5);
 }
 
-export function getNodeFill(side: string | null): string {
-  if (side === "white") return "#fff";
-  if (side === "black") return "#333";
+export function getNodeFill(color: string | null): string {
+  if (color === "white") return "#fff";
+  if (color === "black") return "#333";
   return "green";
 }
 
-export function getNodeTextColor(side: string | null): string {
-  return side === "white" ? "#333" : "#fff";
+export function getNodeTextColor(color: string | null): string {
+  return color === "white" ? "#333" : "#fff";
 }
 
-export function getMoveListSideClass(side: string | null): string {
-  if (side === "white" || side === "red") return "white";
+export function getMoveListSideClass(color: string | null): string {
+  if (color === "white" || color === "red") return "white";
   return "black";
 }
 
