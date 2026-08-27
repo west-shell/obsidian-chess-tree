@@ -16,6 +16,7 @@ const EXCLUDED_FILES = new Set([
   "icon.ts",
   "confirmModal.ts",
   "declarations.d.ts",
+  "_variant.scss",
 ]);
 
 const EXCLUDED_PATHS = new Set([
@@ -26,10 +27,6 @@ const EXCLUDED_PATHS = new Set([
 
 const EXCLUDED_DIRS = new Set([
   "assets",
-]);
-
-const EXCLUDED_EXTENSIONS = new Set([
-  ".scss",
 ]);
 
 const SRC_DIR = join(CHESS_TREE_ROOT, "src");
@@ -60,11 +57,6 @@ function syncDir(srcDir, destDir, relPrefix) {
 
     if (EXCLUDED_PATHS.has(rel)) {
       console.log(`  SKIP path: src/${rel}`);
-      continue;
-    }
-
-    if (EXCLUDED_EXTENSIONS.has(extname(entry))) {
-      console.log(`  SKIP ext:  src/${rel}`);
       continue;
     }
 

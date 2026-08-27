@@ -1,0 +1,36 @@
+// ====== Chess variant-specific values ======
+// This is the ONLY file that differs between chess-tree and obsidian-xiangqi.
+// All other scss files are shared via sync.
+
+// Board aspect ratio (width / height): chess=1, xiangqi=0.9
+$board-aspect-ratio: 1;
+
+// Primary dimension for col2 uniboard: "width" or "height"
+// chess uses width (square board), xiangqi uses height (taller board)
+$col2-primary-dimension: "width";
+
+// Extra col1 variable only needed by chess
+$col1-uniboard-controls: 5rem;
+
+// Whether to output detailed coordinate label styles
+$coords-extra-styles: true;
+
+// GenFEN piece button grid: chess=6 cols, xiangqi=7 cols
+$piecebtns-cols: 6;
+$piecebtns-col-cqw: 16.6667cqw;
+$piecebtns-col-cqh: 16.6667cqh;
+
+// GenFEN toolbar col2: chess=nowrap, xiangqi=wrap+align-content:start
+$genfen-toolbar-flex-wrap: nowrap;
+$genfen-toolbar-align-content: null;
+
+// col1 board: chess adds --chess-board-scale and max-width
+$col1-board-scale: 1;
+$col1-board-max-width: 100vh;
+
+// PGN view board width ratios
+$pgn-col1-board-cqh: 50cqh;
+$pgn-col2-board-cqh: 100cqh;
+
+// PGN view col2: chess overrides ---col2-uniboard-width
+$pgn-col2-override-uniboard-width: true;

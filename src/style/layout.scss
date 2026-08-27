@@ -5,16 +5,7 @@
 @use "scss/layout-base" as *;
 @use "scss/board" as *;
 @use "scss/coords" as *;
-
-// ====== 棋盘布局系统 ======
-//
-// 两种布局模式：
-//   col1  — 单栏（竖屏窄窗口）：棋盘 → 工具栏 → 工具面板
-//   col2  — 双栏（宽屏或横屏）：棋盘 | 工具栏+工具面板
-//
-// 断点逻辑（与 lila 一致）：
-//   col1:  max-width: 799.29px AND portrait
-//   col2:  min-width: 799.3px OR landscape
+@use "scss/variant" as *;
 
 $local-block-gap: 2px;
 
@@ -51,8 +42,12 @@ $local-block-gap: 2px;
     "tools";
 
   &__board {
-    --chess-board-scale: 1;
-    max-width: 100vh;
+    @if $col1-board-scale {
+      --chess-board-scale: #{$col1-board-scale};
+    }
+    @if $col1-board-max-width {
+      max-width: #{$col1-board-max-width};
+    }
     justify-self: center;
 
     .board-resize {
@@ -66,9 +61,12 @@ $local-block-gap: 2px;
 
   // ====== col2：双栏（宽屏或横屏） ======
   @include mq-is-col2 {
-    height: var(---col2-uniboard-width);
+    @if $col2-primary-dimension != "width" {
+      --chess-board-width: var(---col2-uniboard-width);
+    }
+    height: var(---col2-uniboard-#{$col2-primary-dimension});
     grid-template-columns: var(---col2-uniboard-width) auto $uniboard-table;
-    grid-template-rows: var(---col2-uniboard-width) 1fr;
+    grid-template-rows: var(---col2-uniboard-#{$col2-primary-dimension}) 1fr;
     grid-template-areas:
       "board toolbar tools"
       "board toolbar tools";
@@ -82,20 +80,19 @@ $local-block-gap: 2px;
     .chess-layout__toolbar.toolbar-container {
       flex-direction: column;
       flex-wrap: wrap;
-      max-height: var(---col2-uniboard-width);
+      max-height: var(---col2-uniboard-#{$col2-primary-dimension});
       column-gap: 2px;
       grid-row: 1;
     }
 
     &__tools {
-      max-height: var(---col2-uniboard-width);
+      max-height: var(---col2-uniboard-#{$col2-primary-dimension});
       min-width: 160px;
     }
   }
 }
 
 // ====== 工具栏方向自适应 ======
-// col1：横向（棋盘下方），col2 由 grid 内联设置竖向
 .chess-layout__toolbar {
   display: flex;
   flex-direction: row;
@@ -104,27 +101,6 @@ $local-block-gap: 2px;
   align-items: center;
   gap: 2px;
 }
-
-// // ====== 工具栏按钮基础样式 ======
-// :global(.toolbar-btn) {
-//   border: none;
-//   border-radius: 6px;
-//   cursor: pointer;
-//   flex: 0 1 auto;
-//   min-height: 24px;
-//   font-size: clamp(12px, 3vw, 16px);
-//   padding: clamp(2px, 1vw, 6px) clamp(4px, 2vw, 10px);
-//   margin: 0;
-//   transition:
-//     background-color 0.2s ease,
-//     transform 0.1s ease;
-
-//   @include mq-is-col2 {
-//     .chess-layout__toolbar & {
-//       min-width: 24px;
-//     }
-//   }
-// }
 
 // ====== GenFEN 编辑器专用 ======
 .chess-layout--genfen {
@@ -143,36 +119,38 @@ $local-block-gap: 2px;
 
     .chess-layout__toolbar {
       flex-direction: column;
-      flex-wrap: nowrap;
+      flex-wrap: #{$genfen-toolbar-flex-wrap};
       align-items: center;
+      @if $genfen-toolbar-align-content {
+        align-content: #{$genfen-toolbar-align-content};
+      }
     }
   }
 
   .chess-layout__piecebtns.piece-btn-container {
     container-type: size;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(#{$piecebtns-cols}, 1fr);
     grid-template-rows: repeat(2, 1fr);
     width: 100%;
     height: 56px;
     .piece-btn {
-      width: 16.6667cqw;
+      width: #{$piecebtns-col-cqw};
       height: 28px;
     }
     @include mq-is-col2 {
       grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(6, 1fr);
+      grid-template-rows: repeat(#{$piecebtns-cols}, 1fr);
       width: 56px;
       height: 100%;
       .piece-btn {
         width: 28px;
-        height: 16.6667cqh;
+        height: #{$piecebtns-col-cqh};
       }
     }
   }
 }
 
 // ====== PGN 文件视图专用 ======
-// PGNView: col1 = bottom（竖屏），col2 = right（横屏/宽屏），flex 布局
 .pgn-view .chess-layout {
   container-type: size;
   display: flex;
@@ -180,7 +158,7 @@ $local-block-gap: 2px;
   height: 100%;
 
   &__board {
-    --chess-board-width: min(100cqw, 50cqh);
+    --chess-board-width: min(100cqw, #{$pgn-col1-board-cqh});
     align-self: center;
     .board-resize {
       display: none;
@@ -202,9 +180,11 @@ $local-block-gap: 2px;
 
   @include mq-is-col2 {
     flex-direction: row;
-    ---col2-uniboard-width: 100cqh;
+    @if $pgn-col2-override-uniboard-width {
+      ---col2-uniboard-width: 100cqh;
+    }
     &__board {
-      --chess-board-width: min(60cqw, 100cqh);
+      --chess-board-width: min(60cqw, #{$pgn-col2-board-cqh});
       align-self: center;
     }
 
