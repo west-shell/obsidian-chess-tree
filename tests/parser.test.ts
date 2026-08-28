@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { PGNParser } from "./parser";
+import { PGNParser } from "../src/modules/Source/parser";
 
 describe("Chess PGN Parser", () => {
   test("parse simple move sequence", () => {
@@ -17,14 +17,14 @@ describe("Chess PGN Parser", () => {
 
     const move1 = gameTree.children[0];
     expect(move1.move?.san).toBe("e4");
-    expect(move1.side).toBe("white");
+    expect(move1.color).toBe("white");
     expect(move1.step).toBe(1);
     expect(move1.children).toHaveLength(1);
     expect(move1.fen).toBeTruthy();
 
     const move2 = move1.children[0];
     expect(move2.move?.san).toBe("e5");
-    expect(move2.side).toBe("black");
+    expect(move2.color).toBe("black");
     expect(move2.step).toBe(2);
     expect(move2.fen).toBeTruthy();
   });
