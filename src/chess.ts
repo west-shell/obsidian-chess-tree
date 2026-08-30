@@ -284,4 +284,4 @@ export function createPieceFromChar(_char: string): Piece | null {
   return null;
 }
 
-export function registerCustomIcon(_app: unknown): void {}
+export function registerCustomIcon(): void {}
