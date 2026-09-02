@@ -56,7 +56,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "chess.js": "^1.4.0",
-    "chessground": "^9.2.1"
+    "@lichess-org/chessground": "^10.1.1",
+    "chess.js": "^1.4.0"
   }
 }

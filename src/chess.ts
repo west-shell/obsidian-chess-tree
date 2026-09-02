@@ -1,9 +1,9 @@
 // ========== Library Re-exports ==========
-export { Chessground } from "chessground";
-export type { Api } from "chessground/api";
-export type { Config } from "chessground/config";
-export type { DrawShape } from "chessground/draw";
-export type * as cg from "chessground/types";
+export { Chessground } from "@lichess-org/chessground";
+export type { Api } from "@lichess-org/chessground/api";
+export type { Config } from "@lichess-org/chessground/config";
+export type { DrawShape } from "@lichess-org/chessground/draw";
+export type * as cg from "@lichess-org/chessground/types";
 export {
   Chess,
   validateFen,
