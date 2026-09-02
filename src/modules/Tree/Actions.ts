@@ -8,6 +8,8 @@ import {
   matchMove,
   PRIMARY_PLAYER_KEY,
 } from "../../chess";
+import { Notice } from "obsidian";
+import { validateFen } from "../../utils/chessEngine";
 import {
   ANNOTATION_PREFIX,
   isAnnotationKey,
@@ -510,6 +512,11 @@ const ActionsModule = {
                 : host.isFenMode
                   ? host.fen
                   : buildDefaultEditFen(host.fen.split(" ")[0]);
+              const validation = validateFen(fen);
+              if (!validation.ok) {
+                new Notice(t("import.invalidFen"));
+                return;
+              }
               host.root.children = [];
               host.root.comments = [];
               host.root.fen = fen;
