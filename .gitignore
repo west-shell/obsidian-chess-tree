@@ -17,6 +17,8 @@ build/
 .vscode/
 .claude/
 .codegraph/
+.agent/
+.deveco/
 .obsidian-cache/
 .idea
 .DS_Store
