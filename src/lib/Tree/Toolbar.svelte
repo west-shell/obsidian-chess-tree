@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Menu, setIcon } from "obsidian";
+  import { onDestroy } from "svelte";
   import type { EventBus } from "../../core/event-bus";
   import type { IOptions, ISettings } from "../../types";
   import type ChessPlugin from "../../main";
@@ -21,26 +22,32 @@
   }: Props = $props();
 
   let _lv = $state(0);
-  onLangChange(() => _lv++);
+  const unsubLang = onLangChange(() => _lv++);
+  onDestroy(() => {
+    unsubLang();
+  });
 
   let modified = $state(false);
 
   $effect(() => {
-    eventBus.on("modified", () => {
+    const onModified = () => {
       modified = true;
-    });
-    eventBus.on("setViewData", () => {
+    };
+    const onResetModified = () => {
       modified = false;
-    });
-    eventBus.on("load", () => {
-      modified = false;
-    });
-    eventBus.on("save", () => {
-      modified = false;
-    });
-    eventBus.on("reset", () => {
-      modified = false;
-    });
+    };
+    eventBus.on("modified", onModified);
+    eventBus.on("setViewData", onResetModified);
+    eventBus.on("load", onResetModified);
+    eventBus.on("save", onResetModified);
+    eventBus.on("reset", onResetModified);
+    return () => {
+      eventBus.off("modified", onModified);
+      eventBus.off("setViewData", onResetModified);
+      eventBus.off("load", onResetModified);
+      eventBus.off("save", onResetModified);
+      eventBus.off("reset", onResetModified);
+    };
   });
 
   let autoAnalyze = $state(false);
@@ -48,34 +55,52 @@
   let batchAnalyzing = $state(false);
 
   $effect(() => {
-    eventBus.on("engine-busy", () => {
+    const onBusy = () => {
       engineBusy = true;
-    });
-    eventBus.on("engine-result", () => {
+    };
+    const onResult = () => {
       engineBusy = false;
-    });
-    eventBus.on("engine-batch-start", () => {
+    };
+    const onBatchStart = () => {
       batchAnalyzing = true;
-    });
-    eventBus.on("engine-batch-done", () => {
+    };
+    const onBatchDone = () => {
       engineBusy = false;
       batchAnalyzing = false;
-    });
-    eventBus.on("engine-auto-on", () => {
+    };
+    const onAutoOn = () => {
       autoAnalyze = true;
-    });
-    eventBus.on("engine-auto-off", () => {
+    };
+    const onAutoOff = () => {
       autoAnalyze = false;
-    });
-    eventBus.on("engine-stop", () => {
+    };
+    const onStop = () => {
       autoAnalyze = false;
       engineBusy = false;
       batchAnalyzing = false;
-    });
-    eventBus.on("engine-batch-stop", () => {
+    };
+    const onBatchStop = () => {
       batchAnalyzing = false;
-    });
+    };
+    eventBus.on("engine-busy", onBusy);
+    eventBus.on("engine-result", onResult);
+    eventBus.on("engine-batch-start", onBatchStart);
+    eventBus.on("engine-batch-done", onBatchDone);
+    eventBus.on("engine-auto-on", onAutoOn);
+    eventBus.on("engine-auto-off", onAutoOff);
+    eventBus.on("engine-stop", onStop);
+    eventBus.on("engine-batch-stop", onBatchStop);
     eventBus.emit("request-engine-state");
+    return () => {
+      eventBus.off("engine-busy", onBusy);
+      eventBus.off("engine-result", onResult);
+      eventBus.off("engine-batch-start", onBatchStart);
+      eventBus.off("engine-batch-done", onBatchDone);
+      eventBus.off("engine-auto-on", onAutoOn);
+      eventBus.off("engine-auto-off", onAutoOff);
+      eventBus.off("engine-stop", onStop);
+      eventBus.off("engine-batch-stop", onBatchStop);
+    };
   });
 
   let analyzeBtnClass = $derived(

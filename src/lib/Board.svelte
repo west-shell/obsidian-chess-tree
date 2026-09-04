@@ -69,6 +69,10 @@
   let layoutChangeHandler: (() => void) | null = null;
   let boardResizeRo: ResizeObserver | null = null;
   let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  let promoteHandler:
+    | ((payload?: { from: Square; to: Square; color: "w" | "b" }) => void)
+    | null = null;
+  let destroyed = false;
   let promoIconSize = $derived(
     boardElement?.offsetWidth ? boardElement.offsetWidth * 0.11 : 30,
   );
@@ -228,6 +232,7 @@
         });
         ro.observe(boardElement);
       });
+      if (destroyed) return;
     }
     api = Chessground(boardElement, config);
     injectGridSVG(boardElement);
@@ -246,14 +251,16 @@
     boardResizeRo.observe(boardElement);
 
     if (HAS_PROMOTION) {
-      eventBus.on<{ from: Square; to: Square; color: "w" | "b" }>(
-        "promote",
-        (payload) => {
-          if (!payload) return;
-          promotingMove = { from: payload.from, to: payload.to };
-          promotingColor = payload.color;
-        },
-      );
+      promoteHandler = (payload) => {
+        if (!payload) return;
+        promotingMove = { from: payload.from, to: payload.to };
+        promotingColor = payload.color;
+      };
+      eventBus.on<{
+        from: Square;
+        to: Square;
+        color: "w" | "b";
+      }>("promote", promoteHandler);
     }
 
     layoutChangeHandler = () => {
@@ -269,6 +276,7 @@
   });
 
   onDestroy(() => {
+    destroyed = true;
     if (boardResizeRo) {
       boardResizeRo.disconnect();
       boardResizeRo = null;
@@ -276,6 +284,10 @@
     if (resizeTimer) {
       clearTimeout(resizeTimer);
       resizeTimer = null;
+    }
+    if (promoteHandler) {
+      eventBus.off("promote", promoteHandler);
+      promoteHandler = null;
     }
     if (layoutChangeHandler) {
       activeDocument.body.removeEventListener(

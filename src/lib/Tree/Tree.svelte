@@ -82,11 +82,12 @@
   let listUlRef: HTMLUListElement | null = $state(null);
 
   $effect(() => {
-    void listCurrentStep;
+    const step = listCurrentStep;
     void listMoves;
     (async () => {
       await tick();
-      const index = listCurrentStep <= 0 ? 0 : Math.ceil(listCurrentStep / 2);
+      if (destroyed) return;
+      const index = step <= 0 ? 0 : Math.ceil(step / 2);
       const targetEl = listItemRefs[index];
       if (targetEl) {
         scrollToBTN(targetEl, listUlRef);
@@ -103,6 +104,7 @@
     }
     (async () => {
       await tick();
+      if (destroyed) return;
       resetView();
     })();
   });
@@ -152,8 +154,12 @@
   let handleSliderTouchEnd: (() => void) | null = null;
   let intersectionObserver: IntersectionObserver | null = null;
   let needsInitialReset = $state(false);
+  let destroyed = false;
 
   onDestroy(() => {
+    destroyed = true;
+    unsubLang();
+    eventBus.off("updateUI", onUiVer);
     if (saveTimeout) {
       clearTimeout(saveTimeout);
       saveTimeout = undefined;
@@ -475,17 +481,22 @@
   let listVisible = $state(settings?.showMovelist ?? true);
   function toggleListVisible() {
     listVisible = !listVisible;
-    tick().then(() => resetView());
+    void tick().then(() => {
+      if (destroyed) return undefined;
+      resetView();
+      return undefined;
+    });
   }
 
   let _lv = $state(0);
-  onLangChange(() => _lv++);
+  const unsubLang = onLangChange(() => _lv++);
 
   let _uiVer = $state(0);
+  const onUiVer = () => {
+    _uiVer++;
+  };
   onMount(() => {
-    eventBus.on("updateUI", () => {
-      _uiVer++;
-    });
+    eventBus.on("updateUI", onUiVer);
   });
 
   let showGameNav = $derived(games && games.length > 1 && !isBlockMode);
@@ -685,7 +696,7 @@
     tick()
       .then(() => new Promise(requestAnimationFrame))
       .then(() => {
-        if (!svgEl) return;
+        if (destroyed || !svgEl) return;
         if (svgEl.clientWidth === 0 || svgEl.clientHeight === 0) {
           needsInitialReset = true;
           intersectionObserver = new IntersectionObserver(
@@ -694,6 +705,7 @@
                 if (entry.isIntersecting && needsInitialReset) {
                   needsInitialReset = false;
                   requestAnimationFrame(() => {
+                    if (destroyed) return;
                     updateZoomExtent();
                     d3.select(svgEl!).call(zoomBehavior!);
                     resetView();
@@ -724,6 +736,7 @@
     const node = currentNode;
     commentsText = (node.comments ?? []).join("\n");
     tick().then(() => {
+      if (destroyed) return;
       if (textareaEl) adjustTextareaHeight();
       panToNodeIfNeeded(node);
       return undefined;

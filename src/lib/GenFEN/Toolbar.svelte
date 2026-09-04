@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { EventBus } from "../../core/event-bus";
   import { onLangChange, t } from "../../i18n";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   interface Props {
     eventBus: EventBus;
@@ -11,7 +11,10 @@
   let { eventBus, fen, isFenMode = false }: Props = $props();
 
   let _lv = $state(0);
-  onLangChange(() => _lv++);
+  const unsubLang = onLangChange(() => _lv++);
+  onDestroy(() => {
+    unsubLang();
+  });
 
   function parseFen(fen: string) {
     const parts = fen.split(" ");
@@ -167,6 +170,16 @@
     }
   }
 
+  const onFenUpdated = (fenStr?: string) => {
+    const currentFen = fenStr || fen;
+    const currentBp = boardPart(currentFen);
+    const parsed = parseFen(currentFen);
+    _turn = parsed.turn;
+    syncCastlingFromBoard(currentBp);
+    enPassantFiles = computeEnPassantFilesFor(currentBp, _turn);
+    validateEnPassant();
+  };
+
   onMount(() => {
     const parsed = parseFen(fen);
     _turn = parsed.turn;
@@ -176,15 +189,10 @@
     syncCastlingFromBoard(bp);
     enPassantFiles = computeEnPassantFilesFor(bp, _turn);
     validateEnPassant();
-    eventBus.on<string>("updateUI", (fenStr) => {
-      const currentFen = fenStr || fen;
-      const currentBp = boardPart(currentFen);
-      const parsed = parseFen(currentFen);
-      _turn = parsed.turn;
-      syncCastlingFromBoard(currentBp);
-      enPassantFiles = computeEnPassantFilesFor(currentBp, _turn);
-      validateEnPassant();
-    });
+    eventBus.on<string>("updateUI", onFenUpdated);
+  });
+  onDestroy(() => {
+    eventBus.off("updateUI", onFenUpdated);
   });
 </script>
 
