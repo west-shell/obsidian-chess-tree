@@ -458,6 +458,8 @@
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -466,12 +468,12 @@
 
   .promotion-choices {
     display: flex;
-    gap: 4px;
-    padding: 6px;
-    border-radius: 6px;
+    gap: 6px;
+    padding: 8px;
+    border-radius: var(--radius-m, 10px);
     background: var(--background-primary);
     color: var(--text-normal);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-l, 0 2px 12px rgba(0, 0, 0, 0.3));
   }
 
   .promotion-btn {

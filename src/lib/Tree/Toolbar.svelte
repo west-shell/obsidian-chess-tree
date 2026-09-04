@@ -427,17 +427,29 @@
 
 <style>
   .toolbar-btn.saved {
-    background-color: hsl(122, 39%, 49%);
+    background-color: var(--color-green, hsl(122, 39%, 49%));
+    color: var(--text-on-accent);
+  }
+
+  .toolbar-btn.saved:hover {
+    background-color: var(--color-green, hsl(122, 39%, 49%));
+    filter: brightness(1.1);
   }
 
   .toolbar-btn.unsaved {
-    background-color: hsl(35, 100%, 50%);
+    background-color: var(--color-orange, hsl(35, 100%, 50%));
+    color: var(--text-on-accent);
+  }
+
+  .toolbar-btn.unsaved:hover {
+    background-color: var(--color-orange, hsl(35, 100%, 50%));
+    filter: brightness(1.1);
   }
 
   .toolbar-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 2px;
+    gap: 4px;
     align-items: center;
   }
 
@@ -452,14 +464,14 @@
     overflow: hidden;
   }
 
-  .toolbar-container :global(.toolbar-btn svg) {
-    width: 20px;
-    height: 20px;
-  }
-
-  .engine-active {
+  .toolbar-btn.engine-active {
     background-color: var(--interactive-accent);
     color: var(--text-on-accent);
+  }
+
+  .toolbar-btn.engine-active:hover {
+    background-color: var(--interactive-accent);
+    filter: brightness(1.15);
   }
 
   .engine-busy {
