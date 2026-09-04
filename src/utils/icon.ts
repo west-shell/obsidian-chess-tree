@@ -5,6 +5,8 @@
 
 type IconNode = [string, Record<string, string>][];
 
+export const RIBBON_ICON_SVG: string | null = null;
+
 const ICONS: Record<string, IconNode> = {
   chess_king: [
     [

@@ -283,5 +283,3 @@ export function parseExternalUrl(_source: string): string | null {
 export function createPieceFromChar(_char: string): Piece | null {
   return null;
 }
-
-export function registerCustomIcon(): void {}
