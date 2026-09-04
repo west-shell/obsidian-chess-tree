@@ -1046,7 +1046,7 @@
         </g>
       </svg>
 
-      <div class="toolbar">
+      <div class="toolbar toolbar-group">
         {#if canFold}
           <button
             class="toolbar-btn"
@@ -1399,12 +1399,9 @@
     position: absolute;
     bottom: 0.5rem;
     left: 0.5rem;
-    display: flex;
     flex-direction: column;
     gap: 2px;
     margin: 0;
-    padding: 3px;
-    border-radius: var(--radius-m, 8px);
     background: color-mix(
       in srgb,
       var(--background-primary) 72%,
@@ -1418,13 +1415,6 @@
 
   .toolbar .toolbar-btn {
     pointer-events: auto;
-  }
-
-  .toolbar .toolbar-btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    margin: 0;
   }
 
   .slider {

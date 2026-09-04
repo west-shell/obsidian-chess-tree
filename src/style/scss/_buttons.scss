@@ -44,3 +44,36 @@ button.toolbar-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
 }
+
+// ====== Grouped pill controls ======
+// Related buttons live inside one bordered pill; the pill direction follows
+// its parent toolbar (row in col1, column in col2) via flex-direction inherit.
+
+.toolbar-group {
+  display: flex;
+  flex-direction: inherit;
+  align-items: center;
+  gap: 0;
+  padding: 2px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m, 8px);
+}
+
+.toolbar-group button.toolbar-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.toolbar-group button.toolbar-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toolbar-sep {
+  flex: none;
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 1px;
+  background: var(--background-modifier-border);
+}

@@ -92,7 +92,7 @@
   let isprotected = $derived(options?.protected || false);
   let saveBtnClass = $derived(modified ? "unsaved" : "saved");
 
-  const buildButtons = (v: number) => [
+  const buildNavButtons = (v: number) => [
     { title: t("toolbar.reset", v), icon: "rotate-ccw", event: "reset" },
     {
       title: t("toolbar.start", v),
@@ -102,6 +102,10 @@
     { title: t("toolbar.back", v), icon: "arrow-left", event: "back" },
     { title: t("toolbar.forward", v), icon: "arrow-right", event: "next" },
     { title: t("toolbar.end", v), icon: "arrow-right-to-line", event: "toEnd" },
+  ];
+  let navButtons = $derived(buildNavButtons(_lv));
+
+  const buildMenuButtons = (v: number) => [
     {
       title: t("toolbar.board", v),
       icon: "layout-grid",
@@ -118,7 +122,7 @@
       event: "toggle-node-menu",
     },
   ];
-  let buttons = $derived(buildButtons(_lv));
+  let menuButtons = $derived(buildMenuButtons(_lv));
 
   const buildAnnotations = (v: number) => [
     {
@@ -153,6 +157,16 @@
     },
   ];
   let annotations = $derived(buildAnnotations(_lv));
+
+  function handleMenuButton(event: string, evt: MouseEvent) {
+    if (event === "toggle-edit-menu") {
+      handleEditMenu(evt);
+    } else if (event === "toggle-node-menu") {
+      handleNodeMenu(evt);
+    } else if (event === "toggle-board-menu") {
+      handleBoardMenu(evt);
+    }
+  }
 
   function emitEvent(name: string, payload: string | null = null) {
     eventBus.emit("btn-click", { name, payload });
@@ -390,34 +404,38 @@
 </script>
 
 <div class="toolbar-container chess-layout__toolbar">
-  {#each buttons as { title, icon, event } (event)}
-    <button
-      class="toolbar-btn"
-      aria-label={title}
-      use:useSetIcon={icon}
-      onclick={(e) => {
-        if (event === "toggle-edit-menu") {
-          handleEditMenu(e);
-        } else if (event === "toggle-node-menu") {
-          handleNodeMenu(e);
-        } else if (event === "toggle-board-menu") {
-          handleBoardMenu(e);
-        } else {
-          emitEvent(event);
-        }
-      }}
-    ></button>
-  {/each}
+  <div class="toolbar-group">
+    {#each navButtons as { title, icon, event }, i (event)}
+      {#if i === 1}<div class="toolbar-sep"></div>{/if}
+      <button
+        class="toolbar-btn"
+        aria-label={title}
+        use:useSetIcon={icon}
+        onclick={() => emitEvent(event)}
+      ></button>
+    {/each}
+  </div>
+
+  <div class="toolbar-group">
+    {#each menuButtons as { title, icon, event } (event)}
+      <button
+        class="toolbar-btn"
+        aria-label={title}
+        use:useSetIcon={icon}
+        onclick={(e) => handleMenuButton(event, e)}
+      ></button>
+    {/each}
+  </div>
 
   <button
-    class="toolbar-btn{analyzeBtnClass}"
+    class="toolbar-btn toolbar-single{analyzeBtnClass}"
     aria-label={t("toolbar.analyzeMenu", _lv)}
     use:useSetIcon={"brain"}
     onclick={(e) => handleAnalyzeMenu(e)}
   ></button>
 
   <button
-    class="toolbar-btn {saveBtnClass}"
+    class="toolbar-btn toolbar-single {saveBtnClass}"
     aria-label={t("toolbar.save", _lv)}
     use:useSetSaveIcon
     disabled={isprotected}
@@ -449,19 +467,13 @@
   .toolbar-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 6px;
     align-items: center;
   }
 
-  .toolbar-container :global(.toolbar-btn) {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+  .toolbar-single {
+    width: 28px;
+    height: 28px;
   }
 
   .toolbar-btn.engine-active {
