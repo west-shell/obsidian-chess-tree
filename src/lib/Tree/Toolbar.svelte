@@ -75,6 +75,7 @@
     eventBus.on("engine-batch-stop", () => {
       batchAnalyzing = false;
     });
+    eventBus.emit("request-engine-state");
   });
 
   let analyzeBtnClass = $derived(
