@@ -36,6 +36,9 @@ $local-block-gap: 2px;
   }
 
   // ====== col1：单栏（默认，竖屏） ======
+  @if $col1-board-scale {
+    --chess-board-scale: #{$col1-board-scale};
+  }
   grid-template-columns: 1fr;
   grid-template-rows: auto auto auto;
   grid-template-areas:
@@ -44,9 +47,6 @@ $local-block-gap: 2px;
     "tools";
 
   &__board {
-    @if $col1-board-scale {
-      --chess-board-scale: #{$col1-board-scale};
-    }
     @if $col1-board-max-width {
       max-width: #{$col1-board-max-width};
     }
@@ -54,6 +54,22 @@ $local-block-gap: 2px;
 
     .board-resize {
       display: none;
+    }
+  }
+
+  // 主工具栏与棋盘同宽、居中对齐；col1 单排按钮自适应缩放
+  .chess-layout__toolbar.toolbar-container {
+    width: min(
+      var(--chess-board-max-size, 100vh) * var(--chess-board-scale, 0.85),
+      100%
+    );
+    justify-self: center;
+    flex-wrap: nowrap;
+
+    .toolbar-btn {
+      min-width: 0;
+      height: auto;
+      aspect-ratio: 1;
     }
   }
 
@@ -86,6 +102,8 @@ $local-block-gap: 2px;
       align-items: center;
       column-gap: 0;
       grid-row: 1;
+      justify-content: flex-start;
+      width: auto;
 
       .toolbar-sep {
         width: auto;
@@ -189,6 +207,12 @@ $local-block-gap: 2px;
     min-height: 32px;
   }
 
+  // 主工具栏与棋盘同宽、居中对齐
+  &__toolbar.toolbar-container {
+    width: min(100cqw, #{$pgn-col1-board-cqh});
+    align-self: center;
+  }
+
   &__tools {
     flex: 1 1 0;
     min-height: 0;
@@ -223,6 +247,13 @@ $local-block-gap: 2px;
 
     .chess-layout--genfen &__toolbar {
       align-self: stretch;
+    }
+
+    // 主工具栏靠上，并还原 col1 的同宽/单排设置
+    &__toolbar.toolbar-container {
+      width: auto;
+      align-self: flex-start;
+      flex-wrap: wrap;
     }
 
     &__tools {
