@@ -20,10 +20,17 @@ import type { Move, Piece, Square } from "chess.js";
 export const DEFAULT_FEN =
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 export const EMPTY_FEN = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
-export const LAYOUT_CLASS = "chess-layout";
-export const LAYOUT_CLASS_GENFEN = "chess-layout--genfen";
+
+// ---- DOM class names (BEM, `ct-` prefixed; see src/style/README.md) ----
+export const LAYOUT_CLASS = "ct-layout";
+export const LAYOUT_CLASS_EDIT = "ct-layout--edit";
+export const BLOCK_CLASS = "ct-block";
+export const FILE_VIEW_CLASS = "ct-file-view";
+export const RESIZING_CLASS = "ct-resizing";
+// chessground's own class names — never rename, styled in style/scss/_board.scss
 export const WRAP_CLASS = "cg-wrap";
 export const BOARD_ELEMENT = "cg-board";
+
 export const BOARD_ASPECT_RATIO = 1;
 export const LAYOUT_CHANGE_EVENT = "chess-layout-change";
 export const ZOOM_CHANGE_EVENT = "chess-zoom-changed";
@@ -155,8 +162,10 @@ export function getNodeTextColor(color: string | null): string {
 }
 
 export function getMoveListSideClass(color: string | null): string {
-  if (color === "white" || color === "red") return "white";
-  return "black";
+  if (color === "white" || color === "red") {
+    return "ct-moves__move--white";
+  }
+  return "ct-moves__move--black";
 }
 
 export function getStartLabel(): string {
@@ -232,29 +241,29 @@ export function applyThemeCSSVars(
 ): void {
   const boardScale = (settings.zoom / 100) * 0.75 + 0.25;
   const body = activeDocument.body.style;
-  body.setProperty("--chess-board-scale", `${boardScale}`);
-  body.setProperty("--chess-font-size", `${settings.fontSize}px`);
+  body.setProperty("--ct-board-scale", `${boardScale}`);
+  body.setProperty("--ct-font-size", `${settings.fontSize}px`);
 
   let bg = themeData.bg;
   if (app && /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(bg)) {
     const url = app.vault.adapter.getResourcePath(
       app.vault.configDir + "/" + bg,
     );
-    body.setProperty("--chess-board-bg-image", `url('${url}')`);
-    body.setProperty("--chess-board-bg-color", "#333");
+    body.setProperty("--ct-board-bg-image", `url('${url}')`);
+    body.setProperty("--ct-board-bg", "#333");
   } else {
-    body.setProperty("--chess-board-bg-color", bg);
-    body.removeProperty("--chess-board-bg-image");
+    body.setProperty("--ct-board-bg", bg);
+    body.removeProperty("--ct-board-bg-image");
   }
 
   if (themeData.texture) {
-    body.setProperty("--chess-board-texture", themeData.texture);
+    body.setProperty("--ct-board-texture", themeData.texture);
   } else {
-    body.removeProperty("--chess-board-texture");
+    body.removeProperty("--ct-board-texture");
   }
   if (themeData.grid) {
     body.setProperty(
-      "--chess-grid-color",
+      "--ct-grid-color",
       themeData.grid === "dark"
         ? "#555"
         : themeData.grid === "light"
@@ -262,15 +271,15 @@ export function applyThemeCSSVars(
           : "transparent",
     );
   } else {
-    body.removeProperty("--chess-grid-color");
+    body.removeProperty("--ct-grid-color");
   }
-  body.setProperty("--chess-board-margin-top", `${settings.boardMarginTop}px`);
+  body.setProperty("--ct-board-margin-top", `${settings.boardMarginTop}px`);
   body.setProperty(
-    "--chess-board-margin-bottom",
+    "--ct-board-margin-bottom",
     `${settings.boardMarginBottom}px`,
   );
   body.setProperty(
-    "--chess-coords-display",
+    "--ct-coords-display",
     settings.showCoordinateLabels ? "flex" : "none",
   );
 }

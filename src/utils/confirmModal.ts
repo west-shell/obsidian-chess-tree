@@ -348,7 +348,7 @@ export class ImportModal extends Modal {
 
     new Setting(contentEl).setName(t("import.fen"));
     const fenArea = contentEl.createEl("textarea", {
-      cls: "import-textarea",
+      cls: "ct-modal-textarea",
       attr: {
         rows: "3",
         placeholder: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -359,7 +359,7 @@ export class ImportModal extends Modal {
     });
 
     contentEl.createDiv({
-      cls: "import-fen-warning",
+      cls: "ct-modal-warning",
       text: t("import.fenWarning"),
     });
 
@@ -370,11 +370,11 @@ export class ImportModal extends Modal {
     });
     importFenBtn.addEventListener("click", () => this.handleImportFen());
 
-    contentEl.createDiv({ cls: "import-separator" });
+    contentEl.createDiv({ cls: "ct-modal-separator" });
 
     new Setting(contentEl).setName(t("import.pgn"));
     const pgnArea = contentEl.createEl("textarea", {
-      cls: "import-textarea",
+      cls: "ct-modal-textarea",
       attr: { rows: "6", placeholder: "1. e4 e5 2. Nf3 Nc6 ..." },
     });
     pgnArea.addEventListener("input", () => {
@@ -654,7 +654,7 @@ export class ExportModal extends Modal {
   ) {
     new Setting(container).setName(label);
     const area = container.createEl("textarea", {
-      cls: "export-textarea",
+      cls: "ct-modal-textarea ct-modal-textarea--fixed",
       attr: {
         rows: String(Math.max(2, Math.min(value.split("\n").length, 10))),
         readonly: "",

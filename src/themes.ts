@@ -66,6 +66,6 @@ export function applyThemes(settings: ISettings, _app?: App) {
   const t = themes[settings.theme] ?? themes.wood;
   applyThemeCSSVars(settings, t, _app);
   const body = activeDocument.body.style;
-  body.setProperty("--chess-piece-white", t.white);
-  body.setProperty("--chess-piece-black", t.black);
+  body.setProperty("--ct-piece-primary", t.white);
+  body.setProperty("--ct-piece-secondary", t.black);
 }

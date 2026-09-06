@@ -1,36 +1,36 @@
-// ====== Chess variant-specific values ======
-// This is the ONLY file that differs between chess-tree and obsidian-xiangqi.
-// All other scss files are shared via sync.
+// ============================================================================
+// Variant-specific values — CHESS
+// This is the ONLY style file that differs between chess-tree and
+// obsidian-xiangqi. All other files are shared verbatim by
+// scripts/sync-to-xiangqi.mjs (this one is excluded from the sync).
+// ============================================================================
 
-// Board aspect ratio (width / height): chess=1, xiangqi=0.9
-$board-aspect-ratio: 1;
+// Board aspect ratio (width / height): chess = 1, xiangqi = 0.9
+$board-ratio: 1;
 
-// Primary dimension for col2 uniboard: "width" or "height"
-// chess uses width (square board), xiangqi uses height (taller board)
-$col2-primary-dimension: "width";
+// Primary dimension driving the col2 board+toolbar rail ("uniboard"):
+// "width" for the square chess board, "height" for a taller board.
+$col2-size-dimension: "width";
 
-// Extra col1 variable only needed by chess
-$col1-uniboard-controls: 5rem;
-
-// Whether to output detailed coordinate label styles
-$coords-extra-styles: true;
-
-// GenFEN piece button grid: chess=6 cols, xiangqi=7 cols
-$piecebtns-cols: 6;
-$piecebtns-col-cqw: 16.6667cqw;
-$piecebtns-col-cqh: 16.6667cqh;
-
-// GenFEN toolbar col2: chess=nowrap, xiangqi=wrap+align-content:start
-$genfen-toolbar-flex-wrap: nowrap;
-$genfen-toolbar-align-content: null;
-
-// col1 board: chess adds --chess-board-scale and max-width
+// col1 board: fixed scale override and max width
 $col1-board-scale: 1;
 $col1-board-max-width: 100vh;
 
-// PGN view board width ratios
-$pgn-col1-board-cqh: 50cqh;
-$pgn-col2-board-cqh: 100cqh;
+// PGN file view: board width relative to the view container
+$pgn-col1-board-height: 50cqh;
+$pgn-col2-board-height: 100cqh;
 
-// PGN view col2: chess overrides ---col2-uniboard-width
-$pgn-col2-override-uniboard-width: true;
+// PGN file view col2: override the computed rail width with the view height
+$pgn-col2-override-width: true;
+
+// Coordinate labels: emit the rich files/ranks layout (chess style)
+$coords-rich: true;
+
+// FEN editor piece palette: 12 buttons laid out in N columns
+$palette-cols: 6;
+$palette-col-cqw: 16.6667cqw;
+$palette-col-cqh: 16.6667cqh;
+
+// FEN editor toolbar in col2: wrap behaviour
+$genfen-toolbar-wrap: nowrap;
+$genfen-toolbar-align: null;
