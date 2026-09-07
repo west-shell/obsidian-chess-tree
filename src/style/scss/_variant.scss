@@ -31,6 +31,7 @@ $palette-cols: 6;
 $palette-col-cqw: 16.6667cqw;
 $palette-col-cqh: 16.6667cqh;
 
-// FEN editor toolbar in col2: wrap behaviour
-$genfen-toolbar-wrap: nowrap;
-$genfen-toolbar-align: null;
+// FEN editor toolbar in col2: wrap into columns when taller than the board,
+// packing wrapped columns to the top-start corner.
+$genfen-toolbar-wrap: wrap;
+$genfen-toolbar-align: flex-start;
