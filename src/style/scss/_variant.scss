@@ -14,12 +14,40 @@
   background-color: var(--ct-board-bg, #f0d9b5);
 }
 
+// ---- Highlight colors (theme-driven) -----------------------------------------
+// themes.ts writes hex colors to <body> (--ct-selected-color /
+// --ct-lastmove-color / --ct-nextmove-color); alpha is applied with
+// relative-color syntax (Chromium 119+, same requirement as contrast-text
+// in _mixins.scss). Fallbacks keep the library defaults.
+
+.cg-wrap cg-board square.last-move {
+  background-color: #{"rgb(from var(--ct-lastmove-color, #9bc700) r g b / 0.41)"};
+}
+
+.cg-wrap cg-board square.selected {
+  background-color: #{"rgb(from var(--ct-selected-color, #14551e) r g b / 0.5)"};
+}
+
+.cg-wrap cg-board square.move-dest {
+  background: radial-gradient(
+    #{"rgb(from var(--ct-nextmove-color, #14551e) r g b / 0.5)"} 22%,
+    #{"rgb(from var(--ct-nextmove-color, #14551e) r g b)"} 0,
+    rgba(0, 0, 0, 0.3) 0,
+    rgba(0, 0, 0, 0) 0
+  );
+}
+
+.cg-wrap cg-board square.move-dest:hover,
+.cg-wrap cg-board square.move-dest.hover {
+  background: #{"rgb(from var(--ct-nextmove-color, #14551e) r g b / 0.3)"};
+}
+
 // Move-destination hint (occupancy class).
 .cg-wrap cg-board square.oc.move-dest {
   background: radial-gradient(
     transparent 0%,
     transparent 75%,
-    rgba(20, 85, 0, 0.3) 75%
+    #{"rgb(from var(--ct-nextmove-color, #14551e) r g b / 0.3)"} 75%
   );
 }
 
