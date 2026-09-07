@@ -116,7 +116,7 @@ const PIECE_ICONS: Record<string, string> = {
 };
 
 export function getNodeLabel(move: Move | null, mode: number): string {
-  if (!move) return "= Start =";
+  if (!move) return "start";
   if (mode === 1) return move.san;
   return "";
 }
@@ -143,7 +143,7 @@ export function getNodeWidth(
   measureFn?: (text: string, fontSize: string) => number,
 ): number {
   if (mode === 0) return 13;
-  const notation = move ? move.san : "= Start =";
+  const notation = move ? move.san : "start";
   if (measureFn) {
     return Math.max(13, Math.ceil(measureFn(notation, "6px")) + 4);
   }
@@ -168,7 +168,7 @@ export function getMoveListSideClass(color: string | null): string {
 }
 
 export function getStartLabel(): string {
-  return "= Start =";
+  return "=start=";
 }
 
 // ========== FEN Build Functions ==========
