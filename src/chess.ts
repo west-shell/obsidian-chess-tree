@@ -21,12 +21,11 @@ export const DEFAULT_FEN =
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 export const EMPTY_FEN = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
 
-// ---- DOM class names (BEM, `ct-` prefixed; see src/style/README.md) ----
-export const LAYOUT_CLASS = "ct-layout";
-export const LAYOUT_CLASS_EDIT = "ct-layout--edit";
-export const BLOCK_CLASS = "ct-block";
-export const FILE_VIEW_CLASS = "ct-file-view";
-export const RESIZING_CLASS = "ct-resizing";
+// ---- DOM class names (BEM) ----
+// Class-name prefix (chess: "ct", xiangqi: "xq"). Every plugin class is
+// `${CLS_PREFIX}-...` at the usage site; the matching scss prefix lives in
+// style/scss/_variant.scss ($cls-prefix).
+export const CLS_PREFIX = "ct";
 // chessground's own class names — never rename, styled in style/scss/_board.scss
 export const WRAP_CLASS = "cg-wrap";
 export const BOARD_ELEMENT = "cg-board";
@@ -163,9 +162,9 @@ export function getNodeTextColor(color: string | null): string {
 
 export function getMoveListSideClass(color: string | null): string {
   if (color === "white" || color === "red") {
-    return "ct-moves__move--white";
+    return `${CLS_PREFIX}-moves__move--white`;
   }
-  return "ct-moves__move--black";
+  return `${CLS_PREFIX}-moves__move--black`;
 }
 
 export function getStartLabel(): string {

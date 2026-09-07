@@ -1,6 +1,6 @@
 <script lang="ts">
   import { setIcon } from "obsidian";
-  import type { Piece } from "../../chess";
+  import { CLS_PREFIX, type Piece } from "../../chess";
   import type { EventBus } from "../../core/event-bus";
 
   interface Props {
@@ -107,15 +107,11 @@
   }
 </script>
 
-<div class="ct-layout__palette">
+<div class="{CLS_PREFIX}-layout__palette">
   {#each PIECES as { key, color, icon, piece } (key)}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-      class="ct-palette__btn ct-palette__btn--{color}"
-      class:ct-palette__btn--empty={count[key] === 0}
-      class:ct-palette__btn--active={selectedPiece &&
-        selectedPiece.type === piece.type &&
-        selectedPiece.color === piece.color}
+      class={`${CLS_PREFIX}-palette__btn ${CLS_PREFIX}-palette__btn--${color} ${count[key] === 0 ? `${CLS_PREFIX}-palette__btn--empty` : ""} ${selectedPiece && selectedPiece.type === piece.type && selectedPiece.color === piece.color ? `${CLS_PREFIX}-palette__btn--active` : ""}`}
       use:useIcon={icon}
       onclick={() => eventBus.emit("clickPieceBTN", piece)}
     ></button>

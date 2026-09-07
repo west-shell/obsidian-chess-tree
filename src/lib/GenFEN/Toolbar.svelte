@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { CLS_PREFIX } from "../../chess";
   import type { EventBus } from "../../core/event-bus";
   import { onLangChange, t } from "../../i18n";
   import { onDestroy, onMount } from "svelte";
@@ -196,11 +197,12 @@
   });
 </script>
 
-<div class="ct-genfen">
-  <div class="ct-genfen__group">
-    <div class="ct-genfen__section ct-genfen__section--row">
+<div class="{CLS_PREFIX}-genfen">
+  <div class="{CLS_PREFIX}-genfen__group">
+    <div class="{CLS_PREFIX}-genfen__section {CLS_PREFIX}-genfen__section--row">
       <button
-        class="ct-genfen__turn ct-genfen__turn--{_turn === 'b'
+        class="{CLS_PREFIX}-genfen__turn {CLS_PREFIX}-genfen__turn--{_turn ===
+        'b'
           ? 'black'
           : 'white'}"
         onclick={toggleTurn}
@@ -210,14 +212,15 @@
       >
     </div>
 
-    <div class="ct-genfen__section">
-      <span class="ct-genfen__label">{t("genfen.castling", _lv)}</span>
-      <div class="ct-genfen__rights">
-        <span class="ct-genfen__side">{t("genfen.castling_black", _lv)}</span>
+    <div class="{CLS_PREFIX}-genfen__section">
+      <span class="{CLS_PREFIX}-genfen__label">{t("genfen.castling", _lv)}</span
+      >
+      <div class="{CLS_PREFIX}-genfen__rights">
+        <span class="{CLS_PREFIX}-genfen__side"
+          >{t("genfen.castling_black", _lv)}</span
+        >
         <label
-          class="ct-genfen__right"
-          class:ct-genfen__right--on={hasCastling.q}
-          class:ct-genfen__right--off={!validCastling.q}
+          class={`${CLS_PREFIX}-genfen__right ${hasCastling.q ? `${CLS_PREFIX}-genfen__right--on` : ""} ${!validCastling.q ? `${CLS_PREFIX}-genfen__right--off` : ""}`}
         >
           <input
             type="checkbox"
@@ -228,9 +231,7 @@
           <span>q</span>
         </label>
         <label
-          class="ct-genfen__right"
-          class:ct-genfen__right--on={hasCastling.k}
-          class:ct-genfen__right--off={!validCastling.k}
+          class={`${CLS_PREFIX}-genfen__right ${hasCastling.k ? `${CLS_PREFIX}-genfen__right--on` : ""} ${!validCastling.k ? `${CLS_PREFIX}-genfen__right--off` : ""}`}
         >
           <input
             type="checkbox"
@@ -241,12 +242,12 @@
           <span>k</span>
         </label>
       </div>
-      <div class="ct-genfen__rights">
-        <span class="ct-genfen__side">{t("genfen.castling_white", _lv)}</span>
+      <div class="{CLS_PREFIX}-genfen__rights">
+        <span class="{CLS_PREFIX}-genfen__side"
+          >{t("genfen.castling_white", _lv)}</span
+        >
         <label
-          class="ct-genfen__right"
-          class:ct-genfen__right--on={hasCastling.Q}
-          class:ct-genfen__right--off={!validCastling.Q}
+          class={`${CLS_PREFIX}-genfen__right ${hasCastling.Q ? `${CLS_PREFIX}-genfen__right--on` : ""} ${!validCastling.Q ? `${CLS_PREFIX}-genfen__right--off` : ""}`}
         >
           <input
             type="checkbox"
@@ -257,9 +258,7 @@
           <span>Q</span>
         </label>
         <label
-          class="ct-genfen__right"
-          class:ct-genfen__right--on={hasCastling.K}
-          class:ct-genfen__right--off={!validCastling.K}
+          class={`${CLS_PREFIX}-genfen__right ${hasCastling.K ? `${CLS_PREFIX}-genfen__right--on` : ""} ${!validCastling.K ? `${CLS_PREFIX}-genfen__right--off` : ""}`}
         >
           <input
             type="checkbox"
@@ -272,13 +271,13 @@
       </div>
     </div>
 
-    <div class="ct-genfen__section">
-      <label class="ct-genfen__label" for="genfen-ep"
+    <div class="{CLS_PREFIX}-genfen__section">
+      <label class="{CLS_PREFIX}-genfen__label" for="genfen-ep"
         >{t("genfen.enpassant", _lv)}</label
       >
       <select
         id="genfen-ep"
-        class="ct-genfen__select"
+        class="{CLS_PREFIX}-genfen__select"
         value={_enPassant === "-" ? "-" : _enPassant[0]}
         onfocus={() =>
           (enPassantFiles = computeEnPassantFilesFor(boardPart(fen), _turn))}
@@ -292,25 +291,34 @@
     </div>
   </div>
 
-  <div class="ct-genfen__section ct-genfen__actions">
-    <button class="ct-genfen__action" onclick={() => buttonClick("start")}>
+  <div class="{CLS_PREFIX}-genfen__section {CLS_PREFIX}-genfen__actions">
+    <button
+      class="{CLS_PREFIX}-genfen__action"
+      onclick={() => buttonClick("start")}
+    >
       {t("genfen.start", _lv)}
     </button>
-    <button class="ct-genfen__action" onclick={() => buttonClick("empty")}>
+    <button
+      class="{CLS_PREFIX}-genfen__action"
+      onclick={() => buttonClick("empty")}
+    >
       {t("genfen.empty", _lv)}
     </button>
-    <button class="ct-genfen__action" onclick={() => buttonClick("flip")}>
+    <button
+      class="{CLS_PREFIX}-genfen__action"
+      onclick={() => buttonClick("flip")}
+    >
       {t("genfen.flip", _lv)}
     </button>
     <button
-      class="ct-genfen__action ct-genfen__action--save"
+      class="{CLS_PREFIX}-genfen__action {CLS_PREFIX}-genfen__action--save"
       onclick={() => buttonClick("save")}
     >
       {t("genfen.save", _lv)}
     </button>
     {#if !isFenMode}
       <button
-        class="ct-genfen__action ct-genfen__action--back"
+        class="{CLS_PREFIX}-genfen__action {CLS_PREFIX}-genfen__action--back"
         onclick={() => eventBus.emit("exit-edit")}
       >
         {t("genfen.back", _lv)}
