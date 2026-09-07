@@ -1,9 +1,68 @@
 // ============================================================================
-// Variant-specific values — CHESS
+// Variant-specific rules + values — CHESS
 // This is the ONLY style file that differs between chess-tree and
 // obsidian-xiangqi. All other files are shared verbatim by
-// scripts/sync-to-xiangqi.mjs (this one is excluded from the sync).
+// scripts/sync-to-xiangqi.mjs (this one is excluded from the sync):
+// shared rules stay variant-agnostic; selectors that only make sense for
+// one variant (cg-board / xq-board internals, coords layout) live here.
 // ============================================================================
+
+// ---- Variant-only selectors --------------------------------------------------
+
+// Board background (chessground square board).
+.cg-wrap cg-board {
+  background-color: var(--ct-board-bg, #f0d9b5);
+}
+
+// Move-destination hint (occupancy class).
+.cg-wrap cg-board square.oc.move-dest {
+  background: radial-gradient(
+    transparent 0%,
+    transparent 75%,
+    rgba(20, 85, 0, 0.3) 75%
+  );
+}
+
+// Rich coordinate labels (files bottom-left / ranks top-right).
+.cg-wrap coords {
+  display: var(--ct-coords-display, flex);
+  font-size: clamp(7px, 2.5cqw, 14px);
+}
+
+.cg-wrap coords.ranks {
+  left: auto;
+  right: 0;
+  top: 0;
+  width: 12.5%;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.cg-wrap coords.files {
+  bottom: 0;
+  left: 0;
+  height: 12.5%;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.cg-wrap coords coord {
+  line-height: 1;
+}
+
+.cg-wrap coords.ranks coord {
+  transform: none;
+  padding-right: 2%;
+  padding-top: 2%;
+}
+
+.cg-wrap coords.files coord {
+  padding-left: 0;
+  padding-bottom: 0;
+  text-align: left;
+}
+
+// ---- Variant-tunable values ---------------------------------------------------
 
 // Board aspect ratio (width / height): chess = 1, xiangqi = 0.9
 $board-ratio: 1;
@@ -22,9 +81,6 @@ $pgn-col2-board-height: 100cqh;
 
 // PGN file view col2: override the computed rail width with the view height
 $pgn-col2-override-width: true;
-
-// Coordinate labels: emit the rich files/ranks layout (chess style)
-$coords-rich: true;
 
 // FEN editor piece palette: 12 buttons laid out in N columns
 $palette-cols: 6;
