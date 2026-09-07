@@ -1,6 +1,5 @@
 import type { ISettings } from "./types";
 import { applyThemeCSSVars, type ThemeData } from "./chess";
-import { contrastColor } from "./utils/color";
 import type { App } from "obsidian";
 
 const themes: Record<string, ThemeData & { white: string; black: string }> = {
@@ -10,7 +9,7 @@ const themes: Record<string, ThemeData & { white: string; black: string }> = {
     bg: "#f0d9b5",
     grid: "none",
     white: "#fff",
-    black: "#b58863",
+    black: "#7e593a",
   },
   green: {
     name: "Green",
@@ -50,7 +49,7 @@ const themes: Record<string, ThemeData & { white: string; black: string }> = {
     bg: "#e0d8cf",
     grid: "none",
     white: "#fafafa",
-    black: "#8b7355",
+    black: "#7e6545",
   },
 };
 
@@ -69,6 +68,4 @@ export function applyThemes(settings: ISettings, _app?: App) {
   const body = activeDocument.body.style;
   body.setProperty("--ct-piece-primary", t.white);
   body.setProperty("--ct-piece-secondary", t.black);
-  body.setProperty("--ct-piece-primary-contrast", contrastColor(t.white));
-  body.setProperty("--ct-piece-secondary-contrast", contrastColor(t.black));
 }
