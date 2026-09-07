@@ -261,18 +261,6 @@ export function applyThemeCSSVars(
   } else {
     body.removeProperty("--ct-board-texture");
   }
-  if (themeData.grid) {
-    body.setProperty(
-      "--ct-grid-color",
-      themeData.grid === "dark"
-        ? "#555"
-        : themeData.grid === "light"
-          ? "#ccc"
-          : "transparent",
-    );
-  } else {
-    body.removeProperty("--ct-grid-color");
-  }
   body.setProperty("--ct-board-margin-top", `${settings.boardMarginTop}px`);
   body.setProperty(
     "--ct-board-margin-bottom",
