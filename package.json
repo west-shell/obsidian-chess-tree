@@ -1,7 +1,7 @@
 {
   "name": "obsidian-chess-tree",
   "private": true,
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "Chess variation tree.",
   "main": "main.js",
   "type": "module",
@@ -73,5 +73,10 @@
     "*.{css,scss,html,json,md}": [
       "prettier --write"
     ]
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "esbuild@0.28.2": true,
+    "simple-git-hooks@2.14.0": true
   }
 }
