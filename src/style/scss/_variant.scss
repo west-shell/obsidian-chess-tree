@@ -24,23 +24,23 @@ $cls-prefix: "ct";
 }
 
 // ---- Highlight colors (theme-driven) -----------------------------------------
-// themes.ts writes hex colors to <body> (--ct-selected-color /
-// --ct-lastmove-color / --ct-nextmove-color); alpha is applied with
-// relative-color syntax (Chromium 119+, same requirement as contrast-text
-// in _mixins.scss). Fallbacks keep the library defaults.
+// themes.ts writes rgba() colors (alpha precomputed in JS) to <body>
+// (--ct-selected-color / --ct-lastmove-color / --ct-nextmove-color); they are
+// consumed as-is — no relative-color syntax, which mobile WebViews don't
+// support. Fallbacks keep the library defaults.
 
 .cg-wrap cg-board square.last-move {
-  background-color: #{"rgb(from var(--ct-lastmove-color, #9bc700) r g b / 0.41)"};
+  background-color: var(--ct-lastmove-color, rgba(155, 199, 0, 0.41));
 }
 
 .cg-wrap cg-board square.selected {
-  background-color: #{"rgb(from var(--ct-selected-color, #14551e) r g b / 0.5)"};
+  background-color: var(--ct-selected-color, rgba(20, 85, 30, 0.5));
 }
 
 .cg-wrap cg-board square.move-dest {
   background: radial-gradient(
-    #{"rgb(from var(--ct-nextmove-color, #14551e) r g b / 0.5)"} 22%,
-    #{"rgb(from var(--ct-nextmove-color, #14551e) r g b)"} 0,
+    var(--ct-nextmove-color, rgba(20, 85, 30, 0.5)) 22%,
+    var(--ct-nextmove-color, rgba(20, 85, 30, 0.5)) 0,
     rgba(0, 0, 0, 0.3) 0,
     rgba(0, 0, 0, 0) 0
   );
@@ -48,7 +48,7 @@ $cls-prefix: "ct";
 
 .cg-wrap cg-board square.move-dest:hover,
 .cg-wrap cg-board square.move-dest.hover {
-  background: #{"rgb(from var(--ct-nextmove-color, #14551e) r g b / 0.3)"};
+  background: var(--ct-nextmove-color, rgba(20, 85, 30, 0.5));
 }
 
 // Move-destination hint (occupancy class).
@@ -56,7 +56,7 @@ $cls-prefix: "ct";
   background: radial-gradient(
     transparent 0%,
     transparent 75%,
-    #{"rgb(from var(--ct-nextmove-color, #14551e) r g b / 0.3)"} 75%
+    var(--ct-nextmove-color, rgba(20, 85, 0, 0.5)) 75%
   );
 }
 

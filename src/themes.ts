@@ -2,14 +2,15 @@ import type { ISettings } from "./types";
 import { applyThemeCSSVars, type ThemeData } from "./chess";
 import type { App } from "obsidian";
 
-// Highlight color presets — the suffix names the board it suits:
-// *_light for light boards (dark marks), *_dark for dark boards (light marks).
-const selected_light = "#14551e";
-const selected_dark = "#66bb6a";
-const lastMove_light = "#9bc700";
-const lastMove_dark = "#7986cb";
-const nextMove_light = "#14551e";
-const nextMove_dark = "#66bb6a";
+// Highlight color presets (with alpha baked in) — the suffix names the board
+// it suits: *_light for light boards (dark marks), *_dark for dark boards
+// (light marks).
+const selected_light = "rgba(20, 85, 30, 0.5)";
+const selected_dark = "rgba(102, 187, 106, 0.5)";
+const lastMove_light = "rgba(155, 199, 0, 0.41)";
+const lastMove_dark = "rgba(121, 134, 203, 0.41)";
+const nextMove_light = "rgba(20, 85, 30, 0.5)";
+const nextMove_dark = "rgba(102, 187, 106, 0.5)";
 
 const themes: Record<
   string,
@@ -40,9 +41,9 @@ const themes: Record<
     grid: "none",
     white: "#eee",
     black: "#425232",
-    selected: "#0d47a1",
+    selected: "rgba(13, 71, 161, 0.5)",
     lastMove: lastMove_light,
-    nextMove: "#0d47a1",
+    nextMove: "rgba(13, 71, 161, 0.5)",
   },
   blue: {
     name: "Blue",
@@ -105,6 +106,9 @@ export function applyThemes(settings: ISettings, _app?: App) {
   const body = activeDocument.body.style;
   body.setProperty("--ct-piece-primary", t.white);
   body.setProperty("--ct-piece-secondary", t.black);
+  // Highlight colors already carry alpha (see presets above) and are
+  // consumed as-is by the SCSS — mobile WebViews don't support
+  // relative-color syntax.
   body.setProperty("--ct-selected-color", t.selected);
   body.setProperty("--ct-lastmove-color", t.lastMove);
   body.setProperty("--ct-nextmove-color", t.nextMove);
