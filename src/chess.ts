@@ -151,8 +151,10 @@ export function getNodeWidth(
 }
 
 export function getNodeFill(color: string | null): string {
-  if (color === "white") return "#fff";
-  if (color === "black") return "#333";
+  // Use the theme's piece colors (same as the FEN-edit palette buttons):
+  // white side -> --{prefix}-piece-primary, black side -> --{prefix}-piece-secondary.
+  if (color === "white") return `var(--${CLS_PREFIX}-piece-primary)`;
+  if (color === "black") return `var(--${CLS_PREFIX}-piece-secondary)`;
   return "green";
 }
 
