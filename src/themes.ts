@@ -104,8 +104,8 @@ export function applyThemes(settings: ISettings, _app?: App) {
   const t = themes[settings.theme] ?? themes.wood;
   applyThemeCSSVars(settings, t, _app);
   const body = activeDocument.body.style;
-  body.setProperty("--ct-piece-primary", t.white);
-  body.setProperty("--ct-piece-secondary", t.black);
+  body.setProperty("--ct-piece-white", t.white);
+  body.setProperty("--ct-piece-black", t.black);
   // Highlight colors already carry alpha (see presets above) and are
   // consumed as-is by the SCSS — mobile WebViews don't support
   // relative-color syntax.

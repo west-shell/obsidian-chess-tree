@@ -99,6 +99,21 @@ $cls-prefix: "ct";
   text-align: left;
 }
 
+// Turn indicator frame: a crisp ring around the board (no blur → no glow)
+// in the side-to-move piece color. Drawn on cg-board — not the grid cell —
+// because the board fills the cell flush, so a cell background only leaks
+// through as a sub-pixel sliver whose width changes with the board scale.
+// Thickness scales with the board (cqw resolves against the wrap, the
+// inline-size container declared in _board.scss): ~2px at 500px, clamped
+// to 1–3px.
+.#{$cls-prefix}-layout__board--turn-white cg-board {
+  box-shadow: 0 0 0 clamp(1px, 0.4cqw, 3px) var(--ct-piece-white);
+}
+
+.#{$cls-prefix}-layout__board--turn-black cg-board {
+  box-shadow: 0 0 0 clamp(1px, 0.4cqw, 3px) var(--ct-piece-black);
+}
+
 // ---- FEN editor piece colors (theme-driven) -----------------------------------
 // Palette + side-to-move button colors. `{prefix}-layout--edit`-scoped so they
 // outrank the shared base button rule in _genfen.scss (which loads later
@@ -108,32 +123,32 @@ $cls-prefix: "ct";
 .#{$cls-prefix}-layout--edit
   .#{$cls-prefix}-layout__palette
   button.#{$cls-prefix}-palette__btn--white {
-  background-color: var(--ct-piece-primary);
-  @include contrast-text(var(--ct-piece-primary), black);
+  background-color: var(--ct-piece-white);
+  @include contrast-text(var(--ct-piece-white), black);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .#{$cls-prefix}-layout--edit
   .#{$cls-prefix}-layout__palette
   button.#{$cls-prefix}-palette__btn--black {
-  background-color: var(--ct-piece-secondary);
-  @include contrast-text(var(--ct-piece-secondary), white);
+  background-color: var(--ct-piece-black);
+  @include contrast-text(var(--ct-piece-black), white);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .#{$cls-prefix}-layout--edit
   .#{$cls-prefix}-genfen
   button.#{$cls-prefix}-genfen__turn--white {
-  background-color: var(--ct-piece-primary);
-  @include contrast-text(var(--ct-piece-primary), black);
+  background-color: var(--ct-piece-white);
+  @include contrast-text(var(--ct-piece-white), black);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .#{$cls-prefix}-layout--edit
   .#{$cls-prefix}-genfen
   button.#{$cls-prefix}-genfen__turn--black {
-  background-color: var(--ct-piece-secondary);
-  @include contrast-text(var(--ct-piece-secondary), white);
+  background-color: var(--ct-piece-black);
+  @include contrast-text(var(--ct-piece-black), white);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
