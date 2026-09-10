@@ -3,6 +3,7 @@
 ![Version](https://img.shields.io/github/v/release/west-shell/obsidian-chess-tree)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](./LICENSE)
 [![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
+[![Afdian](https://img.shields.io/badge/Afdian-Sponsor-946CE6?logo=afdian)](https://afdian.com/a/weshell)
 
 [中文](./README.zh.md) | [English](./README.md)
 
@@ -221,5 +222,6 @@ npm run build:min    # Minified build (for release)
 If you like this plugin, feel free to support me!
 
 [![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
+[![Afdian](https://img.shields.io/badge/Afdian-Sponsor-946CE6?logo=afdian)](https://afdian.com/a/weshell)
 
 ![Donation](./IMAGE/打赏.png)

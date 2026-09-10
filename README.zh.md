@@ -3,6 +3,7 @@
 ![版本](https://img.shields.io/github/v/release/west-shell/obsidian-chess-tree)
 [![许可证: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](./LICENSE)
 [![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
+[![爱发电](https://img.shields.io/badge/爱发电-赞助-946CE6?logo=afdian)](https://afdian.com/a/weshell)
 
 [中文](./README.zh.md) | [English](./README.md)
 
@@ -221,5 +222,6 @@ npm run build:min    # 精简版本（压缩，适合发布）
 如果喜欢该插件，可以打赏一下哦
 
 [![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
+[![爱发电](https://img.shields.io/badge/爱发电-赞助-946CE6?logo=afdian)](https://afdian.com/a/weshell)
 
 ![打赏](./IMAGE/打赏.png)
