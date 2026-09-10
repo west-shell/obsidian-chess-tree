@@ -40,7 +40,11 @@ export const RIBBON_ICON = "chess-knight";
 export const DEFAULT_FILENAME = "Untitled";
 export const GRID_SVG: string | null = null;
 export const TREE_LAYOUT_SPACING = 0.3;
-export const TREE_SPACING_X = 18;
+
+/** Horizontal pixel spacing per layout x-unit, varies with node display mode. */
+export function getTreeSpacingX(mode: number): number {
+  return mode === 1 ? 18 : 15;
+}
 export const NODE_CHAR_DY = 3.5;
 export const DEFAULT_LANG = "en";
 
