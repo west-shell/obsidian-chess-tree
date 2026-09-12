@@ -38,6 +38,7 @@ export const DEFAULT_TREE_BLOCK_NAMES = ["chess", "tree"];
 export const DEFAULT_FEN_BLOCK_NAMES = ["fen"];
 export const RIBBON_ICON = "chess-knight";
 export const DEFAULT_FILENAME = "Untitled";
+export const PGN_PLACEHOLDER = "1. e4 e5 2. Nf3 Nc6 ...";
 export const GRID_SVG: string | null = null;
 export const TREE_LAYOUT_SPACING = 0.3;
 

@@ -4,7 +4,7 @@ import type { ChessNode, GameSlot, IHost } from "../types";
 import { PGNParser } from "../modules/Source/parser";
 import { validateFen } from "./chessEngine";
 import { activateGame } from "./parse";
-import { CLS_PREFIX } from "../chess";
+import { CLS_PREFIX, DEFAULT_FEN, PGN_PLACEHOLDER } from "../chess";
 
 export type SaveConfirmResult = {
   action: "save" | "saveAll" | "cancel";
@@ -320,7 +320,15 @@ export class DownloadModal extends Modal {
   error(index: number, msg: string) {
     const row = this.fileRows[index];
     if (!row) return;
-    row.status.textContent = msg;
+    row.status.textContent = "";
+    const retryLink = row.status.createEl("a", {
+      text: msg + " - " + t("engine.retry", 0),
+      attr: { href: "#", target: "_blank" },
+    });
+    retryLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.onConfirm?.();
+    });
     this.downloadBtn.disabled = false;
   }
 
@@ -352,7 +360,7 @@ export class ImportModal extends Modal {
       cls: `${CLS_PREFIX}-modal-textarea`,
       attr: {
         rows: "3",
-        placeholder: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        placeholder: DEFAULT_FEN,
       },
     });
     fenArea.addEventListener("input", () => {
@@ -376,7 +384,7 @@ export class ImportModal extends Modal {
     new Setting(contentEl).setName(t("import.pgn"));
     const pgnArea = contentEl.createEl("textarea", {
       cls: `${CLS_PREFIX}-modal-textarea`,
-      attr: { rows: "6", placeholder: "1. e4 e5 2. Nf3 Nc6 ..." },
+      attr: { rows: "6", placeholder: PGN_PLACEHOLDER },
     });
     pgnArea.addEventListener("input", () => {
       this.pgnValue = pgnArea.value;
@@ -539,9 +547,10 @@ export class ImportModal extends Modal {
 export class ExportModal extends Modal {
   private includeComments = true;
   private includeEval = true;
-  private allPgnArea!: HTMLTextAreaElement;
-  private branchPgnArea!: HTMLTextAreaElement;
-  private allGamesArea: HTMLTextAreaElement | null = null;
+  private fenMode: "current" | "root" = "current";
+  private pgnMode: "branch" | "all" | "allGames" = "branch";
+  private fenArea!: HTMLTextAreaElement;
+  private pgnArea!: HTMLTextAreaElement;
 
   constructor(
     app: App,
@@ -558,62 +567,97 @@ export class ExportModal extends Modal {
     const { contentEl } = this;
     const host = this.host;
 
-    new Setting(contentEl).setName(t("export.title")).setHeading();
+    contentEl.createDiv({
+      text: t("export.fen"),
+      cls: `${CLS_PREFIX}-export-section-title`,
+    });
+    this.createSegmented(
+      contentEl,
+      [
+        { key: "current", label: t("export.currentFen") },
+        { key: "root", label: t("export.rootFen") },
+      ],
+      this.fenMode,
+      (key) => {
+        this.fenMode = key as "current" | "root";
+        this.setAreaValue(this.fenArea, this.buildFen());
+      },
+    );
+    this.fenArea = this.createExportArea(contentEl, this.buildFen());
 
-    const rootFen = host.root.fen;
-    const currentFen = host.currentNode.fen;
-
-    this.addExportSection(contentEl, t("export.rootFen"), rootFen, null);
-    this.addExportSection(contentEl, t("export.currentFen"), currentFen, null);
-
-    new Setting(contentEl)
-      .setName(t("export.includeComments"))
-      .addToggle((toggle) => {
-        toggle.setValue(this.includeComments).onChange((val) => {
-          this.includeComments = val;
-          this.refreshPgn();
-        });
-      });
-
-    new Setting(contentEl)
-      .setName(t("export.includeEval"))
-      .addToggle((toggle) => {
-        toggle.setValue(this.includeEval).onChange((val) => {
-          this.includeEval = val;
-          this.refreshPgn();
-        });
-      });
-
-    const allPgn =
-      host.tags + "\n\n" + host.stringifyPGN(host.root, this.includeEval);
-    this.addExportSection(contentEl, t("export.allPgn"), allPgn, "allPgn");
-
-    if (host.games && host.games.length > 1) {
-      const allGamesPgn = this.getAllGamesPGN();
-      this.addExportSection(
-        contentEl,
-        t("export.allGames"),
-        allGamesPgn,
-        "allGames",
-      );
-    }
-
-    const branchPgn = this.getCurrentBranchPGN(
+    contentEl.createDiv({
+      text: t("export.pgn"),
+      cls: `${CLS_PREFIX}-export-section-title ${CLS_PREFIX}-export-section-title--divider`,
+    });
+    const togglesRow = contentEl.createDiv(`${CLS_PREFIX}-export-toggles`);
+    this.createToggle(
+      togglesRow,
+      t("export.includeComments"),
+      () => {
+        this.includeComments = !this.includeComments;
+        this.setAreaValue(this.pgnArea, this.buildPgn());
+      },
       this.includeComments,
+    );
+    this.createToggle(
+      togglesRow,
+      t("export.includeEval"),
+      () => {
+        this.includeEval = !this.includeEval;
+        this.setAreaValue(this.pgnArea, this.buildPgn());
+      },
       this.includeEval,
     );
-    this.addExportSection(
-      contentEl,
-      t("export.currentBranchPgn"),
-      branchPgn,
-      "branchPgn",
-    );
+
+    const pgnOptions: { key: string; label: string }[] = [
+      { key: "branch", label: t("export.currentBranchPgn") },
+      { key: "all", label: t("export.allPgn") },
+    ];
+    if (host.games && host.games.length > 1) {
+      pgnOptions.push({ key: "allGames", label: t("export.allGames") });
+    }
+    this.createSegmented(contentEl, pgnOptions, this.pgnMode, (key) => {
+      this.pgnMode = key as "branch" | "all" | "allGames";
+      this.setAreaValue(this.pgnArea, this.buildPgn());
+    });
+    this.pgnArea = this.createExportArea(contentEl, this.buildPgn());
 
     const btnContainer = contentEl.createDiv("modal-button-container");
     const closeBtn = btnContainer.createEl("button", {
       text: t("export.close"),
     });
     closeBtn.addEventListener("click", () => this.close());
+  }
+
+  private createToggle(
+    container: HTMLElement,
+    label: string,
+    onChange: () => void,
+    checked: boolean,
+  ) {
+    const wrap = container.createEl("label", {
+      cls: `${CLS_PREFIX}-export-toggle`,
+    });
+    const input = wrap.createEl("input", { attr: { type: "checkbox" } });
+    input.checked = checked;
+    input.addEventListener("change", onChange);
+    wrap.appendText(label);
+  }
+
+  private buildFen(): string {
+    const host = this.host;
+    return this.fenMode === "root" ? host.root.fen : host.currentNode.fen;
+  }
+
+  private buildPgn(): string {
+    const host = this.host;
+    if (this.pgnMode === "allGames") return this.getAllGamesPGN();
+    if (this.pgnMode === "all") {
+      return (
+        host.tags + "\n\n" + host.stringifyPGN(host.root, this.includeEval)
+      );
+    }
+    return this.getCurrentBranchPGN(this.includeComments, this.includeEval);
   }
 
   private getAllGamesPGN(): string {
@@ -633,26 +677,39 @@ export class ExportModal extends Modal {
     return parts.join("\n\n");
   }
 
-  private refreshPgn() {
-    const host = this.host;
-    const allPgn =
-      host.tags + "\n\n" + host.stringifyPGN(host.root, this.includeEval);
-    if (this.allPgnArea) this.allPgnArea.value = allPgn;
-    if (this.allGamesArea) this.allGamesArea.value = this.getAllGamesPGN();
-    const branchPgn = this.getCurrentBranchPGN(
-      this.includeComments,
-      this.includeEval,
+  private setAreaValue(area: HTMLTextAreaElement, value: string) {
+    area.value = value;
+    area.setAttribute(
+      "rows",
+      String(Math.max(2, Math.min(value.split("\n").length, 10))),
     );
-    if (this.branchPgnArea) this.branchPgnArea.value = branchPgn;
   }
 
-  private addExportSection(
+  private createSegmented(
     container: HTMLElement,
-    label: string,
-    value: string,
-    areaKey: "allPgn" | "branchPgn" | "allGames" | null,
+    options: { key: string; label: string }[],
+    activeKey: string,
+    onChange: (key: string) => void,
   ) {
-    new Setting(container).setName(label);
+    const group = container.createDiv(`${CLS_PREFIX}-export-segmented`);
+    const buttons = new Map<string, HTMLButtonElement>();
+    for (const opt of options) {
+      const btn = group.createEl("button", { text: opt.label });
+      buttons.set(opt.key, btn);
+      btn.addEventListener("click", () => {
+        for (const [key, b] of buttons) {
+          b.classList.toggle("mod-cta", key === opt.key);
+        }
+        onChange(opt.key);
+      });
+    }
+    buttons.get(activeKey)?.classList.add("mod-cta");
+  }
+
+  private createExportArea(
+    container: HTMLElement,
+    value: string,
+  ): HTMLTextAreaElement {
     const area = container.createEl("textarea", {
       cls: `${CLS_PREFIX}-modal-textarea ${CLS_PREFIX}-modal-textarea--fixed`,
       attr: {
@@ -662,11 +719,8 @@ export class ExportModal extends Modal {
     });
     area.value = value;
 
-    if (areaKey === "allPgn") this.allPgnArea = area;
-    else if (areaKey === "branchPgn") this.branchPgnArea = area;
-    else if (areaKey === "allGames") this.allGamesArea = area;
-
-    const copyBtn = container.createEl("button", {
+    const copyRow = container.createDiv(`${CLS_PREFIX}-export-copy-row`);
+    const copyBtn = copyRow.createEl("button", {
       text: t("export.copy"),
       cls: "mod-cta",
     });
@@ -679,6 +733,7 @@ export class ExportModal extends Modal {
         })
         .catch(() => {});
     });
+    return area;
   }
 
   onClose() {

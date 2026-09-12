@@ -14,7 +14,6 @@ const EXCLUDED_FILES = new Set([
   "css-imports.ts",
   "themes.ts",
   "icon.ts",
-  "confirmModal.ts",
   "declarations.d.ts",
   "_variant.scss",
 ]);
@@ -25,9 +24,7 @@ const EXCLUDED_PATHS = new Set([
   "modules/Engine/Engine.ts",
 ]);
 
-const EXCLUDED_DIRS = new Set([
-  "assets",
-]);
+const EXCLUDED_DIRS = new Set(["assets"]);
 
 const SRC_DIR = join(CHESS_TREE_ROOT, "src");
 const DEST_SRC_DIR = join(XIANGQI_ROOT, "src");
@@ -67,4 +64,6 @@ function syncDir(srcDir, destDir, relPrefix) {
 
 console.log("Syncing chess-tree -> xiangqi...\n");
 syncDir(SRC_DIR, DEST_SRC_DIR, "");
-console.log("\nDone! Now manually update xiangqi's chess.ts with xiangqi-specific values.");
+console.log(
+  "\nDone! Now manually update xiangqi's chess.ts with xiangqi-specific values.",
+);
