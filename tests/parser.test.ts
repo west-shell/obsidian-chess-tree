@@ -151,4 +151,45 @@ describe("Chess PGN Parser", () => {
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     );
   });
+
+  // ============ 严格模式测试 ============
+
+  test("strict mode throws on illegal move", () => {
+    const pgn = `
+      1. e4 e5 2. Ke4
+    `;
+    expect(() => new PGNParser(pgn, true)).toThrow();
+  });
+
+  test("strict mode throws on garbage input with no legal moves", () => {
+    expect(() => new PGNParser("hello world", true)).toThrow();
+  });
+
+  test("strict mode throws on invalid FEN tag", () => {
+    const pgn = `
+      [FEN "7q/8/2R5/6R1/8/8/8/3Q4 w - - 0 1"]
+      1. Ra6
+    `;
+    expect(() => new PGNParser(pgn, true)).toThrow();
+  });
+
+  test("strict mode accepts a valid game with variations", () => {
+    const pgn = `
+      [Event "Test"]
+      1. e4 (1. d4 d5) e5 2. Nf3 Nc6 1/2-1/2
+    `;
+    const parser = new PGNParser(pgn, true);
+    expect(parser.getRoot().children).toHaveLength(2);
+  });
+
+  test("non-strict mode still skips illegal moves", () => {
+    const pgn = `
+      1. e4 e5 2. Ke4
+    `;
+    const parser = new PGNParser(pgn);
+    const root = parser.getRoot();
+    expect(root.children[0].move?.san).toBe("e4");
+    expect(root.children[0].children[0].move?.san).toBe("e5");
+    expect(root.children[0].children[0].children).toHaveLength(0);
+  });
 });
