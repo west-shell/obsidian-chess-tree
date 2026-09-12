@@ -185,7 +185,7 @@ export function buildDefaultEditFen(boardPart: string): string {
 
 // ========== Token/Parser Functions ==========
 export const MOVE_REGEX =
-  /^(O-O(?:-O)?[+#]?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)\b/;
+  /^(O-O(?:-O)?|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?)\b[+#]?/;
 
 export const FEN_REGEX =
   /^[rnbqkpRNBQKP1-8]+(\/[rnbqkpRNBQKP1-8]+){7}(\s+[wb]\s+(?:K?Q?k?q?|-)\s+(?:-|[a-h][3-6])\s+\d+\s+\d+)?/;

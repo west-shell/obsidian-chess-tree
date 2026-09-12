@@ -192,4 +192,70 @@ describe("Chess PGN Parser", () => {
     expect(root.children[0].children[0].move?.san).toBe("e5");
     expect(root.children[0].children[0].children).toHaveLength(0);
   });
+
+  test("non-strict mode stops at the first invalid FEN tag", () => {
+    const pgn = `
+      [FEN "invalid fen"]
+      1. e4 e5 2. Ke4
+    `;
+    const parser = new PGNParser(pgn);
+    const skipped = parser.getSkipped();
+    expect(skipped.map((s) => [s.text, s.kind])).toEqual([
+      ['[FEN "invalid fen"]', "fen"],
+    ]);
+    expect(skipped[0].line).toBe(2);
+  });
+
+  test("non-strict mode stops at the first illegal move", () => {
+    const pgn = "1. e4 e5 2. Ke4 Qxf7 (1... c5)";
+    const parser = new PGNParser(pgn);
+    const skipped = parser.getSkipped();
+    expect(skipped.map((s) => [s.text, s.kind])).toEqual([["Ke4", "move"]]);
+    expect(skipped[0].line).toBe(1);
+    // Content after the first error is not parsed.
+    expect(parser.getMap().size).toBe(3);
+  });
+
+  test("non-strict mode reports unrecognized content", () => {
+    const parser = new PGNParser("1. D8-D91 E9-E8");
+    const skipped = parser.getSkipped();
+    expect(skipped.map((s) => [s.text, s.kind])).toEqual([
+      ["D8-D91", "unknown"],
+    ]);
+    // Nothing was actually parsed.
+    expect(parser.getMap().size).toBe(1);
+  });
+
+  test("NAGs and escape lines do not trigger warnings", () => {
+    const parser = new PGNParser("1. e4 e5 $1 2. Nf3 Nc6\n% escape line");
+    expect(parser.getSkipped()).toEqual([]);
+    expect(parser.getMainLine()).toHaveLength(4);
+  });
+
+  test("non-strict mode records nothing for valid PGN", () => {
+    const parser = new PGNParser("1. e4 e5 2. Nf3 Nc6");
+    expect(parser.getSkipped()).toEqual([]);
+  });
+
+  test("check and checkmate suffixes are part of the move token", () => {
+    const withCheck = new PGNParser("1. e4 e5 2. Nf3 d6 3. Bb5+ c6");
+    expect(withCheck.getSkipped()).toEqual([]);
+    expect(withCheck.getMainLine().map((n) => n.move?.san)).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "d6",
+      "Bb5+",
+      "c6",
+    ]);
+
+    const withMate = new PGNParser("1. f3 e5 2. g4 Qh4#");
+    expect(withMate.getSkipped()).toEqual([]);
+    expect(withMate.getMainLine().map((n) => n.move?.san)).toEqual([
+      "f3",
+      "e5",
+      "g4",
+      "Qh4#",
+    ]);
+  });
 });
