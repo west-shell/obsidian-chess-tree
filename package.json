@@ -1,7 +1,7 @@
 {
   "name": "obsidian-chess-tree",
   "private": true,
-  "version": "2.9.9",
+  "version": "2.9.10",
   "description": "Chess variation tree.",
   "main": "main.js",
   "type": "module",
