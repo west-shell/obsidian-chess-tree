@@ -3,6 +3,8 @@ import { applyThemeCSSVars, type ThemeData } from "./chess";
 import { applyPieceSet } from "./pieceSets";
 import type { App } from "obsidian";
 
+import woodB64 from "../assets/wood.jpg?base64";
+
 // Piece-set switching is variant-specific (excluded from the xiangqi sync);
 // re-exported here so shared UI (settings tab, toolbar) gets it from the
 // variant's appearance module — NOT from ./chess, which must stay free of
@@ -41,6 +43,22 @@ const themes: Record<
     selected: selected_light,
     lastMove: lastMove_light,
     nextMove: nextMove_light,
+  },
+  woodgrain: {
+    name: "Wood Grain",
+    nameZh: "木纹",
+    // Vault-relative image path (under .obsidian/) — deployBoardAssets()
+    // materializes it from the bundled base64 on startup.
+    bg: "plugins/chess-tree/assets/wood.jpg",
+    bgImage: { path: "plugins/chess-tree/assets/wood.jpg", base64: woodB64 },
+    grid: "none",
+    white: "#fff",
+    black: "#7e593a",
+    // Bright marks stay legible over the mid-tone wood texture; the cool
+    // highlight hues complement the warm grain.
+    selected: selected_dark,
+    lastMove: lastMove_dark,
+    nextMove: nextMove_dark,
   },
   green: {
     name: "Green",
@@ -106,6 +124,54 @@ export function getThemeDisplayName(key: string, lang: string): string {
   const def = themes[key];
   if (!def) return key;
   return lang === "zh" ? def.nameZh : def.name;
+}
+
+function base64ToArrayBuffer(b64: string): ArrayBuffer {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+async function ensureDir(
+  adapter: {
+    exists(p: string): Promise<boolean>;
+    mkdir(p: string): Promise<void>;
+  },
+  dir: string,
+) {
+  const parts = dir.split("/").filter(Boolean);
+  let cur = "";
+  for (const part of parts) {
+    cur = cur ? `${cur}/${part}` : part;
+    if (!(await adapter.exists(cur))) {
+      await adapter.mkdir(cur);
+    }
+  }
+}
+
+/** Materialize bundled theme background images into the vault's config dir. */
+export async function ensureBoardAssets(app: App): Promise<void> {
+  const adapter = app.vault.adapter;
+  const configDir = app.vault.configDir;
+  for (const def of Object.values(themes)) {
+    const img = def.bgImage;
+    if (!img) continue;
+    const fullPath = `${configDir}/${img.path}`;
+    try {
+      if (await adapter.exists(fullPath)) continue;
+      const slash = img.path.lastIndexOf("/");
+      if (slash > 0) {
+        await ensureDir(adapter, `${configDir}/${img.path.slice(0, slash)}`);
+      }
+      await adapter.writeBinary(fullPath, base64ToArrayBuffer(img.base64));
+    } catch (err) {
+      console.error(
+        `[chess-tree] failed to write board asset: ${img.path}`,
+        err,
+      );
+    }
+  }
 }
 
 export function applyThemes(settings: ISettings, _app?: App) {
