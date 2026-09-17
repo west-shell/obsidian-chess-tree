@@ -67,8 +67,17 @@ const FIGURINE_NOTATION: Record<string, string> = {
 };
 
 // Notation modes offered in the move-list settings. The adapter owns this
-// list so variants without letter notation can define their own.
-export const NOTATION_TYPES: readonly string[] = ["figurine", "letter"];
+// list so variants can define their own; each label key resolves to a
+// dropdown label showing a notation example.
+export interface NotationType {
+  value: string;
+  labelKey: string;
+}
+
+export const NOTATION_TYPES: readonly NotationType[] = [
+  { value: "figurine", labelKey: "movelist.notation.figurine" },
+  { value: "letter", labelKey: "movelist.notation.letter" },
+];
 export const DEFAULT_NOTATION_TYPE = "figurine";
 
 export function getMoveNotation(move: Move, notationType?: string): string {
@@ -143,9 +152,13 @@ const PIECE_ICONS: Record<string, string> = {
   p: "chess_pawn",
 };
 
-export function getNodeLabel(move: Move | null, mode: number): string {
+export function getNodeLabel(
+  move: Move | null,
+  mode: number,
+  notationType?: string,
+): string {
   if (!move) return "start";
-  if (mode === 1) return move.san;
+  if (mode === 1) return getMoveNotation(move, notationType);
   return "";
 }
 
@@ -169,9 +182,10 @@ export function getNodeWidth(
   move: Move | null,
   mode: number,
   measureFn?: (text: string, fontSize: string) => number,
+  notationType?: string,
 ): number {
   if (mode === 0) return 13;
-  const notation = move ? move.san : "start";
+  const notation = move ? getMoveNotation(move, notationType) : "start";
   if (measureFn) {
     return Math.max(13, Math.ceil(measureFn(notation, "6px")) + 4);
   }
