@@ -55,7 +55,29 @@ export const HAS_PROMOTION = true;
 export const PRIMARY_PLAYER_KEY = "White";
 
 // ========== Move Functions ==========
-export function getMoveNotation(move: Move): string {
+
+// Figurine notation: SAN piece letters -> figurine glyphs. Display-only
+// (move list); saved PGN and speech always use plain SAN.
+const FIGURINE_NOTATION: Record<string, string> = {
+  K: "♔",
+  Q: "♕",
+  R: "♖",
+  B: "♗",
+  N: "♘",
+};
+
+// Notation modes offered in the move-list settings. The adapter owns this
+// list so variants without letter notation can define their own.
+export const NOTATION_TYPES: readonly string[] = ["figurine", "letter"];
+export const DEFAULT_NOTATION_TYPE = "figurine";
+
+export function getMoveNotation(move: Move, notationType?: string): string {
+  if (notationType === "figurine") {
+    return (move.san ?? "").replace(
+      /[KQRBN]/g,
+      (m) => FIGURINE_NOTATION[m] ?? m,
+    );
+  }
   return move.san;
 }
 
