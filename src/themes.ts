@@ -4,6 +4,7 @@ import { applyPieceSet } from "./pieceSets";
 import type { App } from "obsidian";
 
 import woodB64 from "../assets/wood.jpg?base64";
+import newspaperB64 from "../assets/newspaper.svg?base64";
 
 // Piece-set switching is variant-specific (excluded from the xiangqi sync);
 // re-exported here so shared UI (settings tab, toolbar) gets it from the
@@ -31,6 +32,8 @@ const themes: Record<
     selected: string;
     lastMove: string;
     nextMove: string;
+    /** false = seamless texture board, no checker overlay (e.g. bamboo). */
+    checker?: boolean;
   }
 > = {
   wood: {
@@ -54,11 +57,30 @@ const themes: Record<
     grid: "none",
     white: "#fff",
     black: "#7e593a",
-    // Bright marks stay legible over the mid-tone wood texture; the cool
-    // highlight hues complement the warm grain.
     selected: selected_dark,
     lastMove: lastMove_dark,
     nextMove: nextMove_dark,
+  },
+  newspaper: {
+    name: "Newspaper",
+    nameZh: "报纸",
+    // Vault-relative image path (under .obsidian/) — ensureBoardAssets()
+    // materializes it from the bundled base64 on startup.
+    bg: "plugins/chess-tree/assets/newspaper.svg",
+    bgImage: {
+      path: "plugins/chess-tree/assets/newspaper.svg",
+      base64: newspaperB64,
+    },
+    grid: "none",
+    // lila's newspaper board: the 8x8 checker, square borders and the
+    // corner doodle marks are all baked into the SVG itself, so the CSS
+    // checker overlay is suppressed.
+    checker: false,
+    white: "#f5f5f5",
+    black: "#3d3d3d",
+    selected: selected_light,
+    lastMove: lastMove_light,
+    nextMove: nextMove_light,
   },
   green: {
     name: "Green",
@@ -186,5 +208,13 @@ export function applyThemes(settings: ISettings, _app?: App) {
   body.setProperty("--ct-selected-color", t.selected);
   body.setProperty("--ct-lastmove-color", t.lastMove);
   body.setProperty("--ct-nextmove-color", t.nextMove);
+  // Seamless-texture themes (checker === false) drop the board checker
+  // overlay; every other theme removes the override and falls back to the
+  // checker layer declared in scss/_variant.scss.
+  if (t.checker === false) {
+    body.setProperty("--ct-board-checker", "none");
+  } else {
+    body.removeProperty("--ct-board-checker");
+  }
   applyPieceSet(settings);
 }
