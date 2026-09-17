@@ -1,7 +1,9 @@
 import type { ISettings } from "./types";
 import { applyThemeCSSVars, type ThemeData } from "./chess";
 import { applyPieceSet } from "./pieceSets";
-import type { App } from "obsidian";
+import { getLang, t } from "./i18n";
+import { type App, Modal } from "obsidian";
+import type ChessPlugin from "./main";
 
 import woodB64 from "../assets/wood.jpg?base64";
 import newspaperB64 from "../assets/newspaper.svg?base64";
@@ -218,3 +220,56 @@ export function applyThemes(settings: ISettings, _app?: App) {
   }
   applyPieceSet(settings);
 }
+
+/** Board-menu picker: a modal grid of board-style swatches. */
+function openBoardThemePicker(plugin: ChessPlugin): void {
+  const modal = new Modal(plugin.app);
+  modal.onOpen = () => {
+    const { contentEl } = modal;
+    contentEl.addClass("ct-board-theme-picker");
+
+    const title = contentEl.createDiv("ct-board-theme-picker__title");
+    title.setText(t("boardMenu.boardTheme"));
+
+    const grid = contentEl.createDiv("ct-board-theme-picker__grid");
+    for (const key of THEME_KEYS) {
+      const def = themes[key];
+      if (!def) continue;
+      const active = key === plugin.settings.theme;
+      const tile = grid.createEl("button", {
+        cls: `ct-board-theme-picker__tile${active ? " ct-board-theme-picker__tile--active" : ""}`,
+      });
+      const swatch = tile.createDiv("ct-board-theme-picker__swatch");
+      if (/\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(def.bg)) {
+        const url = plugin.app.vault.adapter.getResourcePath(
+          `${plugin.app.vault.configDir}/${def.bg}`,
+        );
+        swatch.style.backgroundImage = `url('${url}')`;
+      } else {
+        swatch.style.backgroundColor = def.bg;
+      }
+      // Checkered boards preview the chessground dark-square overlay
+      // (20% black over the background); seamless texture themes
+      // (checker === false) show the image as-is.
+      if (def.checker !== false) {
+        swatch.createDiv("ct-board-theme-picker__dark");
+        swatch.createDiv("ct-board-theme-picker__dark");
+      }
+      const label = tile.createDiv("ct-board-theme-picker__name");
+      label.setText(getThemeDisplayName(key, getLang()));
+      tile.addEventListener("click", () => {
+        plugin.settings.theme = key;
+        void plugin.saveSettings();
+        plugin.refresh();
+        modal.close();
+      });
+    }
+  };
+  modal.onClose = () => {
+    (modal as { contentEl: HTMLElement }).contentEl.empty();
+  };
+  modal.open();
+}
+
+/** Adapter capability consumed by the shared toolbar. */
+export const BOARD_THEME_PICKER = { open: openBoardThemePicker };

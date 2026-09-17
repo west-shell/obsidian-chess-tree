@@ -272,3 +272,86 @@ $genfen-toolbar-align: flex-start;
     text-align: center;
   }
 }
+
+// ---- Board-theme picker modal (board menu -> "Board style…") ----------------
+// Each tile previews the theme as a 2x2 mini board: the swatch background is
+// the theme color (or texture image), and checkered themes add the same
+// 20%-black dark-square overlay chessground draws on the real board.
+
+.#{$cls-prefix}-board-theme-picker {
+  .#{$cls-prefix}-board-theme-picker__title {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 0.75em;
+    color: var(--text-normal);
+  }
+
+  .#{$cls-prefix}-board-theme-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .#{$cls-prefix}-board-theme-picker__tile {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 6px;
+    border-radius: var(--radius-m, 10px);
+    border: 1px solid var(--background-modifier-border-hover);
+    background: var(--background-secondary);
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+  }
+
+  .#{$cls-prefix}-board-theme-picker__tile:hover {
+    background: var(--background-modifier-hover);
+    border-color: var(--color-accent);
+  }
+
+  .#{$cls-prefix}-board-theme-picker__tile--active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent);
+  }
+
+  .#{$cls-prefix}-board-theme-picker__swatch {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--background-modifier-border);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .#{$cls-prefix}-board-theme-picker__dark {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    background: rgba(0, 0, 0, 0.2);
+
+    &:nth-child(1) {
+      left: 50%;
+      top: 0;
+    }
+
+    &:nth-child(2) {
+      left: 0;
+      top: 50%;
+    }
+  }
+
+  .#{$cls-prefix}-board-theme-picker__name {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    text-align: center;
+  }
+}
