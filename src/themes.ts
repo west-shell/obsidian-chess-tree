@@ -1,6 +1,14 @@
 import type { ISettings } from "./types";
 import { applyThemeCSSVars, type ThemeData } from "./chess";
+import { applyPieceSet } from "./pieceSets";
 import type { App } from "obsidian";
+
+// Piece-set switching is variant-specific (excluded from the xiangqi sync);
+// re-exported here so shared UI (settings tab, toolbar) gets it from the
+// variant's appearance module — NOT from ./chess, which must stay free of
+// obsidian imports because the parser test chain runs through it.
+export { PIECE_SETS, PIECE_SET_PICKER, resolvePieceSetKey } from "./pieceSets";
+export type { PieceSetDef } from "./pieceSets";
 
 // Highlight color presets (with alpha baked in) — the suffix names the board
 // it suits: *_light for light boards (dark marks), *_dark for dark boards
@@ -112,4 +120,5 @@ export function applyThemes(settings: ISettings, _app?: App) {
   body.setProperty("--ct-selected-color", t.selected);
   body.setProperty("--ct-lastmove-color", t.lastMove);
   body.setProperty("--ct-nextmove-color", t.nextMove);
+  applyPieceSet(settings);
 }

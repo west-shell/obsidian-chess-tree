@@ -16,6 +16,8 @@ const EXCLUDED_FILES = new Set([
   "icon.ts",
   "declarations.d.ts",
   "_variant.scss",
+  "pieceSets.ts",
+  "pieceSets.gen.ts",
 ]);
 
 const EXCLUDED_PATHS = new Set([
@@ -24,7 +26,7 @@ const EXCLUDED_PATHS = new Set([
   "modules/Engine/Engine.ts",
 ]);
 
-const EXCLUDED_DIRS = new Set(["assets"]);
+const EXCLUDED_DIRS = new Set(["assets", "pieceSets"]);
 
 const SRC_DIR = join(CHESS_TREE_ROOT, "src");
 const DEST_SRC_DIR = join(XIANGQI_ROOT, "src");

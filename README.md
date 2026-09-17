@@ -226,3 +226,11 @@ If you like this plugin, feel free to support me!
 [![Afdian](https://img.shields.io/badge/Afdian-Sponsor-946CE6?logo=afdian)](https://afdian.com/a/weshell)
 
 ![Donation](./IMAGE/打赏.png)
+
+## Piece Artwork
+
+The bundled piece sets are from [lichess-org/lila](https://github.com/lichess-org/lila) (public/piece/), used under their respective free licenses (GPL/CC). Regenerate the embedded CSS after changing ssets/pieces/:
+
+`bash
+node scripts/gen-piece-css.mjs
+`n
