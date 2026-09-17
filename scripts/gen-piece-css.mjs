@@ -1,6 +1,7 @@
 // Generates piece-set CSS + registry from assets/pieces/ (single source of
 // truth: one sub-directory per piece set, holding the 12 standard SVGs
-// wK wQ wR wB wN wP bK bQ bR bB bN bP).
+// wK wQ wR wB wN wP bK bQ bR bB bN bP — or just w.svg + b.svg for sets
+// where all pieces of a side share one image, e.g. lila's "disguised").
 //
 //   node scripts/gen-piece-css.mjs          generate (write files)
 //   node scripts/gen-piece-css.mjs --check  verify outputs are up to date
@@ -23,9 +24,8 @@ import {
   readdirSync,
   mkdirSync,
   rmSync,
-  statSync,
 } from "node:fs";
-import { join, dirname } from "node:path";
+import { join } from "node:path";
 
 const ROOT = import.meta.dirname;
 const SRC_DIR = join(ROOT, "..", "assets", "pieces");
@@ -171,28 +171,20 @@ function dataUri(file) {
   return `url("data:${MIME[ext]};base64,${bin.toString("base64")}")`;
 }
 
-// Windows checkouts materialize git symlinks as tiny text files holding the
-// link target (e.g. lila's "disguised" set: wK.svg -> w.svg); resolve those
-// to the referenced sibling file.
-function resolveFile(file) {
-  if (statSync(file).size <= 64) {
-    const target = readFileSync(file, "utf8").trim();
-    if (/^[\w.-]+\.(svg|webp)$/i.test(target)) {
-      const resolved = join(dirname(file), target);
-      if (existsSync(resolved)) {
-        console.log(`LINK:  ${file} -> ${target}`);
-        return resolved;
-      }
-    }
-  }
-  return file;
-}
-
 // Resolve assets/pieces/<set>/<code>.<svg|webp>, or null if absent.
 function pieceFile(dir, code) {
   for (const ext of EXTENSIONS) {
     const file = join(dir, `${code}${ext}`);
-    if (existsSync(file)) return resolveFile(file);
+    if (existsSync(file)) return file;
+  }
+  return null;
+}
+
+// Resolve the per-side shared image assets/pieces/<set>/<w|b>.<svg|webp>.
+function sideFile(dir, color) {
+  for (const ext of EXTENSIONS) {
+    const file = join(dir, `${color}${ext}`);
+    if (existsSync(file)) return file;
   }
   return null;
 }
@@ -210,8 +202,16 @@ for (const entry of readdirSync(SRC_DIR, { withFileTypes: true })) {
   const dir = join(SRC_DIR, entry.name);
   const missing = PIECE_FILES.filter((code) => pieceFile(dir, code) === null);
   if (missing.length > 0) {
-    console.warn(`SKIP ${entry.name}/ — missing: ${missing.join(", ")}`);
-    continue;
+    // Shared-art set: no per-piece files, but both side images present —
+    // all pieces of a side share one image (e.g. lila's "disguised").
+    if (
+      missing.length !== PIECE_FILES.length ||
+      !sideFile(dir, "w") ||
+      !sideFile(dir, "b")
+    ) {
+      console.warn(`SKIP ${entry.name}/ — missing: ${missing.join(", ")}`);
+      continue;
+    }
   }
   sets.push(entry.name);
 }
@@ -237,6 +237,27 @@ const outputs = new Map(); // path -> content
 for (const set of sets) {
   const dir = join(SRC_DIR, set);
   let css = `/* ${AUTO_HEADER} Source: assets/pieces/${set}/ */\n`;
+  const sharedW = sideFile(dir, "w");
+  const sharedB = sideFile(dir, "b");
+  if (sharedW && sharedB && pieceFile(dir, "wK") === null) {
+    // Shared-art set: a single rule per side covers every piece kind and
+    // the picker thumbnail. Thumbnail selectors must require the scope
+    // class ON the picker tile itself — see the comment below.
+    for (const [c, file] of [
+      ["w", sharedW],
+      ["b", sharedB],
+    ]) {
+      const selectors = Object.values(KIND).map(
+        (kind) => `.ct-pieceset-${set} .cg-wrap piece.${kind}.${COLOR[c]}`,
+      );
+      selectors.push(
+        `.ct-piece-set-picker__tile.ct-pieceset-${set} .ct-piece-thumb.${c}N`,
+      );
+      css += `${selectors.join(",\n")} {\n  background-image: ${dataUri(file)};\n}\n`;
+    }
+    outputs.set(join(CSS_DIR, `${set}.css`), css);
+    continue;
+  }
   for (const code of PIECE_FILES) {
     const color = COLOR[code[0]];
     const kind = KIND[code[1]];
