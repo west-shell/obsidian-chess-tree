@@ -332,6 +332,12 @@ $genfen-toolbar-align: flex-start;
     background-position: center;
   }
 
+  // Baked-checker boards (checker === false): zoom to the centered 2x2
+  // squares so the swatch reads like the plain-color themes' preview.
+  .#{$cls-prefix}-board-theme-picker__swatch--baked {
+    background-size: 400%;
+  }
+
   .#{$cls-prefix}-board-theme-picker__dark {
     position: absolute;
     width: 50%;

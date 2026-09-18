@@ -245,6 +245,13 @@ function openBoardThemePicker(plugin: ChessPlugin): void {
           `${plugin.app.vault.configDir}/${def.bg}`,
         );
         swatch.style.backgroundImage = `url('${url}')`;
+        // Boards with the checker baked into the image (checker === false,
+        // e.g. newspaper) zoom to a centered 2x2-square crop, so the swatch
+        // previews chunky squares like the plain-color themes instead of a
+        // shrunken full board.
+        if (def.checker === false) {
+          swatch.addClass("ct-board-theme-picker__swatch--baked");
+        }
       } else {
         swatch.style.backgroundColor = def.bg;
       }
