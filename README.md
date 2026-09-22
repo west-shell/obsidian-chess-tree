@@ -74,24 +74,26 @@ For the best experience on mobile devices, it's recommended to install the Full 
 
 ### Board Appearance
 
-- **Theme**: Wood, Green, Blue, Grey, Dark, Light
-- **Cell Size**: Adjustable board cell size (15–100 px)
-- **Layout**: Toolbar position — right / bottom
+- **Board Style**: Wood, Wood Grain, Newspaper, Green, Blue, Grey, Dark, Light — switchable in settings or via the board menu's swatch picker
+- **Piece Set**: 42 lichess piece sets (Cburnett, Merida, Alpha, …) — choose from the settings dropdown or the board menu's piece-set picker
+- **Board Zoom**: Adjustable board scale (0–100 %)
 - **Coordinate Labels**: Show/hide board coordinates
 
 ### Game Hints
 
 - **Last Move Highlight**: Highlight the last move on the board
 - **Legal Moves**: Show legal move destinations
+- **Other Variations**: Highlight alternative variations on the board
 - **Turn Border**: Highlight the current player's turn
 - **Move Narration**: Optional speech synthesis for moves (desktop only)
+- **Auto Jump**: Jump to latest position — never / always / auto
 
 ### Move List
 
 - **Show Move List**: Toggle move list visibility
-- **Show Move Text**: Toggle text notation in move list
 - **Font Size**: Adjustable move text size (10–25 px)
-- **Auto Jump**: Jump to latest position — never / always / auto
+- **Notation**: Figurine (♔♕♖♗♘) or letter (SAN) move notation
+- **Move Marks**: Eval bar, annotation badge, glyph (!?/??…) and comment underline shown next to moves — each can be toggled independently
 
 ### Board Margins
 
@@ -111,8 +113,10 @@ Customize code block aliases in **Settings > Chess > Code Block Names**:
 
 - **Engine Depth**: Search depth for Stockfish analysis (1–30, default 18)
 - **Engine Skill Level**: Skill level for engine play (0–20, default 20)
-- **Save Eval by Default**: Automatically include eval data when saving (default off)
-- **Save Eval Prompt**: Show prompt when saving with eval data (default on)
+- **Show Best Move**: Show the engine's best-move arrow (default on)
+- **Show Ponder Move**: Show the ponder-move arrow (default on)
+- **Show Engine Annotations**: Show engine glyphs (!?/?/??…) on analyzed moves (default on)
+- **Show Board Annotations**: Draw engine annotations on the board (default on)
 
 ### Save
 
@@ -132,7 +136,9 @@ Enable/disable PGN file view and customize file extensions:
 
 - **Complete Rules Engine**: Castling, en passant, promotion, check/checkmate detection, threefold repetition, 50-move rule — all via chess.js
 - **Board Rendering**: High-quality chessboard via chessground with drag-and-drop moves
-- **Move List**: Full move record with click-to-navigate
+- **Board Styles**: 8 board styles including texture-baked Wood Grain and Newspaper, switchable from the board menu's swatch picker
+- **Piece Sets**: 42 lichess piece sets with pickers in settings and the board menu
+- **Move List**: Grid-aligned move columns with figurine/letter notation and per-move marks (eval, annotation, glyph, comment)
 - **Variation Tree**: Tree graph with icon/SAN display modes for node labels
 - **Visual FEN Editor**: Drag/click to place pieces, clear/fill board, toggle side to move, set castling and en passant
 - **PGN Saving**:
@@ -164,6 +170,8 @@ Enable/disable PGN file view and customize file extensions:
 3. Controls:
    - The variation tree displays all branches graphically
    - Click any node to navigate to that position
+   - The board menu (board icon in the toolbar) flips the board and toggles highlights, coordinates, and annotations on the fly
+   - Switch board style and piece set instantly from the board menu's visual pickers
 4. Click **Save** to overwrite the original PGN
 5. Click **Edit board** in the Edit menu to switch to position editor mode
    - Modify the position by dragging/clicking pieces
@@ -214,8 +222,8 @@ p:true
 git clone https://github.com/west-shell/obsidian-chess-tree.git
 cd obsidian-chess-tree
 npm install
-npm run build        # Dev build (unminified, with sourcemaps)
-npm run build:min    # Minified build (for release)
+npm run build        # Minified production build (for release)
+npm run build:debug  # Unminified production build (with sourcemaps)
 ```
 
 ## Donation
@@ -229,8 +237,8 @@ If you like this plugin, feel free to support me!
 
 ## Piece Artwork
 
-The bundled piece sets are from [lichess-org/lila](https://github.com/lichess-org/lila) (public/piece/), used under their respective free licenses (GPL/CC). Regenerate the embedded CSS after changing ssets/pieces/:
+The bundled piece sets are from [lichess-org/lila](https://github.com/lichess-org/lila) (public/piece/), used under their respective free licenses (GPL/CC). Regenerate the embedded CSS after changing `assets/pieces/`:
 
-`bash
+```bash
 node scripts/gen-piece-css.mjs
-`n
+```
