@@ -76,7 +76,7 @@ For the best experience on mobile devices, it's recommended to install the Full 
 
 - **Board Style**: Wood, Wood Grain, Newspaper, Green, Blue, Grey, Dark, Light — switchable in settings or via the board menu's swatch picker
 - **Piece Set**: 42 lichess piece sets (Cburnett, Merida, Alpha, …) — choose from the settings dropdown or the board menu's piece-set picker
-- **Board Zoom**: Adjustable board scale (0–100 %)
+- **Board Zoom**: Adjustable board scale
 - **Coordinate Labels**: Show/hide board coordinates
 
 ### Game Hints
@@ -85,6 +85,7 @@ For the best experience on mobile devices, it's recommended to install the Full 
 - **Legal Moves**: Show legal move destinations
 - **Other Variations**: Highlight alternative variations on the board
 - **Turn Border**: Highlight the current player's turn
+- **Move Sounds**: Sound effects for moves, captures and checkmate, with adjustable volume
 - **Move Narration**: Optional speech synthesis for moves (desktop only)
 - **Auto Jump**: Jump to latest position — never / always / auto
 
