@@ -123,6 +123,10 @@ export function matchMove(existing: Move, incoming: Move): boolean {
   );
 }
 
+export function moveToUci(move: Move): string {
+  return move.from + move.to + (move.promotion ?? "");
+}
+
 export function isPromotionRank(to: string, color: "w" | "b"): boolean {
   return (color === "w" && to[1] === "8") || (color === "b" && to[1] === "1");
 }
