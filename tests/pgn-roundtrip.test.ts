@@ -493,4 +493,71 @@ describe("PGN round-trip consistency", () => {
     const e5 = reParser.getRoot().children[0].children[0];
     expect(e5.children).toHaveLength(3);
   });
+
+  test("black-first game numbers the opening move as N...", () => {
+    const fen = "4k3/p1p5/8/8/8/8/8/4K3 b - - 0 1";
+    const original = `[FEN "${fen}"]\n1... a5 2. Kd2`;
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("1... a5");
+    expect(exported).toContain("2. Kd2");
+    expect(exported).not.toMatch(/^a5/);
+    expect(exported).not.toMatch(/\b0\./);
+
+    const reParser = new PGNParser(`[FEN "${fen}"]\n${exported}`);
+    expect(collectMainline(reParser.getRoot())).toEqual(["a5", "Kd2"]);
+  });
+
+  test("black-first root variation exports (N... move), not (0. ... move)", () => {
+    const fen = "4k3/p1p5/8/8/8/8/8/4K3 b - - 0 1";
+    const original = `[FEN "${fen}"]\n1... a5 (1... c5 2. Kd2) 2. Kd2`;
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("(1... c5 2. Kd2)");
+    expect(exported).not.toContain("0.");
+    expect(exported).not.toContain("1. ...");
+
+    const reParser = new PGNParser(`[FEN "${fen}"]\n${exported}`);
+    expect(reParser.getRoot().children).toHaveLength(2);
+    expect(reParser.getRoot().children[1].move?.san).toBe("c5");
+  });
+
+  test("move numbering follows the FEN fullmove number", () => {
+    const fen = "4k3/p1p5/8/8/8/8/8/4K3 b - - 0 14";
+    const original = `[FEN "${fen}"]\n14... a5 (14... c5) 15. Kd2`;
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("14... a5");
+    expect(exported).toContain("(14... c5)");
+    expect(exported).toContain("15. Kd2");
+  });
+
+  test("white-to-move FEN game resumes at the FEN fullmove", () => {
+    const fen = "4k3/p7/8/8/8/8/4P3/4K3 w - - 0 14";
+    const original = `[FEN "${fen}"]\n14. e4 Kd7`;
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("14. e4");
+    expect(exported).toContain("Kd7");
+  });
+
+  test("mid-game black variation uses N... without extra space", () => {
+    const original = "1. e4 e5 (1... c5 2. Nf3) 2. Nf3";
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("(1... c5 2. Nf3)");
+    expect(exported).not.toContain("1. ...");
+  });
+
+  test("illegal move inside a variation aborts without corrupting the tree", () => {
+    // `(1... c5)` right after a white move is non-standard: the variation
+    // would have to start with a white move from the start position, so c5
+    // is illegal there. Parsing must stop cleanly and keep the mainline.
+    const original = "1. e4 (1... c5 2. Nf3) e5";
+    const exported = parseAndStringify(original);
+
+    const reParser = new PGNParser(exported);
+    expect(collectMainline(reParser.getRoot())).toEqual(["e4"]);
+    expect(countNodes(reParser.getRoot())).toBe(1);
+  });
 });

@@ -235,7 +235,11 @@ export class PGNParser {
     this.currentNode = variationBase;
     this.currentStep = variationBase.step!;
 
-    while (!this.match("right-paren") && !this.match("eof")) {
+    while (
+      !this.match("right-paren") &&
+      !this.match("eof") &&
+      !this.parseAborted
+    ) {
       if (this.isMoveToken()) {
         this.processMove(
           this.consume().value,

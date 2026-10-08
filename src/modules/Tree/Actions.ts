@@ -12,7 +12,11 @@ import {
 import { Notice } from "obsidian";
 import { validateFen } from "../../utils/chessEngine";
 import { isAnnotationKey } from "../../utils/icon";
-import { serializeNodeMeta, stringifyPGN } from "../../utils/stringify-pgn";
+import {
+  getFullmoveFromFen,
+  serializeNodeMeta,
+  stringifyPGN,
+} from "../../utils/stringify-pgn";
 import {
   registerBlockModule,
   registerFileModule,
@@ -840,7 +844,9 @@ function stringifyCurrentBranchPGN(
   if (host.root.fen !== DEFAULT_FEN) {
     result = `[FEN "${host.root.fen}"]\n[SetUp "1"]\n\n`;
   }
-  let stepNum = 1;
+  // Numbering follows the root FEN's fullmove so a mid-game branch copies
+  // as "14. ..." / "14... " instead of restarting at 1.
+  let stepNum = getFullmoveFromFen(host.root.fen);
   for (let i = 1; i < pathIds.length; i++) {
     const node = host.nodeMap.get(pathIds[i])!;
     const notation = getSaveNotation(node.move!);

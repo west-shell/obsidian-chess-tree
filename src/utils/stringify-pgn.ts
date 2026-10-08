@@ -1,6 +1,12 @@
-import { getSaveNotation } from "../chess";
+import { getSaveNotation, getTurnFromFen } from "../chess";
 import type { ChessNode, NodeEval } from "../types";
 import { ANNOTATION_PREFIX } from "./icon";
+
+/** FEN fullmove number (field 6); defaults to 1 when absent/invalid. */
+export function getFullmoveFromFen(fen: string): number {
+  const n = Number.parseInt(fen.split(" ")[5] ?? "", 10);
+  return Number.isNaN(n) || n < 1 ? 1 : n;
+}
 
 function genNodeBrothers(root: ChessNode): Map<ChessNode, ChessNode[]> {
   const map = new Map<ChessNode, ChessNode[]>();
@@ -115,37 +121,51 @@ export function serializeNodeMeta(
 export function stringifyPGN(root: ChessNode, includeEval = true): string {
   const nodeBrothers = genNodeBrothers(root);
 
-  function walk(node: ChessNode, stepNum: number): string {
+  // Move numbering follows the root FEN: a fullmove-14 game resumes at
+  // "14." (white to move) or "14..." (black to move) instead of restarting
+  // at 1. For the default start position this resolves to step 0 → "1. e4".
+  const fullmove = getFullmoveFromFen(root.fen);
+  const rootStep =
+    getTurnFromFen(root.fen) === "black" ? fullmove : fullmove - 1;
+
+  // `lineStart` marks a black move that opens a line (mainline first move
+  // of a black-to-move game, or the first move of a black variation) and
+  // therefore needs the "N..." prefix; black replies mid-line stay bare.
+  // `inVariation` suppresses the bare `*` filler inside parentheses —
+  // lichess-style variations end at their last move.
+  function walk(
+    node: ChessNode,
+    stepNum: number,
+    lineStart = false,
+    inVariation = false,
+  ): string {
     let result = "";
     if (node.move) {
       const notation = getSaveNotation(node.move);
       if (node.color === "white") {
         result += `${stepNum}. ${notation}`;
       } else if (node.color === "black") {
-        result += `${notation}`;
+        result += lineStart ? `${stepNum}... ${notation}` : notation;
       }
     }
     result += serializeNodeMeta(node, { includeEval });
     const brothers = nodeBrothers.get(node);
     if (brothers?.length) {
       for (const brother of brothers) {
-        if (brother.color === "white") {
-          result += ` (${walk(brother, stepNum)})`;
-        } else if (brother.color === "black") {
-          result += ` (${stepNum}. ... ${walk(brother, stepNum)})`;
-        }
+        // A black brother opens its own variation line → "N..." prefix.
+        result += ` (${walk(brother, stepNum, brother.color === "black", true)})`;
       }
     }
     if (node.children[0]) {
       const next = node.children[0];
       const nextStepNum = next.color === "white" ? stepNum + 1 : stepNum;
-      result += ` ${walk(next, nextStepNum)}`;
+      result += ` ${walk(next, nextStepNum, node === root && next.color === "black", inVariation)}`;
     } else if (node.result) {
       result += ` ${node.result}`;
-    } else {
+    } else if (!inVariation) {
       result += " *";
     }
     return result;
   }
-  return walk(root, 0).trim();
+  return walk(root, rootStep).trim();
 }
