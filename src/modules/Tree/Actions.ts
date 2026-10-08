@@ -11,12 +11,8 @@ import {
 } from "../../chess";
 import { Notice } from "obsidian";
 import { validateFen } from "../../utils/chessEngine";
-import {
-  ANNOTATION_PREFIX,
-  isAnnotationKey,
-  SHAPES_PREFIX,
-} from "../../utils/icon";
-import { stringifyPGN } from "../../utils/stringify-pgn";
+import { isAnnotationKey } from "../../utils/icon";
+import { serializeNodeMeta, stringifyPGN } from "../../utils/stringify-pgn";
 import {
   registerBlockModule,
   registerFileModule,
@@ -809,7 +805,7 @@ function updateFenTag(tags: string, newFen: string): string {
   if (tags.includes('[FEN "')) {
     return tags.replace(/\[FEN "[^"]*"\]/, `[FEN "${newFen}"]`);
   }
-  return `[FEN "${newFen}"]\n${tags}`;
+  return `[FEN "${newFen}"]\n[SetUp "1"]\n${tags}`;
 }
 
 function emitNodeEval(host: IHost) {
@@ -842,7 +838,7 @@ function stringifyCurrentBranchPGN(
 
   let result = "";
   if (host.root.fen !== DEFAULT_FEN) {
-    result = `[FEN "${host.root.fen}"]\n\n`;
+    result = `[FEN "${host.root.fen}"]\n[SetUp "1"]\n\n`;
   }
   let stepNum = 1;
   for (let i = 1; i < pathIds.length; i++) {
@@ -858,34 +854,7 @@ function stringifyCurrentBranchPGN(
       }
       stepNum++;
     }
-    if (includeComments && node.comments?.length) {
-      for (const c of node.comments) result += `{${c}}`;
-    }
-    if (node.annotation) {
-      result += `{${ANNOTATION_PREFIX}${node.annotation}}`;
-    }
-    if (node.shapes?.length) {
-      const shapeStr = node.shapes
-        .map((s) => s.orig + (s.dest ?? "") + ":" + s.brush)
-        .join(",");
-      result += `{${SHAPES_PREFIX}${shapeStr}}`;
-    }
-    if (includeEval && node.eval) {
-      const absScore = Math.abs(node.eval.score);
-      const evalStr =
-        node.eval.scoreType === "mate"
-          ? `m${node.eval.score >= 0 ? "+" : "-"}${absScore}`
-          : `${node.eval.score >= 0 ? "+" : "-"}${(absScore / 100).toFixed(2)}`;
-      let annotation = `%e:${evalStr}`;
-      if (node.eval.bestmove) {
-        annotation += `,${node.eval.bestmove}`;
-        if (node.eval.ponder) annotation += `,${node.eval.ponder}`;
-      }
-      if (node.glyph) {
-        annotation += `,${node.glyph.symbol}`;
-      }
-      result += `{${annotation}}`;
-    }
+    result += serializeNodeMeta(node, { includeComments, includeEval });
     if (i < pathIds.length - 1) result += " ";
   }
   return result;

@@ -48,7 +48,12 @@ describe("PGN round-trip consistency", () => {
     const exported = parseAndStringify(original);
     const reParser = new PGNParser(exported);
 
-    expect(collectMainline(reParser.getRoot())).toEqual(["e4", "e5", "Nf3", "Nc6"]);
+    expect(collectMainline(reParser.getRoot())).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+    ]);
     expect(countNodes(reParser.getRoot())).toBe(4);
   });
 
@@ -57,7 +62,12 @@ describe("PGN round-trip consistency", () => {
     const exported = parseAndStringify(original);
     const reParser = new PGNParser(exported);
 
-    expect(collectMainline(reParser.getRoot())).toEqual(["e4", "e5", "Nf3", "Nc6"]);
+    expect(collectMainline(reParser.getRoot())).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+    ]);
   });
 
   test("single variation round-trips", () => {
@@ -65,7 +75,12 @@ describe("PGN round-trip consistency", () => {
     const exported = parseAndStringify(original);
     const reParser = new PGNParser(exported);
 
-    expect(collectMainline(reParser.getRoot())).toEqual(["e4", "e5", "Nf3", "Nc6"]);
+    expect(collectMainline(reParser.getRoot())).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+    ]);
     const e5 = reParser.getRoot().children[0].children[0];
     expect(e5.children).toHaveLength(2);
     expect(e5.children[0].move?.san).toBe("Nf3");
@@ -77,7 +92,12 @@ describe("PGN round-trip consistency", () => {
     const exported = parseAndStringify(original);
     const reParser = new PGNParser(exported);
 
-    expect(collectMainline(reParser.getRoot())).toEqual(["e4", "e5", "Nf3", "Nc6"]);
+    expect(collectMainline(reParser.getRoot())).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+    ]);
     const e5 = reParser.getRoot().children[0].children[0];
     expect(e5.children).toHaveLength(3);
     expect(e5.children[0].move?.san).toBe("Nf3");
@@ -90,7 +110,13 @@ describe("PGN round-trip consistency", () => {
     const exported = parseAndStringify(original);
     const reParser = new PGNParser(exported);
 
-    expect(collectMainline(reParser.getRoot())).toEqual(["e4", "e5", "Nf3", "Nc6", "Bb5"]);
+    expect(collectMainline(reParser.getRoot())).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+      "Bb5",
+    ]);
     const nf3 = reParser.getRoot().children[0].children[0].children[0];
     expect(nf3.children).toHaveLength(2);
     expect(nf3.children[0].move?.san).toBe("Nc6");
@@ -123,7 +149,13 @@ describe("PGN round-trip consistency", () => {
     const reParser = new PGNParser(exported);
 
     expect(collectMainline(reParser.getRoot())).toEqual([
-      "e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "O-O",
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+      "Bc4",
+      "Nf6",
+      "O-O",
     ]);
   });
 
@@ -166,7 +198,8 @@ describe("PGN round-trip consistency", () => {
   });
 
   test("double round-trip with comments and variations is stable", () => {
-    const original = "1. e4 {best by test} e5 2. Nf3 (2. Bc4 {Italian} Bc5) Nc6";
+    const original =
+      "1. e4 {best by test} e5 2. Nf3 (2. Bc4 {Italian} Bc5) Nc6";
     const firstExport = parseAndStringify(original);
     const secondExport = parseAndStringify(firstExport);
 
@@ -199,6 +232,7 @@ describe("PGN round-trip consistency", () => {
     e4Node.annotation = "+";
 
     const exported = stringifyPGN(root, true);
+    expect(exported).toContain("e4 $16");
     const reParser = new PGNParser(exported);
 
     const reE4 = reParser.getRoot().children[0];
@@ -214,21 +248,51 @@ describe("PGN round-trip consistency", () => {
     e4Node.shapes = [{ orig: "e2", dest: "e4", brush: "g" }];
 
     const exported = stringifyPGN(root, true);
+    expect(exported).toContain("[%cal Ge2e4]");
     const reParser = new PGNParser(exported);
 
     const reE4 = reParser.getRoot().children[0];
     expect(reE4.shapes).toEqual([{ orig: "e2", dest: "e4", brush: "g" }]);
   });
 
-  test("eval round-trips", () => {
+  test("square highlights round-trip as [%csl]", () => {
+    const original = "1. e4 e5";
+    const parser = new PGNParser(original);
+    const root = parser.getRoot();
+
+    root.children[0].shapes = [
+      { orig: "b4", brush: "g" },
+      { orig: "d5", brush: "y" },
+    ];
+
+    const exported = stringifyPGN(root, true);
+    expect(exported).toContain("[%csl Gb4,Yd5]");
+    const reParser = new PGNParser(exported);
+
+    const reE4 = reParser.getRoot().children[0];
+    expect(reE4.shapes).toEqual([
+      { orig: "b4", brush: "g" },
+      { orig: "d5", brush: "y" },
+    ]);
+  });
+
+  test("eval round-trips as [%eval] with %e: for bestmove/ponder", () => {
     const original = "1. e4 e5";
     const parser = new PGNParser(original);
     const root = parser.getRoot();
 
     const e4Node = root.children[0];
-    e4Node.eval = { score: 25, scoreType: "cp", depth: 20, bestmove: "e2e4", ponder: "e7e5" };
+    e4Node.eval = {
+      score: 25,
+      scoreType: "cp",
+      depth: 20,
+      bestmove: "e2e4",
+      ponder: "e7e5",
+    };
 
     const exported = stringifyPGN(root, true);
+    expect(exported).toContain("[%eval +0.25]");
+    expect(exported).toContain("%e:+0.25,e2e4,e7e5");
     const reParser = new PGNParser(exported);
 
     const reE4 = reParser.getRoot().children[0];
@@ -239,7 +303,7 @@ describe("PGN round-trip consistency", () => {
     expect(reE4.eval!.ponder).toBe("e7e5");
   });
 
-  test("mate eval round-trips", () => {
+  test("mate eval round-trips as [%eval #n]", () => {
     const original = "1. e4 e5";
     const parser = new PGNParser(original);
     const root = parser.getRoot();
@@ -248,12 +312,38 @@ describe("PGN round-trip consistency", () => {
     e4Node.eval = { score: 3, scoreType: "mate", depth: 15 };
 
     const exported = stringifyPGN(root, true);
+    expect(exported).toContain("[%eval #3]");
     const reParser = new PGNParser(exported);
 
     const reE4 = reParser.getRoot().children[0];
     expect(reE4.eval).toBeDefined();
     expect(reE4.eval!.score).toBe(3);
     expect(reE4.eval!.scoreType).toBe("mate");
+  });
+
+  test("negative mate eval round-trips", () => {
+    const original = "1. e4 e5";
+    const parser = new PGNParser(original);
+    const root = parser.getRoot();
+
+    root.children[0].eval = { score: -4, scoreType: "mate", depth: 15 };
+
+    const exported = stringifyPGN(root, true);
+    expect(exported).toContain("[%eval #-4]");
+    const reParser = new PGNParser(exported);
+    expect(reParser.getRoot().children[0].eval!.score).toBe(-4);
+  });
+
+  test("plain eval without bestmove exports no %e: block", () => {
+    const original = "1. e4 e5";
+    const parser = new PGNParser(original);
+    const root = parser.getRoot();
+
+    root.children[0].eval = { score: 50, scoreType: "cp", depth: 20 };
+
+    const exported = stringifyPGN(root, true);
+    expect(exported).toContain("[%eval +0.50]");
+    expect(exported).not.toContain("%e:");
   });
 
   test("includeEval=false strips eval data", () => {
@@ -285,6 +375,7 @@ describe("PGN round-trip consistency", () => {
     e4Node.glyph = { symbol: "!", name: "Good move", color: "#22ac38" };
 
     const exported = stringifyPGN(root, true);
+    expect(exported).toContain("e4!");
     const reParser = new PGNParser(exported);
 
     const reE4 = reParser.getRoot().children[0];
@@ -292,8 +383,99 @@ describe("PGN round-trip consistency", () => {
     expect(reE4.glyph!.symbol).toBe("!");
   });
 
+  test("NAG glyph round-trips as suffix symbol", () => {
+    const original = "1. e4 $1 e5 $6";
+    const exported = parseAndStringify(original);
+    expect(exported).toContain("e4!");
+    expect(exported).toContain("e5?!");
+
+    const reParser = new PGNParser(exported);
+    const [e4, e5] = reParser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!");
+    expect(e5.glyph?.symbol).toBe("?!");
+  });
+
+  test("NAG glyph round-trips inside variations", () => {
+    const original = "1. e4 (1. d4 $3 d5) e5";
+    const exported = parseAndStringify(original);
+    const reParser = new PGNParser(exported);
+
+    const d4 = reParser.getRoot().children[1];
+    expect(d4.glyph?.symbol).toBe("!!");
+  });
+
+  test("double round-trip with NAGs is stable", () => {
+    const original = "1. e4 $1 e5 $6 2. Nf3 (2. Bc4 $5) Nc6";
+    const firstExport = parseAndStringify(original);
+    const secondExport = parseAndStringify(firstExport);
+
+    expect(firstExport).toBe(secondExport);
+  });
+
+  test("suffix symbol glyphs round-trip as suffixes", () => {
+    const original = "1. e4! e5?! 2. Nf3 (2. Bc4!? Bc5)";
+    const exported = parseAndStringify(original);
+    expect(exported).toContain("e4!");
+    expect(exported).toContain("e5?!");
+    expect(exported).toContain("Bc4!?");
+
+    const reParser = new PGNParser(exported);
+    const [e4, e5] = reParser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!");
+    expect(e5.glyph?.symbol).toBe("?!");
+  });
+
+  test("lichess shapes round-trip in [%csl]/[%cal] format", () => {
+    const original = "1. e4 { [%csl Gb4][%cal Ge2e4] } e5";
+    const exported = parseAndStringify(original);
+    expect(exported).toContain("[%csl Gb4]");
+    expect(exported).toContain("[%cal Ge2e4]");
+
+    const reParser = new PGNParser(exported);
+    const e4 = reParser.getMainLine()[0];
+    expect(e4.shapes).toEqual([
+      { orig: "b4", brush: "g" },
+      { orig: "e2", dest: "e4", brush: "g" },
+    ]);
+  });
+
+  test("comments are exported verbatim", () => {
+    const original = "1. e4 e5";
+    const parser = new PGNParser(original);
+    parser.getRoot().children[0].comments = ["hello world"];
+
+    const exported = stringifyPGN(parser.getRoot(), true);
+    expect(exported).toContain("{hello world}");
+  });
+
+  test("unmappable bm annotation keeps private #a: form", () => {
+    const original = "1. e4 e5";
+    const parser = new PGNParser(original);
+    parser.getRoot().children[0].annotation = "bm";
+
+    const exported = stringifyPGN(parser.getRoot(), true);
+    expect(exported).toContain("{#a:bm}");
+    const reParser = new PGNParser(exported);
+    expect(reParser.getRoot().children[0].annotation).toBe("bm");
+  });
+
+  test("legacy &s: shapes re-export as [%csl]/[%cal]", () => {
+    const original = "1. e4 {&s:e2e4:g,b4:y} e5";
+    const exported = parseAndStringify(original);
+    expect(exported).toContain("[%csl Yb4]");
+    expect(exported).toContain("[%cal Ge2e4]");
+
+    const reParser = new PGNParser(exported);
+    const e4 = reParser.getMainLine()[0];
+    expect(e4.shapes).toEqual([
+      { orig: "b4", brush: "y" },
+      { orig: "e2", dest: "e4", brush: "g" },
+    ]);
+  });
+
   test("complex PGN with multiple features round-trips stably", () => {
-    const original = "1. e4 {best by test} e5 2. Nf3 (2. Bc4 {Italian Game} Bc5 3. c3) (2. d4 exd4) Nc6 3. Bb5 a6";
+    const original =
+      "1. e4 {best by test} e5 2. Nf3 (2. Bc4 {Italian Game} Bc5 3. c3) (2. d4 exd4) Nc6 3. Bb5 a6";
     const firstExport = parseAndStringify(original);
     const secondExport = parseAndStringify(firstExport);
 
@@ -301,7 +483,12 @@ describe("PGN round-trip consistency", () => {
 
     const reParser = new PGNParser(firstExport);
     expect(collectMainline(reParser.getRoot())).toEqual([
-      "e4", "e5", "Nf3", "Nc6", "Bb5", "a6",
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+      "Bb5",
+      "a6",
     ]);
     const e5 = reParser.getRoot().children[0].children[0];
     expect(e5.children).toHaveLength(3);

@@ -252,6 +252,8 @@ export function parseMoveInGame(
 }
 
 export const SHAPE_SQUARE_REGEX = /[a-h][1-8]/;
+/** Square coordinate pattern (variant adapter); embed into other regexes. */
+export const SQUARE_PATTERN = "[a-h][1-8]";
 export const SHAPE_PART_REGEX = /^([a-h][1-8])([a-h][1-8])?:([gryb])$/;
 export const EVAL_REGEX =
   /^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,(!\?|\?!|\?\?|[?!]|!!))?$/;

@@ -232,6 +232,220 @@ describe("Chess PGN Parser", () => {
     expect(parser.getMainLine()).toHaveLength(4);
   });
 
+  // ============ NAG 解析测试 ============
+
+  test("move-quality NAGs annotate the preceding move", () => {
+    const parser = new PGNParser("1. e4 $1 e5 $6 2. Nf3 $5 Nc6 $4");
+    expect(parser.getSkipped()).toEqual([]);
+    const [e4, e5, nf3, nc6] = parser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!");
+    expect(e5.glyph?.symbol).toBe("?!");
+    expect(nf3.glyph?.symbol).toBe("!?");
+    expect(nc6.glyph?.symbol).toBe("??");
+  });
+
+  test("NAGs inside variations annotate the variation move", () => {
+    const parser = new PGNParser("1. e4 (1. d4 $3 d5 $2) e5");
+    const d4 = parser.getRoot().children[1];
+    const d5 = d4.children[0];
+    expect(d4.glyph?.symbol).toBe("!!");
+    expect(d5.glyph?.symbol).toBe("?");
+  });
+
+  test("unmapped NAGs are skipped without warnings", () => {
+    const parser = new PGNParser("1. e4 $7 e5 $40 2. Nf3 Nc6");
+    expect(parser.getSkipped()).toEqual([]);
+    const [e4, e5] = parser.getMainLine();
+    expect(e4.glyph).toBeUndefined();
+    expect(e4.annotation).toBeUndefined();
+    expect(e5.glyph).toBeUndefined();
+    expect(e5.annotation).toBeUndefined();
+  });
+
+  test("positional NAGs map to annotations", () => {
+    const parser = new PGNParser(
+      "1. e4 $16 e5 $17 2. Nf3 $10 Nc6 $24 3. Bb5 $14 a6 $15",
+    );
+    expect(parser.getSkipped()).toEqual([]);
+    const [e4, e5, nf3, nc6, bb5, a6] = parser.getMainLine();
+    expect(e4.annotation).toBe("+");
+    expect(e5.annotation).toBe("-");
+    expect(nf3.annotation).toBe("=");
+    expect(nc6.annotation).toBe("st");
+    expect(bb5.annotation).toBe("+");
+    expect(a6.annotation).toBe("-");
+    for (const n of [e4, e5, nf3, nc6, bb5, a6]) {
+      expect(n.glyph).toBeUndefined();
+    }
+  });
+
+  test("first mapped NAG wins when several follow a move", () => {
+    const parser = new PGNParser("1. e4 $1 $14 e5");
+    expect(parser.getMainLine()[0].glyph?.symbol).toBe("!");
+  });
+
+  test("suffix symbol glyphs annotate the preceding move", () => {
+    const parser = new PGNParser("1. e4! e5?! 2. Nf3?? Nc6!! 3. Bb5+!? a6?");
+    expect(parser.getSkipped()).toEqual([]);
+    const [e4, e5, nf3, nc6, bb5, a6] = parser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!");
+    expect(e5.glyph?.symbol).toBe("?!");
+    expect(nf3.glyph?.symbol).toBe("??");
+    expect(nc6.glyph?.symbol).toBe("!!");
+    expect(bb5.glyph?.symbol).toBe("!?");
+    expect(a6.glyph?.symbol).toBe("?");
+  });
+
+  test("suffix symbols work inside variations and after black ellipsis", () => {
+    const fen =
+      "rn1r2k1/pb3ppp/1p2pn2/3p4/1PP5/q2N2P1/P2NPPBP/R2Q1RK1 b - - 0 14";
+    const parser = new PGNParser(
+      `[FEN "${fen}"]\n14... a5?? (14... Qxb4 15. Nxb4!?) 15. Nb1`,
+    );
+    expect(parser.getSkipped()).toEqual([]);
+    const a5 = parser.getRoot().children[0];
+    expect(a5.move?.san).toBe("a5");
+    expect(a5.glyph?.symbol).toBe("??");
+    const qxb4 = parser.getRoot().children[1];
+    expect(qxb4.children[0].move?.san).toBe("Nxb4");
+    expect(qxb4.children[0].glyph?.symbol).toBe("!?");
+  });
+
+  // ============ Lichess 形状（[%csl]/[%cal]）解析测试 ============
+
+  test("parses [%csl] square highlights", () => {
+    const parser = new PGNParser("1. e4 e5 2. Nf3 { [%csl Gb4,Yd5,Rf6] }");
+    const nf3 = parser.getMainLine()[2];
+    expect(nf3.shapes).toEqual([
+      { orig: "b4", brush: "g" },
+      { orig: "d5", brush: "y" },
+      { orig: "f6", brush: "r" },
+    ]);
+    expect(nf3.comments).toEqual([]);
+  });
+
+  test("parses [%cal] arrows", () => {
+    const parser = new PGNParser("1. e4 { [%cal Ge2e4,Ye2d4,Re2g4] } e5");
+    const e4 = parser.getMainLine()[0];
+    expect(e4.shapes).toEqual([
+      { orig: "e2", dest: "e4", brush: "g" },
+      { orig: "e2", dest: "d4", brush: "y" },
+      { orig: "e2", dest: "g4", brush: "r" },
+    ]);
+  });
+
+  test("parses combined [%csl][%cal] block without leftover text", () => {
+    const parser = new PGNParser("1. e4 { [%csl Gb4][%cal Ge2e4] } e5");
+    const e4 = parser.getMainLine()[0];
+    expect(e4.shapes).toEqual([
+      { orig: "b4", brush: "g" },
+      { orig: "e2", dest: "e4", brush: "g" },
+    ]);
+    expect(e4.comments).toEqual([]);
+  });
+
+  test("keeps surrounding text when shapes are embedded in a comment", () => {
+    const parser = new PGNParser(
+      "1. e4 { best move [%cal Ge2e4] covers the center } e5",
+    );
+    const e4 = parser.getMainLine()[0];
+    expect(e4.shapes).toEqual([{ orig: "e2", dest: "e4", brush: "g" }]);
+    expect(e4.comments).toEqual(["best move covers the center"]);
+  });
+
+  test("unknown color letters degrade to blue", () => {
+    const parser = new PGNParser("1. e4 { [%csl Pb4][%cal Ze2e4] } e5");
+    const e4 = parser.getMainLine()[0];
+    expect(e4.shapes).toEqual([
+      { orig: "b4", brush: "b" },
+      { orig: "e2", dest: "e4", brush: "b" },
+    ]);
+  });
+
+  test("shapes accumulate across consecutive comment blocks", () => {
+    const parser = new PGNParser(
+      "1. e4 { first } { [%csl Gb4] } { [%cal Re2e4] } { second } e5",
+    );
+    const e4 = parser.getMainLine()[0];
+    expect(e4.shapes).toEqual([
+      { orig: "b4", brush: "g" },
+      { orig: "e2", dest: "e4", brush: "r" },
+    ]);
+    expect(e4.comments).toEqual(["first", "second"]);
+  });
+
+  test("lichess study game: shapes attach and no raw metadata leaks", () => {
+    const fen =
+      "rn1r2k1/pb3ppp/1p2pn2/3p4/1PP5/q2N2P1/P2NPPBP/R2Q1RK1 b - - 0 14";
+    const parser = new PGNParser(
+      `[FEN "${fen}"]\n` +
+        `14... a5?? { Before, it was a normal-looking position. } { [%clk 1:09:33] } ` +
+        `15. Nb1 { Black's Queen is trapped. } { [%csl Ra3] } 1-0`,
+    );
+    const nb1 = parser.getMainLine()[1];
+    expect(nb1.shapes).toEqual([{ orig: "a3", brush: "r" }]);
+    expect(nb1.comments).toEqual(["Black's Queen is trapped."]);
+  });
+
+  // ============ Lichess [%eval] 解析测试 ============
+
+  test("parses [%eval] with cp values", () => {
+    const parser = new PGNParser(
+      "1. e4 { [%eval 0.35] } e5 { [%eval +1.20] } 2. Nf3 { [%eval -0.5] }",
+    );
+    const [e4, e5, nf3] = parser.getMainLine();
+    expect(e4.eval).toEqual({ score: 35, scoreType: "cp", depth: 0 });
+    expect(e5.eval).toEqual({ score: 120, scoreType: "cp", depth: 0 });
+    expect(nf3.eval).toEqual({ score: -50, scoreType: "cp", depth: 0 });
+    expect(e4.comments).toEqual([]);
+  });
+
+  test("parses [%eval] with mate values", () => {
+    const parser = new PGNParser("1. e4 { [%eval #4] } e5 { [%eval #-4] }");
+    const [e4, e5] = parser.getMainLine();
+    expect(e4.eval).toEqual({ score: 4, scoreType: "mate", depth: 0 });
+    expect(e5.eval).toEqual({ score: -4, scoreType: "mate", depth: 0 });
+  });
+
+  test("mixed [%eval]/[%csl] block extracts both and leaves no text", () => {
+    const parser = new PGNParser("1. e4 { [%eval 0.35][%csl Ge4] } e5");
+    const e4 = parser.getMainLine()[0];
+    expect(e4.eval).toEqual({ score: 35, scoreType: "cp", depth: 0 });
+    expect(e4.shapes).toEqual([{ orig: "e4", brush: "g" }]);
+    expect(e4.comments).toEqual([]);
+  });
+
+  test("invalid [%eval] value stays as comment text", () => {
+    const parser = new PGNParser("1. e4 { [%eval nonsense] } e5");
+    const e4 = parser.getMainLine()[0];
+    expect(e4.eval).toBeUndefined();
+    expect(e4.comments).toEqual(["[%eval nonsense]"]);
+  });
+
+  // ============ [SetUp] 标签测试 ============
+
+  test("getTags pairs [FEN] with [SetUp]", () => {
+    const parser = new PGNParser(
+      '[FEN "4k3/8/8/8/8/8/8/4K3 w - - 0 1"]\n1. Ke2 Kd7',
+    );
+    const tags = parser.getTags();
+    expect(tags).toContain('[FEN "4k3/8/8/8/8/8/8/4K3 w - - 0 1"]');
+    expect(tags).toContain('[SetUp "1"]');
+  });
+
+  test("getTags does not duplicate an existing [SetUp]", () => {
+    const parser = new PGNParser(
+      '[FEN "4k3/8/8/8/8/8/8/4K3 w - - 0 1"]\n[SetUp "1"]\n1. Ke2 Kd7',
+    );
+    const tags = parser.getTags();
+    expect(tags.match(/\[SetUp/g)).toHaveLength(1);
+  });
+
+  test("getTags adds no [SetUp] without [FEN]", () => {
+    const parser = new PGNParser("1. e4 e5");
+    expect(parser.getTags()).not.toContain("SetUp");
+  });
+
   test("non-strict mode records nothing for valid PGN", () => {
     const parser = new PGNParser("1. e4 e5 2. Nf3 Nc6");
     expect(parser.getSkipped()).toEqual([]);
