@@ -323,7 +323,7 @@ export class PGNParser {
       }
     }
 
-    const { shapes, eval: evalMeta, text } = extractCommentMeta(raw);
+    const { shapes, eval: evalMeta, clock, text } = extractCommentMeta(raw);
     if (shapes.length > 0) {
       // Lichess shapes accumulate across comment blocks (lila: shapes ++ s).
       (this.currentNode.shapes ??= []).push(...shapes);
@@ -331,6 +331,10 @@ export class PGNParser {
     if (evalMeta) {
       // Lichess [%eval]; later blocks win (same rule as %e: comments).
       this.currentNode.eval = { ...evalMeta, depth: 0 };
+    }
+    if (clock) {
+      // Lichess [%clk]; later blocks win (same rule as %e: comments).
+      this.currentNode.clock = clock;
     }
     if (text) {
       this.currentNode.comments ??= [];

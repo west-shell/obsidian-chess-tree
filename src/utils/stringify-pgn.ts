@@ -90,6 +90,10 @@ export function serializeNodeMeta(
     for (const c of node.comments) meta += ` {${c}}`;
   }
 
+  if (includeComments && node.clock) {
+    meta += ` {[%clk ${node.clock}]}`;
+  }
+
   if (node.shapes?.length) {
     const highlights = node.shapes
       .filter((s) => !s.dest)

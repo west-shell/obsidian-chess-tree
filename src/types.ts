@@ -105,6 +105,8 @@ export type ChessNode = {
   glyph?: MoveGlyph | null;
   annotation?: string;
   shapes?: NodeShape[];
+  /** Remaining clock time after this move ("H:MM:SS"), from lichess [%clk]. */
+  clock?: string;
   isCheckmate?: boolean;
   result?: string;
 };

@@ -560,4 +560,48 @@ describe("PGN round-trip consistency", () => {
     expect(collectMainline(reParser.getRoot())).toEqual(["e4"]);
     expect(countNodes(reParser.getRoot())).toBe(1);
   });
+
+  test("[%clk] round-trips as a clock block, stripped from comments", () => {
+    const original =
+      "1. e4 {best by test} {[%clk 0:05:00]} e5 {[%clk 0:04:55]} 2. Nf3";
+    const parser = new PGNParser(original);
+
+    const e4 = parser.getRoot().children[0];
+    expect(e4.clock).toBe("0:05:00");
+    expect(e4.comments).toEqual(["best by test"]);
+    const e5 = e4.children[0];
+    expect(e5.clock).toBe("0:04:55");
+    expect(e5.comments).toEqual([]);
+
+    const exported = stringifyPGN(parser.getRoot());
+    expect(exported).toContain("{best by test} {[%clk 0:05:00]}");
+    expect(exported).toContain("e5 {[%clk 0:04:55]}");
+  });
+
+  test("[%clk] embedded inside a text comment is extracted", () => {
+    const original = "1. e4 {nice move [%clk 0:03:00]} e5";
+    const parser = new PGNParser(original);
+
+    const e4 = parser.getRoot().children[0];
+    expect(e4.clock).toBe("0:03:00");
+    expect(e4.comments).toEqual(["nice move"]);
+  });
+
+  test("invalid [%clk] value stays verbatim in the comment", () => {
+    const original = "1. e4 {[%clk half an hour]} e5";
+    const parser = new PGNParser(original);
+
+    const e4 = parser.getRoot().children[0];
+    expect(e4.clock).toBeUndefined();
+    expect(e4.comments).toEqual(["[%clk half an hour]"]);
+  });
+
+  test("double round-trip with [%clk] is stable", () => {
+    const original =
+      "1. e4 {best by test} {[%clk 0:05:00]} e5 {[%clk 0:04:55]}";
+    const firstExport = parseAndStringify(original);
+    const secondExport = parseAndStringify(firstExport);
+
+    expect(firstExport).toBe(secondExport);
+  });
 });
