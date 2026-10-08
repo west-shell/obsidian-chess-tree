@@ -186,6 +186,7 @@
   "tag.Black": "Black",
   "tag.Result": "Result",
   "tree.placeholder": "Add a comment",
+  "tree.editComment": "Click to edit",
   "tree.zoomIn": "Zoom in",
   "tree.zoomOut": "Zoom out",
   "tree.resetView": "Reset view",
