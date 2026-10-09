@@ -549,6 +549,48 @@ describe("PGN round-trip consistency", () => {
     expect(exported).not.toContain("1. ...");
   });
 
+  test("black reply keeps its number after a comment block (lichess)", () => {
+    const original = "1. e4 {best by test} e5 2. Nf3";
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("1. e4 {best by test} 1... e5");
+    expect(parseAndStringify(exported)).toBe(exported);
+  });
+
+  test("black reply keeps its number after eval/clock blocks (lichess)", () => {
+    const original = "1. d4 {[%clk 0:03:00]} {[%eval 0.15]} Nf6";
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("1... Nf6");
+    expect(parseAndStringify(exported)).toBe(exported);
+  });
+
+  test("black reply keeps its number after a variation (lichess)", () => {
+    // Mirrors the lichess game export shape:
+    // 23. Qxf8?? {…} (23. e4 …) 23... Qxg2#
+    const original = "1. e4 e5 2. Nf3 (2. f4 exf4) Nc6 3. Bb5";
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("(2. f4 exf4) 2... Nc6");
+    expect(parseAndStringify(exported)).toBe(exported);
+  });
+
+  test("black reply stays bare when nothing interrupts the pair", () => {
+    const original = "1. e4 e5 2. Nf3 Nc6 3. Bb5";
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("1. e4 e5 2. Nf3 Nc6");
+    expect(exported).not.toContain("...");
+  });
+
+  test("glyph suffixes do not interrupt black reply numbering", () => {
+    const original = "1. e4!? e5 2. Nf3";
+    const exported = parseAndStringify(original);
+
+    expect(exported).toContain("1. e4!? e5");
+    expect(exported).not.toContain("1... e5");
+  });
+
   test("illegal move inside a variation aborts without corrupting the tree", () => {
     // `(1... c5)` right after a white move is non-standard: the variation
     // would have to start with a white move from the start position, so c5

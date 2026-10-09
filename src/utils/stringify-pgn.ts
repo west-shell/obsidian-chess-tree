@@ -140,9 +140,11 @@ export function stringifyPGN(root: ChessNode, includeEval = true): string {
   const rootStep =
     getTurnFromFen(root.fen) === "black" ? fullmove : fullmove - 1;
 
-  // `lineStart` marks a black move that opens a line (mainline first move
-  // of a black-to-move game, or the first move of a black variation) and
-  // therefore needs the "N..." prefix; black replies mid-line stay bare.
+  // `lineStart` marks a black move that needs the "N..." prefix: one that
+  // opens a line (first mainline move of a black-to-move game, first move
+  // of a black variation) or one whose white half-move was separated from
+  // it by comment blocks or a variation (lichess numbering). Black replies
+  // directly following their white move stay bare.
   // `inVariation` suppresses the bare `*` filler inside parentheses —
   // lichess-style variations end at their last move.
   function walk(
@@ -160,7 +162,8 @@ export function stringifyPGN(root: ChessNode, includeEval = true): string {
         result += lineStart ? `${stepNum}... ${notation}` : notation;
       }
     }
-    result += serializeNodeMeta(node, { includeEval });
+    const meta = serializeNodeMeta(node, { includeEval });
+    result += meta;
     const brothers = nodeBrothers.get(node);
     if (brothers?.length) {
       for (const brother of brothers) {
@@ -171,7 +174,16 @@ export function stringifyPGN(root: ChessNode, includeEval = true): string {
     if (node.children[0]) {
       const next = node.children[0];
       const nextStepNum = next.color === "white" ? stepNum + 1 : stepNum;
-      result += ` ${walk(next, nextStepNum, node === root && next.color === "black", inVariation)}`;
+      // Lichess (scalachess PgnStr) omits a black reply's number only when
+      // it directly follows its white half-move. Comment blocks between the
+      // two (eval/clock/comments — all brace-wrapped) or a variation in
+      // between force the "N..." prefix, otherwise the move could be read
+      // as a continuation of the variation. Glyph suffixes and `$n` NAGs
+      // are part of the move token and never interrupt.
+      const blackStarts =
+        next.color === "black" &&
+        (node === root || meta.includes("{") || Boolean(brothers?.length));
+      result += ` ${walk(next, nextStepNum, blackStarts, inVariation)}`;
     } else if (node.result) {
       result += ` ${node.result}`;
     } else if (!inVariation) {
