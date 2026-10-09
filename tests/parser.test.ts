@@ -252,19 +252,21 @@ describe("Chess PGN Parser", () => {
     expect(d5.glyph?.symbol).toBe("?");
   });
 
-  test("unmapped NAGs are skipped without warnings", () => {
-    const parser = new PGNParser("1. e4 $99 e5 $140 2. Nf3 Nc6");
+  test("unmapped and trimmed NAGs are skipped without warnings", () => {
+    const parser = new PGNParser("1. e4 $99 e5 $140 2. Nf3 $36 Nc6 $14");
     expect(parser.getSkipped()).toEqual([]);
-    const [e4, e5] = parser.getMainLine();
+    const [e4, e5, nf3, nc6] = parser.getMainLine();
     expect(e4.glyph).toBeUndefined();
     expect(e4.annotations).toBeUndefined();
     expect(e5.glyph).toBeUndefined();
-    expect(e5.annotations).toEqual(["140"]);
+    expect(e5.annotations).toBeUndefined();
+    expect(nf3.annotations).toBeUndefined();
+    expect(nc6.annotations).toBeUndefined();
   });
 
   test("study NAGs map to annotation keys (lichess glyph catalog)", () => {
     const parser = new PGNParser(
-      "1. e4 $16 e5 $17 2. Nf3 $10 Nc6 $24 3. Bb5 $14 a6 $15",
+      "1. e4 $16 e5 $17 2. Nf3 $10 Nc6 $24 3. Bb5 $13 a6 $16",
     );
     expect(parser.getSkipped()).toEqual([]);
     const [e4, e5, nf3, nc6, bb5, a6] = parser.getMainLine();
@@ -272,20 +274,16 @@ describe("Chess PGN Parser", () => {
     expect(e5.annotations).toEqual(["17"]);
     expect(nf3.annotations).toEqual(["10"]);
     expect(nc6.annotations).toEqual(["st"]);
-    expect(bb5.annotations).toEqual(["14"]);
-    expect(a6.annotations).toEqual(["15"]);
+    expect(bb5.annotations).toEqual(["13"]);
+    expect(a6.annotations).toEqual(["16"]);
     for (const n of [e4, e5, nf3, nc6, bb5, a6]) {
       expect(n.glyph).toBeUndefined();
     }
   });
 
-  test("multiple study NAGs stack on one move", () => {
-    const parser = new PGNParser("1. e4 $16 $36 $40 e5");
-    const [e4] = parser.getMainLine();
-    expect(e4.annotations).toEqual(["16", "36", "40"]);
-    // duplicate NAGs dedupe
-    const dup = new PGNParser("1. e4 $16 $16 e5");
-    expect(dup.getMainLine()[0].annotations).toEqual(["16"]);
+  test("duplicate study NAGs dedupe", () => {
+    const parser = new PGNParser("1. e4 $16 $16 e5");
+    expect(parser.getMainLine()[0].annotations).toEqual(["16"]);
   });
 
   test("first mapped NAG wins when several follow a move", () => {

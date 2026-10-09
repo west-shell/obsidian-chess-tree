@@ -244,22 +244,18 @@ describe("PGN round-trip consistency", () => {
     const parser = new PGNParser(original);
     const root = parser.getRoot();
 
-    root.children[0].annotations = ["16", "36", "140"];
+    root.children[0].annotations = ["16", "13"];
 
     const exported = stringifyPGN(root, true);
-    expect(exported).toContain("e4 $16 $36 $140");
+    expect(exported).toContain("e4 $16 $13");
     const reParser = new PGNParser(exported);
-    expect(reParser.getRoot().children[0].annotations).toEqual([
-      "16",
-      "36",
-      "140",
-    ]);
+    expect(reParser.getRoot().children[0].annotations).toEqual(["16", "13"]);
   });
 
-  test("glyph and study annotations combine (e5? $16 $36 $40)", () => {
-    const original = "1. e4 e5? $16 $36 $40 2. Nf3";
+  test("glyph and study annotations combine (e5? $16)", () => {
+    const original = "1. e4 e5? $16 2. Nf3";
     const exported = parseAndStringify(original);
-    expect(exported).toContain("e5? $16 $36 $40");
+    expect(exported).toContain("e5? $16");
     expect(parseAndStringify(exported)).toBe(exported);
   });
 
