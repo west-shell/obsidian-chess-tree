@@ -253,30 +253,39 @@ describe("Chess PGN Parser", () => {
   });
 
   test("unmapped NAGs are skipped without warnings", () => {
-    const parser = new PGNParser("1. e4 $7 e5 $40 2. Nf3 Nc6");
+    const parser = new PGNParser("1. e4 $99 e5 $140 2. Nf3 Nc6");
     expect(parser.getSkipped()).toEqual([]);
     const [e4, e5] = parser.getMainLine();
     expect(e4.glyph).toBeUndefined();
-    expect(e4.annotation).toBeUndefined();
+    expect(e4.annotations).toBeUndefined();
     expect(e5.glyph).toBeUndefined();
-    expect(e5.annotation).toBeUndefined();
+    expect(e5.annotations).toEqual(["140"]);
   });
 
-  test("positional NAGs map to annotations", () => {
+  test("study NAGs map to annotation keys (lichess glyph catalog)", () => {
     const parser = new PGNParser(
       "1. e4 $16 e5 $17 2. Nf3 $10 Nc6 $24 3. Bb5 $14 a6 $15",
     );
     expect(parser.getSkipped()).toEqual([]);
     const [e4, e5, nf3, nc6, bb5, a6] = parser.getMainLine();
-    expect(e4.annotation).toBe("+");
-    expect(e5.annotation).toBe("-");
-    expect(nf3.annotation).toBe("=");
-    expect(nc6.annotation).toBe("st");
-    expect(bb5.annotation).toBe("+");
-    expect(a6.annotation).toBe("-");
+    expect(e4.annotations).toEqual(["16"]);
+    expect(e5.annotations).toEqual(["17"]);
+    expect(nf3.annotations).toEqual(["10"]);
+    expect(nc6.annotations).toEqual(["st"]);
+    expect(bb5.annotations).toEqual(["14"]);
+    expect(a6.annotations).toEqual(["15"]);
     for (const n of [e4, e5, nf3, nc6, bb5, a6]) {
       expect(n.glyph).toBeUndefined();
     }
+  });
+
+  test("multiple study NAGs stack on one move", () => {
+    const parser = new PGNParser("1. e4 $16 $36 $40 e5");
+    const [e4] = parser.getMainLine();
+    expect(e4.annotations).toEqual(["16", "36", "40"]);
+    // duplicate NAGs dedupe
+    const dup = new PGNParser("1. e4 $16 $16 e5");
+    expect(dup.getMainLine()[0].annotations).toEqual(["16"]);
   });
 
   test("first mapped NAG wins when several follow a move", () => {

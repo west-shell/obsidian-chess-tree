@@ -223,20 +223,44 @@ describe("PGN round-trip consistency", () => {
     expect(mainline).toEqual(["e4", "e5", "Bc4", "Nc6", "Qh5", "Nf6", "Qxf7#"]);
   });
 
-  test("annotation round-trips when includeEval is true", () => {
+  test("custom annotation round-trips via private #a: form", () => {
     const original = "1. e4 e5 2. Nf3 Nc6";
     const parser = new PGNParser(original);
     const root = parser.getRoot();
 
     const e4Node = root.children[0];
-    e4Node.annotation = "+";
+    e4Node.annotations = ["+"];
 
     const exported = stringifyPGN(root, true);
-    expect(exported).toContain("e4 $16");
+    expect(exported).toContain("e4 {#a:+}");
     const reParser = new PGNParser(exported);
 
     const reE4 = reParser.getRoot().children[0];
-    expect(reE4.annotation).toBe("+");
+    expect(reE4.annotations).toEqual(["+"]);
+  });
+
+  test("study glyph annotations round-trip as NAGs", () => {
+    const original = "1. e4 e5";
+    const parser = new PGNParser(original);
+    const root = parser.getRoot();
+
+    root.children[0].annotations = ["16", "36", "140"];
+
+    const exported = stringifyPGN(root, true);
+    expect(exported).toContain("e4 $16 $36 $140");
+    const reParser = new PGNParser(exported);
+    expect(reParser.getRoot().children[0].annotations).toEqual([
+      "16",
+      "36",
+      "140",
+    ]);
+  });
+
+  test("glyph and study annotations combine (e5? $16 $36 $40)", () => {
+    const original = "1. e4 e5? $16 $36 $40 2. Nf3";
+    const exported = parseAndStringify(original);
+    expect(exported).toContain("e5? $16 $36 $40");
+    expect(parseAndStringify(exported)).toBe(exported);
   });
 
   test("shapes round-trip", () => {
@@ -353,7 +377,7 @@ describe("PGN round-trip consistency", () => {
 
     const e4Node = root.children[0];
     e4Node.eval = { score: 25, scoreType: "cp", depth: 20, bestmove: "e2e4" };
-    e4Node.annotation = "+";
+    e4Node.annotations = ["+"];
     e4Node.shapes = [{ orig: "e2", dest: "e4", brush: "g" }];
 
     const exported = stringifyPGN(root, false);
@@ -361,7 +385,7 @@ describe("PGN round-trip consistency", () => {
 
     const reE4 = reParser.getRoot().children[0];
     expect(reE4.eval).toBeUndefined();
-    expect(reE4.annotation).toBe("+");
+    expect(reE4.annotations).toEqual(["+"]);
     expect(reE4.shapes).toEqual([{ orig: "e2", dest: "e4", brush: "g" }]);
   });
 
@@ -451,12 +475,12 @@ describe("PGN round-trip consistency", () => {
   test("unmappable bm annotation keeps private #a: form", () => {
     const original = "1. e4 e5";
     const parser = new PGNParser(original);
-    parser.getRoot().children[0].annotation = "bm";
+    parser.getRoot().children[0].annotations = ["bm"];
 
     const exported = stringifyPGN(parser.getRoot(), true);
     expect(exported).toContain("{#a:bm}");
     const reParser = new PGNParser(exported);
-    expect(reParser.getRoot().children[0].annotation).toBe("bm");
+    expect(reParser.getRoot().children[0].annotations).toEqual(["bm"]);
   });
 
   test("legacy &s: shapes re-export as [%csl]/[%cal]", () => {
