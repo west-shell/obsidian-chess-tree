@@ -604,4 +604,84 @@ describe("PGN round-trip consistency", () => {
 
     expect(firstExport).toBe(secondExport);
   });
+
+  test("[%anno] author is stripped from comments and round-trips inline", () => {
+    const original =
+      '1. e4 {[%anno "AArmstark", aaarmstark] Chess on the board!} e5';
+    const parser = new PGNParser(original);
+
+    const e4 = parser.getRoot().children[0];
+    expect(e4.comments).toEqual(["Chess on the board!"]);
+    expect(e4.commentAuthors?.[0]).toEqual({
+      name: "AArmstark",
+      user: "aaarmstark",
+    });
+
+    const exported = stringifyPGN(parser.getRoot());
+    expect(exported).toContain(
+      '{[%anno "AArmstark", aaarmstark] Chess on the board!}',
+    );
+  });
+
+  test("multiple comments by different authors keep their own [%anno]", () => {
+    const original =
+      '1. e4 {[%anno "AArmstark", aaarmstark] Chaos!} {[%anno "FM NaSil", nasil] Calm down.} e5 {plain comment}';
+    const parser = new PGNParser(original);
+
+    const e4 = parser.getRoot().children[0];
+    expect(e4.comments).toEqual(["Chaos!", "Calm down."]);
+    expect(e4.commentAuthors?.[0]).toEqual({
+      name: "AArmstark",
+      user: "aaarmstark",
+    });
+    expect(e4.commentAuthors?.[1]).toEqual({
+      name: "FM NaSil",
+      user: "nasil",
+    });
+
+    const exported = stringifyPGN(parser.getRoot());
+    expect(exported).toContain('{[%anno "AArmstark", aaarmstark] Chaos!}');
+    expect(exported).toContain('{[%anno "FM NaSil", nasil] Calm down.}');
+    expect(exported).toContain("e5 {plain comment}");
+
+    // Reparsing the export restores the exact per-comment pairing.
+    const reParser = new PGNParser(exported);
+    const e4again = reParser.getRoot().children[0];
+    expect(e4again.commentAuthors?.[0]?.user).toBe("aaarmstark");
+    expect(e4again.commentAuthors?.[1]?.user).toBe("nasil");
+    const e5again = e4again.children[0];
+    expect(e5again.commentAuthors).toBeUndefined();
+  });
+
+  test("[%anno] without user id round-trips (external author)", () => {
+    const original = '1. e4 {[%anno "Some External"] nice} e5';
+    const parser = new PGNParser(original);
+
+    const e4 = parser.getRoot().children[0];
+    expect(e4.commentAuthors?.[0]).toEqual({
+      name: "Some External",
+      user: "",
+    });
+
+    const exported = stringifyPGN(parser.getRoot());
+    expect(exported).toContain('{[%anno "Some External"] nice}');
+  });
+
+  test("malformed [%anno] stays verbatim in the comment", () => {
+    const original = "1. e4 {[%anno ] text} e5";
+    const parser = new PGNParser(original);
+
+    const e4 = parser.getRoot().children[0];
+    expect(e4.commentAuthors).toBeUndefined();
+    expect(e4.comments).toEqual(["[%anno ] text"]);
+  });
+
+  test("double round-trip with [%anno] and [%clk] is stable", () => {
+    const original =
+      '1. e4 {[%anno "AA", aa] Chaos!} {[%clk 0:05:00]} e5 {[%clk 0:04:55]}';
+    const firstExport = parseAndStringify(original);
+    const secondExport = parseAndStringify(firstExport);
+
+    expect(firstExport).toBe(secondExport);
+  });
 });

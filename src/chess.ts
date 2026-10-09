@@ -257,6 +257,8 @@ export const SQUARE_PATTERN = "[a-h][1-8]";
 export const SHAPE_PART_REGEX = /^([a-h][1-8])([a-h][1-8])?:([gryb])$/;
 export const EVAL_REGEX =
   /^%e:([^,}]+)(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,([a-h][1-8][a-h][1-8][qrbn]?))?(?:,(!\?|\?!|\?\?|[?!]|!!))?$/;
+/** Lichess study annotator profile URL prefix; null = no per-user pages. */
+export const ANNOTATOR_URL_PREFIX: string | null = "https://lichess.org/@/";
 
 export function getTurnFromFen(fen: string): "white" | "black" {
   return fen.split(" ")[1] === "b" ? "black" : "white";

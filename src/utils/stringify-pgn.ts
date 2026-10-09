@@ -87,7 +87,15 @@ export function serializeNodeMeta(
   }
 
   if (includeComments && node.comments?.length) {
-    for (const c of node.comments) meta += ` {${c}}`;
+    // Mirror lila PgnDump.authoredComment: each comment block carries its
+    // own [%anno] inline; unauthored comments (or the exporter's own) stay bare.
+    for (let i = 0; i < node.comments.length; i++) {
+      const c = node.comments[i];
+      const author = node.commentAuthors?.[i];
+      meta += author
+        ? ` {[%anno "${author.name}"${author.user ? `, ${author.user}` : ""}] ${c}}`
+        : ` {${c}}`;
+    }
   }
 
   if (includeComments && node.clock) {

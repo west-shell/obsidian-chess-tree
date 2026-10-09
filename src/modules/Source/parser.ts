@@ -323,7 +323,13 @@ export class PGNParser {
       }
     }
 
-    const { shapes, eval: evalMeta, clock, text } = extractCommentMeta(raw);
+    const {
+      shapes,
+      eval: evalMeta,
+      clock,
+      annotator,
+      text,
+    } = extractCommentMeta(raw);
     if (shapes.length > 0) {
       // Lichess shapes accumulate across comment blocks (lila: shapes ++ s).
       (this.currentNode.shapes ??= []).push(...shapes);
@@ -339,6 +345,12 @@ export class PGNParser {
     if (text) {
       this.currentNode.comments ??= [];
       this.currentNode.comments.push(text);
+      if (annotator) {
+        // [%anno] belongs to THIS comment block; align by comments index.
+        (this.currentNode.commentAuthors ??= [])[
+          this.currentNode.comments.length - 1
+        ] = annotator;
+      }
     }
   }
 

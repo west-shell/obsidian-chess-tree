@@ -19,6 +19,11 @@ const EVAL_TAG_REGEX = /\[\s*%eval\s+([^\]]*?)\]/g;
 // Lichess clock time: { [%clk 0:36:46] } — remaining time after the move.
 const CLK_REGEX = /\[\s*%clk\s+(\d+(?::\d{1,2}){1,2})\]/g;
 
+// Lichess study annotation author (lila CommentParser): { [%anno "Name", id] }
+// — name may be quoted or bare; the user id after the comma is optional.
+const ANNO_REGEX =
+  /\[\s*%anno\s+(?:"([^"]*)"|([^\],]+))\s*(?:,\s*([^\]\s]+))?\s*\]/g;
+
 const BRUSH_BY_COLOR: Record<string, string> = {
   G: "g",
   R: "r",
@@ -57,14 +62,16 @@ export interface CommentMeta {
   eval?: { score: number; scoreType: "cp" | "mate" };
   /** Remaining clock time from [%clk] ("H:MM:SS"), later blocks win. */
   clock?: string;
+  /** Annotation author from [%anno] — belongs to THIS comment's text. */
+  annotator?: { name: string; user: string };
   /** Comment text with all recognized metadata stripped; empty when pure. */
   text: string;
 }
 
 /**
- * Extract Lichess metadata ([%csl]/[%cal] shapes, [%eval], [%clk]) from a
- * comment and return the remaining plain text. More lenient than lila
- * (which only reads the first block of each kind): every block is
+ * Extract Lichess metadata ([%csl]/[%cal] shapes, [%eval], [%clk], [%anno])
+ * from a comment and return the remaining plain text. More lenient than
+ * lila (which only reads the first block of each kind): every block is
  * collected — a superset, so re-imported exports stay compatible.
  */
 export function extractCommentMeta(raw: string): CommentMeta {
@@ -111,9 +118,26 @@ export function extractCommentMeta(raw: string): CommentMeta {
     return "";
   });
 
+  let annotator: CommentMeta["annotator"];
+  text = text.replace(
+    ANNO_REGEX,
+    (
+      match,
+      quoted: string | undefined,
+      bare: string | undefined,
+      user?: string,
+    ) => {
+      const name = (quoted ?? bare ?? "").trim();
+      if (!name && !user) return match;
+      stripped = true;
+      annotator = { name, user: user ?? "" };
+      return "";
+    },
+  );
+
   if (stripped) {
     // Collapse the whitespace left behind by stripped blocks.
     text = text.replace(/\s+/g, " ").trim();
   }
-  return { shapes, eval: evalMeta, clock, text };
+  return { shapes, eval: evalMeta, clock, annotator, text };
 }

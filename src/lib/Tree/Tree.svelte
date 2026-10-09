@@ -10,6 +10,7 @@
     type NodeMap,
   } from "../../types";
   import {
+    ANNOTATOR_URL_PREFIX,
     CLS_PREFIX,
     getMoveListSideClass,
     getMoveNotation,
@@ -222,23 +223,52 @@
 
   $effect(() => {
     void _uiVer;
-    const text = commentsText;
+    const node = currentNode;
     const el = commentViewEl;
-    if (!el || !plugin) return;
+    if (!el || !plugin || !node) return;
     // Render into a fresh container per run: a still-pending previous
     // render then writes into a detached node instead of interleaving.
     el.replaceChildren();
     const inner = document.createElement("div");
     el.appendChild(inner);
+    // Each comment block renders with its own [%anno] author byline, so
+    // several comments by different authors stay correctly attributed.
+    const markdown = (node.comments ?? [])
+      .map((text, i) => {
+        let part = autolinkBareUrls(text);
+        const author = node.commentAuthors?.[i];
+        if (author) part += `\n\n${bylineMarkdown(author)}`;
+        return part;
+      })
+      .join("\n\n");
     const sourcePath = plugin.app.workspace.getActiveFile()?.path ?? "";
     void MarkdownRenderer.render(
       plugin.app,
-      autolinkBareUrls(text),
+      markdown,
       inner,
       sourcePath,
       plugin,
     );
   });
+
+  function bylineMarkdown(author: { name: string; user: string }): string {
+    const name = author.name || author.user;
+    const linked =
+      author.user && ANNOTATOR_URL_PREFIX
+        ? `<a href="${ANNOTATOR_URL_PREFIX}${encodeURI(author.user)}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`
+        : escapeHtml(name);
+    return `<small class="${CLS_PREFIX}-comment__byline">${t("tree.annotatedBy", _lv)} ${linked}</small>`;
+  }
+
+  function escapeHtml(value: string): string {
+    return value.replace(/[&<>"']/g, (ch) => {
+      if (ch === "&") return "&amp;";
+      if (ch === "<") return "&lt;";
+      if (ch === ">") return "&gt;";
+      if (ch === '"') return "&quot;";
+      return "&#39;";
+    });
+  }
 
   function enterCommentEdit(evt: MouseEvent) {
     // Clicks on links navigate instead of starting edit mode; selecting
@@ -320,6 +350,10 @@
       regularComments.length !== oldComments.length ||
       regularComments.some((c, i) => c !== oldComments[i]);
     currentNode.comments = regularComments;
+    if (changed) {
+      // Rewritten lines no longer map to their original [%anno] authors.
+      currentNode.commentAuthors = undefined;
+    }
     eventBus.emit("updateUI");
     if (changed) eventBus.emit("modified");
   }

@@ -565,6 +565,11 @@ svg.#{$cls-prefix}-moves__annot {
   }
 }
 
+// [%anno] author byline appended after an authored comment.
+.#{$cls-prefix}-comment__byline {
+  color: var(--text-muted);
+}
+
 button.#{$cls-prefix}-comment__toggle {
   width: 28px;
   height: auto;
