@@ -300,6 +300,25 @@ describe("Chess PGN Parser", () => {
     expect(a3.annotations).toEqual(["st"]);
   });
 
+  test("bracketed #a: glyph comments parse to glyph and annotation", () => {
+    const parser = new PGNParser("1. e4 {[#a:!?]} e5 {[#a:±]} 2. Nf3 {[#a:=]}");
+    expect(parser.getSkipped()).toEqual([]);
+    const [e4, e5, nf3] = parser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!?");
+    expect(e4.annotations).toBeUndefined();
+    expect(e5.glyph).toBeUndefined();
+    expect(e5.annotations).toEqual(["16"]);
+    expect(nf3.annotations).toEqual(["10"]);
+  });
+
+  test("unbracketed #a: symbol comments also parse", () => {
+    const parser = new PGNParser("1. e4 {#a:!?} e5 {#a:∞}");
+    expect(parser.getSkipped()).toEqual([]);
+    const [e4, e5] = parser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!?");
+    expect(e5.annotations).toEqual(["13"]);
+  });
+
   test("first mapped NAG wins when several follow a move", () => {
     const parser = new PGNParser("1. e4 $1 $14 e5");
     expect(parser.getMainLine()[0].glyph?.symbol).toBe("!");

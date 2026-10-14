@@ -415,6 +415,43 @@ describe("PGN round-trip consistency", () => {
     expect(e5.glyph?.symbol).toBe("?!");
   });
 
+  test("nag annotationFormat exports the glyph as a NAG", () => {
+    const parser = new PGNParser("1. e4 $1 e5 $6");
+    const exported = stringifyPGN(parser.getRoot(), true, "nag");
+    expect(exported).toContain("e4 $1");
+    expect(exported).toContain("e5 $6");
+    expect(exported).not.toContain("e4!");
+    expect(exported).not.toContain("e5?!");
+
+    const reParser = new PGNParser(exported);
+    const [e4, e5] = reParser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!");
+    expect(e5.glyph?.symbol).toBe("?!");
+  });
+
+  test("comment annotationFormat exports glyph and annotations as bracket blocks", () => {
+    const parser = new PGNParser("1. e4 $1 $16 e5 $3");
+    const exported = stringifyPGN(parser.getRoot(), true, "comment");
+    expect(exported).toContain("e4 {[#a:!]} {[#a:±]}");
+    expect(exported).toContain("e5 {[#a:!!]}");
+    expect(exported).not.toContain("$16");
+
+    const reParser = new PGNParser(exported);
+    const [e4, e5] = reParser.getMainLine();
+    expect(e4.glyph?.symbol).toBe("!");
+    expect(e4.annotations).toEqual(["16"]);
+    expect(e5.glyph?.symbol).toBe("!!");
+  });
+
+  test("plain bracketed comments stay comments (no glyph symbol match)", () => {
+    const exported = parseAndStringify("1. e4 {[a comment]} e5");
+    expect(exported).toContain("{[a comment]}");
+    const reParser = new PGNParser(exported);
+    const [e4] = reParser.getMainLine();
+    expect(e4.glyph).toBeUndefined();
+    expect(e4.comments).toEqual(["[a comment]"]);
+  });
+
   test("NAG glyph round-trips inside variations", () => {
     const original = "1. e4 (1. d4 $3 d5) e5";
     const exported = parseAndStringify(original);
