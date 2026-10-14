@@ -229,14 +229,14 @@ describe("PGN round-trip consistency", () => {
     const root = parser.getRoot();
 
     const e4Node = root.children[0];
-    e4Node.annotations = ["+"];
+    e4Node.annotations = ["bm"];
 
     const exported = stringifyPGN(root, true);
-    expect(exported).toContain("e4 {#a:+}");
+    expect(exported).toContain("e4 {#a:bm}");
     const reParser = new PGNParser(exported);
 
     const reE4 = reParser.getRoot().children[0];
-    expect(reE4.annotations).toEqual(["+"]);
+    expect(reE4.annotations).toEqual(["bm"]);
   });
 
   test("study glyph annotations round-trip as NAGs", () => {
@@ -373,7 +373,7 @@ describe("PGN round-trip consistency", () => {
 
     const e4Node = root.children[0];
     e4Node.eval = { score: 25, scoreType: "cp", depth: 20, bestmove: "e2e4" };
-    e4Node.annotations = ["+"];
+    e4Node.annotations = ["bm"];
     e4Node.shapes = [{ orig: "e2", dest: "e4", brush: "g" }];
 
     const exported = stringifyPGN(root, false);
@@ -381,7 +381,7 @@ describe("PGN round-trip consistency", () => {
 
     const reE4 = reParser.getRoot().children[0];
     expect(reE4.eval).toBeUndefined();
-    expect(reE4.annotations).toEqual(["+"]);
+    expect(reE4.annotations).toEqual(["bm"]);
     expect(reE4.shapes).toEqual([{ orig: "e2", dest: "e4", brush: "g" }]);
   });
 

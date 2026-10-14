@@ -287,6 +287,19 @@ describe("Chess PGN Parser", () => {
     expect(parser.getMainLine()[0].annotations).toEqual(["16"]);
   });
 
+  test("legacy #a: custom keys migrate to NAG annotation keys", () => {
+    const parser = new PGNParser(
+      "1. e4 {#a:+} e5 {#a:-} 2. Nf3 {#a:=} Nc6 {#a:bm} 3. a3 {#a:st}",
+    );
+    expect(parser.getSkipped()).toEqual([]);
+    const [e4, e5, nf3, nc6, a3] = parser.getMainLine();
+    expect(e4.annotations).toEqual(["16"]);
+    expect(e5.annotations).toEqual(["17"]);
+    expect(nf3.annotations).toEqual(["10"]);
+    expect(nc6.annotations).toEqual(["bm"]);
+    expect(a3.annotations).toEqual(["st"]);
+  });
+
   test("first mapped NAG wins when several follow a move", () => {
     const parser = new PGNParser("1. e4 $1 $14 e5");
     expect(parser.getMainLine()[0].glyph?.symbol).toBe("!");
