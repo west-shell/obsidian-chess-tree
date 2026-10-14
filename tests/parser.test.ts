@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { PGNParser } from "../src/modules/Source/parser";
+import { parseOrientationTag } from "../src/utils/parse";
 
 describe("Chess PGN Parser", () => {
   test("parse simple move sequence", () => {
@@ -478,5 +479,38 @@ describe("Chess PGN Parser", () => {
       "g4",
       "Qh4#",
     ]);
+  });
+});
+
+describe("Lichess [Orientation] tag", () => {
+  test('[Orientation "black"] flips the board', () => {
+    expect(parseOrientationTag('[Orientation "black"]')).toBe(true);
+  });
+
+  test('[Orientation "white"] keeps the board upright', () => {
+    expect(parseOrientationTag('[Orientation "white"]')).toBe(false);
+  });
+
+  test("missing tag returns undefined", () => {
+    expect(parseOrientationTag('[Event "Test"]\n1. e4 e5')).toBeUndefined();
+  });
+
+  test("tag is found among other headers", () => {
+    const raw = [
+      '[Event "Study: Ch 1"]',
+      '[Result "*"]',
+      '[Orientation "black"]',
+      "",
+      "1. e4 e5",
+    ].join("\n");
+    expect(parseOrientationTag(raw)).toBe(true);
+  });
+
+  test("case-insensitive color value", () => {
+    expect(parseOrientationTag('[Orientation "Black"]')).toBe(true);
+  });
+
+  test("invalid color value returns undefined", () => {
+    expect(parseOrientationTag('[Orientation "sideways"]')).toBeUndefined();
   });
 });
