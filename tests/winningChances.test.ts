@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 
-import { computeGlyph, EVAL_NOISE_BAND } from "../src/utils/winningChances";
+import {
+  computeGlyph,
+  EVAL_NOISE_BAND,
+  evalBarIntensity,
+} from "../src/utils/winningChances";
 import type { NodeEval } from "../src/types";
 
 const ev = (cp: number): NodeEval => ({
@@ -76,5 +80,34 @@ describe("computeGlyph", () => {
       "!!",
     );
     expect(computeGlyph(mateEv(0), mateEv(0), "white", true)).toBeNull();
+  });
+});
+
+describe("evalBarIntensity", () => {
+  test("equal position yields zero-length bar", () => {
+    expect(evalBarIntensity(ev(0))).toBeCloseTo(0, 10);
+  });
+
+  test("follows the lichess winning-chances curve", () => {
+    expect(evalBarIntensity(ev(100))).toBeCloseTo(0.182, 2);
+    expect(evalBarIntensity(ev(300))).toBeCloseTo(0.502, 2);
+    expect(evalBarIntensity(ev(500))).toBeCloseTo(0.726, 2);
+    expect(evalBarIntensity(ev(1000))).toBeCloseTo(0.951, 2);
+  });
+
+  test("negative scores mirror positive ones", () => {
+    expect(evalBarIntensity(ev(-500))).toBeCloseTo(
+      evalBarIntensity(ev(500)),
+      10,
+    );
+  });
+
+  test("never saturates before mate and mate fills the bar", () => {
+    const big = evalBarIntensity(ev(1000));
+    const huge = evalBarIntensity(ev(3000));
+    expect(big).toBeLessThan(huge);
+    expect(huge).toBeLessThan(1);
+    expect(evalBarIntensity(mateEv(-3))).toBe(1);
+    expect(evalBarIntensity(mateEv(2))).toBe(1);
   });
 });
