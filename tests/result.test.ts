@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { getAutoResult } from "../src/chess";
 import { PGNParser } from "../src/modules/Source/parser";
 import type { ChessNode } from "../src/types";
 import { branchTip, migrateBranchResult } from "../src/utils/result";
@@ -16,6 +17,38 @@ function makeNode(id: string, result?: string): ChessNode {
     result,
   };
 }
+
+describe("getAutoResult", () => {
+  test("checkmate against black forces 1-0", () => {
+    // Scholar's mate: Qxf7#, black to move.
+    expect(
+      getAutoResult(
+        "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4",
+      ),
+    ).toBe("1-0");
+  });
+
+  test("checkmate against white forces 0-1", () => {
+    // Fool's mate: Qh4#, white to move.
+    expect(
+      getAutoResult(
+        "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3",
+      ),
+    ).toBe("0-1");
+  });
+
+  test("stalemate forces a draw", () => {
+    // Black king a8: not in check, a7/b7/b8 all covered by the queen.
+    expect(getAutoResult("k7/8/1Q6/8/8/8/8/K7 b - - 0 1")).toBe("1/2-1/2");
+  });
+
+  test("ongoing positions and invalid FENs return null", () => {
+    expect(
+      getAutoResult("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
+    ).toBeNull();
+    expect(getAutoResult("not a fen")).toBeNull();
+  });
+});
 
 describe("branchTip", () => {
   test("follows the first-child chain to the line's last node", () => {

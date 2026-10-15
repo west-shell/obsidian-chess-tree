@@ -14,6 +14,7 @@ export {
   type Square,
 } from "chess.js";
 
+import { Chess } from "chess.js";
 import type { Move, Piece, Square } from "chess.js";
 import type { ChessNode, IHost } from "./types";
 
@@ -104,6 +105,25 @@ export function isMoveCheckmate(move: Move): boolean {
 
 export function isMoveCheck(move: Move): boolean {
   return /\+|#/.test(move.san ?? "");
+}
+
+// Result forced by the position itself — checkmate (mating side wins) or
+// stalemate (draw) — or null while the game continues. The move handler
+// stores it on a mating move's node and the result toolbar treats a
+// non-null value as read-only.
+export function getAutoResult(fen: string): string | null {
+  try {
+    const game = new Chess(fen);
+    if (game.isCheckmate()) {
+      return game.turn() === "w" ? "0-1" : "1-0";
+    }
+    if (game.isStalemate()) {
+      return "1/2-1/2";
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export function getMoveDest(move: Move): Square | undefined {
