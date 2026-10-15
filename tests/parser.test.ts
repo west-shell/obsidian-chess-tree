@@ -546,3 +546,38 @@ describe("Lichess [Orientation] tag", () => {
     expect(parseOrientationTag('[Orientation "sideways"]')).toBeUndefined();
   });
 });
+
+describe("[Result] header without movetext terminator", () => {
+  function mainlineTip(parser: PGNParser) {
+    let tip = parser.getRoot();
+    while (tip.children.length > 0) tip = tip.children[0];
+    return tip;
+  }
+
+  test("header result lands on the mainline tip", () => {
+    const pgn = [
+      '[Event "Study: Ch 1"]',
+      '[Result "1/2-1/2"]',
+      "",
+      "1. e4 e5 2. Nf3 Nc6",
+    ].join("\n");
+    expect(mainlineTip(new PGNParser(pgn)).result).toBe("1/2-1/2");
+  });
+
+  test("explicit movetext result wins over the header", () => {
+    const pgn = ['[Result "1-0"]', "", "1. e4 e5 2. Nf3 Nc6 1/2-1/2"].join(
+      "\n",
+    );
+    expect(mainlineTip(new PGNParser(pgn)).result).toBe("1/2-1/2");
+  });
+
+  test('[Result "*"] stays undecided', () => {
+    const pgn = '[Result "*"]\n\n1. e4 e5';
+    expect(mainlineTip(new PGNParser(pgn)).result).toBeUndefined();
+  });
+
+  test("no result anywhere leaves the tip unset", () => {
+    const pgn = '[Event "Casual"]\n\n1. e4 e5';
+    expect(mainlineTip(new PGNParser(pgn)).result).toBeUndefined();
+  });
+});
