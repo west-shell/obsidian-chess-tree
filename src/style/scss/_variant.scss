@@ -168,6 +168,16 @@ $cls-prefix: "ct";
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+// ---- Player-bar side marks (white / black chips) ------------------------------
+
+.#{$cls-prefix}-player-bar__mark--white {
+  background: var(--ct-piece-white);
+}
+
+.#{$cls-prefix}-player-bar__mark--black {
+  background: var(--ct-piece-black);
+}
+
 // ---- Variant-tunable values ---------------------------------------------------
 
 // Board aspect ratio (width / height): chess = 1, xiangqi = 0.9

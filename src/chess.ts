@@ -53,6 +53,10 @@ export const DEFAULT_LANG = "en";
 // ========== Flags ==========
 export const HAS_PROMOTION = true;
 export const PRIMARY_PLAYER_KEY = "White";
+/** Piece-color key of the first player, for player-bar side marks. */
+export const FIRST_PLAYER_COLOR = "white";
+/** Piece-color key of the second player, for player-bar side marks. */
+export const SECOND_PLAYER_COLOR = "black";
 
 // ========== Move Functions ==========
 
