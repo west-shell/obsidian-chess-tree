@@ -169,13 +169,17 @@ $cls-prefix: "ct";
 }
 
 // ---- Player-bar side marks (white / black chips) ------------------------------
+// Fill in the side's own piece color, border in the opponent's, so each
+// chip stays readable on any background.
 
 .#{$cls-prefix}-player-bar__mark--white {
   background: var(--ct-piece-white);
+  border: 1px solid var(--ct-piece-black);
 }
 
 .#{$cls-prefix}-player-bar__mark--black {
   background: var(--ct-piece-black);
+  border: 1px solid var(--ct-piece-white);
 }
 
 // ---- Variant-tunable values ---------------------------------------------------
