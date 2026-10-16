@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { getMoveDest, isMoveCheckmate } from "../src/chess";
 import { PGNParser } from "../src/modules/Source/parser";
-import { badgeBoardSvg } from "../src/utils/icon";
+import { badgeBoardSvg, resultBadgeKeyOf } from "../src/utils/icon";
 
 describe("board checkmate badge conditions", () => {
   test("parsed mate node satisfies board # conditions", () => {
@@ -29,26 +29,20 @@ describe("board checkmate badge conditions", () => {
     expect(tip.isCheckmate).toBe(false);
   });
 
-  test("board result key mirrors the tree's resultBadgeKey", () => {
-    const boardResultKey = (node: {
-      result?: string;
-      isCheckmate?: boolean;
-    }): string =>
-      node.result
-        ? `result_${node.result}`
-        : node.isCheckmate
-          ? "checkmate"
-          : "";
-    // Resignation win: result set, no checkmate — the board must still
-    // render the result "#" badge (mirrors the tree node badge).
-    expect(boardResultKey({ result: "1-0", isCheckmate: false })).toBe(
-      "result_1-0",
-    );
-    expect(badgeBoardSvg("result_1-0")).toContain("matrix");
-    // Real mate without a stored result falls back to the checkmate mark.
-    expect(boardResultKey({ isCheckmate: true })).toBe("checkmate");
+  test("result key maps mates to #, resignations to the flag", () => {
+    // Resignation win: result set, no checkmate — the flag badge on the
+    // winner's color (board and tree share resultBadgeKeyOf).
+    expect(resultBadgeKeyOf("1-0", false)).toBe("resign_1-0");
+    expect(badgeBoardSvg("resign_1-0")).toContain("matrix");
+    // Real mate keeps the "#" mark (result-colored disc).
+    expect(resultBadgeKeyOf("0-1", true)).toBe("result_0-1");
+    expect(resultBadgeKeyOf("1-0", true)).toBe("result_1-0");
+    // Mate without a stored result falls back to the checkmate mark.
+    expect(resultBadgeKeyOf(undefined, true)).toBe("checkmate");
     expect(badgeBoardSvg("checkmate")).toContain("matrix");
+    // Draws keep the handshake.
+    expect(resultBadgeKeyOf("1/2-1/2", false)).toBe("result_1/2-1/2");
     // Ongoing positions render nothing.
-    expect(boardResultKey({})).toBe("");
+    expect(resultBadgeKeyOf(undefined, false)).toBe("");
   });
 });
