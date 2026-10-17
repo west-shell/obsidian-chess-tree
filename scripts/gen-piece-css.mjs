@@ -7,10 +7,10 @@
 //   node scripts/gen-piece-css.mjs --check  verify outputs are up to date
 //
 // Outputs (all committed to the repo, bundled into styles.css by Vite):
-//   src/style/pieces/<set>.css     12 board rules + 2 thumbnail rules,
+//   src/style/pieces/css/<set>.css  12 board rules + 2 thumbnail rules,
 //                                  base64 data URIs scoped under
 //                                  .ct-pieceset-<set>
-//   src/style/pieces/index.css     @import list, lichess canonical order
+//   src/style/pieces/css/index.css  @import list, lichess canonical order
 //   src/style/pieces/pieceSets.gen.ts  PIECE_SETS registry for settings UI
 //
 // Directories missing any of the 12 standard files are skipped with a
@@ -29,9 +29,10 @@ import { join } from "node:path";
 
 const ROOT = import.meta.dirname;
 const SRC_DIR = join(ROOT, "..", "assets", "pieces");
-const CSS_DIR = join(ROOT, "..", "src", "style", "pieces");
+const PIECES_DIR = join(ROOT, "..", "src", "style", "pieces");
+const CSS_DIR = join(PIECES_DIR, "css");
 const INDEX_CSS = join(CSS_DIR, "index.css");
-const GEN_TS = join(CSS_DIR, "pieceSets.gen.ts");
+const GEN_TS = join(PIECES_DIR, "pieceSets.gen.ts");
 
 const CHECK = process.argv.includes("--check");
 
