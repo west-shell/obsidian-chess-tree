@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 import type { ChessNode, NodeMap } from "../src/types";
 import {
   branchStepDirection,
+  currentVariation,
+  enumerateVariations,
   findForkAbove,
   findForkBelow,
   firstForkOnPath,
@@ -170,5 +172,56 @@ describe("branchStepDirection", () => {
     const deepMap = prepare(deep);
     expect(branchStepDirection(deepMap.get("f")!, deepMap, true)).toBe(-1);
     expect(branchStepDirection(deepMap.get("f")!, deepMap, false)).toBe(1);
+  });
+});
+
+describe("enumerateVariations", () => {
+  test("lists every displayed-path variation below a fork in DFS order", () => {
+    // root(fork) ─ a ─ b1
+    //            └ c ─ d1
+    //               └ d2
+    const root = n("root", [n("a", [n("b1")]), n("c", [n("d1"), n("d2")])]);
+    prepare(root);
+    // From the root: three leaf tips (b1, d1, d2) → three variations,
+    // the index taken at every node with children down to the tip.
+    expect(enumerateVariations(root)).toEqual([
+      [0, 0],
+      [1, 0],
+      [1, 1],
+    ]);
+  });
+
+  test("returns a single variation on a branchless chain", () => {
+    const root = n("root", [n("x", [n("y")])]);
+    prepare(root);
+    expect(enumerateVariations(root)).toEqual([[0, 0]]);
+    expect(enumerateVariations(root.children[0].children[0])).toEqual([[]]);
+  });
+});
+
+describe("currentVariation", () => {
+  test("follows stored choices down the displayed path", () => {
+    // root(fork) ─ a ─ b1
+    //            └ c ─ d1
+    //               └ d2
+    const root = n("root", [n("a", [n("b1")]), n("c", [n("d1"), n("d2")])]);
+    prepare(root);
+    expect(currentVariation(root)).toEqual([0, 0]);
+    // Root switched to c, then to d2.
+    expect(currentVariation(root, new Map([["root", 1]]))).toEqual([1, 0]);
+    expect(
+      currentVariation(
+        root,
+        new Map([
+          ["root", 1],
+          ["c", 1],
+        ]),
+      ),
+    ).toEqual([1, 1]);
+  });
+
+  test("clamps stale out-of-range choices", () => {
+    const { a } = buildTree();
+    expect(currentVariation(a, new Map([["a", 9]]))).toEqual([0, 0]);
   });
 });
