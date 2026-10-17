@@ -2,9 +2,11 @@ import { describe, expect, test } from "vitest";
 
 import type { ChessNode, NodeMap } from "../src/types";
 import {
+  branchStepDirection,
   findForkAbove,
   findForkBelow,
   firstForkOnPath,
+  nodeDepth,
   pathBranchIndex,
   pathChild,
 } from "../src/utils/branch-nav";
@@ -137,5 +139,36 @@ describe("firstForkOnPath", () => {
     prepare(root);
     expect(firstForkOnPath(root)).toBeNull();
     expect(firstForkOnPath(root.children[0])).toBeNull();
+  });
+});
+
+describe("branchStepDirection", () => {
+  test("depth is counted in plies from the root", () => {
+    // root(depth 0) → x(1) → y(2)
+    const root = n("root", [n("x", [n("y")])]);
+    const nodeMap = prepare(root);
+    expect(nodeDepth(nodeMap.get("y")!, nodeMap)).toBe(2);
+  });
+
+  test("odd-layer forks (branches right): right steps +1, left steps -1", () => {
+    // Fork at depth 1: branches stack to the RIGHT of the trunk.
+    const root = n("root", [n("f", [n("b1"), n("b2"), n("b3")])]);
+    const nodeMap = prepare(root);
+    const fork = nodeMap.get("f")!;
+    expect(branchStepDirection(fork, nodeMap, true)).toBe(1);
+    expect(branchStepDirection(fork, nodeMap, false)).toBe(-1);
+  });
+
+  test("even-layer forks (branches left): right steps -1, left steps +1", () => {
+    // Fork at depth 0 (the root itself): branches stack to the LEFT.
+    const root = n("root", [n("b1"), n("b2"), n("b3")]);
+    const nodeMap = prepare(root);
+    expect(branchStepDirection(root, nodeMap, true)).toBe(-1);
+    expect(branchStepDirection(root, nodeMap, false)).toBe(1);
+    // Fork at depth 2: also even.
+    const deep = n("root", [n("x", [n("f", [n("b1"), n("b2")])])]);
+    const deepMap = prepare(deep);
+    expect(branchStepDirection(deepMap.get("f")!, deepMap, true)).toBe(-1);
+    expect(branchStepDirection(deepMap.get("f")!, deepMap, false)).toBe(1);
   });
 });
