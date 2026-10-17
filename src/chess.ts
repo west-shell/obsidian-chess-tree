@@ -99,6 +99,12 @@ export function getSaveNotation(move: Move): string {
   return move.san;
 }
 
+// Variant hook: substitutions applied to spoken notation so TTS picks the
+// right reading (e.g. xiangqi's 卒→足). Chess SAN is read as-is.
+export function applySpeechSubstitutions(text: string): string {
+  return text;
+}
+
 export function isMoveCheckmate(move: Move): boolean {
   return move.san?.endsWith("#") ?? false;
 }
