@@ -26,9 +26,9 @@ export const EMPTY_FEN = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
 // ---- DOM class names (BEM) ----
 // Class-name prefix (chess: "ct", xiangqi: "xq"). Every plugin class is
 // `${CLS_PREFIX}-...` at the usage site; the matching scss prefix lives in
-// style/scss/_variant.scss ($cls-prefix).
+// style/layout/_variant.scss ($cls-prefix).
 export const CLS_PREFIX = "ct";
-// chessground's own class names — never rename, styled in style/scss/_board.scss
+// chessground's own class names — never rename, styled in style/layout/_board.scss
 export const WRAP_CLASS = "cg-wrap";
 export const BOARD_ELEMENT = "cg-board";
 

@@ -1,19 +1,23 @@
-import type { ISettings } from "./types";
-import { applyThemeCSSVars, type ThemeData } from "./chess";
-import { applyPieceSet } from "./pieceSets";
-import { getLang, t } from "./i18n";
+import type { ISettings } from "../../types";
+import { applyThemeCSSVars, type ThemeData } from "../../chess";
+import { applyPieceSet } from "../pieces/pieceSets";
+import { getLang, t } from "../../i18n";
 import { type App, Modal } from "obsidian";
-import type ChessPlugin from "./main";
+import type ChessPlugin from "../../main";
 
-import woodB64 from "../assets/wood.jpg?base64";
-import newspaperB64 from "../assets/newspaper.svg?base64";
+import woodB64 from "../../../assets/wood.jpg?base64";
+import newspaperB64 from "../../../assets/newspaper.svg?base64";
 
 // Piece-set switching is variant-specific (excluded from the xiangqi sync);
 // re-exported here so shared UI (settings tab, toolbar) gets it from the
 // variant's appearance module — NOT from ./chess, which must stay free of
 // obsidian imports because the parser test chain runs through it.
-export { PIECE_SETS, PIECE_SET_PICKER, resolvePieceSetKey } from "./pieceSets";
-export type { PieceSetDef } from "./pieceSets";
+export {
+  PIECE_SETS,
+  PIECE_SET_PICKER,
+  resolvePieceSetKey,
+} from "../pieces/pieceSets";
+export type { PieceSetDef } from "../pieces/pieceSets";
 
 // Highlight color presets (with alpha baked in) — the suffix names the board
 // it suits: *_light for light boards (dark marks), *_dark for dark boards
@@ -212,7 +216,7 @@ export function applyThemes(settings: ISettings, _app?: App) {
   body.setProperty("--ct-nextmove-color", t.nextMove);
   // Seamless-texture themes (checker === false) drop the board checker
   // overlay; every other theme removes the override and falls back to the
-  // checker layer declared in scss/_variant.scss.
+  // checker layer declared in layout/_variant.scss.
   if (t.checker === false) {
     body.setProperty("--ct-board-checker", "none");
   } else {
