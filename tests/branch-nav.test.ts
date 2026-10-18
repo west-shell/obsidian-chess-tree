@@ -8,14 +8,17 @@ import {
   findForkAbove,
   findForkBelow,
   firstForkOnPath,
+  nearestBranchStart,
   nodeDepth,
   nodesAtDepth,
+  orderedBranchStarts,
   orderedTips,
   pathBranchIndex,
   pathChild,
   renderedChild,
   renderedTip,
   samePlyNodes,
+  visibleBranchStarts,
   visibleTips,
 } from "../src/utils/branch-nav";
 
@@ -465,5 +468,122 @@ describe("orderedTips", () => {
     const { root, nodeMap } = buildTree();
     nodeMap.get("d2")!.x = 1;
     expect(orderedTips(root).map((t) => t.id)).toEqual(["c1", "d2"]);
+  });
+});
+
+// Tree used by the visibleBranchStarts / nearestBranchStart tests:
+//   root ─ a ─ b1 ─ c1
+//             └ b2 ─ d1 ─ d2
+//                    └ e1 ─ e2
+function buildStartsTree(): { root: ChessNode; nodeMap: NodeMap } {
+  const root = n("root", [
+    n("a", [
+      n("b1", [n("c1")]),
+      n("b2", [n("d1", [n("d2"), n("e1", [n("e2")])])]),
+    ]),
+  ]);
+  const nodeMap = prepare(root);
+  return { root, nodeMap };
+}
+
+describe("visibleBranchStarts", () => {
+  test("collects the main line start plus every extra fork child", () => {
+    const { root } = buildStartsTree();
+    expect(visibleBranchStarts(root).map((s) => s.id)).toEqual([
+      "a",
+      "b2",
+      "e1",
+    ]);
+  });
+
+  test("skips branch starts hidden by folding", () => {
+    const { root } = buildStartsTree();
+    // Folding a hides the whole b2 subtree (b2 and the nested e1).
+    expect(visibleBranchStarts(root, new Set(["a"])).map((s) => s.id)).toEqual([
+      "a",
+    ]);
+    // Folding d1 hides only the nested variation start e1.
+    expect(visibleBranchStarts(root, new Set(["d1"])).map((s) => s.id)).toEqual(
+      ["a", "b2"],
+    );
+  });
+
+  test("a lone root is itself the only start", () => {
+    const solo = n("root");
+    prepare(solo);
+    expect(visibleBranchStarts(solo).map((s) => s.id)).toEqual(["root"]);
+  });
+
+  test("a single line has only the main line start", () => {
+    const root = n("root", [n("a", [n("b1")])]);
+    prepare(root);
+    expect(visibleBranchStarts(root).map((s) => s.id)).toEqual(["a"]);
+  });
+});
+
+describe("orderedBranchStarts", () => {
+  test("sorts by layout x when every start has a finite x", () => {
+    const { root, nodeMap } = buildStartsTree();
+    nodeMap.get("a")!.x = 0;
+    nodeMap.get("b2")!.x = 2;
+    nodeMap.get("e1")!.x = 1;
+    expect(orderedBranchStarts(root).map((s) => s.id)).toEqual([
+      "a",
+      "e1",
+      "b2",
+    ]);
+  });
+
+  test("falls back to DFS pre-order when any x is missing", () => {
+    const { root, nodeMap } = buildStartsTree();
+    nodeMap.get("e1")!.x = 0;
+    expect(orderedBranchStarts(root).map((s) => s.id)).toEqual([
+      "a",
+      "b2",
+      "e1",
+    ]);
+  });
+});
+
+describe("nearestBranchStart", () => {
+  test("main-line nodes anchor to the main line start", () => {
+    const { root, nodeMap } = buildStartsTree();
+    // The game-start root itself is not a branch start (no ancestor
+    // hits the set) — Actions falls back to first/last start.
+    expect(
+      nearestBranchStart(root, visibleBranchStarts(root), nodeMap),
+    ).toBeNull();
+    expect(
+      nearestBranchStart(nodeMap.get("c1")!, visibleBranchStarts(root), nodeMap)
+        ?.id,
+    ).toBe("a");
+  });
+
+  test("variation nodes anchor to their own branch start", () => {
+    const { root, nodeMap } = buildStartsTree();
+    const starts = visibleBranchStarts(root);
+    expect(nearestBranchStart(nodeMap.get("d2")!, starts, nodeMap)?.id).toBe(
+      "b2",
+    );
+    expect(nearestBranchStart(nodeMap.get("e2")!, starts, nodeMap)?.id).toBe(
+      "e1",
+    );
+  });
+
+  test("returns null when no ancestor is a visible branch start", () => {
+    const { root, nodeMap } = buildStartsTree();
+    // With a folded, b2 is no longer a visible start: d2's nearest
+    // visible start would be a — but a IS in the set. Use a node whose
+    // whole ancestor chain misses the set: none here, so craft one.
+    const solo = n("root");
+    const map = prepare(solo);
+    expect(nearestBranchStart(solo, [], map)).toBeNull();
+    // A folded fork hides b2; a node in that hidden branch anchors to
+    // the main line start instead.
+    const folded = new Set(["a"]);
+    const visibleStarts = visibleBranchStarts(root, folded);
+    expect(
+      nearestBranchStart(nodeMap.get("d2")!, visibleStarts, nodeMap)?.id,
+    ).toBe("a");
   });
 });
