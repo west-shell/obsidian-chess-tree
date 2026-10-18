@@ -9,8 +9,10 @@ import {
   findForkBelow,
   firstForkOnPath,
   nodeDepth,
+  nodesAtDepth,
   pathBranchIndex,
   pathChild,
+  samePlyNodes,
 } from "../src/utils/branch-nav";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -223,5 +225,87 @@ describe("currentVariation", () => {
   test("clamps stale out-of-range choices", () => {
     const { a } = buildTree();
     expect(currentVariation(a, new Map([["a", 9]]))).toEqual([0, 0]);
+  });
+});
+
+// Tree used by the nodesAtDepth / samePlyNodes tests:
+//   root ─ a ─ b1
+//        └ c ─ d1 ─ d2
+function buildDepthTree(): ChessNode {
+  return n("root", [n("a", [n("b1")]), n("c", [n("d1", [n("d2")])])]);
+}
+
+const NO_FOLD = new Set<string>();
+
+describe("nodesAtDepth", () => {
+  test("collects every node at the depth in DFS pre-order", () => {
+    const root = buildDepthTree();
+    prepare(root);
+    expect(nodesAtDepth(root, 0, NO_FOLD).map((x) => x.id)).toEqual(["root"]);
+    expect(nodesAtDepth(root, 1, NO_FOLD).map((x) => x.id)).toEqual(["a", "c"]);
+    expect(nodesAtDepth(root, 2, NO_FOLD).map((x) => x.id)).toEqual([
+      "b1",
+      "d1",
+    ]);
+    expect(nodesAtDepth(root, 3, NO_FOLD).map((x) => x.id)).toEqual(["d2"]);
+  });
+
+  test("returns an empty list past the deepest tip", () => {
+    const root = buildDepthTree();
+    prepare(root);
+    expect(nodesAtDepth(root, 4, NO_FOLD)).toEqual([]);
+  });
+
+  test("prunes the extra children of a folded node", () => {
+    // Folding the root keeps only its first child's subtree.
+    const root = buildDepthTree();
+    prepare(root);
+    const folded = new Set(["root"]);
+    expect(nodesAtDepth(root, 1, folded).map((x) => x.id)).toEqual(["a"]);
+    expect(nodesAtDepth(root, 2, folded).map((x) => x.id)).toEqual(["b1"]);
+    expect(nodesAtDepth(root, 3, folded)).toEqual([]);
+  });
+
+  test("keeps the folded node itself and single-child chains intact", () => {
+    // Folding a (one child) prunes nothing; the folded node itself stays.
+    const root = buildDepthTree();
+    prepare(root);
+    const folded = new Set(["a"]);
+    expect(nodesAtDepth(root, 0, folded).map((x) => x.id)).toEqual(["root"]);
+    expect(nodesAtDepth(root, 2, folded).map((x) => x.id)).toEqual([
+      "b1",
+      "d1",
+    ]);
+  });
+});
+
+describe("samePlyNodes", () => {
+  test("sorts by layout x when every node has a finite x", () => {
+    const root = buildDepthTree();
+    const nodeMap = prepare(root);
+    nodeMap.get("d1")!.x = 1;
+    nodeMap.get("b1")!.x = 3;
+    expect(samePlyNodes(root, 2, NO_FOLD).map((x) => x.id)).toEqual([
+      "d1",
+      "b1",
+    ]);
+  });
+
+  test("falls back to DFS pre-order when any x is missing", () => {
+    const root = buildDepthTree();
+    const nodeMap = prepare(root);
+    nodeMap.get("d1")!.x = 1;
+    // b1 has no x yet (never rendered): keep the DFS order for all.
+    expect(samePlyNodes(root, 2, NO_FOLD).map((x) => x.id)).toEqual([
+      "b1",
+      "d1",
+    ]);
+  });
+
+  test("skips folded branches", () => {
+    const root = buildDepthTree();
+    prepare(root);
+    const folded = new Set(["root"]);
+    expect(samePlyNodes(root, 2, folded).map((x) => x.id)).toEqual(["b1"]);
   });
 });
