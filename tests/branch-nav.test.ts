@@ -12,6 +12,7 @@ import {
   nodesAtDepth,
   pathBranchIndex,
   pathChild,
+  renderedChild,
   samePlyNodes,
 } from "../src/utils/branch-nav";
 
@@ -225,6 +226,107 @@ describe("currentVariation", () => {
   test("clamps stale out-of-range choices", () => {
     const { a } = buildTree();
     expect(currentVariation(a, new Map([["a", 9]]))).toEqual([0, 0]);
+  });
+});
+
+describe("renderedChild", () => {
+  test("follows the stored choice at unfolded forks", () => {
+    const { a } = buildTree();
+    expect(renderedChild(a, new Map([["a", 1]]))?.id).toBe("b2");
+  });
+
+  test("a folded node always continues into its first child", () => {
+    const { a } = buildTree();
+    expect(renderedChild(a, new Map([["a", 1]]), new Set(["a"]))?.id).toBe(
+      "b1",
+    );
+  });
+
+  test("returns null at a line tip", () => {
+    const { root } = buildTree();
+    expect(renderedChild(root.children[0].children[0].children[0])).toBeNull();
+  });
+});
+
+describe("findForkBelow (folding)", () => {
+  test("the rendered walk never enters a folded-away subtree", () => {
+    // root(fork) ─ a ─ a1(fork: b1, b2)
+    //            └ c ─ c1(fork: d1, d2)
+    const root = n("root", [
+      n("a", [n("a1", [n("b1"), n("b2")])]),
+      n("c", [n("c1", [n("d1"), n("d2")])]),
+    ]);
+    prepare(root);
+    // Without folding the stored choice points the walk into c's subtree.
+    expect(findForkBelow(root, new Map([["root", 1]]))?.id).toBe("c1");
+    // Folding the root renders only the a subtree.
+    expect(
+      findForkBelow(root, new Map([["root", 1]]), new Set(["root"]))?.id,
+    ).toBe("a1");
+  });
+});
+
+describe("firstForkOnPath (folding)", () => {
+  test("skips a folded fork and lands on the next unfolded one below", () => {
+    // root ─ f1(fork: x, y) ─ x ─ g(fork: g1, g2)
+    const root = n("root", [
+      n("f1", [n("x", [n("g", [n("g1"), n("g2")])]), n("y")]),
+    ]);
+    prepare(root);
+    expect(firstForkOnPath(root)?.fork.id).toBe("f1");
+    expect(firstForkOnPath(root, undefined, new Set(["f1"]))?.fork.id).toBe(
+      "g",
+    );
+  });
+
+  test("returns null when every fork below is folded", () => {
+    const root = n("root", [n("f1", [n("x"), n("y")])]);
+    prepare(root);
+    expect(firstForkOnPath(root, undefined, new Set(["f1"]))).toBeNull();
+  });
+});
+
+describe("enumerateVariations (folding)", () => {
+  test("skips branches hidden by folding", () => {
+    // root(fork) ─ a ─ b1
+    //            └ c ─ d1
+    //               └ d2
+    const root = n("root", [n("a", [n("b1")]), n("c", [n("d1"), n("d2")])]);
+    prepare(root);
+    expect(enumerateVariations(root, new Set(["root"]))).toEqual([[0, 0]]);
+    expect(enumerateVariations(root, new Set(["c"]))).toEqual([
+      [0, 0],
+      [1, 0],
+    ]);
+  });
+});
+
+describe("currentVariation (folding)", () => {
+  test("a folded node contributes index 0 whatever the stored choice", () => {
+    // root(fork) ─ a ─ b1
+    //            └ c ─ d1
+    //               └ d2
+    const root = n("root", [n("a", [n("b1")]), n("c", [n("d1"), n("d2")])]);
+    prepare(root);
+    expect(
+      currentVariation(
+        root,
+        new Map([
+          ["root", 1],
+          ["c", 1],
+        ]),
+      ),
+    ).toEqual([1, 1]);
+    expect(
+      currentVariation(
+        root,
+        new Map([
+          ["root", 1],
+          ["c", 1],
+        ]),
+        new Set(["c"]),
+      ),
+    ).toEqual([1, 0]);
   });
 });
 
