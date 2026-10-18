@@ -10,10 +10,13 @@ import {
   firstForkOnPath,
   nodeDepth,
   nodesAtDepth,
+  orderedTips,
   pathBranchIndex,
   pathChild,
   renderedChild,
+  renderedTip,
   samePlyNodes,
+  visibleTips,
 } from "../src/utils/branch-nav";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -409,5 +412,58 @@ describe("samePlyNodes", () => {
     prepare(root);
     const folded = new Set(["root"]);
     expect(samePlyNodes(root, 2, folded).map((x) => x.id)).toEqual(["b1"]);
+  });
+});
+
+describe("renderedTip", () => {
+  test("follows the stored choices down to the line tip", () => {
+    const { a } = buildTree();
+    expect(renderedTip(a).id).toBe("c1");
+    expect(renderedTip(a, new Map([["a", 1]])).id).toBe("d2");
+  });
+
+  test("a folded node continues into its first child's tip", () => {
+    const { a } = buildTree();
+    expect(renderedTip(a, new Map([["a", 1]]), new Set(["a"])).id).toBe("c1");
+  });
+
+  test("a line tip anchors to itself", () => {
+    const { root } = buildTree();
+    const tip = root.children[0].children[0].children[0]; // c1
+    expect(renderedTip(tip).id).toBe("c1");
+  });
+});
+
+describe("visibleTips", () => {
+  test("collects every rendered leaf in DFS pre-order", () => {
+    const { root } = buildTree();
+    expect(visibleTips(root).map((t) => t.id)).toEqual(["c1", "d2"]);
+  });
+
+  test("skips branch ends hidden by folding", () => {
+    const { root } = buildTree();
+    // Folding a hides the b2 subtree, so only c1 remains a visible tip.
+    expect(visibleTips(root, new Set(["a"])).map((t) => t.id)).toEqual(["c1"]);
+  });
+
+  test("a lone root is itself a tip", () => {
+    const solo = n("root");
+    prepare(solo);
+    expect(visibleTips(solo).map((t) => t.id)).toEqual(["root"]);
+  });
+});
+
+describe("orderedTips", () => {
+  test("sorts by layout x when every tip has a finite x", () => {
+    const { root, nodeMap } = buildTree();
+    nodeMap.get("c1")!.x = 2;
+    nodeMap.get("d2")!.x = 1;
+    expect(orderedTips(root).map((t) => t.id)).toEqual(["d2", "c1"]);
+  });
+
+  test("falls back to DFS pre-order when any x is missing", () => {
+    const { root, nodeMap } = buildTree();
+    nodeMap.get("d2")!.x = 1;
+    expect(orderedTips(root).map((t) => t.id)).toEqual(["c1", "d2"]);
   });
 });
