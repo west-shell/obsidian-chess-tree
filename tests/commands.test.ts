@@ -4,13 +4,12 @@ import en from "../src/i18n/en.json";
 import zh from "../src/i18n/zh.json";
 import { NAV_ACTIONS } from "../src/nav-actions";
 
-// Every btn-click navigation action the PGN view supports (and thus
-// the commands cover) — guards against typos in the NAV_ACTIONS table.
+// Every btn-click branch navigation action the PGN view supports (and
+// thus the commands cover) — guards against typos in the NAV_ACTIONS
+// table. The four plain move-stepping actions (back/next/toStart/
+// toEnd) are intentionally absent: they stay view-internal Scope
+// bindings, not commands.
 const KNOWN_ACTIONS = new Set([
-  "back",
-  "next",
-  "toStart",
-  "toEnd",
   "navPrevFork",
   "navNextFork",
   "prevPathBranch",
@@ -50,7 +49,7 @@ describe("NAV_ACTIONS", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  test("covers all 16 scope navigation actions", () => {
+  test("covers all 12 branch navigation actions", () => {
     expect(NAV_ACTIONS.map((a) => a.action).sort()).toEqual(
       [...KNOWN_ACTIONS].sort(),
     );
@@ -63,11 +62,10 @@ describe("NAV_ACTIONS", () => {
     }
   });
 
-  test("plain move-stepping commands carry no default hotkey", () => {
-    const plain = new Set(["back", "next", "to-start", "to-end"]);
+  test("no command exposes a plain arrow key", () => {
     for (const action of NAV_ACTIONS) {
-      if (plain.has(action.id)) {
-        expect(action.hotkeys, action.id).toBeUndefined();
+      for (const hotkey of action.hotkeys ?? []) {
+        expect(hotkey.modifiers, action.id).not.toHaveLength(0);
       }
     }
   });
