@@ -4,8 +4,8 @@ import en from "../src/i18n/en.json";
 import zh from "../src/i18n/zh.json";
 import { NAV_ACTIONS } from "../src/nav-actions";
 
-// Every btn-click action the PGN view's Scope registers (and thus the
-// commands cover) — guards against typos in the NAV_ACTIONS table.
+// Every btn-click navigation action the PGN view supports (and thus
+// the commands cover) — guards against typos in the NAV_ACTIONS table.
 const KNOWN_ACTIONS = new Set([
   "back",
   "next",
@@ -25,10 +25,10 @@ const KNOWN_ACTIONS = new Set([
   "nextBranchStart",
 ]);
 
-// The default hotkey of every branch navigation command, mirroring
-// the PGN view's built-in Scope binding (FileHost.onOpen). The four
-// plain move-stepping commands carry no default on purpose: global
-// arrow-key defaults would break arrow navigation elsewhere.
+// The default hotkey of every branch navigation command — the binding
+// the PGN view uses for the modifier combos. The four plain
+// move-stepping commands carry no default on purpose: global arrow-key
+// defaults would break arrow navigation elsewhere.
 const EXPECTED_PRESETS: Record<string, string[]> = {
   "prev-fork": ["Ctrl", "ArrowUp"],
   "next-fork": ["Ctrl", "ArrowDown"],
@@ -72,7 +72,7 @@ describe("NAV_ACTIONS", () => {
     }
   });
 
-  test("branch navigation presets mirror the built-in Scope bindings", () => {
+  test("branch navigation commands define the expected default hotkeys", () => {
     expect(new Set(Object.keys(EXPECTED_PRESETS))).toEqual(
       new Set(NAV_ACTIONS.filter((action) => action.hotkeys).map((a) => a.id)),
     );
