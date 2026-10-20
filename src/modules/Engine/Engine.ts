@@ -143,6 +143,10 @@ self.onmessage = function(e) {
 
       this.initResolve = () => {
         window.clearTimeout(timeout);
+        // Enable Chess960 castling semantics (king-takes-rook UCI moves,
+        // X-FEN/Shredder castling FENs). Semantics for standard games are
+        // unchanged, and this is re-sent on every worker init.
+        this.worker!.postMessage("setoption name UCI_Chess960 value true");
         resolve();
       };
       this.initReject = (err: Error) => {

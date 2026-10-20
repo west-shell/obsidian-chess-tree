@@ -48,6 +48,12 @@ function base64Asset(): Plugin {
 export default defineConfig(({ mode }) => {
   const isMin = mode === "production-min";
   return {
+    // Vendored Chess960-patched chess.js (see vendor/chessjs/README.md).
+    resolve: {
+      alias: {
+        "chess.js": resolve(__dirname, "vendor/chessjs/chess.ts"),
+      },
+    },
     plugins: [
       base64Asset(),
       svelte({

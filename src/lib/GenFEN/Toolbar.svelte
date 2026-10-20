@@ -1,7 +1,12 @@
 <script lang="ts">
-  import { CLS_PREFIX } from "../../chess";
+  import {
+    chess960FenByNumber,
+    chess960SpnFromFen,
+    CLS_PREFIX,
+  } from "../../chess";
   import type { EventBus } from "../../core/event-bus";
   import { onLangChange, t } from "../../i18n";
+  import { Notice } from "obsidian";
   import { onDestroy, onMount } from "svelte";
 
   interface Props {
@@ -16,6 +21,64 @@
   onDestroy(() => {
     unsubLang();
   });
+
+  // ---- Variant picker (standard / Chess960) ----
+  // The dropdown loads the standard or the Chess960 start; the 960
+  // number box (official Scharnagl number, 0-959) can be typed, stepped
+  // with -/+, or re-rolled with the random button.
+  type Variant = "standard" | "chess960";
+  let _variant = $state<Variant>("standard");
+  let _spn = $state(518);
+
+  // Keep the picker in sync with the board: standard start -> "standard",
+  // any other 960 start -> "chess960" with its number. Custom positions
+  // keep the current selection (the picker is sticky). SPN 518 is the
+  // standard position, so it only shows as "chess960" when the user
+  // picked that variant explicitly.
+  function syncVariantFromFen(currentFen: string) {
+    const spn = chess960SpnFromFen(currentFen);
+    if (spn === null) return;
+    _spn = spn;
+    if (spn !== 518) _variant = "chess960";
+    else if (_variant !== "chess960") _variant = "standard";
+  }
+
+  function onVariantChange(evt: Event) {
+    const value = (evt.target as HTMLSelectElement).value;
+    if (value === "chess960") {
+      _variant = "chess960";
+      loadSpn(_spn);
+    } else {
+      _variant = "standard";
+      eventBus.emit("btn-click", { name: "start" });
+    }
+  }
+
+  function loadSpn(spn: number) {
+    const fen960 = chess960FenByNumber(spn);
+    if (!fen960) return;
+    _spn = spn;
+    eventBus.emit("btn-click", { name: "random960", payload: fen960 });
+  }
+
+  function onSpnChange(evt: Event) {
+    const input = evt.target as HTMLInputElement;
+    const raw = input.value;
+    const spn = Number(raw);
+    if (raw.trim() === "" || !Number.isInteger(spn) || spn < 0 || spn > 959) {
+      new Notice(t("genfen.variant.numberInvalid"));
+      input.value = String(_spn);
+      return;
+    }
+    if (spn !== _spn) {
+      loadSpn(spn);
+    }
+  }
+
+  // Step through the 960 positions, wrapping around at both ends.
+  function stepSpn(delta: number) {
+    loadSpn((_spn + delta + 960) % 960);
+  }
 
   function parseFen(fen: string) {
     const parts = fen.split(" ");
@@ -110,17 +173,61 @@
     const wKingRank = board[7];
     const bKingRank = board[0];
 
-    if (wKingRank[4] === "K") {
-      if (wKingRank[7] === "R") result.K = true;
-      if (wKingRank[0] === "R") result.Q = true;
+    // X-FEN semantics: K/Q refer to the outermost rook on each side of
+    // the king, wherever king and rooks stand (Chess960 included).
+    const wKingFile = wKingRank.indexOf("K");
+    if (wKingFile !== -1) {
+      if (wKingRank.some((p, i) => p === "R" && i > wKingFile)) result.K = true;
+      if (wKingRank.some((p, i) => p === "R" && i < wKingFile)) result.Q = true;
     }
 
-    if (bKingRank[4] === "k") {
-      if (bKingRank[7] === "r") result.k = true;
-      if (bKingRank[0] === "r") result.q = true;
+    const bKingFile = bKingRank.indexOf("k");
+    if (bKingFile !== -1) {
+      if (bKingRank.some((p, i) => p === "r" && i > bKingFile)) result.k = true;
+      if (bKingRank.some((p, i) => p === "r" && i < bKingFile)) result.q = true;
     }
 
     return result;
+  }
+
+  // Translate a castling field (X-FEN letters or Shredder file letters)
+  // into the X-FEN K/Q/k/q subset the toolbar can express. Shredder
+  // letters map to the side of the king their rook stands on.
+  function normalizeCastlingField(castling: string, boardFen: string): string {
+    if (castling === "-") return "-";
+    const board = expandBoard(boardFen);
+    const wKingRank = board[7];
+    const bKingRank = board[0];
+    const wKingFile = wKingRank.indexOf("K");
+    const bKingFile = bKingRank.indexOf("k");
+    const out: string[] = [];
+    const push = (c: string) => {
+      if (!out.includes(c)) out.push(c);
+    };
+    for (const c of castling) {
+      if ("KQkq".includes(c)) {
+        push(c);
+      } else {
+        const lower = c.toLowerCase();
+        if (!"abcdefgh".includes(lower)) continue;
+        const file = FILES.indexOf(lower);
+        if (c === lower) {
+          if (bKingFile !== -1 && bKingRank[file] === "r") {
+            push(file > bKingFile ? "k" : "q");
+          }
+        } else {
+          if (wKingFile !== -1 && wKingRank[file] === "R") {
+            push(file > wKingFile ? "K" : "Q");
+          }
+        }
+      }
+    }
+    const order = ["K", "Q", "k", "q"];
+    const result = out
+      .filter((c) => order.includes(c))
+      .sort((a, b) => order.indexOf(a) - order.indexOf(b))
+      .join("");
+    return result || "-";
   }
 
   function syncCastlingFromBoard(boardFen: string) {
@@ -179,17 +286,19 @@
     syncCastlingFromBoard(currentBp);
     enPassantFiles = computeEnPassantFilesFor(currentBp, _turn);
     validateEnPassant();
+    syncVariantFromFen(currentFen);
   };
 
   onMount(() => {
     const parsed = parseFen(fen);
     _turn = parsed.turn;
-    _castling = parsed.castling;
+    _castling = normalizeCastlingField(parsed.castling, boardPart(fen));
     _enPassant = parsed.enPassant;
     const bp = boardPart(fen);
     syncCastlingFromBoard(bp);
     enPassantFiles = computeEnPassantFilesFor(bp, _turn);
     validateEnPassant();
+    syncVariantFromFen(fen);
     eventBus.on<string>("updateUI", onFenUpdated);
   });
   onDestroy(() => {
@@ -292,12 +401,45 @@
   </div>
 
   <div class="{CLS_PREFIX}-genfen__section {CLS_PREFIX}-genfen__actions">
-    <button
-      class="{CLS_PREFIX}-genfen__action"
-      onclick={() => buttonClick("start")}
-    >
-      {t("genfen.start", _lv)}
-    </button>
+    <div class="{CLS_PREFIX}-genfen__variant-row">
+      <select
+        class="{CLS_PREFIX}-genfen__select"
+        aria-label={t("genfen.variant", _lv)}
+        value={_variant}
+        onchange={onVariantChange}
+      >
+        <option value="standard">{t("genfen.variant.standard", _lv)}</option>
+        <option value="chess960">{t("genfen.variant.chess960", _lv)}</option>
+      </select>
+      {#if _variant === "chess960"}
+        <span class="{CLS_PREFIX}-genfen__spn-group">
+          <input
+            class="{CLS_PREFIX}-genfen__select {CLS_PREFIX}-genfen__spn"
+            type="number"
+            min="0"
+            max="959"
+            step="1"
+            aria-label={t("genfen.variant.numberLabel", _lv)}
+            value={_spn}
+            onchange={onSpnChange}
+          />
+          <span class="{CLS_PREFIX}-genfen__spn-step">
+            <button
+              aria-label={t("genfen.variant.nextNumber", _lv)}
+              onclick={() => stepSpn(1)}
+            >
+              ▲
+            </button>
+            <button
+              aria-label={t("genfen.variant.prevNumber", _lv)}
+              onclick={() => stepSpn(-1)}
+            >
+              ▼
+            </button>
+          </span>
+        </span>
+      {/if}
+    </div>
     <button
       class="{CLS_PREFIX}-genfen__action"
       onclick={() => buttonClick("empty")}
