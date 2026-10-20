@@ -2,7 +2,7 @@
   "id": "chess-tree",
   "version": "2.12.0",
   "name": "Chess Tree",
-  "description": "Chess variation tree.",
+  "description": "Chess(960) variation tree.",
   "author": "weshell",
   "authorUrl": "https://github.com/west-shell",
   "fundingUrl": {
