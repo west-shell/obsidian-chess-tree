@@ -143,7 +143,7 @@ npm run build:debug  # Unminified production build (with sourcemaps)
 
 ## Credits & License
 
-- Rules engine: [chess.js](https://github.com/jhlywa/chess.js) — vendored fork patched with Chess960 support ([BSD-2-Clause](./vendor/chessjs/LICENSE))
+- Rules engine: [chess.js](https://github.com/jhlywa/chess.js) — Chess960-patched fork published as [@weshell/chess.js](https://www.npmjs.com/package/@weshell/chess.js) (BSD-2-Clause)
 - Board rendering: [chessground](https://github.com/lichess-org/chessground)
 - Engine: [Stockfish 18](https://stockfishchess.org/) (WASM)
 - Piece artwork: [lichess-org/lila](https://github.com/lichess-org/lila) (public/piece/), under their respective free licenses (GPL/CC) — regenerate the embedded CSS after changing `assets/pieces/` with `node scripts/gen-piece-css.mjs`

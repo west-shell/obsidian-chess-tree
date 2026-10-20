@@ -38,7 +38,6 @@ export default tseslint.config(
       "build/**",
       "test-vault/**",
       "node_modules/**",
-      "vendor/**",
       "assets/**",
       "scripts/**",
       "vite.config.ts",

@@ -60,7 +60,8 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@lichess-org/chessground": "^10.1.1"
+    "@lichess-org/chessground": "^10.1.1",
+    "@weshell/chess.js": "^1.0.0"
   },
   "simple-git-hooks": {
     "pre-commit": "npx nano-staged"

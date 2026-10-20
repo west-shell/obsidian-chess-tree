@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 
-import { Chess } from "chess.js";
+import { Chess } from "@weshell/chess.js";
 import {
   Chess as OpsChess,
   fen as opsFen,

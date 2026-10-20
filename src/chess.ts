@@ -12,10 +12,10 @@ export {
   type Move,
   type PieceSymbol,
   type Square,
-} from "chess.js";
+} from "@weshell/chess.js";
 
-import { Chess } from "chess.js";
-import type { Move, Piece, Square } from "chess.js";
+import { Chess } from "@weshell/chess.js";
+import type { Move, Piece, Square } from "@weshell/chess.js";
 import type { ChessNode, IHost } from "./types";
 
 // ========== Constants ==========
@@ -470,7 +470,7 @@ export const PRIMARY_MOVE_TOKEN_TYPES: ReadonlyArray<MoveTokenType> = [
   "san-move",
 ];
 
-import type { Chess as ChessClass } from "chess.js";
+import type { Chess as ChessClass } from "@weshell/chess.js";
 
 export function parseMoveInGame(
   chess: InstanceType<typeof ChessClass>,

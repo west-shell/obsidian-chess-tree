@@ -143,7 +143,7 @@ npm run build:debug  # 开发版本（不压缩，带 sourcemap）
 
 ## 致谢与许可
 
-- 棋规引擎：[chess.js](https://github.com/jhlywa/chess.js) —— 内置 Chess960 补丁的 vendored 分支（[BSD-2-Clause](./vendor/chessjs/LICENSE)）
+- 棋规引擎：[chess.js](https://github.com/jhlywa/chess.js) —— Chess960 补丁分支，已发布为 [@weshell/chess.js](https://www.npmjs.com/package/@weshell/chess.js)（BSD-2-Clause）
 - 棋盘渲染：[chessground](https://github.com/lichess-org/chessground)
 - 引擎：[Stockfish 18](https://stockfishchess.org/) (WASM)
 - 棋子美术：[lichess-org/lila](https://github.com/lichess-org/lila)（public/piece/），遵循各自自由许可协议（GPL/CC）——修改 `assets/pieces/` 后运行 `node scripts/gen-piece-css.mjs` 重新生成内嵌 CSS
