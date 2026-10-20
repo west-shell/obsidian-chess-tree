@@ -465,6 +465,36 @@ describe("Chess960 vendored chess.js", () => {
     expect(chess.history({ verbose: true })[0].rookFrom).toBe("c1");
     expect(chess.pgn()).toContain("1. O-O-O");
   });
+
+  test("castling via object form: king-takes-rook drop works in every drag scenario", () => {
+    // Standard-style drag: king lands on its castling destination.
+    let chess = new Chess("4k3/8/8/8/8/8/8/4K2R w K - 0 1");
+    let move = chess.move({ from: "e1", to: "g1" });
+    expect(move.san).toBe("O-O");
+    expect(move.rookFrom).toBe("h1");
+
+    // King-takes-rook drop: king e1 onto its own rook h1.
+    chess = new Chess("4k3/8/8/8/8/8/8/4K2R w K - 0 1");
+    move = chess.move({ from: "e1", to: "h1" });
+    expect(move.san).toBe("O-O");
+
+    // King already on g1 (stationary castling): the only operable drop is
+    // king-takes-rook — dragging to g1 (move.to) would be a no-op in the UI.
+    chess = new Chess("4k3/8/8/8/8/8/8/6KR w K - 0 1");
+    move = chess.move({ from: "g1", to: "h1" });
+    expect(move.san).toBe("O-O");
+    expect(move.from).toBe("g1");
+    expect(move.to).toBe("g1");
+    expect(move.rookFrom).toBe("h1");
+    expect(chess.fen()).toBe("4k3/8/8/8/8/8/8/5RK1 b - - 1 1");
+
+    // Queen-side stationary variant: king c1, rook a1.
+    chess = new Chess("4k3/8/8/8/8/8/8/R1K5 w Q - 0 1");
+    move = chess.move({ from: "c1", to: "a1" });
+    expect(move.san).toBe("O-O-O");
+    expect(move.to).toBe("c1");
+    expect(move.rookFrom).toBe("a1");
+  });
 });
 
 describe("Chess960 plugin adapter", () => {
