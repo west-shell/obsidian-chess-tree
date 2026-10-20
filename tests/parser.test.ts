@@ -486,6 +486,30 @@ describe("Chess PGN Parser", () => {
     expect(parser.getTags()).not.toContain("SetUp");
   });
 
+  // ============ [Variant] 标签测试 ============
+
+  test("getTags tags a Chess960 start with [Variant] before [FEN]", () => {
+    const fen = "bbqnnrkr/pppppppp/8/8/8/8/PPPPPPPP/BBQNNRKR w KQkq - 0 1";
+    const parser = new PGNParser(`[FEN "${fen}"]\n1. d4 d5`);
+    const lines = parser.getTags().split("\n");
+    const fenIdx = lines.findIndex((l) => l.startsWith("[FEN"));
+    expect(lines[fenIdx - 1]).toBe('[Variant "Chess960"]');
+    expect(lines[fenIdx + 1]).toBe('[SetUp "1"]');
+  });
+
+  test("getTags keeps an existing [Variant] and does not tag non-960 FENs", () => {
+    const fen = "bbqnnrkr/pppppppp/8/8/8/8/PPPPPPPP/BBQNNRKR w KQkq - 0 1";
+    const withVariant = new PGNParser(
+      `[Variant "Chess960"]\n[FEN "${fen}"]\n1. d4 d5`,
+    );
+    expect(withVariant.getTags().match(/\[Variant/g)).toHaveLength(1);
+
+    const parser = new PGNParser(
+      '[FEN "4k3/8/8/8/8/8/8/4K3 w - - 0 1"]\n1. Ke2 Kd7',
+    );
+    expect(parser.getTags()).not.toContain("Variant");
+  });
+
   test("non-strict mode records nothing for valid PGN", () => {
     const parser = new PGNParser("1. e4 e5 2. Nf3 Nc6");
     expect(parser.getSkipped()).toEqual([]);

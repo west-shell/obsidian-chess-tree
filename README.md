@@ -68,6 +68,15 @@ Every branch is visualized as a tree graph — click any node to jump to that po
 
 Branch navigation works in both the PGN file view and `chess` code blocks (in code blocks, hover the block and keep focus out of text editors). On macOS, `Ctrl+↑`/`Ctrl+↓` may conflict with Mission Control. All branch-switching shortcuts skip branches hidden by folding. All PGN view navigation actions are also available as commands in the Command Palette. In the PGN view the modifier-combo shortcuts are the command hotkeys themselves — deleting or rebinding them in Settings → Hotkeys takes effect in the view. The four plain arrow-key shortcuts are built into the PGN view only and are not exposed as commands, since global arrow keys would clash with the app. Code block shortcuts are built-in and hover-gated.
 
+### Chess960 (Fischer Random)
+
+Full Chess960 support, verified move-by-move against [chessops](https://github.com/niklasf/chessops):
+
+- **Position picker**: the board editor's variant dropdown switches between the standard start and Chess960; pick any of the 960 positions by official number (0–959, 518 = standard) or step through them with the ▲/▼ spinner; the **Insert random Chess960 position** command drops a ready-to-play block into the note
+- **Correct castling**: X-FEN and Shredder-FEN castling fields; king-takes-rook input (`O-O`, or drag the king onto its rook)
+- **Engine-ready**: Stockfish runs with `UCI_Chess960` enabled, so analysis and engine play understand 960 castling
+- **PGN round-trip**: games from a 960 start are exported with `[Variant "Chess960"]`
+
 ### Engine Analysis
 
 Built-in Stockfish 18 (WASM) — no external installation needed.
@@ -134,7 +143,7 @@ npm run build:debug  # Unminified production build (with sourcemaps)
 
 ## Credits & License
 
-- Rules engine: [chess.js](https://github.com/jhlywa/chess.js)
+- Rules engine: [chess.js](https://github.com/jhlywa/chess.js) — vendored fork patched with Chess960 support ([BSD-2-Clause](./vendor/chessjs/LICENSE))
 - Board rendering: [chessground](https://github.com/lichess-org/chessground)
 - Engine: [Stockfish 18](https://stockfishchess.org/) (WASM)
 - Piece artwork: [lichess-org/lila](https://github.com/lichess-org/lila) (public/piece/), under their respective free licenses (GPL/CC) — regenerate the embedded CSS after changing `assets/pieces/` with `node scripts/gen-piece-css.mjs`

@@ -68,6 +68,15 @@ r:true
 
 分支导航在 PGN 文件视图和 `chess` 代码块中均可用（代码块中需鼠标悬停在块上，且焦点不在文本编辑器内）。macOS 上 `Ctrl+↑`/`Ctrl+↓` 可能与系统调度中心冲突。所有分支切换快捷键均跳过折叠隐藏的分支。PGN 视图的全部导航动作同时注册为命令面板中的命令。PGN 视图中带修饰键的快捷键即命令热键本身——在 设置 → 快捷键 中删除或改绑会直接作用于视图。四个纯方向键快捷键仅内建于 PGN 视图，不注册为命令（全局方向键会与应用其他部分冲突）。代码块快捷键为内建行为，需悬停触发。
 
+### Chess960（菲舍尔任意制象棋）
+
+完整的 Chess960 支持，逐步经 [chessops](https://github.com/niklasf/chessops) 交叉验证：
+
+- **局面选择**：棋盘编辑器的变体下拉菜单可在标准与 Chess960 之间切换；可按官方编号（0–959，518 = 标准局面）加载任意局面，或用 ▲/▼ 微调按钮逐步切换；**插入随机 Chess960 局面** 命令可直接在笔记中生成即玩代码块
+- **正确的王车易位**：支持 X-FEN 与 Shredder-FEN 易位字段；王吃车走法输入（`O-O`，或将王拖到车上）
+- **引擎就绪**：Stockfish 以 `UCI_Chess960` 模式运行，分析与对弈都能理解 960 易位
+- **PGN 往返**：960 起始的对局导出时自动携带 `[Variant "Chess960"]`
+
 ### 引擎分析
 
 内置 Stockfish 18 (WASM)，无需额外安装。
@@ -134,7 +143,7 @@ npm run build:debug  # 开发版本（不压缩，带 sourcemap）
 
 ## 致谢与许可
 
-- 棋规引擎：[chess.js](https://github.com/jhlywa/chess.js)
+- 棋规引擎：[chess.js](https://github.com/jhlywa/chess.js) —— 内置 Chess960 补丁的 vendored 分支（[BSD-2-Clause](./vendor/chessjs/LICENSE)）
 - 棋盘渲染：[chessground](https://github.com/lichess-org/chessground)
 - 引擎：[Stockfish 18](https://stockfishchess.org/) (WASM)
 - 棋子美术：[lichess-org/lila](https://github.com/lichess-org/lila)（public/piece/），遵循各自自由许可协议（GPL/CC）——修改 `assets/pieces/` 后运行 `node scripts/gen-piece-css.mjs` 重新生成内嵌 CSS
