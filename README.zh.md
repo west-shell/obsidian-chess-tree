@@ -6,7 +6,7 @@
 [![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
 [![爱发电](https://img.shields.io/badge/爱发电-赞助-946CE6?logo=afdian)](https://afdian.com/a/weshell)
 
-> 在 Obsidian 笔记中直接下棋、推演和分析棋局——完整 PGN 支持、交互式棋盘、变着分支树和内置 Stockfish 18 (WASM) 引擎。
+> 在 Obsidian 笔记中直接下棋、推演和分析棋局——完整 PGN 支持、交互式棋盘、变着分支树、Chess960（菲舍尔任意制）和内置 Stockfish 18 (WASM) 引擎。
 
 ![分支图](./IMAGE/Tree.png)
 

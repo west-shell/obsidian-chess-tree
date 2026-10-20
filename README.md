@@ -6,7 +6,7 @@
 [![PayPal](https://img.shields.io/badge/PayPal-Sponsor-blue?logo=paypal)](https://paypal.com/paypalme/weshell1988)
 [![Afdian](https://img.shields.io/badge/Afdian-Sponsor-946CE6?logo=afdian)](https://afdian.com/a/weshell)
 
-> Play, explore and analyze chess right inside your Obsidian notes — full PGN support, interactive boards, variation trees and a built-in Stockfish 18 engine (WASM).
+> Play, explore and analyze chess right inside your Obsidian notes — full PGN support, interactive boards, variation trees, Chess960 (Fischer Random) and a built-in Stockfish 18 engine (WASM).
 
 ![Branch Diagram](./IMAGE/Tree.png)
 
