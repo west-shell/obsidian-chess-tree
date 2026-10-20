@@ -380,7 +380,7 @@
       </div>
     </div>
 
-    <div class="{CLS_PREFIX}-genfen__section">
+    <div class="{CLS_PREFIX}-genfen__section {CLS_PREFIX}-genfen__section--row">
       <label class="{CLS_PREFIX}-genfen__label" for="genfen-ep"
         >{t("genfen.enpassant", _lv)}</label
       >
@@ -440,6 +440,12 @@
         </span>
       {/if}
     </div>
+    <button
+      class="{CLS_PREFIX}-genfen__action"
+      onclick={() => buttonClick("start")}
+    >
+      {t("genfen.start", _lv)}
+    </button>
     <button
       class="{CLS_PREFIX}-genfen__action"
       onclick={() => buttonClick("empty")}
