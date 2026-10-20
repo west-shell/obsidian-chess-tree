@@ -23,6 +23,7 @@
     "src/**/*.js",
     "src/**/*.svelte",
     "vendor/chessjs/*.ts",
-    "vendor/chessjs/*.d.ts"
+    "vendor/chessjs/*.d.ts",
+    "vendor/chessjs/src/**/*.ts"
   ]
 }
