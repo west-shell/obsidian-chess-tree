@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import en from "../src/i18n/en.json";
 import zh from "../src/i18n/zh.json";
-import { NAV_ACTIONS } from "../src/nav-actions";
+import { NAV_ACTIONS } from "../src/utils/nav-actions";
 
 // Every btn-click branch navigation action the PGN view supports (and
 // thus the commands cover) — guards against typos in the NAV_ACTIONS
