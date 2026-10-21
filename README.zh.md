@@ -8,7 +8,7 @@
 
 > 在 Obsidian 笔记中直接下棋、推演和分析棋局——完整 PGN 支持、交互式棋盘、变着分支树、Chess960（菲舍尔任意制）和内置 Stockfish 18 (WASM) 引擎。
 
-![分支图](./IMAGE/Tree.png)
+![分支图](./IMAGE/PGN.png)
 
 中文 | [English](./README.md)
 

@@ -8,7 +8,7 @@
 
 > Play, explore and analyze chess right inside your Obsidian notes — full PGN support, interactive boards, variation trees, Chess960 (Fischer Random) and a built-in Stockfish 18 engine (WASM).
 
-![Branch Diagram](./IMAGE/Tree.png)
+![Branch Diagram](./IMAGE/PGN.png)
 
 English | [中文文档](./README.zh.md)
 
