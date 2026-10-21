@@ -146,6 +146,13 @@ export function matchMove(existing: Move, incoming: Move): boolean {
   );
 }
 
+export function extraMoveDests(move: Move): Square[] {
+  // Chess960 castling: the king may already stand on its castling
+  // destination (g1/c1), making a drag to move.to a no-op. Also offer
+  // the king-takes-rook drop (onto the castling rook) like lichess.
+  return move.rookFrom && move.rookFrom !== move.to ? [move.rookFrom] : [];
+}
+
 export function moveToUci(move: Move): string {
   // Chess960 castling is encoded king-takes-rook (e.g. e1h1), matching
   // the UCI_Chess960 / lichess convention used by the engine protocol.
