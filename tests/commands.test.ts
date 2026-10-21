@@ -24,10 +24,11 @@ const KNOWN_ACTIONS = new Set([
   "nextBranchStart",
 ]);
 
-// The default hotkey of every branch navigation command — the binding
-// the PGN view uses for the modifier combos. The four plain
-// move-stepping commands carry no default on purpose: global arrow-key
-// defaults would break arrow navigation elsewhere.
+// The in-view Scope default of every branch navigation action — the
+// binding the PGN view registers on its Scope for the modifier
+// combos. Commands ship without default hotkeys (Obsidian community
+// guideline: preset hotkeys risk conflicts); these presets only apply
+// while the PGN view is active.
 const EXPECTED_PRESETS: Record<string, string[]> = {
   "prev-fork": ["Ctrl", "ArrowUp"],
   "next-fork": ["Ctrl", "ArrowDown"],
@@ -62,7 +63,7 @@ describe("NAV_ACTIONS", () => {
     }
   });
 
-  test("no command exposes a plain arrow key", () => {
+  test("no in-view preset exposes a plain arrow key", () => {
     for (const action of NAV_ACTIONS) {
       for (const hotkey of action.hotkeys ?? []) {
         expect(hotkey.modifiers, action.id).not.toHaveLength(0);
@@ -70,7 +71,7 @@ describe("NAV_ACTIONS", () => {
     }
   });
 
-  test("branch navigation commands define the expected default hotkeys", () => {
+  test("branch navigation actions define the expected in-view presets", () => {
     expect(new Set(Object.keys(EXPECTED_PRESETS))).toEqual(
       new Set(NAV_ACTIONS.filter((action) => action.hotkeys).map((a) => a.id)),
     );
