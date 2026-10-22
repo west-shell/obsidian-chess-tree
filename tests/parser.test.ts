@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { PGNParser } from "../src/modules/Source/parser";
-import { parseOrientationTag } from "../src/utils/parse";
+import { parseOrientationTag } from "../src/modules/Source/parse";
 
 describe("Chess PGN Parser", () => {
   test("parse simple move sequence", () => {
