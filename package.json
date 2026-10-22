@@ -61,7 +61,9 @@
   },
   "dependencies": {
     "@lichess-org/chessground": "^10.1.1",
-    "@weshell/chess.js": "^1.0.0"
+    "@weshell/chess.js": "^1.0.0",
+    "gifenc": "^1.0.3",
+    "html-to-image": "^1.11.13"
   },
   "simple-git-hooks": {
     "pre-commit": "npx nano-staged"
