@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { PGNParser } from "../src/modules/Source/parser";
-import { stringifyPGN } from "../src/modules/Tree/Actions/stringify-pgn";
+import { stringifyPGN } from "../src/modules/Game/Actions/stringify-pgn";
 
 function parseAndStringify(pgn: string, includeEval = true): string {
   const parser = new PGNParser(pgn);
