@@ -53,6 +53,11 @@ describe("evalFromPvLine", () => {
     expect(derived.pvs?.[0].score).toBe(35);
   });
 
+  test("flags the eval as derived (not searched at this node)", () => {
+    const derived = evalFromPvLine(pv(35, ["e2e4", "e7e5"]), 18);
+    expect(derived.derived).toBe(true);
+  });
+
   test("keeps mate scores unchanged in white view", () => {
     const derived = evalFromPvLine(pv(3, ["h2h4", "a7a6", "h4h5"], "mate"), 20);
     expect(derived.scoreType).toBe("mate");
@@ -133,6 +138,7 @@ describe("fillChildrenFromEval", () => {
     expect(parent.children[0].eval?.score).toBe(35);
     expect(parent.children[0].eval?.depth).toBe(18);
     expect(parent.children[0].eval?.bestmove).toBe("e7e5");
+    expect(parent.children[0].eval?.derived).toBe(true);
     expect(parent.children[1].eval?.score).toBe(12);
     expect(parent.children[1].eval?.bestmove).toBe("d7d5");
     expect(parent.children[2].eval).toBeUndefined();
