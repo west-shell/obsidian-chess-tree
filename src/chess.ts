@@ -58,6 +58,10 @@ export const PRIMARY_PLAYER_KEY = "White";
 export const FIRST_PLAYER_COLOR = "white";
 /** Piece-color key of the second player, for player-bar side marks. */
 export const SECOND_PLAYER_COLOR = "black";
+/** i18n key of the first player's side name (chess: White, xiangqi: Red). */
+export const FIRST_SIDE_KEY = "side.white";
+/** i18n key of the second player's side name (Black in both variants). */
+export const SECOND_SIDE_KEY = "side.black";
 
 // ========== Move Functions ==========
 
