@@ -1,6 +1,4 @@
-import { renderResized, updateBounds } from "@lichess-org/chessground/render";
-
-import type { Api } from "../chess";
+import { type Api, renderResized, updateBounds } from "../chess";
 
 /**
  * Board scale tracking for scaled hosts (Excalidraw embeds).

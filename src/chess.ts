@@ -1,5 +1,6 @@
 // ========== Library Re-exports ==========
 export { Chessground } from "@lichess-org/chessground";
+export { renderResized, updateBounds } from "@lichess-org/chessground/render";
 export type { Api } from "@lichess-org/chessground/api";
 export type { Config } from "@lichess-org/chessground/config";
 export type { DrawShape } from "@lichess-org/chessground/draw";
