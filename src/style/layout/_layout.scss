@@ -127,6 +127,16 @@
   flex-direction: column;
   height: 100%;
 
+  // Hosts that render the view inside a flex container — Excalidraw's
+  // embeddable sets `display:flex; align-items:center` on .view-content —
+  // size this item by its content. `container-type: size` (size containment)
+  // makes that intrinsic size zero, which collapsed the board to 0px, so
+  // claim the whole box explicitly instead of relying on block flow.
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-self: stretch;
+
   &__board {
     --board-width: min(100cqw, #{$pgn-col1-board-height});
     align-self: center;

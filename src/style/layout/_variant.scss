@@ -77,9 +77,15 @@ $cls-prefix: "ct";
 }
 
 // Rich coordinate labels (files bottom-left / ranks top-right).
+//
+// Scaled hosts (Excalidraw embeds, see utils/boardScale.ts) counter-scale
+// cg-container, so a local pixel there is a screen pixel while cqw still
+// resolves against the wrap's *layout* width. Multiplying the designed size by
+// --cg-host-scale (1 everywhere else) keeps the labels proportional to the
+// board the host actually paints.
 .cg-wrap coords {
   display: var(--ct-coords-display, flex);
-  font-size: clamp(7px, 2.5cqw, 14px);
+  font-size: calc(clamp(7px, 2.5cqw, 14px) * var(--cg-host-scale, 1));
 }
 
 .cg-wrap coords.ranks {
@@ -121,13 +127,15 @@ $cls-prefix: "ct";
 // through as a sub-pixel sliver whose width changes with the board scale.
 // Thickness scales with the board (cqw resolves against the wrap, the
 // inline-size container declared in _board.scss): ~2px at 500px, clamped
-// to 1–3px.
+// to 1–3px. --cg-host-scale compensates scaled hosts, see coords above.
 .#{$cls-prefix}-layout__board--turn-white cg-board {
-  box-shadow: 0 0 0 clamp(1px, 0.4cqw, 3px) var(--ct-piece-white);
+  box-shadow: 0 0 0 calc(clamp(1px, 0.4cqw, 3px) * var(--cg-host-scale, 1))
+    var(--ct-piece-white);
 }
 
 .#{$cls-prefix}-layout__board--turn-black cg-board {
-  box-shadow: 0 0 0 clamp(1px, 0.4cqw, 3px) var(--ct-piece-black);
+  box-shadow: 0 0 0 calc(clamp(1px, 0.4cqw, 3px) * var(--cg-host-scale, 1))
+    var(--ct-piece-black);
 }
 
 // ---- FEN editor piece colors (theme-driven) -----------------------------------
