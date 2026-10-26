@@ -224,8 +224,11 @@
   flex-direction: column;
   height: 100%;
 
-  // Excalidraw centres the view content with flex, and size containment gives
-  // this item an intrinsic size of zero; claim the whole box explicitly.
+  // Hosts that render the view inside a flex container — Excalidraw's
+  // embeddable sets `display:flex; align-items:center` on .view-content —
+  // size this item by its content. `container-type: size` (size containment)
+  // makes that intrinsic size zero, which collapsed the board to 0px, so
+  // claim the whole box explicitly instead of relying on block flow.
   width: 100%;
   min-height: 0;
   flex: 1 1 auto;
