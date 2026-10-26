@@ -228,6 +228,26 @@ export function trackViewFrame(view: HTMLElement): ViewFrameHandle {
     observer.observe(parent);
   }
 
+  // Canvas pan/zoom is often a transform written to an ancestor's inline
+  // style. ResizeObserver cannot see that (the layout box is unchanged), and
+  // the pointer may be outside the view while the canvas moves, so watch the
+  // ancestors' inline styles. A translation-only change measures the same box
+  // and is cheap; a zoom re-applies the frame before the next click.
+  let styleObserver: MutationObserver | null = null;
+  if (parent && typeof win.MutationObserver !== "undefined") {
+    styleObserver = new win.MutationObserver(() => schedule());
+    for (
+      let element: HTMLElement | null = parent;
+      element;
+      element = element.parentElement
+    ) {
+      styleObserver.observe(element, {
+        attributes: true,
+        attributeFilter: ["style"],
+      });
+    }
+  }
+
   refresh();
   schedule();
 
@@ -237,6 +257,8 @@ export function trackViewFrame(view: HTMLElement): ViewFrameHandle {
       destroyed = true;
       observer?.disconnect();
       observer = null;
+      styleObserver?.disconnect();
+      styleObserver = null;
       if (frame) win.cancelAnimationFrame(frame);
       frame = 0;
       doc.removeEventListener("wheel", onZoom, { capture: true });

@@ -77,6 +77,7 @@
   let boardElement!: HTMLDivElement;
   let api: Api | null = $state(null);
   let layoutChangeHandler: (() => void) | null = null;
+  let boundsResyncHandler: (() => void) | null = null;
   let boardResizeRo: ResizeObserver | null = null;
   let resizeTimer: ReturnType<typeof setTimeout> | null = null;
   let promoteHandler:
@@ -312,6 +313,17 @@
       LAYOUT_CHANGE_EVENT,
       layoutChangeHandler,
     );
+
+    // Chessground caches the board's bounding rect. Hosts such as Excalidraw can
+    // move the board without resizing it (canvas pan, CSS transform), so a
+    // layout-event or ResizeObserver alone leaves the cached rect stale and the
+    // next click lands on the wrong square. Drop the cache before every press;
+    // chessground re-reads it when resolving the square. This is a no-op when
+    // the board has not moved.
+    boundsResyncHandler = () => {
+      api?.state.dom.bounds.clear();
+    };
+    activeDocument.addEventListener("pointerdown", boundsResyncHandler, true);
   });
 
   onDestroy(() => {
@@ -332,6 +344,13 @@
       activeDocument.body.removeEventListener(
         LAYOUT_CHANGE_EVENT,
         layoutChangeHandler,
+      );
+    }
+    if (boundsResyncHandler) {
+      activeDocument.removeEventListener(
+        "pointerdown",
+        boundsResyncHandler,
+        true,
       );
     }
     if (api) {
