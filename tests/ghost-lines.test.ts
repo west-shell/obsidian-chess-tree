@@ -146,6 +146,22 @@ describe("buildGhostLines", () => {
     expect(count).toBe(3);
   });
 
+  test("maxLines caps the number of rendered pv lines", () => {
+    const root = rootWithEval(
+      [makeNode("n-e4", e4.after, e4)],
+      [
+        pv(35, ["e2e4", "e7e5"]),
+        pv(12, ["d2d4", "d7d5"]),
+        pv(5, ["c2c4", "g8f6"]),
+      ],
+    );
+    const limited = buildGhostLines(root, 10, 1)!.lines;
+    expect(limited).toHaveLength(1);
+    expect(limited[0].rank).toBe(0);
+    // maxLines above the pv count is clamped, not an error.
+    expect(buildGhostLines(root, 10, 9)!.lines).toHaveLength(3);
+  });
+
   test("stops the chain at an illegal pv move", () => {
     const root = rootWithEval([], [pv(35, ["e2e4", "zz9z9", "e7e5"])]);
     const line = buildGhostLines(root)!.lines[0];
