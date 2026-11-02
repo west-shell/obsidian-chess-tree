@@ -104,3 +104,89 @@ describe("analyze progress streaming", () => {
     expect(result.bestmove).toBe("e2e4");
   });
 });
+
+describe("work queue (lila ceval Protocol semantics)", () => {
+  test("superseding search waits for the old bestmove before starting", async () => {
+    const engine = new FakeEngine();
+    engine.boot();
+    const first = engine.analyze("fen-a", 30);
+    expect(engine.posted).toContain("go depth 30");
+
+    // A second analysis parks in the queue; no position/go for it yet.
+    const second = engine.analyze("fen-b", 10);
+    expect(engine.posted).not.toContain("position fen fen-b");
+
+    // The first search's bestmove resolves the first promise...
+    engine.feed("info depth 1 score cp 30 multipv 1 pv e2e4");
+    engine.feed("bestmove e2e4");
+    const firstResult = await first;
+    expect(firstResult.score).toBe(30);
+    expect(firstResult.bestmove).toBe("e2e4");
+
+    // ...and only then does the successor's search start.
+    expect(engine.posted).toContain("position fen fen-b");
+    expect(engine.posted).toContain("go depth 10");
+
+    // The successor settles on ITS OWN data, never the stale bestmove.
+    engine.feed("info depth 1 score cp 12 multipv 1 pv d2d4");
+    engine.feed("bestmove d2d4");
+    const secondResult = await second;
+    expect(secondResult.score).toBe(12);
+    expect(secondResult.bestmove).toBe("d2d4");
+  });
+
+  test("stop() resolves the running search with its partial result", async () => {
+    const engine = new FakeEngine();
+    engine.boot();
+    const promise = engine.analyze("fen-a", 30);
+    engine.feed("info depth 1 score cp 30 multipv 1 pv e2e4");
+    engine.stop();
+    expect(engine.posted).toContain("stop");
+    // Idempotent: a second stop must not post "stop" again.
+    const stopsBefore = engine.posted.filter((c) => c === "stop").length;
+    engine.stop();
+    expect(engine.posted.filter((c) => c === "stop").length).toBe(stopsBefore);
+
+    engine.feed("bestmove e2e4");
+    const result = await promise;
+    expect(result.bestmove).toBe("e2e4");
+    expect(result.score).toBe(30);
+
+    // The engine is free again: a follow-up analysis starts immediately.
+    const next = engine.analyze("fen-b", 5);
+    expect(engine.posted).toContain("position fen fen-b");
+    engine.feed("bestmove d2d4");
+    await expect(next).resolves.toMatchObject({ bestmove: "d2d4" });
+  });
+
+  test("a queued analysis superseded before start is rejected", async () => {
+    const engine = new FakeEngine();
+    engine.boot();
+    const first = engine.analyze("fen-a", 30);
+    const queued = engine.analyze("fen-b", 10);
+    const latest = engine.analyze("fen-c", 8);
+
+    await expect(queued).rejects.toThrow("Analysis cancelled");
+
+    engine.feed("bestmove e2e4");
+    await expect(first).resolves.toMatchObject({ bestmove: "e2e4" });
+
+    // The latest request is the one that runs after the drain.
+    expect(engine.posted).toContain("position fen fen-c");
+    expect(engine.posted).toContain("go depth 8");
+    engine.feed("bestmove a2a3");
+    await expect(latest).resolves.toMatchObject({ bestmove: "a2a3" });
+  });
+
+  test("stop() rejects a queued-but-not-started analysis", async () => {
+    const engine = new FakeEngine();
+    engine.boot();
+    const first = engine.analyze("fen-a", 30);
+    const queued = engine.analyze("fen-b", 10);
+    engine.stop();
+    await expect(queued).rejects.toThrow("Analysis cancelled");
+    engine.feed("bestmove e2e4");
+    await expect(first).resolves.toMatchObject({ bestmove: "e2e4" });
+    expect(engine.posted).not.toContain("position fen fen-b");
+  });
+});
