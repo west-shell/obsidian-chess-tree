@@ -86,6 +86,8 @@ Built-in Stockfish 18 (WASM) — no external installation needed.
 - **Eval bar**: live evaluation beside the board (green = white advantage, red = black)
 - **Eval trend chart & node color bars**: see the whole game's evaluation at a glance
 - **Instant eval attribution**: eval bars light up along a searched line without re-running the engine — display only, every position still gets its own full-depth search
+- **Ghost lines**: engine principal variations render on the tree graph as dashed ghost lines — toggle them and pick how many lines (1–5) in settings
+- **Live streaming**: analysis results (eval, arrows, ghost lines) update progressively per depth while the engine searches
 - **Persistence**: evaluations are stored as `%e:` comments in PGN
 - **Engine play**: play against the engine with configurable depth (1–30) and skill level (0–20)
 - **Engine simulation**: let the engine play White, Black, or both sides (self-play) from the analysis menu, with a configurable move interval (0.1–10 s); it stops by itself on game end, threefold repetition, or the 50-move rule
@@ -119,16 +121,16 @@ The layout adapts to small screens. For best results, combine it with a fullscre
 
 All options live in **Settings → Chess**, grouped as follows:
 
-| Group            | What you can configure                                                                        |
-| ---------------- | --------------------------------------------------------------------------------------------- |
-| Board Appearance | Board style, piece set, board zoom, coordinate labels                                         |
-| Game Hints       | Last-move highlight, legal moves, other variations, turn border, sounds, narration, auto jump |
-| Move List        | Visibility, font size, notation, per-move marks                                               |
-| Board Margins    | Top/bottom margin (0–100 px) for fullscreen layouts                                           |
-| Code Block Names | Aliases for `chess`/`tree` blocks, FEN save target                                            |
-| Engine Analysis  | Depth, skill level, simulation interval, arrows, engine/board annotations                     |
-| Save             | Include eval on save, eval prompt, default export folder                                      |
-| PGN File View    | Enable/disable the view, custom file extensions, new PGN file location                        |
+| Group            | What you can configure                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Board Appearance | Board style, piece set, board zoom, coordinate labels                                                  |
+| Game Hints       | Last-move highlight, legal moves, other variations, turn border, sounds, narration, auto jump          |
+| Move List        | Visibility, font size, notation, per-move marks                                                        |
+| Board Margins    | Top/bottom margin (0–100 px) for fullscreen layouts                                                    |
+| Code Block Names | Aliases for `chess`/`tree` blocks, FEN save target                                                     |
+| Engine Analysis  | Depth, skill level, simulation interval, arrows, ghost line visibility/count, engine/board annotations |
+| Save             | Include eval on save, eval prompt, default export folder                                               |
+| PGN File View    | Enable/disable the view, custom file extensions, new PGN file location                                 |
 
 Code block names, file extensions, and custom file types take effect after restarting the plugin or Obsidian.
 
