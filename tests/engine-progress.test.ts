@@ -8,7 +8,7 @@ import {
 // BaseEngine schedules its analysis watchdog via window.setTimeout; the
 // node test environment has no window, so point it at the node globals
 // (fake timers patch the same globals, keeping the watchdog testable).
-vi.stubGlobal("window", window);
+vi.stubGlobal("window", globalThis);
 
 class FakeEngine extends BaseEngine {
   posted: string[] = [];

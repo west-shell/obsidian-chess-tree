@@ -182,6 +182,16 @@ export default tseslint.config(
   },
 
   {
+    files: ["tests/**/*.ts"],
+    rules: {
+      // Tests run in the node environment, where there is no global
+      // `window`; the rule's autofix (globalThis -> window) would break
+      // them, so keep the rule off outside plugin runtime code.
+      "obsidianmd/no-global-this": "off",
+    },
+  },
+
+  {
     files: ["src/settings.ts"],
     rules: {
       // Dual-path by design: display() stays as the fallback for users on
