@@ -47,7 +47,7 @@ describe("analyze progress streaming", () => {
     const promise = engine.analyze("8/8/8/8/8/8/8/8 w - - 0 1", 2, (p) =>
       progress.push(p),
     );
-    expect(engine.posted).toContain("go movetime 300");
+    expect(engine.posted).toContain("go depth 2");
 
     engine.feed("info depth 1 score cp 30 multipv 1 pv e2e4");
     engine.feed("info depth 1 score cp 20 multipv 2 pv d2d4");
@@ -111,35 +111,33 @@ describe("analyze progress streaming", () => {
     expect(result.bestmove).toBe("e2e4");
   });
 
-  test("ramp-up snapshots of a later slice do not walk the eval backwards", async () => {
+  test("out-of-order snapshots do not walk the eval backwards", async () => {
     const engine = new FakeEngine();
     engine.boot();
     const progress: EngineProgress[] = [];
     const promise = engine.analyze("fen-a", 10, (p) => progress.push(p));
 
-    // Slice 1 reaches depth 3 of 10 and ends without the target.
     engine.feed("info depth 3 score cp 20 multipv 1 pv e2e4");
     expect(progress).toHaveLength(1);
-    engine.feed("bestmove e2e4");
-    // No settle, no re-posted position: the next slice reuses the TT.
-    expect(engine.count("position fen fen-a")).toBe(1);
-    expect(engine.count("go movetime 300")).toBe(2);
 
-    // Slice 2 ramps through the already-covered depth: suppressed.
+    // An already-superseded depth: suppressed.
     engine.feed("info depth 2 score cp 18 multipv 1 pv d2d4");
     expect(progress).toHaveLength(1);
-    // Beyond the previous deepest depth: streams again.
+    // A deeper iteration: streams again.
     engine.feed("info depth 4 score cp 25 multipv 1 pv e2e4 e7e5");
     expect(progress).toHaveLength(2);
     expect(progress[1].depth).toBe(4);
-    engine.feed("bestmove e2e4");
 
-    // Slice 3 reaches the target: early stop and settle.
+    // Target depth: early stop and settle on the bestmove.
     engine.feed("info depth 10 score cp 30 multipv 1 pv e2e4");
+    expect(engine.posted).toContain("stop");
     engine.feed("bestmove e2e4");
     const result = await promise;
     expect(result.depth).toBe(10);
     expect(result.bestmove).toBe("e2e4");
+    // One search: position and go were posted exactly once.
+    expect(engine.count("position fen fen-a")).toBe(1);
+    expect(engine.count("go depth 10")).toBe(1);
   });
 });
 
@@ -148,7 +146,7 @@ describe("work queue (lila ceval Protocol semantics)", () => {
     const engine = new FakeEngine();
     engine.boot();
     const first = engine.analyze("fen-a", 1);
-    expect(engine.posted).toContain("go movetime 300");
+    expect(engine.posted).toContain("go depth 1");
 
     // A second analysis parks in the queue; no position/go for it yet.
     const second = engine.analyze("fen-b", 1);
@@ -163,7 +161,7 @@ describe("work queue (lila ceval Protocol semantics)", () => {
 
     // ...and only then does the successor's search start.
     expect(engine.posted).toContain("position fen fen-b");
-    expect(engine.count("go movetime 300")).toBe(2);
+    expect(engine.count("go depth 1")).toBe(2);
 
     // The successor settles on ITS OWN data, never the stale bestmove.
     engine.feed("info depth 1 score cp 12 multipv 1 pv d2d4");
@@ -213,7 +211,7 @@ describe("work queue (lila ceval Protocol semantics)", () => {
 
     // The latest request is the one that runs after the drain.
     expect(engine.posted).toContain("position fen fen-c");
-    expect(engine.posted).toContain("go movetime 300");
+    expect(engine.posted).toContain("go depth 8");
     engine.feed("info depth 8 score cp 20 multipv 1 pv a2a3");
     engine.feed("bestmove a2a3");
     await expect(latest).resolves.toMatchObject({ bestmove: "a2a3" });
@@ -233,25 +231,19 @@ describe("work queue (lila ceval Protocol semantics)", () => {
   });
 });
 
-describe("iterative-deepening slices (movetime chunks)", () => {
-  test("continues slice by slice until the target depth is reached", async () => {
+describe("single go-depth search (interruptible asyncify engine)", () => {
+  test("stops early once the target depth iteration is complete", async () => {
     const engine = new FakeEngine();
     engine.boot();
     const promise = engine.analyze("fen-a", 10);
-    expect(engine.count("go movetime 300")).toBe(1);
+    expect(engine.count("go depth 10")).toBe(1);
 
-    // Slice 1: depth 3 of 10 — next slice posted, promise still pending.
+    // A partial iteration never re-posts go: the search keeps running.
     engine.feed("info depth 3 score cp 20 multipv 1 pv e2e4");
-    engine.feed("bestmove e2e4");
-    expect(engine.count("go movetime 300")).toBe(2);
+    expect(engine.count("go depth 10")).toBe(1);
     expect(engine.count("position fen fen-a")).toBe(1);
 
-    // Slice 2: same depth (TT-warm ramp only) — no progress doubles it.
-    engine.feed("info depth 3 score cp 20 multipv 1 pv e2e4");
-    engine.feed("bestmove e2e4");
-    expect(engine.posted).toContain("go movetime 600");
-
-    // Slice 3: target depth — early stop, settle on the bestmove.
+    // Target depth — early stop, settle on the bestmove.
     engine.feed("info depth 10 score cp 42 multipv 1 pv d2d4");
     expect(engine.posted).toContain("stop");
     engine.feed("bestmove d2d4");
@@ -276,16 +268,14 @@ describe("iterative-deepening slices (movetime chunks)", () => {
     expect(result.depth).toBe(5);
   });
 
-  test("a terminal bestmove settles immediately without another slice", async () => {
+  test("a terminal bestmove settles immediately", async () => {
     const engine = new FakeEngine();
     engine.boot();
     const promise = engine.analyze("fen-a", 30);
     engine.feed("bestmove (none)");
     const result = await promise;
     expect(result.bestmove).toBe("(none)");
-    expect(
-      engine.posted.filter((c) => c.startsWith("go movetime")).length,
-    ).toBe(1);
+    expect(engine.posted.filter((c) => c.startsWith("go "))).toHaveLength(1);
   });
 
   test("idle watchdog rejects a wedged engine, fed while output flows", async () => {
