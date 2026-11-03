@@ -8,7 +8,7 @@ export type { EngineResult };
 const WASM_NAME = "stockfish.wasm";
 const JS_NAME = "stockfish.js";
 const BASE_GITHUB =
-  "https://raw.githubusercontent.com/west-shell/obsidian-chess-tree/main/assets/stockfish";
+  "https://github.com/west-shell/obsidian-chess-tree/releases/download/stockfish";
 const BASE_GITEE_RELEASE =
   "https://gitee.com/wesnell/obsidian-chess-tree/releases/download/stockfish";
 
