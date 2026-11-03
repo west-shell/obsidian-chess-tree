@@ -16,6 +16,13 @@ const JS_NAME = "stockfish.js";
 const ENGINE_VERSION = "1.0.0";
 const BASE_GITHUB = `https://github.com/west-shell/obsidian-chess-tree/releases/download/stockfish-${ENGINE_VERSION}`;
 const BASE_GITEE_RELEASE = `https://gitee.com/wesnell/obsidian-chess-tree/releases/download/stockfish-${ENGINE_VERSION}`;
+/**
+ * Written next to the engine files after a successful download. A
+ * mismatched version file marks assets from a different engine release
+ * and triggers a full-set re-download; installs from before asset
+ * versioning have no version file and stay valid.
+ */
+const VERSION_FILE = "stockfish.version";
 
 interface DownloadSource {
   key: string;
@@ -44,7 +51,17 @@ export class ChessEngine extends BaseEngine {
     if (!(await adapter.exists(`${baseDir}/${WASM_NAME}`)))
       missing.push(WASM_NAME);
     if (!(await adapter.exists(`${baseDir}/${JS_NAME}`))) missing.push(JS_NAME);
-    return missing;
+    if (missing.length) return missing;
+    // Forward-compatible version gate: a mismatched version file marks
+    // assets from a different engine release, re-download the set.
+    const versionPath = `${baseDir}/${VERSION_FILE}`;
+    if (
+      (await adapter.exists(versionPath)) &&
+      (await adapter.read(versionPath)).trim() !== ENGINE_VERSION
+    ) {
+      return [WASM_NAME, JS_NAME];
+    }
+    return [];
   }
 
   openDownloadModal(missingFiles: string[]): void {
@@ -90,6 +107,12 @@ export class ChessEngine extends BaseEngine {
               modal.error(i, t("engine.downloadFailed", 0));
               return;
             }
+          }
+          // Mark the set as the version this module's glue expects.
+          try {
+            await adapter.write(`${baseDir}/${VERSION_FILE}`, ENGINE_VERSION);
+          } catch {
+            /* next check re-downloads the full set */
           }
         })();
       },
