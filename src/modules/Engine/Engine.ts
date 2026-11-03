@@ -7,10 +7,15 @@ export type { EngineResult };
 
 const WASM_NAME = "stockfish.wasm";
 const JS_NAME = "stockfish.js";
-const BASE_GITHUB =
-  "https://github.com/west-shell/obsidian-chess-tree/releases/download/stockfish";
-const BASE_GITEE_RELEASE =
-  "https://gitee.com/wesnell/obsidian-chess-tree/releases/download/stockfish";
+/**
+ * Versioned engine asset release. Bump on every engine rebuild and
+ * publish a matching release tag (`stockfish-<version>`) on both GitHub
+ * and Gitee; older plugin versions keep downloading their own assets
+ * from the older, untouched releases.
+ */
+const ENGINE_VERSION = "1.0.0";
+const BASE_GITHUB = `https://github.com/west-shell/obsidian-chess-tree/releases/download/stockfish-${ENGINE_VERSION}`;
+const BASE_GITEE_RELEASE = `https://gitee.com/wesnell/obsidian-chess-tree/releases/download/stockfish-${ENGINE_VERSION}`;
 
 interface DownloadSource {
   key: string;
