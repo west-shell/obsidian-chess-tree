@@ -18,7 +18,7 @@ There are three ways to use the plugin — all of them end up on the same intera
 
 ### Open a PGN file
 
-Any `.pgn` file opens in a dedicated chess view: browse the variation tree, edit moves and comments, run engine analysis, and save back to the file with one click. Multiple games in one file are managed via the game navigation bar — switch, add, reorder, or delete them — and the ribbon button creates a new PGN file in your configured folder, opening the rename dialog so you can name it right away.
+Any `.pgn` file opens in a dedicated chess view: browse the variation tree, edit moves and comments, run engine analysis, and save back to the file with one click. Multiple games in one file are managed via the game navigation bar — switch, add, reorder, or delete them — and the ribbon button creates a new PGN file in your configured folder, opening the rename dialog so you can name it right away. The file context menu switches a PGN file between the chess view and the Markdown view.
 
 ![PGN File](./IMAGE/PGN.png)
 
@@ -64,9 +64,9 @@ Every branch is visualized as a tree graph — click any node to jump to that po
 | `Alt+←` / `Alt+→`                       | Cycle through every branch's node at the current ply (short or folded branches are skipped; wraps) |
 | `Alt+Shift+←` / `Alt+Shift+→`           | Jump between the ends of all visible branches (wraps)                                              |
 | `Ctrl+Shift+←` / `Ctrl+Shift+→`         | Cycle between the first steps of all visible branches (wraps)                                      |
-| `↑` / `↓` / `←` / `→` (PGN view)        | Step one move back / forward; jump to game start / end                                             |
+| `↑` / `↓` / `←` / `→`                   | Step one move back / forward; jump to game start / end                                             |
 
-Branch navigation works in both the PGN file view and `chess` code blocks (in code blocks, hover the block and keep focus out of text editors). On macOS, `Ctrl+↑`/`Ctrl+↓` may conflict with Mission Control. All branch-switching shortcuts skip branches hidden by folding. All PGN view navigation actions are also available as commands in the Command Palette — without preset hotkeys, to avoid conflicts with core and other plugins; assign your own in Settings → Hotkeys if you want global bindings. All PGN view shortcuts are built into the view and only active while it is focused. Code block shortcuts are built-in and hover-gated.
+These shortcuts work in the PGN file view and in `chess` code blocks alike. In the PGN view they are built into the view and active while it is focused. In a code block, click the board (or anywhere on the block) first — the focused block takes the shortcuts; click back into the note to return to typing. On macOS, `Ctrl+↑`/`Ctrl+↓` may conflict with Mission Control. All branch-switching shortcuts skip branches hidden by folding. All PGN view navigation actions are also available as commands in the Command Palette — without preset hotkeys, to avoid conflicts with core and other plugins; assign your own in Settings → Hotkeys if you want global bindings.
 
 ### Chess960 (Fischer Random)
 
@@ -102,7 +102,7 @@ Built-in Stockfish 18 (WASM) — no external installation needed.
 
 ### Move List
 
-Grid-aligned move columns with figurine (♔♕♖♗♘) or letter (SAN) notation, adjustable font size, and per-move marks — eval bar, annotation badge, glyph (!?/??…) and comment underline — each independently toggleable.
+Grid-aligned move columns with figurine (♔♕♖♗♘) or letter (SAN) notation, adjustable font size, and per-move marks — eval bar, annotation badge, glyph (!?/??…) and comment underline — each independently toggleable. Hovering a move in the list or a node in the tree graph pops up a mini board with that position.
 
 ### Export & Share
 
@@ -119,18 +119,19 @@ The layout adapts to small screens. For best results, combine it with a fullscre
 
 ## Settings Overview
 
-All options live in **Settings → Chess**, grouped as follows:
+All options live in **Settings → Chess Tree**, grouped as follows:
 
-| Group            | What you can configure                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------ |
-| Board Appearance | Board style, piece set, board zoom, coordinate labels                                                  |
-| Game Hints       | Last-move highlight, legal moves, other variations, turn border, sounds, narration, auto jump          |
-| Move List        | Visibility, font size, notation, per-move marks                                                        |
-| Board Margins    | Top/bottom margin (0–100 px) for fullscreen layouts                                                    |
-| Code Block Names | Aliases for `chess`/`tree` blocks, FEN save target                                                     |
-| Engine Analysis  | Depth, skill level, simulation interval, arrows, ghost line visibility/count, engine/board annotations |
-| Save             | Include eval on save, eval prompt, default export folder                                               |
-| PGN File View    | Enable/disable the view, custom file extensions, new PGN file location                                 |
+| Group            | What you can configure                                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| Language         | UI language: Auto (follow app) or a fixed language                                                             |
+| Board Appearance | Board style, piece set, board zoom, coordinate labels, annotation glyphs on the board                          |
+| Game Hints       | Last-move highlight, legal moves, other variations, turn border, sounds & volume, spoken moves, auto jump      |
+| Move List        | Visibility, font size, notation, per-move marks, hover position preview                                        |
+| Engine Analysis  | Depth, skill level, simulation interval, best-move & ponder arrows, auto annotate, ghost line visibility/count |
+| Save             | Include eval on save, eval prompt, annotation format (symbol / NAG / comment), default export folder           |
+| Board Margins    | Top/bottom margin (0–100 px) for fullscreen layouts                                                            |
+| Code Block Names | Game-mode (`chess`/`tree`) and edit-mode (`fen`) block aliases, FEN save target                                |
+| PGN File View    | Enable/disable the view, custom file extensions, new PGN file location                                         |
 
 Code block names, file extensions, and custom file types take effect after restarting the plugin or Obsidian.
 
@@ -158,7 +159,7 @@ npm run build:debug  # Unminified production build (with sourcemaps)
 - Board rendering: [chessground](https://github.com/lichess-org/chessground)
 - Engine: [Stockfish 18](https://stockfishchess.org/) (WASM)
 - Piece artwork: [lichess-org/lila](https://github.com/lichess-org/lila) (public/piece/), under their respective free licenses (GPL/CC) — regenerate the embedded CSS after changing `assets/pieces/` with `node scripts/gen-piece-css.mjs`
-- i18n: English and Chinese UI
+- i18n: UI in English, 简体中文, 日本語, 한국어, Русский, Deutsch, Français and العربية
 
 Released under [GPL-3.0](./LICENSE).
 
