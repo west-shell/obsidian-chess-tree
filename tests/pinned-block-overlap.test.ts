@@ -7,8 +7,8 @@ import {
 } from "../src/lib/Game/panel/layout";
 
 /** 固定盘 / 置顶评论块的参与尺寸（与 TreeGraph.svelte 一致）。 */
-const BW = 140;
-const BH = 140; // chess 方形棋盘
+const BW = 135;
+const BH = 135; // chess 方形棋盘 = 精确 9 行步（9 × 15）
 const NODE_H = 11;
 const NODE_W = 26;
 const GAP_X = 6;
