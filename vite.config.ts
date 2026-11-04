@@ -2,7 +2,7 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
-import { defineConfig, type Plugin, type PluginOption } from "vite";
+import { defineConfig, type Plugin } from "vite";
 
 const setOutDir = (mode: string) => {
   switch (mode) {
@@ -48,23 +48,7 @@ function base64Asset(): Plugin {
 export default defineConfig(({ mode }) => {
   const isMin = mode === "production-min";
   return {
-    plugins: [
-      base64Asset(),
-      svelte({
-        compilerOptions: {
-          compatibility: {
-            componentApi: 4,
-          },
-          cssHash: ({
-            hash,
-            css,
-          }: {
-            hash: (str: string) => string;
-            css: string;
-          }) => `svelte-${hash(css)}`,
-        },
-      }) as PluginOption,
-    ],
+    plugins: [base64Asset(), svelte()],
     build: {
       lib: {
         entry: "src/main",
@@ -75,7 +59,7 @@ export default defineConfig(({ mode }) => {
           entryFileNames: "main.js",
           assetFileNames: "styles.css",
           sourcemapBaseUrl: pathToFileURL(
-            `${__dirname}/test-vault/.obsidian/plugins/chess-tree/`,
+            `${import.meta.dirname}/test-vault/.obsidian/plugins/chess-tree/`,
           ).toString(),
         },
         external: [
