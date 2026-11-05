@@ -30,7 +30,11 @@ function playFrom(fen: string, san: string): Move {
   return chess.move(san);
 }
 
-const pv = (score: number, moves: string[], scoreType = "cp"): PvLine => ({
+const pv = (
+  score: number,
+  moves: string[],
+  scoreType: PvLine["scoreType"] = "cp",
+): PvLine => ({
   score,
   scoreType,
   moves,

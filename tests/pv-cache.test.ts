@@ -9,7 +9,11 @@ import {
   matchPvLine,
 } from "../src/modules/Engine/pv-cache";
 
-const pv = (score: number, moves: string[], scoreType = "cp"): PvLine => ({
+const pv = (
+  score: number,
+  moves: string[],
+  scoreType: PvLine["scoreType"] = "cp",
+): PvLine => ({
   score,
   scoreType,
   moves,
