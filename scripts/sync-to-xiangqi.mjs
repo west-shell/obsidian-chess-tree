@@ -1,5 +1,12 @@
-import { cpSync, mkdirSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join, extname } from "node:path";
+import {
+  cpSync,
+  mkdirSync,
+  existsSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from "node:fs";
+import { join } from "node:path";
 
 const CHESS_TREE_ROOT = join(import.meta.dirname, "..");
 const XIANGQI_ROOT = join(import.meta.dirname, "..", "..", "obsidian-xiangqi");
@@ -32,7 +39,27 @@ function syncDir(srcDir, destDir, relPrefix) {
   if (!existsSync(srcDir)) return;
   mkdirSync(destDir, { recursive: true });
 
-  for (const entry of readdirSync(srcDir)) {
+  const srcEntries = readdirSync(srcDir);
+
+  // Mirror deletions: dest entries absent from src are stale copies from
+  // earlier syncs (renames/moves in chess-tree). Excluded entries are
+  // xiangqi-specific and always kept.
+  for (const entry of readdirSync(destDir)) {
+    const rel = relPrefix ? `${relPrefix}/${entry}` : entry;
+    if (
+      EXCLUDED_FILES.has(entry) ||
+      EXCLUDED_PATHS.has(rel) ||
+      EXCLUDED_DIRS.has(entry)
+    ) {
+      continue;
+    }
+    if (!srcEntries.includes(entry)) {
+      rmSync(join(destDir, entry), { recursive: true, force: true });
+      console.log(`  DELETE:    src/${rel}`);
+    }
+  }
+
+  for (const entry of srcEntries) {
     const srcPath = join(srcDir, entry);
     const destPath = join(destDir, entry);
     const rel = relPrefix ? `${relPrefix}/${entry}` : entry;
