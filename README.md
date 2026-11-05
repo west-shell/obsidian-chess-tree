@@ -54,7 +54,7 @@ A `fen` code block opens a visual position editor — drag or click to place pie
 
 ### Variation Tree & Keyboard Navigation
 
-Every branch is visualized as a tree graph — click any node to jump to that position, and switch between icon and text label modes. The current branch's arrows render at full opacity while sibling branches fade to 50%, so the line you're on stands out. Keyboard shortcuts keep your hands on the board:
+Every branch is visualized as a tree graph — click any node to jump to that position, and switch between icon and text label modes. Nodes are laid out at their real pixel size, so labels, pinned blocks and previews never overlap. The current branch's arrows render at full opacity while sibling branches fade to 50%, so the line you're on stands out. Keyboard shortcuts keep your hands on the board:
 
 | Shortcut                                | Action                                                                                             |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -67,6 +67,17 @@ Every branch is visualized as a tree graph — click any node to jump to that po
 | `↑` / `↓` / `←` / `→`                   | Step one move back / forward; jump to game start / end                                             |
 
 These shortcuts work in the PGN file view and in `chess` code blocks alike. In the PGN view they are built into the view and active while it is focused. In a code block, click the board (or anywhere on the block) first — the focused block takes the shortcuts; click back into the note to return to typing. On macOS, `Ctrl+↑`/`Ctrl+↓` may conflict with Mission Control. All branch-switching shortcuts skip branches hidden by folding. All PGN view navigation actions are also available as commands in the Command Palette — without preset hotkeys, to avoid conflicts with core and other plugins; assign your own in Settings → Hotkeys if you want global bindings.
+
+### Pin to the Tree
+
+Keep annotations visible while you browse — the tree itself carries the extras:
+
+- **Pinned comments**: the pin button in the comment box renders the comment as a text block on the tree, connected to its move node
+- **Pinned board previews**: right-click any tree node → **Pin board preview** to keep that position's board on the tree
+- **Grouped cards**: a node's board preview and pinned comment form one aligned card
+- **Persistence**: pins are stored as `[%pin]` PGN markers, so they survive reloads; save options control what gets written back
+
+The right-click node menu also promotes and reorders branches and applies annotations, acting on the right-clicked node without moving the current one.
 
 ### Chess960 (Fischer Random)
 
@@ -86,7 +97,7 @@ Built-in Stockfish 18 (WASM) — no external installation needed.
 - **Eval bar**: live evaluation beside the board (green = white advantage, red = black)
 - **Eval trend chart & node color bars**: see the whole game's evaluation at a glance
 - **Instant eval attribution**: eval bars light up along a searched line without re-running the engine — display only, every position still gets its own full-depth search
-- **Ghost lines**: engine principal variations render on the tree graph as dashed ghost lines — toggle them and pick how many lines (1–5) in settings
+- **Ghost lines**: engine principal variations render on the tree graph as dashed ghost lines — toggle them, pick how many lines (1–5) and how deep each one goes (1–20 plies) in settings
 - **Live streaming**: analysis results (eval, arrows, ghost lines) update progressively per depth while the engine searches
 - **Persistence**: evaluations are stored as `%e:` comments in PGN
 - **Engine play**: play against the engine with configurable depth (1–30) and skill level (0–20)
@@ -121,17 +132,17 @@ The layout adapts to small screens. For best results, combine it with a fullscre
 
 All options live in **Settings → Chess Tree**, grouped as follows:
 
-| Group            | What you can configure                                                                                         |
-| ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| Language         | UI language: Auto (follow app) or a fixed language                                                             |
-| Board Appearance | Board style, piece set, board zoom, coordinate labels, annotation glyphs on the board                          |
-| Game Hints       | Last-move highlight, legal moves, other variations, turn border, sounds & volume, spoken moves, auto jump      |
-| Move List        | Visibility, font size, notation, per-move marks, hover position preview                                        |
-| Engine Analysis  | Depth, skill level, simulation interval, best-move & ponder arrows, auto annotate, ghost line visibility/count |
-| Save             | Include eval on save, eval prompt, annotation format (symbol / NAG / comment), default export folder           |
-| Board Margins    | Top/bottom margin (0–100 px) for fullscreen layouts                                                            |
-| Code Block Names | Game-mode (`chess`/`tree`) and edit-mode (`fen`) block aliases, FEN save target                                |
-| PGN File View    | Enable/disable the view, custom file extensions, new PGN file location                                         |
+| Group            | What you can configure                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Language         | UI language: Auto (follow app) or a fixed language                                                                                                     |
+| Board Appearance | Board style, piece set, board zoom, coordinate labels, annotation glyphs on the board                                                                  |
+| Game Hints       | Last-move highlight, legal moves, other variations, turn border, sounds & volume, spoken moves, auto jump                                              |
+| Move List        | Visibility, font size, notation, per-move marks, hover position preview                                                                                |
+| Engine Analysis  | Depth, skill level, simulation interval, best-move & ponder arrows, auto annotate, ghost line visibility/count/depth                                   |
+| Save             | Include eval on save, ask-before-saving (evals & pinned blocks), save pinned blocks, annotation format (symbol / NAG / comment), default export folder |
+| Board Margins    | Top/bottom margin (0–100 px) for fullscreen layouts                                                                                                    |
+| Code Block Names | Game-mode (`chess`/`tree`) and edit-mode (`fen`) block aliases, FEN save target                                                                        |
+| PGN File View    | Enable/disable the view, custom file extensions, new PGN file location                                                                                 |
 
 Code block names, file extensions, and custom file types take effect after restarting the plugin or Obsidian.
 
