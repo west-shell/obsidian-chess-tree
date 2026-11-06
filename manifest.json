@@ -1,6 +1,6 @@
 {
   "id": "chess-tree",
-  "version": "2.19.2",
+  "version": "2.19.3",
   "name": "Chess Tree",
   "description": "Chess(960) variation tree.",
   "author": "weshell",
