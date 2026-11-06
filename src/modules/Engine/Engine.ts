@@ -45,6 +45,16 @@ const EXPECTED_SHA256: Record<string, string> = {
 /** Engine assets already hash-verified in this app session. */
 const hashVerified = new Set<string>();
 
+/**
+ * Assets larger than this skip hash verification and rely on the
+ * exact byte-size check alone: mobile webviews can fail or stall on
+ * crypto.subtle.digest for very large buffers (observed with a
+ * ~52 MB engine data file on Android, where engine init hung with
+ * no visible error), while smaller assets keep full hash
+ * verification.
+ */
+const HASH_VERIFY_MAX_BYTES = 16 * 1024 * 1024;
+
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", buffer);
   return Array.from(new Uint8Array(digest))
@@ -142,14 +152,27 @@ export class ChessEngine extends BaseEngine {
    * session. A size-matched but corrupted file falls through
    * checkFileExists and is caught here, before the worker swallows
    * it as a cryptic wasm compile error; the download modal is opened
-   * for the corrupted file instead.
+   * for the corrupted file instead. Assets larger than
+   * HASH_VERIFY_MAX_BYTES, or whose hash cannot be computed on this
+   * platform, skip verification and rely on the byte-size check.
    */
   private async readVerifiedAsset(name: string): Promise<ArrayBuffer> {
     const adapter = this.plugin!.app.vault.adapter;
     const baseDir = `${this.plugin!.app.vault.configDir}/plugins/chess-tree`;
     const buffer = await adapter.readBinary(`${baseDir}/${name}`);
     if (hashVerified.has(name) || !crypto.subtle) return buffer;
-    if ((await sha256Hex(buffer)) === EXPECTED_SHA256[name]) {
+    // Oversized assets (unsafe to digest on mobile) rely on the size check.
+    if (buffer.byteLength > HASH_VERIFY_MAX_BYTES) return buffer;
+    let hex: string;
+    try {
+      hex = await sha256Hex(buffer);
+    } catch (e) {
+      // A webview whose crypto stack cannot digest this buffer must
+      // not kill engine startup — degrade to the size check above.
+      console.warn("[Engine] SHA-256 verify unavailable, skipping:", name, e);
+      return buffer;
+    }
+    if (hex === EXPECTED_SHA256[name]) {
       hashVerified.add(name);
       return buffer;
     }
