@@ -17,12 +17,40 @@ const ENGINE_VERSION = "1.0.0";
 const BASE_GITHUB = `https://github.com/west-shell/obsidian-chess-tree/releases/download/stockfish-${ENGINE_VERSION}`;
 const BASE_GITEE_RELEASE = `https://gitee.com/wesnell/obsidian-chess-tree/releases/download/stockfish-${ENGINE_VERSION}`;
 /**
- * Written next to the engine files after a successful download. A
- * mismatched version file marks assets from a different engine release
- * and triggers a full-set re-download; installs from before asset
- * versioning have no version file and stay valid.
+ * Exact byte size of each engine asset in the `stockfish-<ENGINE_VERSION>`
+ * release (identical on GitHub and Gitee). Verified via adapter.stat()
+ * before the engine starts: a size mismatch marks a wrong-version,
+ * corrupted, or truncated download and re-downloads that file, while
+ * manually installed assets of the right release pass without any
+ * marker file.
  */
-const VERSION_FILE = "stockfish.version";
+const EXPECTED_SIZES: Record<string, number> = {
+  [JS_NAME]: 20_570,
+  [WASM_NAME]: 7_295_411,
+};
+/**
+ * SHA-256 of the same release assets (confirmed identical on GitHub
+ * and Gitee). Verified once per session at engine init, where the
+ * bytes are already loaded in memory — catches the rare size-matched
+ * corruption (e.g. a download manager that preallocates the file and
+ * is interrupted mid-download) that the byte-size check above cannot
+ * see.
+ */
+const EXPECTED_SHA256: Record<string, string> = {
+  [JS_NAME]: "bde83899af9c9573140556c4d2c754268ede7a78d6a1ca9522ff57608f4644e6",
+  [WASM_NAME]:
+    "a8fbc05ec6920b56d7485826dcb02c5ffd2826bcbf751cf973046f237a9096f1",
+};
+
+/** Engine assets already hash-verified in this app session. */
+const hashVerified = new Set<string>();
+
+async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 interface DownloadSource {
   key: string;
@@ -48,23 +76,16 @@ export class ChessEngine extends BaseEngine {
     const adapter = this.plugin!.app.vault.adapter;
     const baseDir = `${this.plugin!.app.vault.configDir}/plugins/chess-tree`;
     const missing: string[] = [];
-    if (!(await adapter.exists(`${baseDir}/${WASM_NAME}`)))
-      missing.push(WASM_NAME);
-    if (!(await adapter.exists(`${baseDir}/${JS_NAME}`))) missing.push(JS_NAME);
-    if (missing.length) return missing;
-    // Forward-compatible version gate: a mismatched version file marks
-    // assets from a different engine release, re-download the set.
-    const versionPath = `${baseDir}/${VERSION_FILE}`;
-    if (
-      (await adapter.exists(versionPath)) &&
-      (await adapter.read(versionPath)).trim() !== ENGINE_VERSION
-    ) {
-      return [WASM_NAME, JS_NAME];
+    for (const file of [WASM_NAME, JS_NAME]) {
+      const stat = await adapter.stat(`${baseDir}/${file}`);
+      if (!stat || stat.type !== "file" || stat.size !== EXPECTED_SIZES[file]) {
+        missing.push(file);
+      }
     }
-    return [];
+    return missing;
   }
 
-  openDownloadModal(missingFiles: string[]): void {
+  openDownloadModal(missingFiles: string[], corrupted = false): void {
     const files = missingFiles.map((f) => ({
       name: f,
       sources: DOWNLOAD_SOURCES.map((s) => ({
@@ -75,7 +96,7 @@ export class ChessEngine extends BaseEngine {
     }));
     const modal = new DownloadModal(
       this.plugin!.app,
-      t("engine.downloadFile", 0),
+      corrupted ? t("engine.corrupted", 0) : t("engine.downloadFile", 0),
       files,
       t("engine.downloadBtn", 0),
       t("engine.downloadCancel", 0),
@@ -102,17 +123,12 @@ export class ChessEngine extends BaseEngine {
               } else {
                 await adapter.write(destPath, resp.text);
               }
+              hashVerified.delete(file);
               modal.done(i);
             } catch {
               modal.error(i, t("engine.downloadFailed", 0));
               return;
             }
-          }
-          // Mark the set as the version this module's glue expects.
-          try {
-            await adapter.write(`${baseDir}/${VERSION_FILE}`, ENGINE_VERSION);
-          } catch {
-            /* next check re-downloads the full set */
           }
         })();
       },
@@ -121,11 +137,31 @@ export class ChessEngine extends BaseEngine {
     modal.open();
   }
 
-  protected async initWorker(): Promise<void> {
+  /**
+   * Read an engine asset and hash-verify it on first load this
+   * session. A size-matched but corrupted file falls through
+   * checkFileExists and is caught here, before the worker swallows
+   * it as a cryptic wasm compile error; the download modal is opened
+   * for the corrupted file instead.
+   */
+  private async readVerifiedAsset(name: string): Promise<ArrayBuffer> {
     const adapter = this.plugin!.app.vault.adapter;
     const baseDir = `${this.plugin!.app.vault.configDir}/plugins/chess-tree`;
-    const wasmBuffer = await adapter.readBinary(`${baseDir}/${WASM_NAME}`);
-    const stockfishJs = await adapter.read(`${baseDir}/${JS_NAME}`);
+    const buffer = await adapter.readBinary(`${baseDir}/${name}`);
+    if (hashVerified.has(name) || !crypto.subtle) return buffer;
+    if ((await sha256Hex(buffer)) === EXPECTED_SHA256[name]) {
+      hashVerified.add(name);
+      return buffer;
+    }
+    this.openDownloadModal([name], true);
+    throw new Error(`Engine asset corrupted: ${name}`);
+  }
+
+  protected async initWorker(): Promise<void> {
+    const wasmBuffer = await this.readVerifiedAsset(WASM_NAME);
+    const stockfishJs = new TextDecoder().decode(
+      await this.readVerifiedAsset(JS_NAME),
+    );
 
     const workerCode = `
 self.addEventListener('unhandledrejection', function(e) {
