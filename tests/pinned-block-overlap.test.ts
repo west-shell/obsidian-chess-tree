@@ -112,9 +112,16 @@ describe("layout: pinned real-size blocks never overlap", () => {
             return {
               width: Math.min(180, (n.comments?.[0]?.length ?? 10) * 5.5) + 8,
               height: lines * 11 + 6,
+              // 镜像生产 sizeFn：评论块底部多留一行高。
+              padBottom: 11,
             };
           }
-          return { width: sizeOf(n) || NODE_W, height: NODE_H };
+          // 镜像生产 sizeFn：末端节点底部预留一个节点高（TreeGraph）。
+          return {
+            width: sizeOf(n) || NODE_W,
+            height: NODE_H,
+            padBottom: n.children.length === 0 ? NODE_H : 0,
+          };
         },
         pinnedBoardIds: pins,
       });
