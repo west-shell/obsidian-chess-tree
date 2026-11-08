@@ -1,7 +1,11 @@
 import { describe, expect, test } from "vitest";
 
 import { PGNParser } from "../src/modules/Source/parser";
-import { parseOrientationTag } from "../src/modules/Source/parse";
+import {
+  extractHeaders,
+  parseOrientationTag,
+  splitPGN,
+} from "../src/modules/Source/parse";
 
 describe("Chess PGN Parser", () => {
   test("parse simple move sequence", () => {
@@ -603,5 +607,45 @@ describe("[Result] header without movetext terminator", () => {
   test("no result anywhere leaves the tip unset", () => {
     const pgn = '[Event "Casual"]\n\n1. e4 e5';
     expect(mainlineTip(new PGNParser(pgn)).result).toBeUndefined();
+  });
+});
+
+describe("Localized (non-ASCII) tag keys", () => {
+  // Tag keys beyond \w (e.g. Chinese 红方) must parse as valid tags; in
+  // standard chess they are preserved raw (identity canonicalization).
+  test("parser stores a localized tag key raw", () => {
+    const pgn = '[Event "测试"]\n[红方 "王天一"]\n\n1. e4 e5';
+    const parser = new PGNParser(pgn);
+    const headers = extractHeaders(parser.getTags());
+    expect(headers.get("红方")).toBe("王天一");
+    expect(headers.get("Event")).toBe("测试");
+  });
+
+  test("localized tag line does not break move parsing", () => {
+    const parser = new PGNParser('[轮次 "3"]\n\n1. e4 e5 2. Nf3');
+    expect(parser.getRoot().children[0].move?.san).toBe("e4");
+    expect(parser.getSkipped()).toHaveLength(0);
+  });
+
+  test("extractHeaders keeps localized keys as-is", () => {
+    const headers = extractHeaders('[红方 "王天一"]\n[Event "开局"]');
+    expect(headers.get("红方")).toBe("王天一");
+    expect(headers.get("Event")).toBe("开局");
+  });
+
+  test("splitPGN splits games whose tags are localized", () => {
+    const pgn = [
+      '[红方 "甲"]',
+      "",
+      "1. e4 e5",
+      "",
+      '[红方 "乙"]',
+      "",
+      "1. d4 d5",
+    ].join("\n");
+    const slots = splitPGN(pgn);
+    expect(slots).toHaveLength(2);
+    expect(slots[0].headers.get("红方")).toBe("甲");
+    expect(slots[1].headers.get("红方")).toBe("乙");
   });
 });
