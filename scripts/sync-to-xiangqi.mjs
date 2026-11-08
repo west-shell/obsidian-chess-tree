@@ -17,7 +17,6 @@ if (!existsSync(XIANGQI_ROOT)) {
 }
 
 const EXCLUDED_FILES = new Set([
-  "chess.ts",
   "css-imports.ts",
   "icon.ts",
   "declarations.d.ts",
@@ -25,6 +24,8 @@ const EXCLUDED_FILES = new Set([
 ]);
 
 const EXCLUDED_PATHS = new Set([
+  // Variant adapter folder: each repo owns its chess/ entirely.
+  "chess",
   "lib/GenFEN/PieceBTNs.svelte",
   "lib/GenFEN/Toolbar.svelte",
   "modules/Engine/Engine.ts",
@@ -65,7 +66,7 @@ function syncDir(srcDir, destDir, relPrefix) {
     const rel = relPrefix ? `${relPrefix}/${entry}` : entry;
 
     if (statSync(srcPath).isDirectory()) {
-      if (EXCLUDED_DIRS.has(entry)) {
+      if (EXCLUDED_DIRS.has(entry) || EXCLUDED_PATHS.has(rel)) {
         console.log(`  SKIP dir:  src/${rel}/`);
         continue;
       }
@@ -91,5 +92,5 @@ function syncDir(srcDir, destDir, relPrefix) {
 console.log("Syncing chess-tree -> xiangqi...\n");
 syncDir(SRC_DIR, DEST_SRC_DIR, "");
 console.log(
-  "\nDone! Now manually update xiangqi's chess.ts with xiangqi-specific values.",
+  "\nDone! Now manually update xiangqi's chess/ folder with xiangqi-specific values.",
 );
