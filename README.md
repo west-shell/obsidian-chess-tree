@@ -166,9 +166,9 @@ npm run build:debug  # Unminified production build (with sourcemaps)
 
 ## Credits & License
 
-- Rules engine: [chess.js](https://github.com/jhlywa/chess.js) — Chess960-patched fork published as [@weshell/chess.js](https://www.npmjs.com/package/@weshell/chess.js) (BSD-2-Clause)
+- Rules engine: [chess.js](https://github.com/west-shell/chess.js) (fork of [jhlywa/chess.js](https://github.com/jhlywa/chess.js)) — Chess960-patched fork published as [@weshell/chess.js](https://www.npmjs.com/package/@weshell/chess.js) (BSD-2-Clause)
 - Board rendering: [chessground](https://github.com/lichess-org/chessground)
-- Engine: [Stockfish 18](https://stockfishchess.org/) (WASM)
+- Engine: [Stockfish 18](https://stockfishchess.org/) — WASM build from [nmrugg/stockfish.js](https://github.com/nmrugg/stockfish.js), re-hosted as versioned engine assets
 - Piece artwork: [lichess-org/lila](https://github.com/lichess-org/lila) (public/piece/), under their respective free licenses (GPL/CC) — regenerate the embedded CSS after changing `assets/pieces/` with `node scripts/gen-piece-css.mjs`
 - i18n: UI in English, 简体中文, 日本語, 한국어, Русский, Deutsch, Français and العربية
 
