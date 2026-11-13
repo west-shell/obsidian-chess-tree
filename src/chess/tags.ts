@@ -15,3 +15,10 @@ export function canonicalTagValue(key: string, value: string): string {
   void key;
   return value;
 }
+
+/**
+ * Tag line(s) seeded into newly created games and PGN files. Empty for
+ * standard chess; the xiangqi adapter seeds [Game "Chinese Chess"] to
+ * match xiangqiai.com exports.
+ */
+export const DEFAULT_GAME_TAGS: string = "";
